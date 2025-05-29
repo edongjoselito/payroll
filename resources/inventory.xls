@@ -1,0 +1,2846 @@
+<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:html="http://www.w3.org/TR/REC-html40">
+ <DocumentProperties xmlns="urn:schemas-microsoft-com:office:office">
+  <LastAuthor>Joselito Edong</LastAuthor>
+  <LastSaved>2024-12-07T23:00:56Z</LastSaved>
+  <Version>16.00</Version>
+ </DocumentProperties>
+ <OfficeDocumentSettings xmlns="urn:schemas-microsoft-com:office:office">
+  <AllowPNG/>
+ </OfficeDocumentSettings>
+ <ExcelWorkbook xmlns="urn:schemas-microsoft-com:office:excel">
+  <WindowHeight>11865</WindowHeight>
+  <WindowWidth>28800</WindowWidth>
+  <WindowTopX>32767</WindowTopX>
+  <WindowTopY>32767</WindowTopY>
+  <ProtectStructure>False</ProtectStructure>
+  <ProtectWindows>False</ProtectWindows>
+ </ExcelWorkbook>
+ <Styles>
+  <Style ss:ID="Default" ss:Name="Normal">
+   <Alignment ss:Vertical="Bottom"/>
+   <Borders/>
+   <Font ss:FontName="Aptos Narrow" x:Family="Swiss" ss:Size="11"
+    ss:Color="#000000"/>
+   <Interior/>
+   <NumberFormat/>
+   <Protection/>
+  </Style>
+  <Style ss:ID="s62">
+   <Font ss:FontName="Aptos Narrow" x:Family="Swiss" ss:Size="11"
+    ss:Color="#000000" ss:Bold="1"/>
+  </Style>
+  <Style ss:ID="s71">
+   <NumberFormat ss:Format="Scientific"/>
+  </Style>
+  <Style ss:ID="s72">
+   <Alignment ss:Vertical="Bottom" ss:WrapText="1"/>
+  </Style>
+  <Style ss:ID="s82">
+   <Font ss:FontName="Aptos Narrow" x:Family="Swiss" ss:Size="11"
+    ss:Color="#000000" ss:Bold="1"/>
+   <NumberFormat ss:Format="yyyy\-mm\-dd;@"/>
+  </Style>
+  <Style ss:ID="s83">
+   <NumberFormat ss:Format="yyyy\-mm\-dd;@"/>
+  </Style>
+ </Styles>
+ <Worksheet ss:Name="Table1">
+  <Table ss:ExpandedColumnCount="36" ss:ExpandedRowCount="188" x:FullColumns="1"
+   x:FullRows="1" ss:DefaultRowHeight="15">
+   <Column ss:AutoFitWidth="0" ss:Width="48.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="168"/>
+   <Column ss:AutoFitWidth="0" ss:Width="143.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="110.25"/>
+   <Column ss:Index="6" ss:AutoFitWidth="0" ss:Width="49.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="114"/>
+   <Column ss:AutoFitWidth="0" ss:Width="110.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="126.75"/>
+   <Column ss:AutoFitWidth="0" ss:Width="110.25" ss:Span="3"/>
+   <Column ss:Index="14" ss:StyleID="s83" ss:AutoFitWidth="0" ss:Width="110.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="84"/>
+   <Column ss:AutoFitWidth="0" ss:Width="110.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="65.25"/>
+   <Column ss:AutoFitWidth="0" ss:Width="110.25" ss:Span="2"/>
+   <Column ss:Index="21" ss:AutoFitWidth="0" ss:Width="73.5"/>
+   <Column ss:AutoFitWidth="0" ss:Width="84"/>
+   <Column ss:AutoFitWidth="0" ss:Width="110.25" ss:Span="4"/>
+   <Column ss:Index="29" ss:AutoFitWidth="0" ss:Width="110.25" ss:Span="7"/>
+   <Row>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">itemID</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">ctrlNo</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">itemName</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">description</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">qty</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">brand</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">model</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">serialNo</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">capacity</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">itemCondition</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">accountable</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">IDNumber</Data></Cell>
+    <Cell ss:StyleID="s82"><Data ss:Type="String">acquiredDate</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">purchasePrice</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">notes</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">settingsID</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">itemCategory</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">itemSubCategory</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">processDate</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">qtyShortage</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">shortageValue</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">fundCluster</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">PARNo</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">aDepreciation</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">aLosses</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">adjustments</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">aCost</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">OAC</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">estUsefulLife</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">DepreciationRate</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">office</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">ICSNo</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">Supplier</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">itemType</Data></Cell>
+    <Cell ss:StyleID="s62"><Data ss:Type="String">Qualification</Data></Cell>
+   </Row>
+   <Row ss:Height="135">
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCPU002FEMO</Data></Cell>
+    <Cell><Data ss:Type="String">System Unit</Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="10"><Data ss:Type="String"></Data></Cell>
+    <Cell><Data ss:Type="String">Good</Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell><Data ss:Type="DateTime">2024-01-01T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Pulled out by Archertech Inc. for integration - August 11, 2022&#10;      - CPU File Server&#10;&#10;[02/10/2023] - On premise Network Controller</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell><Data ss:Type="String">1222</Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell><Data ss:Type="Number">10</Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell><Data ss:Type="String">5</Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell><Data ss:Type="String">123</Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
+    <Cell><Data ss:Type="String"></Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">2</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMTB00005</Data></Cell>
+    <Cell><Data ss:Type="String">Motherboard</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">ASUS</Data></Cell>
+    <Cell><Data ss:Type="String">P5KPL-AM SE</Data></Cell>
+    <Cell><Data ss:Type="String">9BM0AD359072</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-02T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:Index="17"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">3</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMTB00006</Data></Cell>
+    <Cell><Data ss:Type="String">Motherboard</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">ASUS</Data></Cell>
+    <Cell><Data ss:Type="String">P8H61-MLE</Data></Cell>
+    <Cell><Data ss:Type="String">B3M0AC488115</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-03T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:Index="17"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">4</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMTB00007</Data></Cell>
+    <Cell><Data ss:Type="String">Motherboard</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">ASUS</Data></Cell>
+    <Cell><Data ss:Type="String">P8H61-MLE</Data></Cell>
+    <Cell><Data ss:Type="String">C8M0CS078686</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-04T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:Index="17"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">5</Data></Cell>
+    <Cell><Data ss:Type="String">WCMPRINT0002</Data></Cell>
+    <Cell><Data ss:Type="String">Printer</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">HP</Data></Cell>
+    <Cell><Data ss:Type="String">HP Deskjet Ink Advantage 2135</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-05T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">not printing, cartridge not recognized</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">6</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00026</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">A4TECH</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-06T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Good working condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">7</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCPU00001</Data></Cell>
+    <Cell><Data ss:Type="String">CPU/Processor</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">Intel</Data></Cell>
+    <Cell><Data ss:Type="String">i7-9700</Data></Cell>
+    <Cell><Data ss:Type="String">80YR357000722</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-07T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">File Server CPU</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">8</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCPU00002</Data></Cell>
+    <Cell><Data ss:Type="String">CPU/Processor</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">Intel</Data></Cell>
+    <Cell><Data ss:Type="String">i5-8400</Data></Cell>
+    <Cell><Data ss:Type="String">M9471WJ700853</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-08T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Domain Controller CPU</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">9</Data></Cell>
+    <Cell><Data ss:Type="String">WCMWLR00012</Data></Cell>
+    <Cell><Data ss:Type="String">Wi-Fi Router</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">TP-Link</Data></Cell>
+    <Cell><Data ss:Type="String">AC750</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-09T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">installed at room 304</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">10</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCPU00003</Data></Cell>
+    <Cell><Data ss:Type="String">CPU/Processor</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">Intel</Data></Cell>
+    <Cell><Data ss:Type="String">i3-9100</Data></Cell>
+    <Cell><Data ss:Type="String">U92T2J2600171</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-10T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Firewall CPU</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">11</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCPU00004</Data></Cell>
+    <Cell><Data ss:Type="String">CPU/Processor</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">Intel</Data></Cell>
+    <Cell><Data ss:Type="String">i3-9100</Data></Cell>
+    <Cell><Data ss:Type="String">U94J7Y2601711</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-11T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">New Registrar PC CPU</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">12</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCPU00005</Data></Cell>
+    <Cell><Data ss:Type="String">CPU/Processor</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">Intel</Data></Cell>
+    <Cell><Data ss:Type="String">i3-10100</Data></Cell>
+    <Cell><Data ss:Type="String">80FD386704460</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-12T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">New Registrar Staff PC CPU</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">13</Data></Cell>
+    <Cell><Data ss:Type="String">WCMWLR00006</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">TP-Link</Data></Cell>
+    <Cell><Data ss:Type="String">TL-WR940N</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-13T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Active</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">14</Data></Cell>
+    <Cell><Data ss:Type="String">WCMWLR00007</Data></Cell>
+    <Cell><Data ss:Type="String">Wi-Fi Router</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">TP-Link</Data></Cell>
+    <Cell><Data ss:Type="String">TL-WR940N</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-14T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Active</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">15</Data></Cell>
+    <Cell><Data ss:Type="String">WCMWLR00008</Data></Cell>
+    <Cell><Data ss:Type="String">Wi-Fi Router</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">Tenda</Data></Cell>
+    <Cell><Data ss:Type="String">AC2100</Data></Cell>
+    <Cell><Data ss:Type="String">E9721011031001589</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-15T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Active</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">16</Data></Cell>
+    <Cell><Data ss:Type="String">WCMWLR00009</Data></Cell>
+    <Cell><Data ss:Type="String">Wi-Fi Router</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">Tenda</Data></Cell>
+    <Cell><Data ss:Type="String">AC2100</Data></Cell>
+    <Cell><Data ss:Type="String">E9721011031001003</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-16T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Active</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">17</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMTB00001</Data></Cell>
+    <Cell><Data ss:Type="String">Motherboard</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">Gigabyte</Data></Cell>
+    <Cell><Data ss:Type="String">H310M H 2.0</Data></Cell>
+    <Cell><Data ss:Type="String">SN191260009173</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-17T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">ACTIVE</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">18</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMTB00002</Data></Cell>
+    <Cell><Data ss:Type="String">Motherboard</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">Gigabyte</Data></Cell>
+    <Cell><Data ss:Type="String">H310M H 2.0</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-18T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">ACTIVE</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">19</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMTB00003</Data></Cell>
+    <Cell><Data ss:Type="String">Motherboard</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">MSI</Data></Cell>
+    <Cell><Data ss:Type="String">H310M Pro-M2 Plus</Data></Cell>
+    <Cell><Data ss:Type="String">601-7C08-070B1908003424</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-19T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">File Server</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">20</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMTB00004</Data></Cell>
+    <Cell><Data ss:Type="String">Motherboard</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">MSI</Data></Cell>
+    <Cell><Data ss:Type="String">H310M Pro-M2 Plus</Data></Cell>
+    <Cell><Data ss:Type="String">601-7C08-070B1908003423</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-20T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Registrar</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">21</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMTB00008</Data></Cell>
+    <Cell><Data ss:Type="String">Motherboard</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">Gigabyte</Data></Cell>
+    <Cell><Data ss:Type="String">H410M HY</Data></Cell>
+    <Cell><Data ss:Type="String">SN203460061851</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-21T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Registrar Staff (Cora)</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">22</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00014</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-22T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">23</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00015</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-23T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">24</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00016</Data></Cell>
+    <Cell><Data ss:Type="String">Tablet</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-24T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">25</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00017</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-25T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row ss:Height="30">
+    <Cell><Data ss:Type="Number">26</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00018</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-26T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">In good condition&#10;</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">27</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00019</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-27T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">28</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00020</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-28T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">29</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00014</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-29T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">30</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00015</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-30T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">31</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00016</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-01-31T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">32</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00017</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-01T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">33</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00018</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-02T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">34</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00019</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-03T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">35</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00020</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-04T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">36</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00021</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-05T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">37</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00022</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-06T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">38</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00023</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-07T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">39</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00024</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-08T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">40</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00025</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-09T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">41</Data></Cell>
+    <Cell><Data ss:Type="String">WCMHDMI00001</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-10T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">vga-hdmi cable not tested</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">42</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00026</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-11T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">43</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00027</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-12T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">vga long cable not tested</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">44</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00028</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-13T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">vga long cable not tested</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">45</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00024</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-14T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">46</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00025</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-15T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">47</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00026</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-16T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">48</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00027</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-17T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">49</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00028</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-18T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">50</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00029</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-19T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">51</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00030</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-20T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">52</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00032</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-21T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">53</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00033</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-22T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">54</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00034</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-23T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">55</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00035</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-24T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">56</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00036</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-25T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">57</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00037</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-26T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">58</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00038</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-27T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">59</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00039</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-28T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">60</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00040</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-02-29T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row ss:Height="30">
+    <Cell><Data ss:Type="Number">61</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00041</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-01T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">In good condition&#10;</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">62</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00042</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-02T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">63</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00043</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-03T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">64</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00044</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-04T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">65</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00045</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-05T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">66</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00047</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-06T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">67</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00049</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-07T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">68</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00050</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-08T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">69</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00046</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-09T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row ss:Height="75">
+    <Cell><Data ss:Type="Number">70</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCPU001FEMO</Data></Cell>
+    <Cell><Data ss:Type="String">System Unit</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-10T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:StyleID="s72"><Data ss:Type="String">Pulled out by Archertech, Inc. for integration - August 11, 2022&#10;        - CPU Firewall</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">71</Data></Cell>
+    <Cell><Data ss:Type="String">WCM-Logic AVR</Data></Cell>
+    <Cell><Data ss:Type="String">AVR</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-11T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Good working condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">72</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00021</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-12T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Malfunctioning keys</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">73</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00022</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-13T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Malfunctioning keys</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">74</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00023</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-14T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Malfunctioning keys</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">75</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00024</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-15T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Malfunctioning keys</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">76</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00025</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-16T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Malfunctioning keys</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">77</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00013</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-17T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Faulty button</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">78</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00014</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-18T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Faulty button</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">79</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00015</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-19T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Faulty button</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">80</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00016</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-20T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Faulty button</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">81</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00017</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-21T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Faulty button</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">82</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00018</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-22T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Faulty cable</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">83</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00019</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-23T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Faulty cable</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">84</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00001</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-24T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">85</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00002</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-25T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition.</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">86</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00003</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-26T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">87</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00004</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-27T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">88</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00005</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-28T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">89</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00006</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-29T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">90</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00007</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-30T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">91</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00001</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-03-31T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">92</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00002</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-01T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">93</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00003</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-02T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">94</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00004</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-03T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">95</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00005</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-04T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">96</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00006</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-05T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">97</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00007</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-06T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">98</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00008</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-07T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">99</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00009</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-08T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">100</Data></Cell>
+    <Cell><Data ss:Type="String">WCMUTP00001</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-09T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">not tested</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">101</Data></Cell>
+    <Cell><Data ss:Type="String">WCMUTP00002</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-10T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">102</Data></Cell>
+    <Cell><Data ss:Type="String">WCMUTP00003</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-11T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">103</Data></Cell>
+    <Cell><Data ss:Type="String">WCMUTP00004</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-12T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">104</Data></Cell>
+    <Cell><Data ss:Type="String">WCMUTP00005</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-13T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">105</Data></Cell>
+    <Cell><Data ss:Type="String">WCMUTP00006</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-14T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">106</Data></Cell>
+    <Cell><Data ss:Type="String">WCMUTP00007</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-15T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">107</Data></Cell>
+    <Cell><Data ss:Type="String">WCMUTP00008</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-16T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">108</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00010</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-17T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">109</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00011</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-18T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">110</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00001</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-19T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">111</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00002</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-20T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">112</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00003</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-21T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">not tested</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">113</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00004</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-22T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">not tested</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">114</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00005</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-23T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">not tested</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">115</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00006</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-24T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">not tested</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">116</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00007</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-25T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">not tested</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">117</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00001</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-26T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">118</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00002</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-27T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">not tested</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">119</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00003</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-28T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">not tested</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">120</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00004</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-29T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">not tested</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">121</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00005</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-04-30T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">not tested</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">122</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00006</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-01T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">123</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00008</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-02T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">124</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00009</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-03T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">125</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00010</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-04T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">126</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00011</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-05T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">127</Data></Cell>
+    <Cell><Data ss:Type="String">WCMVGA00012</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-06T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">128</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00012</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-07T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">129</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00013</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-08T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">130</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00014</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-09T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">131</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00015</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-10T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">132</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00016</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-11T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">133</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00017</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-12T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">134</Data></Cell>
+    <Cell><Data ss:Type="String">WCMUTP00009</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-13T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">135</Data></Cell>
+    <Cell><Data ss:Type="String">WCMUTP00010</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-14T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">136</Data></Cell>
+    <Cell><Data ss:Type="String">WCMUTP00011</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-15T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">137</Data></Cell>
+    <Cell><Data ss:Type="String">WCMUTP00012</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-16T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">138</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00008</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-17T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">139</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00009</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-18T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">140</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00010</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-19T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">141</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00011</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-20T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">142</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00012</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-21T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:Index="17"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">143</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00007</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-22T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">144</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00008</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-23T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">145</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00009</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-24T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">146</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00010</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-25T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">147</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMSE00011</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-26T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:Index="17"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">148</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00018</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-27T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">149</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00019</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-28T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">150</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00020</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-29T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">151</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00021</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-30T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">152</Data></Cell>
+    <Cell><Data ss:Type="String">TL-WN725N</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="9"><Data ss:Type="String">221B1C7009837</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-05-31T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">153</Data></Cell>
+    <Cell><Data ss:Type="String">WCMHDMI00003</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-01T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">excellent working condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">154</Data></Cell>
+    <Cell><Data ss:Type="String">WCMHDMI00004</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-02T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">excellent working condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">155</Data></Cell>
+    <Cell><Data ss:Type="String">WCMHDMI00005</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-03T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">excellent working condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">156</Data></Cell>
+    <Cell><Data ss:Type="String">WCMHDMI00006</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-04T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">excellent working condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">157</Data></Cell>
+    <Cell><Data ss:Type="String">WCMHDMI00007</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-05T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">excellent working condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">158</Data></Cell>
+    <Cell><Data ss:Type="String">WCMHDMI00008</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-06T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">excellent working condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">159</Data></Cell>
+    <Cell><Data ss:Type="String">WCMHDMI00009</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-07T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">excellent working condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">160</Data></Cell>
+    <Cell><Data ss:Type="String">WCMHDMI00010</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-08T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">excellent working condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">161</Data></Cell>
+    <Cell><Data ss:Type="String">WCMHDMI00011</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-09T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">excellent working condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">162</Data></Cell>
+    <Cell><Data ss:Type="String">Comlab Server system unit</Data></Cell>
+    <Cell><Data ss:Type="String">System Unit</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="9"><Data ss:Type="Number">4150255</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-10T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">in good working condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">163</Data></Cell>
+    <Cell><Data ss:Type="String">S2110FUJIXEROX</Data></Cell>
+    <Cell><Data ss:Type="String">Copier</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">Fuji Xerox</Data></Cell>
+    <Cell><Data ss:Type="String">DocuCentre S2110</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-11T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Brand new</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">164</Data></Cell>
+    <Cell><Data ss:Type="String">WCMPRINT0001</Data></Cell>
+    <Cell><Data ss:Type="String">Printer</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">HP</Data></Cell>
+    <Cell><Data ss:Type="String">HP Deskjet 2336</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-12T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Good working condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">165</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMON0001</Data></Cell>
+    <Cell><Data ss:Type="String">Monitor</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-13T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Defective monitor, black circular spot on the bottom screen</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">166</Data></Cell>
+    <Cell><Data ss:Type="String">WCMMON0002</Data></Cell>
+    <Cell><Data ss:Type="String">Monitor</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">AOC</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-14T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">good working condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">167</Data></Cell>
+    <Cell><Data ss:Type="String">WCMKB00026</Data></Cell>
+    <Cell><Data ss:Type="String">Peripherals</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="8"><Data ss:Type="String">A4TECH USB KEYBOARD</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-15T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Good working condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">168</Data></Cell>
+    <Cell><Data ss:Type="String">WCM-FEMO-001501</Data></Cell>
+    <Cell><Data ss:Type="String">Smart TV</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">TCL</Data></Cell>
+    <Cell><Data ss:Type="String">TCL Smart LED 52&quot;</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-16T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Working. Installed on Room304</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">169</Data></Cell>
+    <Cell><Data ss:Type="String">WCM-FEMO-001502</Data></Cell>
+    <Cell><Data ss:Type="String">Smart TV</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">TCL</Data></Cell>
+    <Cell><Data ss:Type="String">TCL Smart LED 52&quot;</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-17T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Working. Installed on Room305</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">170</Data></Cell>
+    <Cell><Data ss:Type="String">WCM-FEMO-001503</Data></Cell>
+    <Cell><Data ss:Type="String">Smart TV</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">TCL</Data></Cell>
+    <Cell><Data ss:Type="String">TCL Smart LED 52&quot;</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-18T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Working. Installed on Room306</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">171</Data></Cell>
+    <Cell><Data ss:Type="String">WCM-FEMO-001504</Data></Cell>
+    <Cell><Data ss:Type="String">Smart TV</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">TCL</Data></Cell>
+    <Cell><Data ss:Type="String">TCL Smart LED 52&quot; TV</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-19T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Working. Installed on Room307</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">172</Data></Cell>
+    <Cell><Data ss:Type="String">TL-WN725N</Data></Cell>
+    <Cell><Data ss:Type="String">Wi-Fi Dongle</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">TP-Link</Data></Cell>
+    <Cell><Data ss:Type="String">wireless N</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-20T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In use for Sir Joy's laptop wireless connection</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">173</Data></Cell>
+    <Cell><Data ss:Type="String">WCMWLR00003</Data></Cell>
+    <Cell><Data ss:Type="String">Wi-Fi Router</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">Linksys</Data></Cell>
+    <Cell><Data ss:Type="String">WRT54G2 V1</Data></Cell>
+    <Cell><Data ss:Type="String">CSV01H5S2318</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-21T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Inactive</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">174</Data></Cell>
+    <Cell><Data ss:Type="String">WCMWLR00005</Data></Cell>
+    <Cell><Data ss:Type="String">Ethernet Broadband Router</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">D-Link</Data></Cell>
+    <Cell><Data ss:Type="String">DI-604</Data></Cell>
+    <Cell><Data ss:Type="String">DY01878010091</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-22T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Defective</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">175</Data></Cell>
+    <Cell><Data ss:Type="String">WCMWLR00010</Data></Cell>
+    <Cell><Data ss:Type="String">Wi-Fi Router</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">FiberHome</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-23T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Defective</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">176</Data></Cell>
+    <Cell><Data ss:Type="String">WCMWLR00011</Data></Cell>
+    <Cell><Data ss:Type="String">Wi-Fi Router</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">ZTE</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-24T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Defective</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">177</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCPU0001</Data></Cell>
+    <Cell><Data ss:Type="String">CPU/Processor</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">HP</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-25T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">HP Slim Type CPU, OS:Win7</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">178</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCPU0002</Data></Cell>
+    <Cell><Data ss:Type="String">CPU/Processor</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">HP</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-26T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">HP slim type CPU donated by Ma'am Emelyn</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">179</Data></Cell>
+    <Cell><Data ss:Type="String">WCMHDMI00002</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-27T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">with attachments</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">180</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00031</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-28T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">181</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCBL00048</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-29T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">In good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">182</Data></Cell>
+    <Cell><Data ss:Type="String">WCMHDMI102</Data></Cell>
+    <Cell><Data ss:Type="String">Cables</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-06-30T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell ss:Index="17"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">183</Data></Cell>
+    <Cell><Data ss:Type="String">WCMUSB CABLE/PRINTER</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-07-01T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">tested,in good condition</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">184</Data></Cell>
+    <Cell><Data ss:Type="String">WCMCisco1941series</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell ss:Index="9"><Data ss:Type="String">Cisco1941Series</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-07-02T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">not tested</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">185</Data></Cell>
+    <Cell><Data ss:Type="String">WCMWLR00001</Data></Cell>
+    <Cell><Data ss:Type="String">Wi-Fi Router</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">TP-Link</Data></Cell>
+    <Cell><Data ss:Type="String">TL-WR840N</Data></Cell>
+    <Cell ss:StyleID="s71"><Data ss:Type="Number">2200000000000</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-07-03T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Spare</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">186</Data></Cell>
+    <Cell><Data ss:Type="String">WCMWLR00002</Data></Cell>
+    <Cell><Data ss:Type="String">Wi-Fi Router</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">TP-Link</Data></Cell>
+    <Cell><Data ss:Type="String">TL-WR840N</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-07-04T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">Spare</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+   <Row>
+    <Cell><Data ss:Type="Number">187</Data></Cell>
+    <Cell><Data ss:Type="String">WCMWLR00004</Data></Cell>
+    <Cell><Data ss:Type="String">Wi-Fi Router</Data></Cell>
+    <Cell ss:Index="5"><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">unit</Data></Cell>
+    <Cell><Data ss:Type="String">ZyXEL</Data></Cell>
+    <Cell><Data ss:Type="String">VMG3926-B10B</Data></Cell>
+    <Cell><Data ss:Type="String">S160Y20034191</Data></Cell>
+    <Cell ss:Index="11"><Data ss:Type="String">Good</Data></Cell>
+    <Cell ss:Index="14"><Data ss:Type="DateTime">2024-07-05T00:00:00.000</Data></Cell>
+    <Cell><Data ss:Type="Number">0</Data></Cell>
+    <Cell><Data ss:Type="String">MAC: 60319710EA80</Data></Cell>
+    <Cell><Data ss:Type="Number">1</Data></Cell>
+    <Cell><Data ss:Type="String">Machinery and Equipment</Data></Cell>
+    <Cell><Data ss:Type="String">ICT Equipment</Data></Cell>
+   </Row>
+  </Table>
+  <WorksheetOptions xmlns="urn:schemas-microsoft-com:office:excel">
+   <Selected/>
+   <Panes>
+    <Pane>
+     <Number>3</Number>
+     <ActiveRow>67</ActiveRow>
+     <ActiveCol>19</ActiveCol>
+    </Pane>
+   </Panes>
+   <ProtectObjects>False</ProtectObjects>
+   <ProtectScenarios>False</ProtectScenarios>
+  </WorksheetOptions>
+ </Worksheet>
+</Workbook>
