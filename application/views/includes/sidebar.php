@@ -37,7 +37,7 @@
                             <li><a href="#">Project List</a></li>
                         </ul>
                     </li>
-                   
+
 
                     <!-- <li>
                         <a href="javascript: void(0);" class="waves-effect">
@@ -50,13 +50,8 @@
                         </ul>
                     </li> -->
 
-                   
-                    <li>
-                        <a href="<?= base_url(); ?>Page/changepassword" class="waves-effect">
-                            <i class=" ion ion-ios-key"></i>
-                            <span> Change Password </span>
-                        </a>
-                    </li>
+
+
                     <li>
                         <a href="javascript: void(0);" class="waves-effect">
                             <i class="ion ion-md-settings"></i>
@@ -64,17 +59,36 @@
                             <span class="menu-arrow"></span>
                         </a>
                         <ul class="nav-second-level" aria-expanded="false">
-                            <li><a href="<?= base_url(); ?>Settings/schoolInfo">Company Information</a></li>
-                            <li><a href="<?= base_url(); ?>Settings/loginFormBanner">Login Page Image</a></li>
+                            <li><a href="#">Company Information</a></li>
+                            <li><a href="#">Login Page Image</a></li>
                         </ul>
                     </li>
+
+                    <li>
+                        <a href="javascript: void(0);" class="waves-effect">
+                            <i class="ion ion-md-settings"></i>
+                            <span> Manage Users </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <ul class="nav-second-level" aria-expanded="false">
+                            <li><a href="#">Users</a></li>
+                        </ul>
+                    </li>
+                    <!-- 
+                    <li>
+                        <a href="<?= base_url(); ?>Page/changepassword" class="waves-effect">
+                            <i class=" ion ion-ios-key"></i>
+                            <span> Change Password </span>
+                        </a>
+                    </li> -->
+
                 </ul>
 
             </div>
             <!-- End Sidebar -->
 
         <?php elseif ($this->session->userdata('level') === 'IT'): ?>
-            
+
 
         <?php endif; ?>
 

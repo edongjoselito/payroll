@@ -1,1 +1,1 @@
-<title>SRMS School Portal</title>
+<title>Payroll Management System</title>
