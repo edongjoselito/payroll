@@ -86,9 +86,23 @@
                                     <td><?= $row->SchoolAddress; ?></td>
                                     <td><?= $row->SchoolHead; ?></td>
                                     <td style="text-align: center;">
-                                    <a href="<?= base_url('Page/updateSuperAdmin?settingsID=' . $row->settingsID); ?>" 
-                                    class="btn btn-primary waves-effect waves-light btn-sm"><i class="mdi mdi-pencil"></i>Edit</a>
+                                        <a href="<?= base_url('Page/updateSuperAdmin?settingsID=' . $row->settingsID); ?>" 
+                                        class="btn btn-primary waves-effect waves-light btn-sm">
+                                        <i class="mdi mdi-pencil"></i> Edit
+                                        </a>
+
+                                        <!-- Add Admin Button -->
+                                        <!-- Add Admin Button -->
+                                    <button 
+                                        class="btn btn-success btn-sm" 
+                                        data-toggle="modal" 
+                                        data-target="#addAdminModal"
+                                        data-settingsid="<?= $row->settingsID; ?>">
+                                        <i class="mdi mdi-account-plus"></i> Add Admin
+                                    </button>
+
                                     </td>
+
                                 </tr>
                             <?php } ?>
                         </tbody>
@@ -137,6 +151,77 @@
         </div>
         <div class="modal-footer">
           <button type="submit" class="btn btn-primary">Save</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Add Admin Modal -->
+<div class="modal fade" id="addAdminModal" tabindex="-1" role="dialog" aria-labelledby="addAdminLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <form method="POST" action="<?= base_url('Page/saveAdminFromSuperAdmin'); ?>">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add New Admin</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        </div>
+        <div class="modal-body">
+          <!-- Hidden field for settingsID -->
+          <input type="hidden" name="settingsID" id="modalSettingsID">
+          
+          <div class="form-group row">
+            <label class="col-sm-4 col-form-label">First Name</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" name="fName" required>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Middle Name</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" name="mName">
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Last Name</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" name="lName" required>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Employee No.</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" name="IDNumber" required>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Email</label>
+            <div class="col-sm-8">
+              <input type="email" class="form-control" name="email" required>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Account Level</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" name="acctLevel" value="Admin" readonly>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Username</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" name="username" required>
+            </div>
+          </div>
+          <div class="form-group row">
+            <label class="col-sm-4 col-form-label">Password</label>
+            <div class="col-sm-8">
+              <input type="password" class="form-control" name="password" required minlength="8">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-info">Create Admin</button>
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
         </div>
       </div>
@@ -211,6 +296,16 @@
 
     <!-- Datatables init -->
     <script src="<?= base_url(); ?>assets/js/pages/datatables.init.js"></script>
+
+
+<script>
+  $('#addAdminModal').on('show.bs.modal', function (event) {
+    var button = $(event.relatedTarget);
+    var settingsID = button.data('settingsid');
+    $('#modalSettingsID').val(settingsID);
+  });
+</script>
+
 
 </body>
 

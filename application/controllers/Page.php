@@ -167,6 +167,7 @@ public function addNewSuperAdmin()
 			$lName = $this->input->post('lName', TRUE);
 			$completeName = $fName . ' ' . $lName;
 			$email = $this->input->post('email', TRUE);
+			$settingsID = $this->input->post('settingsID', TRUE);
 			$dateCreated = date("Y-m-d");
 
 			// Use query builder to check if the username already exists
@@ -190,7 +191,8 @@ public function addNewSuperAdmin()
 					'avatar' => 'avatar.png',
 					'acctStat' => 'active',
 					'dateCreated' => $dateCreated,
-					'IDNumber' => $IDNumber
+					'IDNumber' => $IDNumber,
+					 'settingsID' => $settingsID
 				);
 
 				// Insert data into the database
@@ -203,7 +205,62 @@ public function addNewSuperAdmin()
 	}
 
 
+	
+public function saveAdminFromSuperAdmin()
+{
+    // Enable error reporting (for debugging)
+    error_reporting(E_ALL);
+    ini_set('display_errors', 1);
 
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $username = $this->input->post('username', TRUE);
+        $IDNumber = $this->input->post('IDNumber', TRUE);
+        $password = sha1($this->input->post('password'));
+        $acctLevel = $this->input->post('acctLevel', TRUE);
+        $fName = $this->input->post('fName', TRUE);
+        $mName = $this->input->post('mName', TRUE);
+        $lName = $this->input->post('lName', TRUE);
+        $email = $this->input->post('email', TRUE);
+        $settingsID = $this->input->post('settingsID', TRUE);
+        $dateCreated = date("Y-m-d");
+
+        // Check if username already exists
+        $this->db->where('username', $username);
+        $query = $this->db->get('o_users');
+
+        if ($query->num_rows() > 0) {
+            $this->session->set_flashdata('msg', '<div class="alert alert-danger text-center"><b>Username already exists.</b></div>');
+        } else {
+            $data = array(
+                'username'     => $username,
+                'password'     => $password,
+                'position'     => $acctLevel,
+                'fName'        => $fName,
+                'mName'        => $mName,
+                'lName'        => $lName,
+                'email'        => $email,
+                'avatar'       => 'avatar.png',
+                'acctStat'     => 'active',
+                'dateCreated'  => $dateCreated,
+                'IDNumber'     => $IDNumber,
+                'settingsID'   => $settingsID
+            );
+
+            $insert = $this->db->insert('o_users', $data);
+
+            if ($insert) {
+                $this->session->set_flashdata('msg', '<div class="alert alert-success text-center"><b>Admin account created successfully.</b></div>');
+            } else {
+                $error = $this->db->error();
+                $this->session->set_flashdata('msg', '<div class="alert alert-danger text-center"><b>Database error: ' . $error['message'] . '</b></div>');
+            }
+        }
+
+        redirect('Page/superAdmin');
+    } else {
+        show_error('Invalid form submission');
+    }
+}
 
 
 
