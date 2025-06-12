@@ -562,7 +562,7 @@ class SettingsModel extends CI_Model
 
     function getSchoolInformation()
     {
-        $query = $this->db->query("select * from srms_settings");
+        $query = $this->db->query("select * from o_srms_settings");
         return $query->result();
     }
 

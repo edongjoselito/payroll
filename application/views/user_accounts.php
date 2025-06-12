@@ -53,9 +53,9 @@
               <div class="page-title-box">
                 <h4 class="page-title">
                   <button type="button" class="btn btn-info waves-effect waves-light" data-toggle="modal" data-target=".bs-example-modal-lg">+Add New</button>
-                  <a href="<?= base_url(); ?>Page/copy_users_to_o_users"><button type="button" class="btn btn-success waves-effect waves-light">Import Local Accounts</button></a>
+                  <!-- <a href="<?= base_url(); ?>Page/copy_users_to_o_users"><button type="button" class="btn btn-success waves-effect waves-light">Import Local Accounts</button></a> -->
                   <!-- <a href="<?= base_url(); ?>Page/create_stude_accts"><button type="button" class="btn btn-success waves-effect waves-light">Create All Students' Accounts</button></a> -->
-                  <a href="<?= base_url(); ?>Page/updateNames"><button type="button" class="btn btn-primary waves-effect waves-light">Update Students' Names</button></a>
+                  <!-- <a href="<?= base_url(); ?>Page/updateNames"><button type="button" class="btn btn-primary waves-effect waves-light">Update Students' Names</button></a> -->
                 </h4>
                 <div class="page-title-right">
                   <ol class="breadcrumb p-0 m-0">
@@ -78,7 +78,7 @@
                   <table id="datatable-buttons" class="table table-striped table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                     <thead>
                       <tr>
-                        <th>Student Name</th>
+                        <th>Full Name</th>
                         <th>Username</th>
                         <th>Level</th>
                         <th>E-mail</th>
@@ -151,7 +151,6 @@
 
 
   <!-- Right Sidebar -->
-  <?php include('includes/themecustomizer.php'); ?>
   <!-- /Right-bar -->
 
 

@@ -71,7 +71,7 @@
                             <span class="menu-arrow"></span>
                         </a>
                         <ul class="nav-second-level" aria-expanded="false">
-                            <li><a href="#">Users</a></li>
+                             <li><a href="<?= base_url(); ?>Page/userAccounts">Users</a></li>
                         </ul>
                     </li>
                     <!-- 
@@ -87,8 +87,21 @@
             </div>
             <!-- End Sidebar -->
 
-        <?php elseif ($this->session->userdata('level') === 'IT'): ?>
+        <?php elseif ($this->session->userdata('level') === 'Super Admin'): ?>
+ <div id="sidebar-menu">
+                <ul class="metismenu" id="side-menu">
 
+                    <li class="menu-title">SUPER ADMIN</li>
+
+                    <li>
+                        <a href="<?= base_url(); ?>Page/superAdmin" class="waves-effect">
+                            <i class="ion-md-speedometer"></i>
+                            <span> Dashboard </span>
+                        </a>
+                    </li>
+                         </ul>
+
+            </div>
 
         <?php endif; ?>
 
