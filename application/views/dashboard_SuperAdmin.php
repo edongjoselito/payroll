@@ -35,7 +35,15 @@
 
                                 <div class="page-title-right">
                                     <ol class="breadcrumb p-0 m-0">
-                                        <!-- <li class="breadcrumb-item"><a href="#"><span class="badge badge-purple mb-3">Currently login to <b>SY <?php echo $this->session->userdata('sy'); ?> <?php echo $this->session->userdata('semester'); ?></span></b></a></li> -->
+                                      <!-- Add New Button -->
+<!-- Add New Button -->
+<div class="mb-3">
+    <button class="btn btn-success" data-toggle="modal" data-target="#addSuperAdminModal">
+        <i class="mdi mdi-plus"></i> Add Company
+    </button>
+</div>
+
+
                                     </ol>
                                 </div>
                                 <div class="clearfix"></div>
@@ -43,6 +51,14 @@
                             </div>
                         </div>
                     </div>
+
+                    <?php if ($this->session->flashdata('msg')) : ?>
+	<div class="alert alert-success alert-dismissible fade show" role="alert">
+		<?= $this->session->flashdata('msg'); ?>
+		<button type="button" class="close" data-dismiss="alert">&times;</button>
+	</div>
+<?php endif; ?>
+
                       <div class="row">
                             <div class="col-md-12">
                                 <div class="card">
@@ -84,6 +100,51 @@
                 </div>
                 </div>
                 <!-- End container-fluid -->
+<!-- Add Super Admin Modal -->
+<div class="modal fade" id="addSuperAdminModal" tabindex="-1" role="dialog" aria-labelledby="addModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <form action="<?= base_url('Page/addNewSuperAdmin'); ?>" method="post" enctype="multipart/form-data">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add New Super Admin</h5>
+          <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label>School Name</label>
+            <input type="text" name="SchoolName" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>School Address</label>
+            <input type="text" name="SchoolAddress" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>School Head</label>
+            <input type="text" name="SchoolHead" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>Head Position</label>
+            <input type="text" name="sHeadPosition" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label>School Logo</label>
+            <input type="file" name="schoolLogo" class="form-control" accept="image/*">
+          </div>
+          <div class="form-group">
+            <label>Letter Head</label>
+            <input type="file" name="letterHead" class="form-control" accept="image/*">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Save</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
 
             </div>
             <!-- End content -->

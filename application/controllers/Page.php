@@ -35,10 +35,66 @@ class Page extends CI_Controller
 
 		public function superAdmin()
 	{
-		// Default method when accessing /Page
 		$result['data'] = $this->SettingsModel->getSchoolInformation();
 		$this->load->view('dashboard_SuperAdmin',  $result); // You should create this view
 	}
+
+
+public function addNewSuperAdmin()
+{
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Basic upload config
+        $config['upload_path'] = './uploads/school/';
+        $config['allowed_types'] = 'jpg|jpeg|png';
+        $config['encrypt_name'] = TRUE;
+        $config['max_size'] = 2048;
+
+        // Load upload library
+        $this->load->library('upload');
+
+        $schoolLogo = null;
+        $letterHead = null;
+
+        // Upload school logo
+        if (!empty($_FILES['schoolLogo']['name'])) {
+            $this->upload->initialize($config);
+            if ($this->upload->do_upload('schoolLogo')) {
+                $schoolLogo = 'uploads/school/' . $this->upload->data('file_name');
+            }
+        }
+
+        // Upload letter head
+        if (!empty($_FILES['letterHead']['name'])) {
+            $this->upload->initialize($config);
+            if ($this->upload->do_upload('letterHead')) {
+                $letterHead = 'uploads/school/' . $this->upload->data('file_name');
+            }
+        }
+
+        // Save form data
+        $data = [
+            'SchoolName'    => $this->input->post('SchoolName'),
+            'SchoolAddress' => $this->input->post('SchoolAddress'),
+            'SchoolHead'    => $this->input->post('SchoolHead'),
+            'sHeadPosition' => $this->input->post('sHeadPosition'),
+            'schoolLogo'    => $schoolLogo,
+            'letterHead'    => $letterHead
+        ];
+
+        $this->SettingsModel->insertSuperAdmin($data);
+        $this->session->set_flashdata('msg', 'New Super Admin added!');
+        redirect('Page/superAdmin');
+    } else {
+        show_error('Invalid form submission');
+    }
+}
+
+
+
+
+
+
+
 
 		public function updateSuperAdmin()
 	{
@@ -145,5 +201,13 @@ class Page extends CI_Controller
 			}
 		}
 	}
+
+
+
+
+
+
+
+
 
 }

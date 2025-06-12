@@ -575,6 +575,12 @@ class SettingsModel extends CI_Model
     }
 
 
+    public function insertSuperAdmin($data)
+{
+	$this->db->insert('o_srms_settings', $data);
+}
+
+
     public function updateSuperAdmin($settingsID, $data)
     {
         $this->db->where('settingsID', $settingsID);
