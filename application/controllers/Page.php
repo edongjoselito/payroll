@@ -33,11 +33,60 @@ class Page extends CI_Controller
 
 
 
-		public function superAdmin()
-	{
-		$result['data'] = $this->SettingsModel->getSchoolInformation();
-		$this->load->view('dashboard_SuperAdmin',  $result); // You should create this view
-	}
+public function superAdmin()
+{
+    $schoolData = $this->SettingsModel->getSchoolInformation();
+
+    // Load user data per settingsID
+    foreach ($schoolData as &$row) {
+        $this->db->where('settingsID', $row->settingsID);
+        $query = $this->db->get('o_users');
+        $row->hasAdmin = ($query->num_rows() > 0);
+    }
+
+    $result['data'] = $schoolData;
+    $this->load->view('dashboard_SuperAdmin', $result);
+}
+
+
+
+// public function seeAdmin()
+// {
+//     $settingsID = $this->input->get('settingsID');
+
+//     $this->db->where('settingsID', $settingsID);
+//     $query = $this->db->get('o_users');
+
+//     if ($query->num_rows() > 0) {
+//         $data['admin'] = $query->row();
+//         $this->load->view('view_admin_details', $data);
+//     } else {
+//         show_error('Admin not found for this company.');
+//     }
+// }
+
+
+public function viewAdmins()
+{
+    $settingsID = $this->input->get('settingsID', TRUE);
+
+    if (!$settingsID || !is_numeric($settingsID)) {
+        show_error('Invalid or missing settingsID.');
+    }
+
+    $this->db->select('u.*, s.SchoolName, s.SchoolAddress');
+    $this->db->from('o_users u');
+    $this->db->join('o_srms_settings s', 's.settingsID = u.settingsID', 'left');
+    $this->db->where('u.position', 'Admin');
+    $this->db->where('u.settingsID', $settingsID);
+    $admins = $this->db->get()->result();
+
+    $data['admins'] = $admins;
+    $data['settingsID'] = $settingsID;
+    $this->load->view('admin_list_view', $data);
+}
+
+
 
 
 public function addNewSuperAdmin()
@@ -205,7 +254,7 @@ public function addNewSuperAdmin()
 	}
 
 
-	
+
 public function saveAdminFromSuperAdmin()
 {
     // Enable error reporting (for debugging)

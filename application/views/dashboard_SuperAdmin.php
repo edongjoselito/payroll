@@ -93,13 +93,20 @@
 
                                         <!-- Add Admin Button -->
                                         <!-- Add Admin Button -->
-                                    <button 
-                                        class="btn btn-success btn-sm" 
-                                        data-toggle="modal" 
-                                        data-target="#addAdminModal"
-                                        data-settingsid="<?= $row->settingsID; ?>">
-                                        <i class="mdi mdi-account-plus"></i> Add Admin
-                                    </button>
+                                  <?php if ($row->hasAdmin): ?>
+    <a href="<?= base_url('Page/viewAdmins?settingsID=' . $row->settingsID); ?>" 
+       class="btn btn-info btn-sm">
+        <i class="mdi mdi-account-circle"></i> See Admin
+    </a>
+<?php else: ?>
+    <button 
+        class="btn btn-success btn-sm" 
+        data-toggle="modal" 
+        data-target="#addAdminModal"
+        data-settingsid="<?= $row->settingsID; ?>">
+        <i class="mdi mdi-account-plus"></i> Add Admin
+    </button>
+<?php endif; ?>
 
                                     </td>
 
