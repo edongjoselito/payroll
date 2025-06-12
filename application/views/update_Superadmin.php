@@ -25,10 +25,10 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="page-title-box">
-                                    <h4 class="page-title">UPDATE SCHOOL INFO</h4>
+                                    <h4 class="page-title">UPDATE COMPANY INFO</h4>
                                     <div class="page-title-right">
                                         <ol class="breadcrumb p-0 m-0">
-                                            <li class="breadcrumb-item"><a href="#"><span class="badge badge-purple mb-3">Currently login to <b>SY <?php echo $this->session->userdata('sy');?> <?php echo $this->session->userdata('semester');?></span></b></a></li>
+                                            <!-- <li class="breadcrumb-item"><a href="#"><span class="badge badge-purple mb-3">Currently login to <b>SY <?php echo $this->session->userdata('sy');?> <?php echo $this->session->userdata('semester');?></span></b></a></li> -->
                                         </ol>
                                     </div>
                                     <div class="clearfix"></div>
@@ -48,15 +48,15 @@
         <div class="row">
             <!-- Column 1 -->
             <div class="col-md-6">
-                <label for="SchoolName">School Name</label>
+                <label for="SchoolName">Company Name</label>
                 <input type="text" class="form-control" name="SchoolName" value="<?php echo $row->SchoolName; ?>">
             </div>
             <div class="col-md-6">
-                <label for="SchoolAddress">School Address</label>
+                <label for="SchoolAddress">Company Address</label>
                 <input type="text" class="form-control" name="SchoolAddress" value="<?php echo $row->SchoolAddress; ?>">
             </div>
             <div class="col-md-6">
-                <label for="SchoolHead">School Head</label>
+                <label for="SchoolHead">Company Head</label>
                 <input type="text" class="form-control" name="SchoolHead" value="<?php echo $row->SchoolHead; ?>">
             </div>
             <div class="col-md-6">
@@ -95,7 +95,7 @@
 
         <div class="row mt-3">
             <div class="col-md-6">
-                <label for="schoolLogo">School Logo</label>
+                <label for="schoolLogo">Company Logo</label>
                 <input type="file" class="form-control" name="schoolLogo" accept="image/*">
             </div>
             <div class="col-md-6">

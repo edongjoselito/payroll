@@ -48,7 +48,7 @@
                                                     <th>Username</th>
                                                     <th>Full Name</th>
                                                     <th>Email</th>
-                                                    <th>School</th>
+                                                    <th>Company</th>
                                                     <th>Employee No.</th>
                                                     <th>Status</th>
                                                     <th>Date Created</th>

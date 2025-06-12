@@ -567,12 +567,20 @@ class SettingsModel extends CI_Model
     }
 
 
+    
+
 
     public function getSuperAdminbyId($settingsID)
     {
         $query = $this->db->query("SELECT * FROM o_srms_settings WHERE settingsID = '" . $settingsID . "'");
         return $query->result();
     }
+
+
+public function getSuperAdminbyIds($settingsID)
+{
+    return $this->db->get_where('o_srms_settings', ['settingsID' => $settingsID])->row(); // ✅ use row() not result()
+}
 
 
     public function insertSuperAdmin($data)

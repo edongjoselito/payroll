@@ -29,9 +29,11 @@
                     <div class="row">
                         <div class="col-12">
                             <div class="page-title-box">
-                                <h4 class="page-title">Company Name Here<br />
-                                    <small class="text-muted">Company Address</small>
-                                </h4>
+                              <h4 class="page-title">
+    <?= isset($company->SchoolName) ? strtoupper($company->SchoolName) : 'No School Name'; ?><br />
+    <small class="text-muted"><?= $company->SchoolAddress ?? 'No Address'; ?></small>
+</h4>
+
 
                                 <div class="page-title-right">
                                     <ol class="breadcrumb p-0 m-0">

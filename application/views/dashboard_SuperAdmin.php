@@ -71,17 +71,17 @@
                     <table id="datatable" class="table table-striped table-bordered dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead>
                             <tr>
-                                <th>Settings ID</th>
-                                <th>School Name</th>
-                                <th>School Address</th>
-                                <th>School Head</th>
+                                <!-- <th>Settings ID</th> -->
+                                <th>Company Name</th>
+                                <th>Company Address</th>
+                                <th>Company Head</th>
                                 <th style="text-align: center;">Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($data as $row) { ?>
                                 <tr>
-                                    <td><?= $row->settingsID; ?></td>
+                                    <!-- <td><?= $row->settingsID; ?></td> -->
                                     <td><?= $row->SchoolName; ?></td>
                                     <td><?= $row->SchoolAddress; ?></td>
                                     <td><?= $row->SchoolHead; ?></td>
@@ -132,15 +132,15 @@
         </div>
         <div class="modal-body">
           <div class="form-group">
-            <label>School Name</label>
+            <label>Company Name</label>
             <input type="text" name="SchoolName" class="form-control" required>
           </div>
           <div class="form-group">
-            <label>School Address</label>
+            <label>Company Address</label>
             <input type="text" name="SchoolAddress" class="form-control" required>
           </div>
           <div class="form-group">
-            <label>School Head</label>
+            <label>Company Head</label>
             <input type="text" name="SchoolHead" class="form-control" required>
           </div>
           <div class="form-group">
@@ -148,7 +148,7 @@
             <input type="text" name="sHeadPosition" class="form-control" required>
           </div>
           <div class="form-group">
-            <label>School Logo</label>
+            <label>Company Logo</label>
             <input type="file" name="schoolLogo" class="form-control" accept="image/*">
           </div>
           <div class="form-group">

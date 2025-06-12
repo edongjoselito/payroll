@@ -19,11 +19,15 @@ class Page extends CI_Controller
 		}
 	}
 
-	public function admin()
-	{
-		// Default method when accessing /Page
-		$this->load->view('dashboard_admin'); // You should create this view
-	}
+public function admin()
+{
+    $settingsID = $this->session->userdata('settingsID');
+
+    $this->load->model('SettingsModel');
+    $data['company'] = $this->SettingsModel->getSuperAdminbyIds($settingsID); // returns object
+
+    $this->load->view('dashboard_admin', $data);
+}
 
 
 	

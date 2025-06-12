@@ -214,6 +214,7 @@ class Login extends CI_Controller
             $email = $data['email'];
             $level = $data['position'];
             $IDNumber = $data['IDNumber'];
+            $settingsID = $data['settingsID'];
             $acctStat = $data['acctStat']; // Assuming `acctStat` is a column in the database
 
             if ($acctStat === 'active') {
@@ -229,6 +230,7 @@ class Login extends CI_Controller
                     'IDNumber'     => $IDNumber,
                     'sy' => $sy,
                     'semester' => $semester,
+                    'settingsID' => $settingsID,
                     'logged_in' => TRUE
                 );
                 $this->session->set_userdata($user_data);
