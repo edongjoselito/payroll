@@ -34,7 +34,7 @@
                             <span class="menu-arrow"></span>
                         </a>
                         <ul class="nav-second-level" aria-expanded="false">
-                            <li><a href="#">Project List</a></li>
+                            <li><a href="<?= base_url(); ?>Project/project_view">Project List</a></li>
                         </ul>
                     </li>
 
