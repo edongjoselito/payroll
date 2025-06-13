@@ -49,4 +49,34 @@ public function delete($id)
     redirect('project/project_view');
 }
 
+// View attendance page
+public function attendance($settingsID) {
+    $data['settingsID'] = $settingsID;
+    $data['personnels'] = $this->Project_model->getPersonnelBySettingsID($settingsID);
+    $data['attendance_date'] = date('Y-m-d');
+    $this->load->view('attendance_view', $data);
+}
+
+public function save_attendance() {
+    $settingsID         = $this->input->post('settingsID');
+    $attendance_date    = $this->input->post('attendance_date');
+    $attendance_status  = $this->input->post('attendance_status');
+    $workDuration       = $this->input->post('workDuration');
+
+    foreach ($attendance_status as $personnelID => $status) {
+        $data = [
+            'personnelID'       => $personnelID,
+            'settingsID'        => $settingsID,
+            'attendance_date'   => $attendance_date,
+            'attendance_status' => $status,
+            'workDuration'      => $workDuration[$personnelID]
+        ];
+        $this->Project_model->save_attendance($data);
+    }
+
+    $this->session->set_flashdata('success', 'Attendance saved successfully.');
+    redirect('project/attendance/'.$settingsID);
+}
+
+
 }

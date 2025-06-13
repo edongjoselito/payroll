@@ -56,14 +56,18 @@
                                                     <tr>
                                                         <td><?= htmlspecialchars($proj->projectTitle) ?></td>
                                                         <!-- <td><?= date('M d, Y', strtotime($proj->created_at ?? 'now')) ?></td> -->
-                                                        <td>
-                                                            <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal<?= $proj->projectID ?>">
-                                                                Edit
-                                                            </button>
-                                                            <a href="<?= base_url('Project/delete/' . $proj->projectID) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this project?')">
-                                                                Delete
-                                                            </a>
-                                                        </td>
+                                                    <td>
+                                                        <a href="<?= base_url('project/attendance/' . $proj->settingsID) ?>" class="btn btn-info btn-sm">Attendance</a>
+
+                                                        <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal<?= $proj->projectID ?>">
+                                                            Edit
+                                                        </button>
+
+                                                        <a href="<?= base_url('Project/delete/' . $proj->projectID) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this project?')">
+                                                            Delete
+                                                        </a>
+                                                    </td>
+
                                                     </tr>
                                                 <?php endforeach; ?>
                                             <?php endif; ?>
