@@ -22,7 +22,7 @@
                         </a>
 
                         <ul class="nav-second-level nav" aria-expanded="false">
-                            <li><a href="#"> Personnel List</a></li>
+                            <li><a href="<?= base_url(); ?>Personnel/manage"> Personnel List</a></li>
                         </ul>
                     </li>
 
