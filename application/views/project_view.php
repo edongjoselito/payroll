@@ -23,6 +23,17 @@
                             <hr>
                         </div>
                     </div>
+                      <?php if ($this->session->flashdata('success')): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <?= $this->session->flashdata('success') ?>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+<?php elseif ($this->session->flashdata('error')): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <?= $this->session->flashdata('error') ?>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+<?php endif; ?>
 
                     <!-- Project Table -->
                     <div class="row">

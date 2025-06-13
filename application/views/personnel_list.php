@@ -17,6 +17,19 @@
                 </div>
                 <hr style="border:0; height:2px; background:linear-gradient(to right, #34A853, #FBBC05, #4285F4); border-radius:1px; margin:20px 0;"/>
 
+                <?php if ($this->session->flashdata('success')): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <?= $this->session->flashdata('success') ?>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+<?php elseif ($this->session->flashdata('error')): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <?= $this->session->flashdata('error') ?>
+        <button type="button" class="close" data-dismiss="alert">&times;</button>
+    </div>
+<?php endif; ?>
+
+
                 <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
@@ -24,8 +37,8 @@
                                 <thead>
                                     <tr>
                                         <th>Name</th>
+                                        <th>Address</th>
                                         <th>Contact</th>
-                                        <th>Email</th>
                                         <th>SSS</th>
                                         <th>PhilHealth</th>
                                         <th>Pag-IBIG</th>
@@ -40,8 +53,8 @@
                                         <?php foreach($personnel as $p): ?>
                                             <tr>
                                                 <td><?= "$p->first_name $p->middle_name $p->last_name $p->name_ext" ?></td>
+                                                <td><?= $p->address ?></td>
                                                 <td><?= $p->contact_number ?></td>
-                                                <td><?= $p->email ?></td>
                                                 <td><?= $p->sss_number ?></td>
                                                 <td><?= $p->philhealth_number ?></td>
                                                 <td><?= $p->pagibig_number ?></td>
@@ -52,9 +65,10 @@
                                                 </td>
                                             </tr>
 
-                                           <!-- Edit Modal -->
+
+<!-- Edit Modal -->
 <div class="modal fade" id="editModal<?= $p->personnelID ?>" tabindex="-1">
-    <div class="modal-dialog modal-lg"> <!-- widened modal -->
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form method="post" action="<?= base_url('personnel/update') ?>">
                 <div class="modal-header">
@@ -96,10 +110,37 @@
                     </div>
 
                     <div class="form-row">
-                        <div class="form-group col-md-3">
-                            <label>SSS Number</label>
-                            <input class="form-control" name="sss_number" value="<?= $p->sss_number ?>">
+                        <div class="form-group col-md-4">
+                            <label>Birthdate</label>
+                            <input type="date" class="form-control" name="birthdate" value="<?= $p->birthdate ?>">
                         </div>
+                        <div class="form-group col-md-4">
+                            <label>Gender</label>
+                            <select class="form-control" name="gender">
+                                <option value="">Select</option>
+                                <option <?= ($p->gender == 'Male') ? 'selected' : '' ?>>Male</option>
+                                <option <?= ($p->gender == 'Female') ? 'selected' : '' ?>>Female</option>
+                                <option <?= ($p->gender == 'Other') ? 'selected' : '' ?>>Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Civil Status</label>
+                            <select class="form-control" name="civil_status">
+                                <option value="">Select</option>
+                                <option <?= ($p->civil_status == 'Single') ? 'selected' : '' ?>>Single</option>
+                                <option <?= ($p->civil_status == 'Married') ? 'selected' : '' ?>>Married</option>
+                                <option <?= ($p->civil_status == 'Widow') ? 'selected' : '' ?>>Widow</option>
+                            </select>
+                        </div>
+                       
+                    </div>
+
+                    <div class="form-group">
+                        <label>Address</label>
+                        <textarea class="form-control" name="address" rows="2"><?= $p->address ?></textarea>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group col-md-3">
                             <label>PhilHealth Number</label>
                             <input class="form-control" name="philhealth_number" value="<?= $p->philhealth_number ?>">
@@ -108,10 +149,16 @@
                             <label>Pag-IBIG Number</label>
                             <input class="form-control" name="pagibig_number" value="<?= $p->pagibig_number ?>">
                         </div>
+                        
+                            <div class="form-group col-md-3">
+                            <label>SSS Number</label>
+                            <input class="form-control" name="sss_number" value="<?= $p->sss_number ?>">
+                        </div>
                         <div class="form-group col-md-3">
                             <label>TIN Number</label>
                             <input class="form-control" name="tin_number" value="<?= $p->tin_number ?>">
                         </div>
+                        
                     </div>
                 </div>
 
@@ -119,11 +166,12 @@
                     <button type="submit" class="btn btn-success">Update</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
-
             </form>
         </div>
     </div>
 </div>
+
+
 
 
                                         <?php endforeach; ?>
@@ -140,8 +188,9 @@
     </div>
 </div>
 <!-- Add Modal -->
+<!-- Add Modal -->
 <div class="modal fade" id="addModal" tabindex="-1">
-    <div class="modal-dialog modal-lg"> <!-- wider modal -->
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form method="post" action="<?= base_url('personnel/store') ?>">
                 <div class="modal-header">
@@ -181,10 +230,37 @@
                     </div>
 
                     <div class="form-row">
-                        <div class="form-group col-md-3">
-                            <label>SSS Number</label>
-                            <input class="form-control" name="sss_number">
+                        <div class="form-group col-md-4">
+                            <label>Birthdate</label>
+                            <input type="date" class="form-control" name="birthdate">
                         </div>
+                        <div class="form-group col-md-4">
+                            <label>Gender</label>
+                            <select class="form-control" name="gender">
+                                <option value="">Select</option>
+                                <option>Male</option>
+                                <option>Female</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Civil Status</label>
+                            <select class="form-control" name="civil_status">
+                                <option value="">Select</option>
+                                <option>Single</option>
+                                <option>Married</option>
+                                <option>Widow</option>
+                            </select>
+                        </div>
+                        
+                    </div>
+
+                    <div class="form-group">
+                        <label>Address</label>
+                        <textarea class="form-control" name="address" rows="2"></textarea>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group col-md-3">
                             <label>PhilHealth Number</label>
                             <input class="form-control" name="philhealth_number">
@@ -192,6 +268,10 @@
                         <div class="form-group col-md-3">
                             <label>Pag-IBIG Number</label>
                             <input class="form-control" name="pagibig_number">
+                        </div>
+                        <div class="form-group col-md-3">
+                            <label>SSS Number</label>
+                            <input class="form-control" name="sss_number">
                         </div>
                         <div class="form-group col-md-3">
                             <label>TIN Number</label>
@@ -208,6 +288,7 @@
         </div>
     </div>
 </div>
+
 
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/datatables/jquery.dataTables.min.js"></script>

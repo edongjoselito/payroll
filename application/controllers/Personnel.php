@@ -10,18 +10,40 @@ class Personnel extends CI_Controller {
         $this->load->view('personnel_list', $data); // use updated view filename
     }
 
-    public function store() {
-        $this->Personnel_model->insert($this->input->post());
-        redirect('personnel/manage');
+public function store() {
+    $data = $this->input->post();
+    $data['settingsID'] = $this->session->userdata('settingsID');
+
+    if ($this->Personnel_model->insert($data)) {
+        $this->session->set_flashdata('success', 'Personnel successfully added.');
+    } else {
+        $this->session->set_flashdata('error', 'Failed to add personnel.');
     }
 
-    public function update() {
-        $this->Personnel_model->update($this->input->post());
-        redirect('personnel/manage');
+    redirect('personnel/manage');
+}
+
+public function update() {
+    $data = $this->input->post();
+    $data['settingsID'] = $this->session->userdata('settingsID');
+
+    if ($this->Personnel_model->update($data)) {
+        $this->session->set_flashdata('success', 'Personnel successfully updated.');
+    } else {
+        $this->session->set_flashdata('error', 'Failed to update personnel.');
     }
 
-    public function delete($personnelID) {
-        $this->Personnel_model->delete($personnelID);
-        redirect('personnel/manage');
+    redirect('personnel/manage');
+}
+
+public function delete($personnelID) {
+    if ($this->Personnel_model->delete($personnelID)) {
+        $this->session->set_flashdata('success', 'Personnel successfully deleted.');
+    } else {
+        $this->session->set_flashdata('error', 'Failed to delete personnel.');
     }
+
+    redirect('personnel/manage');
+}
+
 }

@@ -10,25 +10,43 @@ class Project extends CI_Controller
         $data['projects'] = $this->Project_model->getAll();
         $this->load->view('project_view', $data);
     }
-
-   public function store()
+public function store()
 {
     $data = $this->input->post();
-    $data['settingsID'] = $this->session->userdata('settingsID'); // get from session
-    $this->Project_model->insert($data);
-    redirect('Project/project_view');
+    $data['settingsID'] = $this->session->userdata('settingsID');
+
+    if ($this->Project_model->insert($data)) {
+        $this->session->set_flashdata('success', 'Project successfully added.');
+    } else {
+        $this->session->set_flashdata('error', 'Failed to add project.');
+    }
+
+    redirect('project/project_view');
 }
 
 public function update()
 {
     $data = $this->input->post();
-    $data['settingsID'] = $this->session->userdata('settingsID'); // update with current user
-    $this->Project_model->update($data);
-    redirect('Project/project_view');
+    $data['settingsID'] = $this->session->userdata('settingsID');
+
+    if ($this->Project_model->update($data)) {
+        $this->session->set_flashdata('success', 'Project successfully updated.');
+    } else {
+        $this->session->set_flashdata('error', 'Failed to update project.');
+    }
+
+    redirect('project/project_view');
 }
 
-    public function delete($id) {
-        $this->Project_model->delete($id);
-        redirect('project/project_view');
+public function delete($id)
+{
+    if ($this->Project_model->delete($id)) {
+        $this->session->set_flashdata('success', 'Project successfully deleted.');
+    } else {
+        $this->session->set_flashdata('error', 'Failed to delete project.');
     }
+
+    redirect('project/project_view');
+}
+
 }
