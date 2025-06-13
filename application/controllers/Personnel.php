@@ -20,8 +20,8 @@ class Personnel extends CI_Controller {
         redirect('personnel/manage');
     }
 
-    public function delete($id) {
-        $this->Personnel_model->delete($id);
+    public function delete($personnelID) {
+        $this->Personnel_model->delete($personnelID);
         redirect('personnel/manage');
     }
 }

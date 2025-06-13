@@ -12,7 +12,7 @@
             <div class="container-fluid">
 
                 <div class="page-title-box d-flex justify-content-between align-items-center">
-                    <h4 class="page-title">Personnel Accounts</h4>
+                    <h4 class="page-title">Personnel List</h4>
                     <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addModal">Add New</button>
                 </div>
                 <hr style="border:0; height:2px; background:linear-gradient(to right, #34A853, #FBBC05, #4285F4); border-radius:1px; margin:20px 0;"/>
@@ -47,13 +47,13 @@
                                                 <td><?= $p->pagibig_number ?></td>
                                                 <td><?= $p->tin_number ?></td>
                                                 <td>
-                                                    <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal<?= $p->id ?>">Edit</button>
-                                                    <a href="<?= base_url('personnel/delete/'.$p->id) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this record?')">Delete</a>
+                                                    <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal<?= $p->personnelID ?>">Edit</button>
+                                                    <a href="<?= base_url('personnel/delete/'.$p->personnelID) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this record?')">Delete</a>
                                                 </td>
                                             </tr>
 
                                            <!-- Edit Modal -->
-<div class="modal fade" id="editModal<?= $p->id ?>" tabindex="-1">
+<div class="modal fade" id="editModal<?= $p->personnelID ?>" tabindex="-1">
     <div class="modal-dialog modal-lg"> <!-- widened modal -->
         <div class="modal-content">
             <form method="post" action="<?= base_url('personnel/update') ?>">
@@ -63,7 +63,7 @@
                 </div>
 
                 <div class="modal-body">
-                    <input type="hidden" name="id" value="<?= $p->id ?>">
+                    <input type="hidden" name="personnelID" value="<?= $p->personnelID ?>">
 
                     <div class="form-row">
                         <div class="form-group col-md-4">
