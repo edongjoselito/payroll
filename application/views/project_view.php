@@ -57,7 +57,12 @@
                                                         <td><?= htmlspecialchars($proj->projectTitle) ?></td>
                                                         <!-- <td><?= date('M d, Y', strtotime($proj->created_at ?? 'now')) ?></td> -->
                                                     <td>
-                                                        <a href="<?= base_url('project/attendance/' . $proj->settingsID) ?>" class="btn btn-info btn-sm">Attendance</a>
+                                                        <a href="<?= base_url('project/attendance/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>" class="btn btn-info btn-sm">Attendance</a>
+
+                                                        <a href="<?= base_url('project/assign_personnel/' . $proj->settingsID . '/' . $proj->projectID) ?>" 
+                                                            class="btn btn-success btn-sm">
+                                                            Assign Personnel
+                                                            </a>
 
                                                         <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal<?= $proj->projectID ?>">
                                                             Edit

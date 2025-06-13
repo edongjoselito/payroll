@@ -32,6 +32,8 @@ class Project_model extends CI_Model
     public function getProjectBySettingsID($settingsID) {
     return $this->db->where('settingsID', $settingsID)->get('project')->result();
 }
+
+
 public function getAttendanceBySettingsID($settingsID, $date) {
     $this->db->where('settingsID', $settingsID);
     $this->db->where('attendance_date', $date);
@@ -55,6 +57,46 @@ public function save_batch_attendance($date, $data) {
             $this->db->insert('personnelattendance', $record);
         }
     }
+}
+
+
+
+
+   public function get_all_personnel()
+    {
+        return $this->db->get('personnel')->result();
+    }
+
+public function get_assignments_by_project($projectID)
+{
+    $this->db->select('ppa.ppID, ppa.projectID, ppa.settingsID, ppa.personnelID, 
+                       p.first_name, p.middle_name, p.last_name');
+    $this->db->from('project_personnel_assignment AS ppa');
+    $this->db->join('personnel AS p', 'ppa.personnelID = p.personnelID');
+    $this->db->where('ppa.projectID', $projectID);
+    return $this->db->get()->result();
+}
+
+
+
+    public function assign_personnel($data)
+    {
+        $this->db->insert('project_personnel_assignment', $data);
+    }
+
+    public function delete_assignment($ppID)
+    {
+        $this->db->delete('project_personnel_assignment', ['ppID' => $ppID]);
+    }
+
+    
+public function check_assignment_exists($settingsID, $projectID, $personnelID)
+{
+    $this->db->where('settingsID', $settingsID);
+    $this->db->where('projectID', $projectID);
+    $this->db->where('personnelID', $personnelID);
+    $query = $this->db->get('project_personnel_assignment');
+    return $query->num_rows() > 0;
 }
 
 

@@ -83,4 +83,59 @@ public function save_attendance() {
     redirect('project/attendance/'.$settingsID);
 }
 
+
+
+
+
+
+
+public function assign_personnel($settingsID, $projectID)
+{
+    $this->load->model('Project_model');
+
+    $data['settingsID'] = $settingsID;
+    $data['projectID'] = $projectID;
+    $data['personnel'] = $this->Project_model->get_all_personnel();
+    $data['assignments'] = $this->Project_model->get_assignments_by_project($projectID);
+    $data['project'] = $this->Project_model->getProjectBySettingsID($settingsID);
+
+
+    $this->load->view('assign_personnel', $data);
+}
+
+public function save_assignment()
+{
+    $this->load->model('Project_model');
+
+    $settingsID = $this->input->post('settingsID');
+    $projectID = $this->input->post('projectID');
+    $personnelID = $this->input->post('personnelID');
+
+    // Check if already assigned
+    $exists = $this->Project_model->check_assignment_exists($settingsID, $projectID, $personnelID);
+
+    if ($exists) {
+        $this->session->set_flashdata('error', 'This personnel is already assigned to this project.');
+    } else {
+        $data = [
+            'settingsID' => $settingsID,
+            'projectID' => $projectID,
+            'personnelID' => $personnelID
+        ];
+        $this->Project_model->assign_personnel($data);
+        $this->session->set_flashdata('success', 'Personnel assigned successfully.');
+    }
+
+    redirect('project/assign_personnel/' . $settingsID . '/' . $projectID);
+}
+
+public function delete_assignment($ppID, $settingsID, $projectID)
+{
+    $this->load->model('Project_model');
+    $this->Project_model->delete_assignment($ppID);
+    $this->session->set_flashdata('success', 'Assignment deleted.');
+    redirect("project/assign_personnel/$settingsID/$projectID");
+}
+
+
 }
