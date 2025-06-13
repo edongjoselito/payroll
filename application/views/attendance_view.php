@@ -97,7 +97,7 @@
                                             <thead class="table-light text-center">
                                                 <tr>
                                                     <th style="width: 60%;">👤 Personnel</th>
-                                                    <th style="width: 40%;">📌 Status</th>
+                                                    <th style="width: 40%;">📌 Attendance</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
