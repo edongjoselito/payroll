@@ -60,6 +60,23 @@
         <div class="content">
             <div class="container-fluid pt-2">
 
+            <?php if ($this->session->flashdata('success')): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <?= $this->session->flashdata('success') ?>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+<?php elseif ($this->session->flashdata('error')): ?>
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <?= $this->session->flashdata('error') ?>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+<?php endif; ?>
+
+
                 <!-- Page Header -->
                 <div class="row">
                     <div class="col-md-12">
@@ -76,6 +93,8 @@
                             <div class="card-body p-3">
                                 <form method="post" action="<?= base_url('project/save_attendance') ?>" id="attendanceFormTop">
                                     <input type="hidden" name="settingsID" value="<?= $settingsID ?>">
+                                    <input type="hidden" name="projectID" value="<?= $projectID ?>">
+
                                     <input type="hidden" name="attendance_date" value="<?= date('Y-m-d') ?>">
 
                                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -101,22 +120,25 @@
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php foreach ($personnels as $p): ?>
-                                                    <tr>
-                                                        <td><?= $p->first_name . ' ' . $p->last_name ?></td>
-                                                        <td class="text-center">
-                                                            <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                                                                <label class="btn btn-outline-success btn-sm">
-                                                                    <input type="radio" name="attendance_status[<?= $p->personnelID ?>]" value="Present" required> Present
-                                                                </label>
-                                                                
-                                                                <label class="btn btn-outline-danger btn-sm">
-                                                                    <input type="radio" name="attendance_status[<?= $p->personnelID ?>]" value="Absent"> Absent
-                                                                </label>
-                                                            </div>
-                                                        </td>
-                                                    </tr>
-                                                <?php endforeach; ?>
+                                              <?php foreach ($personnels as $p): ?>
+                                                <?php
+                                                    $saved_status = isset($attendance_records[$p->personnelID]) ? $attendance_records[$p->personnelID] : '';
+                                                ?>
+                                                <tr>
+                                                    <td><?= $p->first_name . ' ' . $p->last_name ?></td>
+                                                    <td class="text-center">
+                                                        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                                                            <label class="btn btn-outline-success btn-sm <?= $saved_status == 'Present' ? 'active' : '' ?>">
+                                                                <input type="radio" name="attendance_status[<?= $p->personnelID ?>]" value="Present" <?= $saved_status == 'Present' ? 'checked' : '' ?>> Present
+                                                            </label>
+                                                            <label class="btn btn-outline-danger btn-sm <?= $saved_status == 'Absent' ? 'active' : '' ?>">
+                                                                <input type="radio" name="attendance_status[<?= $p->personnelID ?>]" value="Absent" <?= $saved_status == 'Absent' ? 'checked' : '' ?>> Absent
+                                                            </label>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+
                                                 <?php if (empty($personnels)): ?>
                                                     <tr>
                                                         <td colspan="2" class="text-center text-muted">No personnel records found.</td>

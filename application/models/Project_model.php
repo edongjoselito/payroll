@@ -34,19 +34,32 @@ class Project_model extends CI_Model
 }
 
 
-public function getAttendanceBySettingsID($settingsID, $date) {
+public function getAttendanceBySettingsID($settingsID, $projectID, $date)
+{
     $this->db->where('settingsID', $settingsID);
+    $this->db->where('projectID', $projectID);
     $this->db->where('attendance_date', $date);
-    return $this->db->get('personnelattendance')->result();
+    $query = $this->db->get('personnelattendance');
+    
+    // Index by personnelID for fast lookup
+    $result = [];
+    foreach ($query->result() as $row) {
+        $result[$row->personnelID] = $row->attendance_status;
+    }
+
+    return $result;
 }
 
 
 
 
-public function save_batch_attendance($date, $data) {
+
+public function save_batch_attendance($date, $data)
+{
     foreach ($data as $record) {
-        // Check if already exists for this personnel + date
         $this->db->where('personnelID', $record['personnelID']);
+        $this->db->where('settingsID', $record['settingsID']);
+        $this->db->where('projectID', $record['projectID']);
         $this->db->where('attendance_date', $date);
         $existing = $this->db->get('personnelattendance')->row();
 
@@ -59,7 +72,15 @@ public function save_batch_attendance($date, $data) {
     }
 }
 
-
+public function getAssignedPersonnel($settingsID, $projectID)
+{
+    $this->db->select('p.personnelID, p.first_name, p.middle_name, p.last_name');
+    $this->db->from('project_personnel_assignment AS ppa');
+    $this->db->join('personnel AS p', 'ppa.personnelID = p.personnelID');
+    $this->db->where('ppa.settingsID', $settingsID);
+    $this->db->where('ppa.projectID', $projectID);
+    return $this->db->get()->result();
+}
 
 
    public function get_all_personnel()

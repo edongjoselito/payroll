@@ -53,16 +53,25 @@ public function delete($id)
 
 
 
-public function attendance($settingsID) {
+public function attendance($settingsID)
+{
+    $projectID = $this->input->get('pid');
+
     $data['settingsID'] = $settingsID;
-    $data['personnels'] = $this->Project_model->getPersonnelBySettingsID($settingsID);
-    $data['project'] = $this->Project_model->getProjectBySettingsID($settingsID);
+    $data['projectID'] = $projectID;
     $data['attendance_date'] = date('Y-m-d');
+    $data['personnels'] = $this->Project_model->getAssignedPersonnel($settingsID, $projectID);
+    $data['project'] = $this->Project_model->getProjectBySettingsID($settingsID);
+    $data['attendance_records'] = $this->Project_model->getAttendanceBySettingsID($settingsID, $projectID, date('Y-m-d'));
+
     $this->load->view('attendance_view', $data);
 }
 
-public function save_attendance() {
+
+public function save_attendance()
+{
     $settingsID         = $this->input->post('settingsID');
+    $projectID          = $this->input->post('projectID');
     $attendance_date    = $this->input->post('attendance_date');
     $attendance_status  = $this->input->post('attendance_status');
 
@@ -72,6 +81,7 @@ public function save_attendance() {
         $batchData[] = [
             'personnelID'       => $personnelID,
             'settingsID'        => $settingsID,
+            'projectID'         => $projectID,
             'attendance_date'   => $attendance_date,
             'attendance_status' => $status
         ];
@@ -80,8 +90,9 @@ public function save_attendance() {
     $this->Project_model->save_batch_attendance($attendance_date, $batchData);
 
     $this->session->set_flashdata('success', 'Attendance saved successfully.');
-    redirect('project/attendance/'.$settingsID);
+    redirect('project/attendance/' . $settingsID . '?pid=' . $projectID);
 }
+
 
 
 
