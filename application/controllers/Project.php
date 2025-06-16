@@ -50,6 +50,18 @@ public function delete($id)
 }
 
 
+public function attendance_list($settingsID)
+{
+    date_default_timezone_set('Asia/Manila');
+    $projectID = $this->input->get('pid');
+
+    $data['settingsID'] = $settingsID;
+    $data['projectID'] = $projectID;
+    $data['project'] = $this->Project_model->getProjectBySettingsID($settingsID);
+    $data['attendance_logs'] = $this->Project_model->getAttendanceLogs($settingsID, $projectID);
+
+    $this->load->view('attendance_list_view', $data);
+}
 
 
 

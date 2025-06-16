@@ -59,6 +59,11 @@
                                                     <td>
                                                         <a href="<?= base_url('project/attendance/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>" class="btn btn-info btn-sm">Attendance</a>
 
+                                                        <a href="<?= base_url('project/attendance_list/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>"
+                                                        class="btn btn-primary btn-sm">
+                                                            Attendance List
+                                                        </a>
+
                                                         <a href="<?= base_url('project/assign_personnel/' . $proj->settingsID . '/' . $proj->projectID) ?>" 
                                                             class="btn btn-success btn-sm">
                                                             Assign Personnel

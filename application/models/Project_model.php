@@ -120,6 +120,16 @@ public function check_assignment_exists($settingsID, $projectID, $personnelID)
 }
 
 
+public function getAttendanceLogs($settingsID, $projectID)
+{
+    $this->db->select('pa.*, p.first_name, p.last_name');
+    $this->db->from('personnelattendance AS pa');
+    $this->db->join('personnel AS p', 'pa.personnelID = p.personnelID');
+    $this->db->where('pa.settingsID', $settingsID);
+    $this->db->where('pa.projectID', $projectID);
+    $this->db->order_by('pa.attendance_date', 'DESC');
+    return $this->db->get()->result();
+}
 
 
 
