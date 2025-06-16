@@ -132,6 +132,32 @@ public function getAttendanceLogs($settingsID, $projectID)
 }
 
 
+   public function get_all_rates()
+    {
+        return $this->db->get('rate')->result();
+    }
+
+    public function get_rate($rateID)
+    {
+        return $this->db->get_where('rate', ['rateID' => $rateID])->row();
+    }
+
+    public function insert_rate($data)
+    {
+        return $this->db->insert('rate', $data);
+    }
+
+    public function update_rate($rateID, $data)
+    {
+        $this->db->where('rateID', $rateID);
+        return $this->db->update('rate', $data);
+    }
+
+    public function delete_rate($rateID)
+    {
+        return $this->db->delete('rate', ['rateID' => $rateID]);
+    }
+
 
 
 }

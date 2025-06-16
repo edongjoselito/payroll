@@ -59,6 +59,7 @@
                             <span class="menu-arrow"></span>
                         </a>
                         <ul class="nav-second-level" aria-expanded="false">
+                            <li><a href="<?= base_url(); ?>Rate/index">Company Rate</a></li>
                             <li><a href="#">Company Information</a></li>
                             <li><a href="#">Login Page Image</a></li>
                         </ul>
