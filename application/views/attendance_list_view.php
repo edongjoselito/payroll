@@ -54,13 +54,15 @@
                                 <div class="card-header bg-info py-3 text-white">
                                     <div class="card-widgets">
                                         <a href="javascript:;" data-toggle="reload"><i class="mdi mdi-refresh"></i></a>
-                                        <a data-toggle="collapse" href="#cardCollpase3" role="button" aria-expanded="false" aria-controls="cardCollpase2"><i class="mdi mdi-minus"></i></a>
-                                        <!-- <a href="#" data-toggle="remove"><i class="mdi mdi-close"></i></a> -->
+                                        <!-- <a data-toggle="collapse" href="#cardCollpase3" role="button" aria-expanded="false" aria-controls="cardCollpase2"><i class="mdi mdi-minus"></i></a> -->
+                    <a href="<?= base_url('project/project_view') ?>" class="btn btn-secondary">Back</a>
+
                                     </div>
                                     <h5 class="card-title mb-0 text-white">Attendance Logs <br>
                                    <small> <?php echo $project[0]->projectTitle; ?></small>
                                 </h5>
                                 </div>
+                                
                                 <?php if (empty($attendance_logs)): ?>
                     <div class="alert alert-info text-center">No attendance records found.</div>
                 <?php else: ?>
@@ -111,9 +113,7 @@
                 <?php endif; ?>
 
                 <!-- Back Button -->
-                <div class="mt-4">
-                    <a href="<?= base_url('project/project_view') ?>" class="btn btn-secondary">← Back</a>
-                </div>
+             
 
             </div>
         </div>
