@@ -55,6 +55,8 @@ public function delete($id)
 
 public function attendance($settingsID)
 {
+        date_default_timezone_set('Asia/Manila'); // Add this line
+
     $projectID = $this->input->get('pid');
 
     $data['settingsID'] = $settingsID;
@@ -74,18 +76,24 @@ public function save_attendance()
     $projectID          = $this->input->post('projectID');
     $attendance_date    = $this->input->post('attendance_date');
     $attendance_status  = $this->input->post('attendance_status');
+    $work_duration = $this->input->post('work_duration');
+
 
     $batchData = [];
 
-    foreach ($attendance_status as $personnelID => $status) {
-        $batchData[] = [
-            'personnelID'       => $personnelID,
-            'settingsID'        => $settingsID,
-            'projectID'         => $projectID,
-            'attendance_date'   => $attendance_date,
-            'attendance_status' => $status
-        ];
-    }
+  foreach ($attendance_status as $personnelID => $status) {
+    $duration = isset($work_duration[$personnelID]) ? $work_duration[$personnelID] : null;
+
+    $batchData[] = [
+        'personnelID'       => $personnelID,
+        'settingsID'        => $settingsID,
+        'projectID'         => $projectID,
+        'attendance_date'   => $attendance_date,
+        'attendance_status' => $status,
+        'workDuration'      => $duration
+    ];
+}
+
 
     $this->Project_model->save_batch_attendance($attendance_date, $batchData);
 

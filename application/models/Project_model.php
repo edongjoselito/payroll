@@ -43,10 +43,9 @@ public function getAttendanceBySettingsID($settingsID, $projectID, $date)
     
     // Index by personnelID for fast lookup
     $result = [];
-    foreach ($query->result() as $row) {
-        $result[$row->personnelID] = $row->attendance_status;
-    }
-
+foreach ($query->result() as $row) {
+    $result[$row->personnelID] = $row; // store full object with status AND workDuration
+}
     return $result;
 }
 

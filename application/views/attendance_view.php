@@ -122,20 +122,41 @@
                                             <tbody>
                                               <?php foreach ($personnels as $p): ?>
                                                 <?php
-                                                    $saved_status = isset($attendance_records[$p->personnelID]) ? $attendance_records[$p->personnelID] : '';
+$saved_row = isset($attendance_records[$p->personnelID]) ? $attendance_records[$p->personnelID] : null;
+$saved_status = $saved_row ? $saved_row->attendance_status : '';
+$saved_duration = $saved_row ? $saved_row->workDuration : '';
                                                 ?>
                                                 <tr>
                                                     <td><?= $p->first_name . ' ' . $p->last_name ?></td>
-                                                    <td class="text-center">
-                                                        <div class="btn-group btn-group-toggle" data-toggle="buttons">
-                                                            <label class="btn btn-outline-success btn-sm <?= $saved_status == 'Present' ? 'active' : '' ?>">
-                                                                <input type="radio" name="attendance_status[<?= $p->personnelID ?>]" value="Present" <?= $saved_status == 'Present' ? 'checked' : '' ?>> Present
-                                                            </label>
-                                                            <label class="btn btn-outline-danger btn-sm <?= $saved_status == 'Absent' ? 'active' : '' ?>">
-                                                                <input type="radio" name="attendance_status[<?= $p->personnelID ?>]" value="Absent" <?= $saved_status == 'Absent' ? 'checked' : '' ?>> Absent
-                                                            </label>
-                                                        </div>
-                                                    </td>
+                                         <td class="text-center">
+    <div class="d-flex justify-content-center align-items-center gap-2">
+        <div class="btn-group btn-group-toggle me-2" data-toggle="buttons">
+            <label class="btn btn-outline-success btn-sm <?= $saved_status == 'Present' ? 'active' : '' ?>">
+                <input type="radio" name="attendance_status[<?= $p->personnelID ?>]" value="Present"
+                       <?= $saved_status == 'Present' ? 'checked' : '' ?>
+                       onchange="toggleWorkDuration(<?= $p->personnelID ?>, this.value)"> Present
+            </label>
+            <label class="btn btn-outline-danger btn-sm <?= $saved_status == 'Absent' ? 'active' : '' ?>">
+                <input type="radio" name="attendance_status[<?= $p->personnelID ?>]" value="Absent"
+                       <?= $saved_status == 'Absent' ? 'checked' : '' ?>
+                       onchange="toggleWorkDuration(<?= $p->personnelID ?>, this.value)"> Absent
+            </label>
+        </div>
+
+        <div class="d-flex flex-column align-items-start">
+           <input type="text" step="0.1" min="0" placeholder="hrs"
+       name="work_duration[<?= $p->personnelID ?>]"
+       id="workDuration<?= $p->personnelID ?>"
+       class="form-control form-control-sm"
+       style="max-width: 130px; <?= $saved_status == 'Present' ? '' : 'display: none;' ?>"
+       value="<?= $saved_duration ?>">
+          
+        </div>
+    </div>
+</td>
+
+
+
                                                 </tr>
                                             <?php endforeach; ?>
 
@@ -169,6 +190,19 @@
 <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/bootstrap-datepicker/bootstrap-datepicker.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/sweetalert2/sweetalert2.min.js"></script>
+
+
+<script>
+function toggleWorkDuration(id, status) {
+    const input = document.getElementById('workDuration' + id);
+    if (status === 'Present') {
+        input.style.display = 'block';
+    } else {
+        input.style.display = 'none';
+        input.value = '';
+    }
+}
+</script>
 
 </body>
 </html>
