@@ -160,4 +160,33 @@ public function getAttendanceLogs($settingsID, $projectID)
 
 
 
+    public function getAttendanceByDateRange($settingsID, $projectID, $start, $end)
+{
+    $this->db->select('pa.*, p.first_name, p.last_name, p.rateType');
+    $this->db->from('personnelattendance pa');
+    $this->db->join('personnel p', 'pa.personnelID = p.personnelID');
+    $this->db->where('pa.settingsID', $settingsID);
+    $this->db->where('pa.projectID', $projectID);
+    $this->db->where('pa.attendance_date >=', $start);
+    $this->db->where('pa.attendance_date <=', $end);
+    $this->db->order_by('pa.attendance_date', 'ASC');
+
+    return $this->db->get()->result();
+}
+
+public function getPayrollAttendanceByDateRange($settingsID, $projectID, $start, $end)
+{
+    $this->db->select('pa.*, p.first_name, p.last_name, p.rate, p.rateType, p.position');
+    $this->db->from('personnelattendance pa');
+    $this->db->join('personnel p', 'pa.personnelID = p.personnelID');
+    $this->db->where('pa.settingsID', $settingsID);
+    $this->db->where('pa.projectID', $projectID);
+    $this->db->where('pa.attendance_date >=', $start);
+    $this->db->where('pa.attendance_date <=', $end);
+    $this->db->order_by('p.last_name ASC');
+    $this->db->order_by('pa.attendance_date ASC');
+    
+    return $this->db->get()->result();
+}
+
 }

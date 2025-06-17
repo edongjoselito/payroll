@@ -68,6 +68,10 @@
                                                             class="btn btn-success btn-sm">
                                                             Assign Personnel
                                                             </a>
+                                                            <a href="<?= base_url('project/payroll_report/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>" class="btn btn-dark btn-sm">
+                                                                Payroll Report
+                                                            </a>
+
 
                                                         <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal<?= $proj->projectID ?>">
                                                             Edit

@@ -141,20 +141,27 @@
                     </div>
 
                     <div class="form-row">
+                         <div class="form-group col-md-3">
+                           <label>Rate Type</label>
+                            <select name="rateType" class="form-control" required>
+                                <option value="Hour" <?= $p->rateType == 'Hour' ? 'selected' : '' ?>>Hour</option>
+                                <option value="Day" <?= $p->rateType == 'Day' ? 'selected' : '' ?>>Day</option>
+                            </select>
+                        </div>
                         <div class="form-group col-md-3">
                             <label>PhilHealth Number</label>
                             <input class="form-control" name="philhealth_number" value="<?= $p->philhealth_number ?>">
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-2">
                             <label>Pag-IBIG Number</label>
                             <input class="form-control" name="pagibig_number" value="<?= $p->pagibig_number ?>">
                         </div>
                         
-                            <div class="form-group col-md-3">
+                            <div class="form-group col-md-2">
                             <label>SSS Number</label>
                             <input class="form-control" name="sss_number" value="<?= $p->sss_number ?>">
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-2">
                             <label>TIN Number</label>
                             <input class="form-control" name="tin_number" value="<?= $p->tin_number ?>">
                         </div>
@@ -261,22 +268,34 @@
                     </div>
 
                     <div class="form-row">
+
+                     <div class="form-group col-md-3">
+                               <label>Rate Type</label>
+                                <select name="rateType" class="form-control" required>
+                                    <option value="">-- Select Rate Type --</option>
+                                    <option value="Hour">Hour</option>
+                                    <option value="Day">Day</option>
+                                </select>
+                        </div>
+
                         <div class="form-group col-md-3">
                             <label>PhilHealth Number</label>
                             <input class="form-control" name="philhealth_number">
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-2">
                             <label>Pag-IBIG Number</label>
                             <input class="form-control" name="pagibig_number">
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-2">
                             <label>SSS Number</label>
                             <input class="form-control" name="sss_number">
                         </div>
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-2">
                             <label>TIN Number</label>
                             <input class="form-control" name="tin_number">
                         </div>
+                       
+
                     </div>
                 </div>
 

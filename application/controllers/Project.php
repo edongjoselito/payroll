@@ -169,4 +169,75 @@ public function delete_assignment($ppID, $settingsID, $projectID)
 }
 
 
+public function attendance_range($settingsID)
+{
+    $projectID = $this->input->get('pid');
+    $start = $this->input->get('start');
+    $end = $this->input->get('end');
+
+    $this->load->model('Project_model');
+
+    $data['settingsID'] = $settingsID;
+    $data['projectID'] = $projectID;
+    $data['project'] = $this->Project_model->getProjectBySettingsID($settingsID);
+    $data['start'] = $start;
+    $data['end'] = $end;
+
+    if ($start && $end) {
+        $data['attendance_logs'] = $this->Project_model->getAttendanceByDateRange($settingsID, $projectID, $start, $end);
+    } else {
+        $data['attendance_logs'] = [];
+    }
+
+    $this->load->view('attendance_range_view', $data);
+}
+
+public function payroll_report($settingsID)
+{
+    $projectID = $this->input->get('pid');
+    $start = $this->input->get('start');
+    $end = $this->input->get('end');
+
+    $this->load->model('Project_model');
+
+    $data['settingsID'] = $settingsID;
+    $data['projectID'] = $projectID;
+    $data['project'] = $this->Project_model->getProjectBySettingsID($settingsID);
+    $data['start'] = $start;
+    $data['end'] = $end;
+
+    $data['personnel_logs'] = [];
+
+    if (!empty($start) && !empty($end)) {
+        $logs = $this->Project_model->getPayrollAttendanceByDateRange($settingsID, $projectID, $start, $end);
+
+        // Group data as before...
+        $grouped = [];
+        foreach ($logs as $log) {
+            $pid = $log->personnelID;
+            if (!isset($grouped[$pid])) {
+                $grouped[$pid] = [
+                    'name' => $log->first_name . ' ' . $log->last_name,
+                    'position' => $log->position,
+                    'rate' => $log->rate,
+                    'rateType' => $log->rateType,
+                    'attendance' => [],
+                    'total_days' => 0,
+                    'total_ot' => 0,
+                ];
+            }
+
+            $grouped[$pid]['attendance'][$log->attendance_date] = $log;
+            if ($log->attendance_status == 'Present') {
+                $grouped[$pid]['total_days']++;
+                $grouped[$pid]['total_ot'] += (float) $log->workDurationOT ?? 0;
+            }
+        }
+
+        $data['personnel_logs'] = $grouped;
+    }
+
+    $this->load->view('payroll_report_view', $data);
+}
+
 }
