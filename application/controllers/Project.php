@@ -195,47 +195,23 @@ public function attendance_range($settingsID)
 public function payroll_report($settingsID)
 {
     $projectID = $this->input->get('pid');
-    $start = $this->input->get('start');
-    $end = $this->input->get('end');
+    $start     = $this->input->get('start');
+    $end       = $this->input->get('end');
 
     $this->load->model('Project_model');
 
+    if (empty($start) || empty($end)) {
+        $this->session->set_flashdata('error', 'Start and end dates are required.');
+        redirect('project/project_view');
+        return;
+    }
+
     $data['settingsID'] = $settingsID;
     $data['projectID'] = $projectID;
-    $data['project'] = $this->Project_model->getProjectBySettingsID($settingsID);
     $data['start'] = $start;
     $data['end'] = $end;
-
-    $data['personnel_logs'] = [];
-
-    if (!empty($start) && !empty($end)) {
-        $logs = $this->Project_model->getPayrollAttendanceByDateRange($settingsID, $projectID, $start, $end);
-
-        // Group data as before...
-        $grouped = [];
-        foreach ($logs as $log) {
-            $pid = $log->personnelID;
-            if (!isset($grouped[$pid])) {
-                $grouped[$pid] = [
-                    'name' => $log->first_name . ' ' . $log->last_name,
-                    'position' => $log->position,
-                    'rate' => $log->rate,
-                    'rateType' => $log->rateType,
-                    'attendance' => [],
-                    'total_days' => 0,
-                    'total_ot' => 0,
-                ];
-            }
-
-            $grouped[$pid]['attendance'][$log->attendance_date] = $log;
-            if ($log->attendance_status == 'Present') {
-                $grouped[$pid]['total_days']++;
-                $grouped[$pid]['total_ot'] += (float) $log->workDurationOT ?? 0;
-            }
-        }
-
-        $data['personnel_logs'] = $grouped;
-    }
+    $data['project'] = $this->Project_model->getProjectBySettingsID($settingsID);
+    $data['attendance_data'] = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end);
 
     $this->load->view('payroll_report_view', $data);
 }
