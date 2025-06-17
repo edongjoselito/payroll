@@ -173,29 +173,39 @@ public function getAttendanceLogs($settingsID, $projectID)
 
     return $this->db->get()->result();
 }
-
 public function getPayrollData($settingsID, $projectID, $start, $end)
 {
-    $this->db->select('
-        p.personnelID, 
-        p.first_name, 
-        p.last_name, 
-        p.position, 
-        p.rateType, 
-        r.rateAmount
-    ');
-    $this->db->from('personnel p');
-    $this->db->join('personnelattendance pa', 'pa.personnelID = p.personnelID', 'left');
-    $this->db->join('rate r', 'r.rateType = p.rateType', 'left'); // Join rate table by rateType
-    $this->db->where('pa.settingsID', $settingsID);
-    $this->db->where('pa.projectID', $projectID);
-    $this->db->where('pa.attendance_date >=', $start);
-    $this->db->where('pa.attendance_date <=', $end);
-    $this->db->group_by('p.personnelID');
+    // Step 1: Get assigned personnel for this project
+    $this->db->select('p.personnelID, p.first_name, p.last_name, p.position, p.rateType, r.rateAmount');
+    $this->db->from('project_personnel_assignment a');
+    $this->db->join('personnel p', 'p.personnelID = a.personnelID');
+    $this->db->join('rate r', 'r.rateType = p.rateType', 'left');
+    $this->db->where('a.settingsID', $settingsID);
+    $this->db->where('a.projectID', $projectID);
     $this->db->order_by('p.last_name', 'ASC');
+    $assignedPersonnel = $this->db->get()->result();
 
-    return $this->db->get()->result();
+    // Step 2: Get all attendance logs within date range
+    $this->db->select('personnelID, attendance_date, attendance_status, workDuration');
+    $this->db->from('personnelattendance');
+    $this->db->where('settingsID', $settingsID);
+    $this->db->where('projectID', $projectID);
+    $this->db->where('attendance_date >=', $start);
+    $this->db->where('attendance_date <=', $end);
+    $logs = $this->db->get()->result();
+
+    // Step 3: Group attendance by personnelID and date
+    $logMap = [];
+    foreach ($logs as $log) {
+        $logMap[$log->personnelID][$log->attendance_date] = $log;
+    }
+
+    // Step 4: Attach attendance to each assigned personnel
+    foreach ($assignedPersonnel as &$p) {
+        $p->logs = $logMap[$p->personnelID] ?? [];
+    }
+
+    return $assignedPersonnel;
 }
-
 
 }

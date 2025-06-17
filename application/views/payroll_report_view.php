@@ -54,25 +54,64 @@
 
 <table class="payroll-table">
     <thead>
-        <tr>
-            <th>L/N</th>
-            <th>NAME</th>
-            <th>POSITION</th>
-            <th>RATE</th>
-            <th>Rate / Hour</th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php $ln = 1; foreach ($attendance_data as $row): ?>
-        <tr>
-            <td><?= $ln++ ?></td>
-            <td><?= htmlspecialchars($row->first_name . ' ' . $row->last_name) ?></td>
-            <td><?= htmlspecialchars($row->position) ?></td>
-            <td><?= $row->rateType === 'Day' ? number_format($row->rateAmount, 2) : '' ?></td>
-            <td><?= $row->rateType === 'Hour' ? number_format($row->rateAmount, 2) : '' ?></td>
-        </tr>
-        <?php endforeach; ?>
-    </tbody>
+    <tr>
+        <th rowspan="2">L/N</th>
+        <th rowspan="2">NAME</th>
+        <th rowspan="2">POSITION</th>
+        <th rowspan="2">RATE</th>
+        <th rowspan="2">Rate / Hour</th>
+        <?php
+        $startDate = strtotime($start);
+        $endDate = strtotime($end);
+        while ($startDate <= $endDate):
+            echo '<th>' . date('M d', $startDate) . '</th>';
+            $startDate = strtotime('+1 day', $startDate);
+        endwhile;
+        ?>
+    </tr>
+    <tr>
+        <?php
+        $startDate = strtotime($start);
+        $endDate = strtotime($end);
+        while ($startDate <= $endDate):
+            echo '<th>' . date('l', $startDate) . '</th>';
+            $startDate = strtotime('+1 day', $startDate);
+        endwhile;
+        ?>
+    </tr>
+</thead>
+
+ <tbody>
+<?php $ln = 1; foreach ($attendance_data as $row): ?>
+    <tr>
+        <td><?= $ln++ ?></td>
+        <td><?= htmlspecialchars($row->first_name . ' ' . $row->last_name) ?></td>
+        <td><?= htmlspecialchars($row->position) ?></td>
+        <td><?= $row->rateType === 'Day' ? number_format($row->rateAmount, 2) : '' ?></td>
+        <td><?= $row->rateType === 'Hour' ? number_format($row->rateAmount, 2) : '' ?></td>
+
+        <?php
+        $startDate = strtotime($start);
+        $endDate = strtotime($end);
+        while ($startDate <= $endDate):
+            $curDate = date('Y-m-d', $startDate);
+            $log = $row->logs[$curDate] ?? null;
+
+            if ($log) {
+                echo $log->attendance_status === 'Present'
+                    ? "<td>{$log->workDuration}</td>"
+                    : "<td class='absent'>Absent</td>";
+            } else {
+                echo "<td>-</td>";
+            }
+
+            $startDate = strtotime('+1 day', $startDate);
+        endwhile;
+        ?>
+    </tr>
+<?php endforeach; ?>
+</tbody>
+
 </table>
 
 <div class="signature">
