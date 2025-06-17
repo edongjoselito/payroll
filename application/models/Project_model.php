@@ -51,6 +51,14 @@ foreach ($query->result() as $row) {
 
 
 
+public function getProjectDetails($settingsID, $projectID)
+{
+    return $this->db
+        ->where('settingsID', $settingsID)
+        ->where('projectID', $projectID)
+        ->get('project')
+        ->row();  // single result
+}
 
 
 public function save_batch_attendance($date, $data)

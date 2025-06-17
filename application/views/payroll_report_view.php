@@ -47,13 +47,14 @@
 </head>
 <body>
 <div class="header">
-    <h2>PROJECT: <?= $project[0]->projectTitle ?? 'N/A' ?></h2>
-    <p>LOCATION: <?= $project[0]->location ?? 'Unknown' ?></p>
+    <h2>PROJECT: <?= $project->projectTitle ?? 'N/A' ?></h2>
+    <p>LOCATION: <?= $project->projectLocation ?? 'Unknown' ?></p>
     <p>PERIOD: <?= date('F d, Y', strtotime($start)) ?> - <?= date('F d, Y', strtotime($end)) ?></p>
 </div>
 
+
 <table class="payroll-table">
-    <thead>
+  <thead>
     <tr>
         <th rowspan="2">L/N</th>
         <th rowspan="2">NAME</th>
@@ -68,6 +69,10 @@
             $startDate = strtotime('+1 day', $startDate);
         endwhile;
         ?>
+        <th colspan="2">TOTAL TIME/DAYS</th>
+        <th rowspan="2">Total Amount</th>
+        <th rowspan="2">signature</th>
+
     </tr>
     <tr>
         <?php
@@ -78,10 +83,12 @@
             $startDate = strtotime('+1 day', $startDate);
         endwhile;
         ?>
+        <th>Time</th>
+        <th>Days</th>
     </tr>
 </thead>
 
- <tbody>
+<tbody>
 <?php $ln = 1; foreach ($attendance_data as $row): ?>
     <tr>
         <td><?= $ln++ ?></td>
@@ -91,27 +98,52 @@
         <td><?= $row->rateType === 'Hour' ? number_format($row->rateAmount, 2) : '' ?></td>
 
         <?php
+        $totalMinutes = 0;
+        $totalDays = 0;
         $startDate = strtotime($start);
         $endDate = strtotime($end);
+
         while ($startDate <= $endDate):
             $curDate = date('Y-m-d', $startDate);
             $log = $row->logs[$curDate] ?? null;
 
-            if ($log) {
-                echo $log->attendance_status === 'Present'
-                    ? "<td>{$log->workDuration}</td>"
-                    : "<td class='absent'>Absent</td>";
+            if ($log && $log->attendance_status === 'Present') {
+                $parts = explode(':', $log->workDuration);
+                $hours = isset($parts[0]) ? (int)$parts[0] : 0;
+                $minutes = isset($parts[1]) ? (int)$parts[1] : 0;
+                $totalMinutes += ($hours * 60) + $minutes;
+                $totalDays++;
+
+                echo "<td>{$log->workDuration}</td>";
+            } elseif ($log && $log->attendance_status === 'Absent') {
+                echo "<td class='absent'>Absent</td>";
             } else {
                 echo "<td>-</td>";
             }
 
             $startDate = strtotime('+1 day', $startDate);
         endwhile;
+
+        $totalHours = floor($totalMinutes / 60);
+        $remainingMinutes = $totalMinutes % 60;
+        $totalTimeFormatted = $totalHours . ':' . str_pad($remainingMinutes, 2, '0', STR_PAD_LEFT);
+
+        // Calculate total amount
+        if ($row->rateType === 'Hour') {
+            $amount = ($totalMinutes / 60) * $row->rateAmount;
+        } elseif ($row->rateType === 'Day') {
+            $amount = $totalDays * $row->rateAmount;
+        } else {
+            $amount = 0;
+        }
         ?>
+        <td><?= $totalTimeFormatted ?></td>
+        <td><?= $totalDays ?></td>
+        <td><?= number_format($amount, 2) ?></td>
+        <td></td>
     </tr>
 <?php endforeach; ?>
 </tbody>
-
 </table>
 
 <div class="signature">

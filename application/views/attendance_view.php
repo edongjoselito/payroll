@@ -144,11 +144,11 @@ $saved_duration = $saved_row ? $saved_row->workDuration : '';
         </div>
 
         <div class="d-flex flex-column align-items-start">
-           <input type="text" step="0.1" min="0" placeholder="hrs"
+           <input type="text" step="0.1" min="0" placeholder="Time Format  8:30"
        name="work_duration[<?= $p->personnelID ?>]"
        id="workDuration<?= $p->personnelID ?>"
        class="form-control form-control-sm"
-       style="max-width: 130px; <?= $saved_status == 'Present' ? '' : 'display: none;' ?>"
+       style="max-width: 150px; <?= $saved_status == 'Present' ? '' : 'display: none;' ?>"
        value="<?= $saved_duration ?>">
           
         </div>

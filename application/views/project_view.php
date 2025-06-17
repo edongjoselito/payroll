@@ -46,6 +46,7 @@
                                     <thead>
                                         <tr>
                                             <th>Project Title</th>
+                                            <th>Location</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -56,6 +57,7 @@
                                             <?php foreach ($projects as $proj) : ?>
                                                 <tr>
                                                     <td><?= htmlspecialchars($proj->projectTitle) ?></td>
+                                                    <td><?= htmlspecialchars($proj->projectLocation) ?></td>
                                                     <td>
                                                         <a href="<?= base_url('project/attendance/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>" class="btn btn-info btn-sm">Attendance</a>
                                                         <a href="<?= base_url('project/attendance_list/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>" class="btn btn-primary btn-sm">Attendance List</a>
@@ -75,7 +77,7 @@
                                                 <div class="modal fade" id="payrollModal<?= $proj->projectID ?>" tabindex="-1" role="dialog" aria-labelledby="payrollModalLabel<?= $proj->projectID ?>" aria-hidden="true">
                                                   <div class="modal-dialog mt-5" role="document">
 
-                                                    <form method="get" action="<?= base_url('project/payroll_report/' . $proj->settingsID) ?>">
+                                        <form method="get" action="<?= base_url('project/payroll_report/' . $proj->settingsID) ?>" target="_blank">
                                                       <input type="hidden" name="pid" value="<?= $proj->projectID ?>">
                                                       <div class="modal-content">
                                                         <div class="modal-header">
@@ -116,6 +118,9 @@
                                                                     <input type="hidden" name="projectID" value="<?= $proj->projectID ?>">
                                                                     <input type="text" name="projectTitle" class="form-control" value="<?= htmlspecialchars($proj->projectTitle) ?>" required>
                                                                 </div>
+                                                                 <div class="modal-body">
+                                                                    <input type="text" name="projectLocation" class="form-control" value="<?= htmlspecialchars($proj->projectLocation) ?>" required>
+                                                                </div>
                                                                 <div class="modal-footer">
                                                                     <button type="submit" class="btn btn-success">Update</button>
                                                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -149,6 +154,9 @@
                     </div>
                     <div class="modal-body">
                         <input type="text" name="projectTitle" class="form-control" placeholder="Project Title" required>
+                    </div>
+                     <div class="modal-body">
+                        <input type="text" name="projectLocation" class="form-control" placeholder="Project Location" required>
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-success">Save</button>

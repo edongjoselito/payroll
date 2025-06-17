@@ -210,7 +210,7 @@ public function payroll_report($settingsID)
     $data['projectID'] = $projectID;
     $data['start'] = $start;
     $data['end'] = $end;
-    $data['project'] = $this->Project_model->getProjectBySettingsID($settingsID);
+$data['project'] = $this->Project_model->getProjectDetails($settingsID, $projectID);
     $data['attendance_data'] = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end);
 
     $this->load->view('payroll_report_view', $data);
