@@ -135,30 +135,33 @@
                        
                     </div>
 
-             
+                    <div class="form-group">
+                        <label>Address</label>
+                        <textarea class="form-control" name="address" rows="2"><?= $p->address ?></textarea>
+                    </div>
 
-                      <div class="form-row">
+                     <div class="form-row">
 
-                     <div class="form-group col-md-6">
-                               <label>Address</label>
-                                <input type="text" class="form-control" name="address" value="<?= $p->address ?>" required>
-                        </div>
-                         <div class="form-group col-md-3">
+               
+                         <div class="form-group col-md-4">
                                <label>Position</label>
                                 <input type="text" class="form-control" name="position" value="<?= $p->position ?>" required>
                         </div>
-                           <div class="form-group col-md-3">
-                               <label>Rate Type</label>
+                           <div class="form-group col-md-4">
+                               <label>Salary Type</label>
                             <select name="rateType" class="form-control" required>
-                                <option value="Hour" <?= $p->rateType == 'Hour' ? 'selected' : '' ?>>Hour</option>
-                                <option value="Day" <?= $p->rateType == 'Day' ? 'selected' : '' ?>>Day</option>
+                                <option value="Hour" <?= $p->rateType == 'Hour' ? 'selected' : '' ?>>Per Hour</option>
+                                <option value="Day" <?= $p->rateType == 'Day' ? 'selected' : '' ?>>Per Day</option>
+                                <option value="Month" <?= $p->rateType == 'Month' ? 'selected' : '' ?>>Per Month</option>
                             </select>
                         </div>
-
+                            <div class="form-group col-md-4">
+                               <label>Salary</label>
+                                <input type="text" class="form-control" name="rateAmount" value="<?= $p->rateAmount ?>" required>
+                        </div>
                         </div>
 
                     <div class="form-row">
-                       
                         <div class="form-group col-md-3">
                             <label>PhilHealth Number</label>
                             <input class="form-control" name="philhealth_number" value="<?= $p->philhealth_number ?>">
@@ -273,32 +276,35 @@
                         
                     </div>
 
-             
-                        <div class="form-row">
+                    <div class="form-group">
+                        <label>Address</label>
+                        <textarea class="form-control" name="address" rows="2"></textarea>
+                    </div>
 
-                     <div class="form-group col-md-6">
-                               <label>Address</label>
-                                <input type="text" class="form-control" name="address" required>
-                        </div>
-                         <div class="form-group col-md-3">
+                    
+                      <div class="form-row">
+
+               
+                         <div class="form-group col-md-4">
                                <label>Position</label>
                                 <input type="text" class="form-control" name="position" required>
                         </div>
-                           <div class="form-group col-md-3">
-                               <label>Rate Type</label>
-                                <select name="rateType" class="form-control" required>
-                                    <option value="">-- Select Rate Type --</option>
-                                    <option value="Hour">Hour</option>
-                                    <option value="Day">Day</option>
-                                </select>
-                        </div>
+                           <div class="form-group col-md-4">
+                               <label>Salary Type</label>
+                            <select name="rateType" class="form-control" required>
+                                <option value="Hour">Per Hour</option>
+                                <option value="Day">Per Day</option>
+                                <option value="Month">Per Month</option>
 
+                            </select>
+                        </div>
+                            <div class="form-group col-md-4">
+                               <label>Salary</label>
+                                <input type="text" class="form-control" name="rateAmount" required>
+                        </div>
                         </div>
 
                     <div class="form-row">
-
-                  
-
                         <div class="form-group col-md-3">
                             <label>PhilHealth Number</label>
                             <input class="form-control" name="philhealth_number">
@@ -315,8 +321,6 @@
                             <label>TIN Number</label>
                             <input class="form-control" name="tin_number">
                         </div>
-                       
-
                     </div>
                 </div>
 
