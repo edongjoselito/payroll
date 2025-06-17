@@ -96,6 +96,16 @@
                                                             <input type="date" name="end" class="form-control" required>
                                                           </div>
                                                         </div>
+                                                        <div class="form-group">
+                                                        <label>Salary Type</label>
+                                                        <select name="rateType" class="form-control">
+                                                            <option value="" disabled selected>Select salary type</option>
+                                                            <option value="Hour">Per Hour</option>
+                                                            <option value="Day">Per Day</option>
+                                                            <option value="Month">Per Month</option>
+                                                        </select>
+                                                        </div>
+
                                                         <div class="modal-footer">
                                                           <button type="submit" class="btn btn-primary">Generate</button>
                                                           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>

@@ -184,15 +184,18 @@ public function getAttendanceLogs($settingsID, $projectID)
 
 
 
-
-public function getPayrollData($settingsID, $projectID, $start, $end)
+public function getPayrollData($settingsID, $projectID, $start, $end, $rateType = null)
 {
-    // Step 1: Get assigned personnel with rate info from personnel table directly
     $this->db->select('p.personnelID, p.first_name, p.last_name, p.position, p.rateType, p.rateAmount');
     $this->db->from('project_personnel_assignment a');
     $this->db->join('personnel p', 'p.personnelID = a.personnelID');
     $this->db->where('a.settingsID', $settingsID);
     $this->db->where('a.projectID', $projectID);
+
+    if (!empty($rateType)) {
+        $this->db->where('p.rateType', $rateType);
+    }
+
     $this->db->order_by('p.last_name', 'ASC');
     $assignedPersonnel = $this->db->get()->result();
 

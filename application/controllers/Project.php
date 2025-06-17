@@ -197,6 +197,8 @@ public function payroll_report($settingsID)
     $projectID = $this->input->get('pid');
     $start     = $this->input->get('start');
     $end       = $this->input->get('end');
+    $rateType = $this->input->get('rateType');
+
 
     $this->load->model('Project_model');
 
@@ -211,7 +213,7 @@ public function payroll_report($settingsID)
     $data['start'] = $start;
     $data['end'] = $end;
 $data['project'] = $this->Project_model->getProjectDetails($settingsID, $projectID);
-    $data['attendance_data'] = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end);
+$data['attendance_data'] = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end, $rateType);
 
     $this->load->view('payroll_report_view', $data);
 }

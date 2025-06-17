@@ -50,7 +50,12 @@
     <h2>PROJECT: <?= $project->projectTitle ?? 'N/A' ?></h2>
     <p>LOCATION: <?= $project->projectLocation ?? 'Unknown' ?></p>
     <p>PERIOD: <?= date('F d, Y', strtotime($start)) ?> - <?= date('F d, Y', strtotime($end)) ?></p>
+
+    <?php if (!empty($_GET['rateType'])): ?>
+        <p>SALARY TYPE: Per <?= htmlspecialchars($_GET['rateType']) ?></p>
+    <?php endif; ?>
 </div>
+
 
 
 <table class="payroll-table">
