@@ -46,7 +46,7 @@
                                     <thead>
                                         <tr>
                                             <th>Project Title</th>
-                                            <th>Location</th>
+                                            <!-- <th>Location</th> -->
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -57,20 +57,54 @@
                                             <?php foreach ($projects as $proj) : ?>
                                                 <tr>
                                                     <td><?= htmlspecialchars($proj->projectTitle) ?></td>
-                                                    <td><?= htmlspecialchars($proj->projectLocation) ?></td>
-                                                    <td>
-                                                        <a href="<?= base_url('project/attendance/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>" class="btn btn-info btn-sm">Attendance</a>
-                                                        <a href="<?= base_url('project/attendance_list/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>" class="btn btn-primary btn-sm">Attendance List</a>
-                                                        <a href="<?= base_url('project/assign_personnel/' . $proj->settingsID . '/' . $proj->projectID) ?>" class="btn btn-success btn-sm">Assign Personnel</a>
-                                                        
-                                                        <!-- Payroll Modal Trigger -->
-                                                        <button class="btn btn-dark btn-sm" data-toggle="modal" data-target="#payrollModal<?= $proj->projectID ?>">Payroll</button>
+                                                    <!-- <td><?= htmlspecialchars($proj->projectLocation) ?></td> -->
+                                                 <td>
+    <a href="<?= base_url('project/attendance/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>"
+       class="btn btn-info btn-sm"
+       data-toggle="tooltip"
+       title="View Attendance">
+        <i class="fas fa-calendar-check"></i>
+    </a>
 
-                                                        <!-- Edit Modal Trigger -->
-                                                        <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal<?= $proj->projectID ?>">Edit</button>
+    <a href="<?= base_url('project/attendance_list/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>"
+       class="btn btn-primary btn-sm"
+       data-toggle="tooltip"
+       title="Attendance List">
+        <i class="fas fa-list"></i>
+    </a>
 
-                                                        <a href="<?= base_url('Project/delete/' . $proj->projectID) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this project?')">Delete</a>
-                                                    </td>
+    <a href="<?= base_url('project/assign_personnel/' . $proj->settingsID . '/' . $proj->projectID) ?>"
+       class="btn btn-success btn-sm"
+       data-toggle="tooltip"
+       title="Assign Personnel">
+        <i class="fas fa-user-plus"></i>
+    </a>
+
+    <button class="btn btn-dark btn-sm"
+            data-toggle="modal"
+            data-target="#payrollModal<?= $proj->projectID ?>"
+            data-toggle="tooltip"
+            title="Payroll">
+        <i class="fas fa-money-check-alt"></i>
+    </button>
+
+    <button class="btn btn-warning btn-sm"
+            data-toggle="modal"
+            data-target="#editModal<?= $proj->projectID ?>"
+            data-toggle="tooltip"
+            title="Edit Project">
+        <i class="fas fa-edit"></i>
+    </button>
+
+    <a href="<?= base_url('Project/delete/' . $proj->projectID) ?>"
+       class="btn btn-danger btn-sm"
+       onclick="return confirm('Delete this project?')"
+       data-toggle="tooltip"
+       title="Delete Project">
+        <i class="fas fa-trash-alt"></i>
+    </a>
+</td>
+
                                                 </tr>
 
                                                 <!-- Payroll Modal -->
@@ -183,5 +217,12 @@
     <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.js"></script>
     <script src="<?= base_url(); ?>assets/js/pages/datatables.init.js"></script>
     <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
+
+    <script>
+        $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+
+    </script>
 </body>
 </html>
