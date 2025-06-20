@@ -4,11 +4,12 @@ class Personnel extends CI_Controller {
         parent::__construct();
         $this->load->model('Personnel_model');
     }
+public function manage() {
+    $settingsID = $this->session->userdata('settingsID');
+    $data['personnel'] = $this->Personnel_model->getAll($settingsID);
+    $this->load->view('personnel_list', $data);
+}
 
-    public function manage() {
-        $data['personnel'] = $this->Personnel_model->getAll();
-        $this->load->view('personnel_list', $data); // use updated view filename
-    }
 
 public function store() {
     $data = $this->input->post();

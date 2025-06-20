@@ -6,10 +6,13 @@ class Project extends CI_Controller
         $this->load->model('Project_model');
     }
 
-    public function project_view() {
-        $data['projects'] = $this->Project_model->getAll();
-        $this->load->view('project_view', $data);
-    }
+public function project_view() {
+    $settingsID = $this->session->userdata('settingsID');
+    $data['projects'] = $this->Project_model->getAll($settingsID);
+    $this->load->view('project_view', $data);
+}
+
+
 public function store()
 {
     $data = $this->input->post();
@@ -126,7 +129,7 @@ public function assign_personnel($settingsID, $projectID)
 
     $data['settingsID'] = $settingsID;
     $data['projectID'] = $projectID;
-    $data['personnel'] = $this->Project_model->get_all_personnel();
+    $data['personnel'] = $this->Project_model->get_all_personnel($settingsID);
     $data['assignments'] = $this->Project_model->get_assignments_by_project($projectID);
     $data['project'] = $this->Project_model->getProjectBySettingsID($settingsID);
 

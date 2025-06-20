@@ -3,9 +3,10 @@ class Project_model extends CI_Model
 {
     private $table = 'project';
 
-    public function getAll() {
-        return $this->db->get($this->table)->result();
-    }
+public function getAll($settingsID) {
+    $this->db->where('settingsID', $settingsID);
+    return $this->db->get($this->table)->result();
+}
 
     public function insert($data) {
         return $this->db->insert($this->table, $data);
@@ -90,10 +91,12 @@ public function getAssignedPersonnel($settingsID, $projectID)
 }
 
 
-   public function get_all_personnel()
-    {
-        return $this->db->get('personnel')->result();
-    }
+public function get_all_personnel($settingsID)
+{
+    $this->db->where('settingsID', $settingsID);
+    return $this->db->get('personnel')->result();
+}
+
 
 public function get_assignments_by_project($projectID)
 {
