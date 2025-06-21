@@ -60,7 +60,7 @@
 				<form action="<?php echo site_url('Login/auth'); ?>" method="post" class="login100-form validate-form">
 					<span class="login100-form-title p-b-43"></span>
 					<span class="login100-form-title p-b-43">
-						<img src="<?= base_url(); ?>upload/banners/<?php echo $data[0]->login_form_image; ?>" alt="mySRMS Portal">
+						<img src="<?= base_url(); ?>upload/banners/<?php echo $data[0]->login_form_image; ?>" style="  max-width: 120px; height: auto;" alt="mySRMS Portal">
 						<!-- <img src="<?= base_url(); ?>upload/banners/<?php echo $data[0]->login_form_image; ?>" alt="mySRMS Portal" width="100%"> -->
 					</span>
 
