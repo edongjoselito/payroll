@@ -204,10 +204,11 @@ public function addNewSuperAdmin()
 
 	public function userAccounts()
 	{
-		// Load the user accounts data and pass it to the view
-		$result['data'] = $this->StudentModel->userAccounts();
-		$this->load->view('user_accounts', $result);
+       $settingsID = $this->session->userdata('settingsID');
 
+    // Load the user accounts data and pass it to the view
+    $result['data'] = $this->StudentModel->userAccounts($settingsID);
+    $this->load->view('user_accounts', $result);
 		// Check if the form has been submitted
 		if ($this->input->post('submit')) {
 			// Sanitize and retrieve data from the form

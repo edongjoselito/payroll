@@ -296,12 +296,13 @@ class StudentModel extends CI_Model
 		return $query->result();
 	}
 
-	public function userAccounts()
-	{
-		$this->db->where('position !=', 'Super Admin');
-		$query = $this->db->get('o_users');
-		return $query->result();
-	}
+public function userAccounts($settingsID)
+{
+    $this->db->where('position !=', 'Super Admin');
+    $this->db->where('settingsID', $settingsID);
+    $query = $this->db->get('o_users');
+    return $query->result();
+}
 
 
 	function studeGradesGroup($studeno)

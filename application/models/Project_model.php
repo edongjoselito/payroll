@@ -93,9 +93,18 @@ public function getAssignedPersonnel($settingsID, $projectID)
 
 public function get_all_personnel($settingsID)
 {
+    // Get assigned personnel IDs
+    $subQuery = $this->db->select('personnelID')
+                         ->from('project_personnel_assignment')
+                         ->get_compiled_select();
+
+    // Use the subquery to exclude those personnel
     $this->db->where('settingsID', $settingsID);
+    $this->db->where("personnelID NOT IN ($subQuery)", null, false);
+
     return $this->db->get('personnel')->result();
 }
+
 
 
 public function get_assignments_by_project($projectID)

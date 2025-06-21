@@ -4,28 +4,17 @@
 <?php include('includes/head.php'); ?>
 
 <body>
+        <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/buttons.bootstrap4.min.css">
 <div id="wrapper">
     <?php include('includes/top-nav-bar.php'); ?>
     <?php include('includes/sidebar.php'); ?>
 
     <div class="content-page">
         <div class="content">
-            <div class="container-fluid">
 
-                <!-- Page Header -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="page-title-box d-flex justify-content-between align-items-center">
-                            <h4 class="page-title">Project Management</h4>
-                            <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#addModal">
-                                <i class="mdi mdi-plus"></i> Add New Project
-                            </button>
-                        </div>
-                        <hr>
-                    </div>
-                </div>
-
-                <?php if ($this->session->flashdata('success')): ?>
+                        <?php if ($this->session->flashdata('success')): ?>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <?= $this->session->flashdata('success') ?>
                         <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -36,12 +25,30 @@
                         <button type="button" class="close" data-dismiss="alert">&times;</button>
                     </div>
                 <?php endif; ?>
+            <div class="container-fluid">
+
+                <!-- Page Header -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="page-title-box d-flex justify-content-between align-items-center">
+                            <!-- <h4 class="page-title">Project Management</h4> -->
+                            <button class="btn btn-success btn-md" data-toggle="modal" data-target="#addModal">
+                                <i class="mdi mdi-plus"></i> Add New Project
+                            </button>
+                        </div>
+                        <hr>
+                    </div>
+                </div>
+
+
 
                 <!-- Project Table -->
                 <div class="row">
                     <div class="col-12">
                         <div class="card">
+                            
                             <div class="card-body">
+                                <h4 class="page-title">Project Management</h4>
                                 <table id="datatable" class="table table-bordered dt-responsive nowrap" style="width:100%">
                                     <thead>
                                         <tr>
@@ -59,6 +66,14 @@
                                                     <td><?= htmlspecialchars($proj->projectTitle) ?></td>
                                                     <!-- <td><?= htmlspecialchars($proj->projectLocation) ?></td> -->
                                                  <td>
+
+    <a href="<?= base_url('project/assign_personnel/' . $proj->settingsID . '/' . $proj->projectID) ?>"
+       class="btn btn-success btn-sm"
+       data-toggle="tooltip"
+       title="Assign Personnel">
+        <i class="fas fa-user-plus"></i>
+    </a>
+
     <a href="<?= base_url('project/attendance/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>"
        class="btn btn-info btn-sm"
        data-toggle="tooltip"
@@ -73,12 +88,6 @@
         <i class="fas fa-list"></i>
     </a>
 
-    <a href="<?= base_url('project/assign_personnel/' . $proj->settingsID . '/' . $proj->projectID) ?>"
-       class="btn btn-success btn-sm"
-       data-toggle="tooltip"
-       title="Assign Personnel">
-        <i class="fas fa-user-plus"></i>
-    </a>
 
     <button class="btn btn-dark btn-sm"
             data-toggle="modal"
@@ -212,11 +221,13 @@
     </div>
 
     <!-- Scripts -->
-    <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
-    <script src="<?= base_url(); ?>assets/libs/datatables/jquery.dataTables.min.js"></script>
-    <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.js"></script>
-    <script src="<?= base_url(); ?>assets/js/pages/datatables.init.js"></script>
-    <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
+<script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
+<script src="<?= base_url(); ?>assets/libs/datatables/jquery.dataTables.min.js"></script>
+<script src="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.js"></script>
+<script src="<?= base_url(); ?>assets/js/pages/datatables.init.js"></script>
+<script src="<?= base_url(); ?>assets/libs/datatables/dataTables.responsive.min.js"></script>
+<script src="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.js"></script>
+<script src="<?= base_url(); ?>assets/js/app.min.js"></script>
 
     <script>
         $(function () {
