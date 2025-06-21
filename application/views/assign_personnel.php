@@ -12,7 +12,7 @@
                 <div class="container-fluid">
 
                     <div class="page-title-box d-flex justify-content-between align-items-center">
-                        <h4 class="page-title"> <?php echo $project[0]->projectTitle; ?> <br>
+                    <h4 class="page-title"> <?php echo $project->projectTitle; ?> <br>
                         <small><i>Assign Personnel to Project</i></small></h4>
                         <h5></h5>
                   

@@ -122,20 +122,21 @@ public function save_attendance()
 
 
 
-
 public function assign_personnel($settingsID, $projectID)
 {
     $this->load->model('Project_model');
 
     $data['settingsID'] = $settingsID;
     $data['projectID'] = $projectID;
-    $data['personnel'] = $this->Project_model->get_all_personnel($settingsID);
+    
+    // ✅ Fix: Pass both parameters
+    $data['personnel'] = $this->Project_model->get_all_personnel($settingsID, $projectID);
     $data['assignments'] = $this->Project_model->get_assignments_by_project($projectID);
-    $data['project'] = $this->Project_model->getProjectBySettingsID($settingsID);
-
+$data['project'] = $this->Project_model->getProject($settingsID, $projectID);
 
     $this->load->view('assign_personnel', $data);
 }
+
 
 public function save_assignment()
 {

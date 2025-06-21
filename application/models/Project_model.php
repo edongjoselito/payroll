@@ -30,9 +30,14 @@ public function getAll($settingsID) {
     return $this->db->where('settingsID', $settingsID)->get('personnel')->result();
 }
 
-    public function getProjectBySettingsID($settingsID) {
-    return $this->db->where('settingsID', $settingsID)->get('project')->result();
+public function getProject($settingsID, $projectID) {
+    return $this->db
+        ->where('settingsID', $settingsID)
+        ->where('projectID', $projectID)
+        ->get('project')
+        ->row(); // Use row() since you expect one record
 }
+
 
 
 public function getAttendanceBySettingsID($settingsID, $projectID, $date)
@@ -91,14 +96,16 @@ public function getAssignedPersonnel($settingsID, $projectID)
 }
 
 
-public function get_all_personnel($settingsID)
+public function get_all_personnel($settingsID, $projectID)
 {
-    // Get assigned personnel IDs
+    // Get personnel already assigned to this specific project and settings
     $subQuery = $this->db->select('personnelID')
                          ->from('project_personnel_assignment')
+                         ->where('settingsID', $settingsID)
+                         ->where('projectID', $projectID)
                          ->get_compiled_select();
 
-    // Use the subquery to exclude those personnel
+    // Main query: get all personnel not in the subquery
     $this->db->where('settingsID', $settingsID);
     $this->db->where("personnelID NOT IN ($subQuery)", null, false);
 
