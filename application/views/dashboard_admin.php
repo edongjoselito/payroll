@@ -81,7 +81,9 @@
                                 <div class="card-body widget-style-2">
                                     <div class="media">
                                         <div class="media-body align-self-center">
-                                            <h2 class="my-0"><span data-plugin="counterup">0</span></h2>
+                                           <h2 class="my-0">
+    <span data-plugin="counterup"><?= $project_count ?></span>
+</h2>
                                             <p class="mb-0"><a href="<?= base_url(); ?>Page/profileList">Projects</a></p>
                                         </div>
                                         <i class="mdi mdi-layers-plus text-info bg-light"></i>
@@ -95,8 +97,9 @@
                                 <div class="card-body widget-style-2">
                                     <div class="media">
                                         <div class="media-body align-self-center">
-                                            <h2 class="my-0"><span data-plugin="counterup">0</span></h2>
-                                            <p class="mb-0"><a href="<?= base_url(); ?>Page/employeeList">Personnel</a></p>
+<h2 class="my-0">
+    <span data-plugin="counterup"><?= $personnel_count ?></span>
+</h2>                                            <p class="mb-0"><a href="<?= base_url(); ?>Page/employeeList">Personnel</a></p>
                                         </div>
                                         <i class="mdi mdi-teach text-primary bg-light"></i>
                                     </div>

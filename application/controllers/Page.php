@@ -25,6 +25,8 @@ public function admin()
 
     $this->load->model('SettingsModel');
     $data['company'] = $this->SettingsModel->getSuperAdminbyIds($settingsID); // returns object
+     $data['project_count'] = $this->SettingsModel->count_projects($settingsID);
+    $data['personnel_count'] = $this->SettingsModel->count_personnel($settingsID);
 
     $this->load->view('dashboard_admin', $data);
 }

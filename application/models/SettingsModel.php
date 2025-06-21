@@ -567,7 +567,18 @@ class SettingsModel extends CI_Model
     }
 
 
-    
+    public function count_projects($settingsID)
+{
+    return $this->db->where('settingsID', $settingsID)
+                    ->count_all_results('project');
+}
+
+public function count_personnel($settingsID)
+{
+    return $this->db->where('settingsID', $settingsID)
+                    ->count_all_results('personnel');
+}
+
 
 
     public function getSuperAdminbyId($settingsID)
