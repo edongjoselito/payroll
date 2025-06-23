@@ -25,14 +25,6 @@ class Loan extends CI_Controller {
 }
 
 
-   public function delete($id) {
-    if ($this->Loan_model->delete_loan($id)) {
-        $this->session->set_flashdata('success', 'Loan deleted successfully.');
-    } else {
-        $this->session->set_flashdata('error', 'Failed to delete loan.');
-    }
-    redirect('Loan');
-}
 
 
  public function update() {
@@ -103,6 +95,22 @@ public function save_cash_advance()
 
     redirect('Loan/cash_advance');
 }
+public function update_cash_advance()
+{
+    $id = $this->input->post('cash_id');
+    $data = [
+        'personnelID'     => $this->input->post('personnelID'),
+        'amount'          => $this->input->post('amount'),
+        'date_requested'  => $this->input->post('date_requested'),
+        'deduct_on'       => $this->input->post('deduct_on')
+    ];
+
+    $this->Loan_model->update_cash_advance($id, $data);
+
+    $this->session->set_flashdata('success', 'Cash advance updated successfully.');
+    redirect('Loan/cash_advance');
+}
+
 
 public function mark_cash_advance_deducted($id)
 {
@@ -139,35 +147,38 @@ public function delete_cash_advance($id)
 public function supply_loan()
 {
     $this->load->model('Loan_model');
-    $this->load->model('Personnel_model');
-
-    $data['supply_loans'] = $this->Loan_model->get_supply_loans();
-    $data['personnel'] = $this->Personnel_model->get_all_personnel($this->session->userdata('settingsID'));
-    $data['title'] = "Supply Loan";
-
+    $data['personnel'] = $this->Loan_model->get_all_personnel();
+    $data['supply_loans'] = $this->Loan_model->get_supply_loans_from_loans(); // filtered from 'loans' table
+    
     $this->load->view('supply_loan', $data);
 }
 
-public function save_supply_loan()
-{
-    $this->load->model('Loan_model');
 
-    $data = [
-        'personnelID'       => $this->input->post('personnelID'),
-        'item_description'  => $this->input->post('item_description'),
-        'amount'            => $this->input->post('amount'),
-        'date_purchased'    => $this->input->post('date_purchased'),
-        'status'            => 'pending'
-    ];
 
-    if ($this->Loan_model->insert_supply_loan($data)) {
-        $this->session->set_flashdata('success', 'Supply loan saved successfully.');
-    } else {
-        $this->session->set_flashdata('error', 'Failed to save supply loan.');
+public function save_supply_loan() {
+    $data = $this->input->post();
+    $personnel = $this->db->get_where('personnel', ['personnelID' => $data['personnelID']])->row();
+
+    if (!$personnel || $data['amount'] > $personnel->rateAmount * 2) {
+        $this->session->set_flashdata('error', 'Personnel not qualified for this loan amount.');
+        redirect('Loan/supply_loan');
+        return;
     }
 
+    $insert = [
+        'personnelID' => $data['personnelID'],
+        'item_description' => $data['item_description'],
+        'loan_type' => $data['loan_type'],
+        'deduction_type' => $data['deduction_type'],
+        'amount' => $data['amount'],
+        'date_purchased' => $data['date_purchased'],
+        'status' => 'pending'
+    ];
+    $this->db->insert('supply_loans', $insert);
+    $this->session->set_flashdata('success', 'Supply loan saved.');
     redirect('Loan/supply_loan');
 }
+
 public function mark_supply_loan_deducted($id)
 {
     $this->load->model('Loan_model');
@@ -215,6 +226,140 @@ public function update_supply_loan()
 
     redirect('Loan/supply_loan');
 }
+public function delete_loan($loanID) {
+    if ($this->Loan_model->delete_loan($loanID)) {
+        $this->session->set_flashdata('success', 'Loan deleted.');
+    } else {
+        $this->session->set_flashdata('error', 'Failed to delete loan.');
+    }
+    redirect('Loan/supply_loan');
+}
+
+public function update_loan() {
+    $loanID = $this->input->post('loanID');
+    $data = [
+        'loan_description' => $this->input->post('item_description'),
+        'loan_type' => $this->input->post('loan_type'),
+        'deduction_type' => $this->input->post('deduction_type'),
+        'loan_amount' => $this->input->post('amount'),
+        'date_issued' => $this->input->post('date_purchased')
+    ];
+    if ($this->Loan_model->update_loan($loanID, $data)) {
+        $this->session->set_flashdata('success', 'Loan updated.');
+    } else {
+        $this->session->set_flashdata('error', 'Update failed.');
+    }
+    redirect('Loan/supply_loan');
+}
+public function update_personnel($id)
+{
+    $data = [
+        'first_name'   => $this->input->post('first_name'),
+        'middle_name'  => $this->input->post('middle_name'),
+        'last_name'    => $this->input->post('last_name'),
+        'name_ext'     => $this->input->post('name_ext'),
+        'rateType'     => $this->input->post('rateType'),
+        'rateAmount'   => $this->input->post('rateAmount'),
+        'position'     => $this->input->post('position')
+    ];
+
+    $this->db->where('personnelID', $id);
+    $updated = $this->db->update('personnel', $data);
+
+    if ($updated) {
+        $this->session->set_flashdata('success', 'Personnel updated successfully.');
+    } else {
+        $this->session->set_flashdata('error', 'Failed to update personnel.');
+    }
+
+    redirect('Loan/supply_loan');
+}
+public function delete_personnel($id)
+{
+    $deleted = $this->db->delete('personnel', ['personnelID' => $id]);
+
+    if ($deleted) {
+        $this->session->set_flashdata('success', 'Personnel deleted successfully.');
+    } else {
+        $this->session->set_flashdata('error', 'Failed to delete personnel.');
+    }
+
+    redirect('Loan/supply_loan');
+}
+
 
 //     -------------------- End Supply Loan----------------
+public function save_personnel_loan()
+{
+    $this->load->model('Loan_model');
+    $data = $this->input->post();
+
+    $personnel = $this->db->get_where('personnel', ['personnelID' => $data['personnelID']])->row();
+    $rateAmount = floatval($personnel->rateAmount);
+
+    if ($data['amount'] > $rateAmount * 2) {
+        $this->session->set_flashdata('error', 'Loan amount exceeds allowed maximum for this personnel.');
+        redirect('Loan/supply_loan');
+        return;
+    }
+
+    $loanData = [
+        'personnelID' => $data['personnelID'],
+        'loan_description' => $data['item_description'],
+        'loan_type' => $data['loan_type'],
+        'deduction_type' => $data['deduction_type'],
+        'loan_amount' => $data['amount'],
+        'date_issued' => $data['date_purchased'],
+        'status' => 'pending',
+        'loan_category' => 'supply',
+        'salary_basis' => $personnel->rateType
+    ];
+
+    $this->Loan_model->insert_loan($loanData);
+    $this->session->set_flashdata('success', 'Loan assigned successfully.');
+    redirect('Loan/supply_loan');
+}
+public function approve($id) {
+    $this->load->model('Loan_model');
+    $this->Loan_model->update_loan_status($id, 'approved');
+    $this->session->set_flashdata('success', 'Loan approved successfully.');
+    redirect('Loan');
+}
+
+public function disapprove($id) {
+    $this->load->model('Loan_model');
+    $this->Loan_model->update_loan_status($id, 'disapproved');
+    $this->session->set_flashdata('error', 'Loan disapproved.');
+    redirect('Loan');
+} 
+
+
+    // Approve via AJAX
+public function ajax_approve()
+{
+    $loan_id = $this->input->post('loan_id');
+    $success = $this->Loan_model->update_loan_status($loan_id, 'approved');
+
+    echo json_encode(['success' => $success]);
+}
+
+// Disapprove via AJAX
+public function ajax_disapprove()
+{
+    $loan_id = $this->input->post('loan_id');
+    $success = $this->Loan_model->update_loan_status($loan_id, 'disapproved');
+
+    echo json_encode(['success' => $success]);
+}
+
+// Delete via AJAX
+public function ajax_delete()
+{
+    $loan_id = $this->input->post('loan_id');
+    $success = $this->Loan_model->delete_loan($loan_id);
+
+    echo json_encode(['success' => $success]);
+}
+
+
 }

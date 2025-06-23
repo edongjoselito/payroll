@@ -37,7 +37,6 @@
         <span class="menu-arrow"></span>
     </a>
     <ul class="nav-second-level nav" aria-expanded="false">
-        <li><a href="<?= base_url(); ?>Loan">Manage Loans</a></li>
         <li><a href="<?= base_url(); ?>Loan/cash_advance">Cash Advance</a></li>
         <li><a href="<?= base_url(); ?>Loan/supply_loan">Supply Loan</a></li>
     </ul>
@@ -57,13 +56,17 @@
                     </li> -->
 
 
-
-                    <li>
-                        <a href="javascript: void(0);" class="waves-effect">
-                            <i class="ion ion-md-settings"></i>
-                            <span> Settings </span>
-                            <span class="menu-arrow"></span>
-                        </a>
+ <li>
+    <a href="javascript: void(0);" class="waves-effect">
+        <i class="fas fa-money-check-alt"></i>
+        <span> Settings </span>
+        <span class="menu-arrow"></span>
+    </a>
+    <ul class="nav-second-level nav" aria-expanded="false">
+        <li><a href="<?= base_url(); ?>Loan">Manage Loans</a></li>
+    </ul>
+</li>
+                  
                         <ul class="nav-second-level" aria-expanded="false">
                             <!-- <li><a href="<?= base_url(); ?>Rate/index">Company Rate</a></li> -->
                             <li><a href="#">Company Information</a></li>
