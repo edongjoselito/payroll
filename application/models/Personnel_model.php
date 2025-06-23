@@ -24,7 +24,18 @@ class Personnel_model extends CI_Model
         $this->db->where('personnelID', $id);
         return $this->db->delete($this->table);
     }
+
+
+    // -------------CASH ADVANCE
+public function get_all_personnel($settingsID)
+{
+    return $this->db
+        ->where('settingsID', $settingsID)
+        ->order_by('last_name', 'ASC')
+        ->get('personnel')
+        ->result();
 }
 
-
+// --------------END----------
+}
 

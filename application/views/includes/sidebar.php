@@ -14,6 +14,9 @@
                         </a>
                     </li>
 
+                      
+
+
                     <li>
                         <a href="javascript: void(0);" class="waves-effect">
                             <i class="fas fa-archive"></i>
@@ -27,16 +30,19 @@
                     </li>
 
 
-                    <li>
-                        <a href="javascript: void(0);" class="waves-effect">
-                            <i class="ion ion-md-cloud-upload"></i>
-                            <span> Projects </span>
-                            <span class="menu-arrow"></span>
-                        </a>
-                        <ul class="nav-second-level" aria-expanded="false">
-                            <li><a href="<?= base_url(); ?>Project/project_view">Project List</a></li>
-                        </ul>
-                    </li>
+    <li>
+    <a href="javascript: void(0);" class="waves-effect">
+        <i class="fas fa-money-check-alt"></i>
+        <span> Loan Management </span>
+        <span class="menu-arrow"></span>
+    </a>
+    <ul class="nav-second-level nav" aria-expanded="false">
+        <li><a href="<?= base_url(); ?>Loan">Manage Loans</a></li>
+        <li><a href="<?= base_url(); ?>Loan/cash_advance">Cash Advance</a></li>
+        <li><a href="<?= base_url(); ?>Loan/supply_loan">Supply Loan</a></li>
+    </ul>
+</li>
+
 
 
                     <!-- <li>
