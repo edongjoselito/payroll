@@ -16,6 +16,10 @@ class Loan_model extends CI_Model {
     return $this->db->insert('loans', $insert);
 }
 
+public function insert_personnel($data)
+{
+    return $this->db->insert('personnel', $data);
+}
 
 
 

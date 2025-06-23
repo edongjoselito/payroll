@@ -226,6 +226,36 @@ public function update_supply_loan()
 
     redirect('Loan/supply_loan');
 }
+public function save_personnel() {
+    $data = [
+        'first_name' => $this->input->post('first_name'),
+        'middle_name' => $this->input->post('middle_name'),
+        'last_name' => $this->input->post('last_name'),
+        'name_ext' => $this->input->post('name_ext'),
+        'contact_number' => $this->input->post('contact_number'),
+        'email' => $this->input->post('email'),
+        'birthdate' => $this->input->post('birthdate'),
+        'gender' => $this->input->post('gender'),
+        'civil_status' => $this->input->post('civil_status'),
+        'address' => $this->input->post('address'),
+        'position' => $this->input->post('position'),
+        'rateType' => $this->input->post('rateType'),
+        'rateAmount' => $this->input->post('rateAmount'),
+        'philhealth_number' => $this->input->post('philhealth_number'),
+        'pagibig_number' => $this->input->post('pagibig_number'),
+        'sss_number' => $this->input->post('sss_number'),
+        'tin_number' => $this->input->post('tin_number'),
+         'settingsID' => $this->session->userdata('settingsID')
+    ];
+
+    $this->db->insert('personnel', $data); 
+
+    $this->session->set_flashdata('success', 'Personnel added successfully.');
+    redirect('Loan/supply_loan');
+}
+
+
+
 public function delete_loan($loanID) {
     if ($this->Loan_model->delete_loan($loanID)) {
         $this->session->set_flashdata('success', 'Loan deleted.');
@@ -361,5 +391,32 @@ public function ajax_delete()
     echo json_encode(['success' => $success]);
 }
 
+public function save_personnel_from_supply_loan()
+{
+    $data = [
+        'first_name'       => $this->input->post('first_name'),
+        'middle_name'      => $this->input->post('middle_name'),
+        'last_name'        => $this->input->post('last_name'),
+        'name_ext'         => $this->input->post('name_ext'),
+        'contact_number'   => $this->input->post('contact_number'),
+        'email'            => $this->input->post('email'),
+        'birthdate'        => $this->input->post('birthdate'),
+        'gender'           => $this->input->post('gender'),
+        'civil_status'     => $this->input->post('civil_status'),
+        'address'          => $this->input->post('address'),
+        'position'         => $this->input->post('position'),
+        'rateType'         => $this->input->post('rateType'),
+        'rateAmount'       => $this->input->post('rateAmount'),
+        'philhealth_number'=> $this->input->post('philhealth_number'),
+        'pagibig_number'   => $this->input->post('pagibig_number'),
+        'sss_number'       => $this->input->post('sss_number'),
+        'tin_number'       => $this->input->post('tin_number')
+    ];
+
+    $this->db->insert('personnel', $data);
+
+    $this->session->set_flashdata('success', 'Personnel successfully added.');
+    redirect('Loan/supply_loan');
+}
 
 }

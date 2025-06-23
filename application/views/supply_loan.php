@@ -22,7 +22,7 @@
 <?php endif; ?>
 
                 <div class="page-title-box d-flex justify-content-between align-items-center">
-                    <h4 class="page-title">Supply Loans<br><small><i>Assign loans directly to personnel</i></small></h4>
+                    <h4 class="page-title">Manage Supply Loans</h4>
                 </div>
                 <hr>
 <div class="mb-3">
@@ -171,7 +171,16 @@
                     <div class="form-group"><label>Middle Name</label><input name="middle_name" class="form-control" value="<?= $p->middle_name ?>"></div>
                     <div class="form-group"><label>Last Name</label><input name="last_name" class="form-control" value="<?= $p->last_name ?>" required></div>
                     <div class="form-group"><label>Extension</label><input name="name_ext" class="form-control" value="<?= $p->name_ext ?>"></div>
-                    <div class="form-group"><label>Rate Type</label><input name="rateType" class="form-control" value="<?= $p->rateType ?>" required></div>
+                    <div class="form-group">
+    <label>Rate Type</label>
+    <select name="rateType" class="form-control" required>
+        <option value="">Select Rate Type</option>
+        <option value="hourly" <?= $p->rateType == 'hourly' ? 'selected' : '' ?>>Hourly</option>
+        <option value="daily" <?= $p->rateType == 'daily' ? 'selected' : '' ?>>Daily</option>
+        <option value="monthly" <?= $p->rateType == 'monthly' ? 'selected' : '' ?>>Monthly</option>
+    </select>
+</div>
+
                     <div class="form-group"><label>Rate Amount</label><input name="rateAmount" type="number" step="0.01" class="form-control" value="<?= $p->rateAmount ?>" required></div>
                     <div class="form-group"><label>Position</label><input name="position" class="form-control" value="<?= $p->position ?>" required></div>
                 </div>
@@ -209,6 +218,41 @@ function checkEligibility<?= $p->personnelID ?>() {
     return true;
 }
 </script>
+<!-- Add Personnel Modal -->
+<div class="modal fade" id="addPersonnelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form method="post" action="<?= base_url('Loan/save_personnel') ?>">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Add New Personnel</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group"><label>First Name</label><input name="first_name" class="form-control" required></div>
+                    <div class="form-group"><label>Middle Name</label><input name="middle_name" class="form-control"></div>
+                    <div class="form-group"><label>Last Name</label><input name="last_name" class="form-control" required></div>
+                    <div class="form-group"><label>Extension</label><input name="name_ext" class="form-control"></div>
+                   <div class="form-group">
+    <label>Rate Type</label>
+    <select name="rateType" class="form-control" required>
+        <option value="">Select Rate Type</option>
+        <option value="hourly">Hourly</option>
+        <option value="daily">Daily</option>
+        <option value="monthly">Monthly</option>
+    </select>
+</div>
+
+                    <div class="form-group"><label>Rate Amount</label><input name="rateAmount" type="number" step="0.01" class="form-control" required></div>
+                    <div class="form-group"><label>Position</label><input name="position" class="form-control" required></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary">Save</button>
+                    <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
                                     <?php endforeach; endif; ?>
                                 </tbody>
