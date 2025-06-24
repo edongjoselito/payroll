@@ -1,139 +1,77 @@
 <?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
 class Loan_model extends CI_Model {
 
-    public function get_loans() {
+    public function get_personnel_by_settings($settingsID)
+    {
+        return $this->db->where('settingsID', $settingsID)
+                        ->get('personnel')
+                        ->result();
+    }
+
+public function insert_loan($data) {
+        return $this->db->insert('loans', $data);
+    }
+
+    public function update_loan($loanID, $data) {
+        $this->db->where('loandID', $loanID);
+        return $this->db->update('loans', $data);
+    }
+
+    public function delete_loan($loanID) {
+        $this->db->where('loanID', $loanID);
+        return $this->db->delete('loans');
+    }
+
+    public function get_loans_by_rate_type($rateType) {
+        $this->db->where('rateType', $rateType);
         return $this->db->get('loans')->result();
     }
 
-   public function insert_loan($data) {
-    $insert = [
-        'personnelID' => $data['personnelID'],
-        'loan_description' => $data['loan_description'],
-        'loan_type' => $data['loan_type'],
-        'loan_amount' => $data['loan_amount'],
-        'salary_basis' => $data['salary_basis']
-    ];
-    return $this->db->insert('loans', $insert);
-}
-
-public function insert_personnel($data)
+  public function get_all_loans($settingsID)
 {
-    return $this->db->insert('personnel', $data);
+    return $this->db
+        ->where('status', 1)
+        ->where('settingsID', $settingsID)
+        ->get('loans')
+        ->result();
 }
 
 
-
-public function is_duplicate($personnelID, $description, $type, $exclude_id = null) {
-    $this->db->where([
-        'personnelID' => $personnelID,
-        'loan_description' => $description,
-        'loan_type' => $type
-    ]);
-    if ($exclude_id) {
-        $this->db->where('loan_id !=', $exclude_id);
+    public function get_loan_by_id($loan_id) {
+        return $this->db->get_where('loans', ['loan_id' => $loan_id])->row();
     }
-    return $this->db->get('loans')->num_rows() > 0;
-}
-
- public function get_all_personnel() {
-    return $this->db->get('personnel')->result();
-}
-
-public function get_loans_with_personnel() {
-    $this->db->select('loans.*, CONCAT(p.first_name, " ", p.middle_name, " ", p.last_name) as full_name');
-    $this->db->from('loans');
-    $this->db->join('personnel p', 'p.personnelID = loans.personnelID', 'left');
-    return $this->db->get()->result();
-}
-
-public function update_loan($loanID, $data) {
-    return $this->db->where('loanID', $loanID)->update('loans', $data);
-}
-
-// ------------------------------------Cash Advance Model------------------------
-
-     public function get_cash_advances()
+    public function get_loans_by_rate($rateType, $settingsID)
 {
-    $this->db->select('c.*, CONCAT(p.first_name, " ", p.middle_name, " ", p.last_name) as full_name');
-    $this->db->from('cash_advance c');
-    $this->db->join('personnel p', 'p.personnelID = c.personnelID');
-    $this->db->order_by('c.date_requested', 'DESC');
-    return $this->db->get()->result();
+    return $this->db->where('rateType', $rateType)
+                    ->where('status', 1)
+                    ->where('settingsID', $settingsID)  // Ensure multitenant filtering
+                    ->get('loans')
+                    ->result();
+}
+public function insert_personnel_loan($data)
+{
+    return $this->db->insert('personnelloans', $data);
 }
 
-public function update_cash_advance_status($id, $status)
+public function check_existing_personnel_loan($personnelID, $loan_id)
 {
-    return $this->db->where('id', $id)->update('cash_advance', ['status' => $status]);
+    return $this->db->where('personnelID', $personnelID)
+                    ->where('loan_id', $loan_id)
+                    ->where('status', 1)
+                    ->get('personnelloans')
+                    ->num_rows() > 0;
 }
-
-public function delete_cash_advance($id)
-{
-    return $this->db->where('id', $id)->delete('cash_advance');
-}
-
-public function update_cash_advance($id, $data)
-{
-    $this->db->where('id', $id);
-    return $this->db->update('cash_advance', $data);
-}
-
- 
-public function insert_cash_advance($data)
-{
-    $this->db->insert('cash_advance', $data);
-    return $this->db->insert_id(); 
-}
-
-
-// -------------------------------------End Advance Model------------------------
-
-//     ----------------------Supply Loan-------------------
-public function get_supply_loans_from_loans()
-{
-    $this->db->select('loans.*, CONCAT(p.first_name, " ", p.middle_name, " ", p.last_name) as full_name');
-    $this->db->from('loans');
-    $this->db->join('personnel p', 'p.personnelID = loans.personnelID');
-    $this->db->where('loan_category', 'supply');
-    $this->db->order_by('date_issued', 'DESC');
+public function get_assigned_loans($settingsID) {
+    $this->db->select('pl.*, p.first_name, p.last_name, p.position, l.loan_description');
+    $this->db->from('personnelloans pl');
+    $this->db->join('personnel p', 'p.personnelID = pl.personnelID');
+    $this->db->join('loans l', 'l.loan_id = pl.loan_id');
+    $this->db->where('pl.settingsID', $settingsID);
+    $this->db->where('pl.status', 1);
     return $this->db->get()->result();
 }
 
 
-public function insert_supply_loan($data)
-{
-    return $this->db->insert('supply_loans', $data);
 }
-
-public function update_supply_loan_status($id, $status)
-{
-    return $this->db->where('id', $id)->update('supply_loans', ['status' => $status]);
-}
-
-          public function delete_supply_loan($id)
-{
-    return $this->db->where('id', $id)->delete('supply_loans');
-}
-
-public function update_supply_loan($id, $data)
-{
-    return $this->db->where('id', $id)->update('supply_loans', $data);
-}
-
-
-
-//     -------------------- End Supply Loan----------------
-public function update_loan_status($loan_id, $status)
-{
-    return $this->db->update('loans', ['status' => $status], ['loan_id' => $loan_id]);
-}
-
-public function delete_loan($loan_id)
-{
-    return $this->db->delete('loans', ['loan_id' => $loan_id]);
-}
-
-
-}
-
-
-

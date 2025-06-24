@@ -152,14 +152,14 @@
                                <label>Position</label>
                                 <input type="text" class="form-control" name="position" value="<?= $p->position ?>" required>
                         </div>
-                           <div class="form-group col-md-4">
-                               <label>Salary Type</label>
-                            <select name="rateType" class="form-control" required>
-                                <option value="Hour" <?= $p->rateType == 'Hour' ? 'selected' : '' ?>>Per Hour</option>
-                                <option value="Day" <?= $p->rateType == 'Day' ? 'selected' : '' ?>>Per Day</option>
-                                <option value="Month" <?= $p->rateType == 'Month' ? 'selected' : '' ?>>Per Month</option>
-                            </select>
-                        </div>
+                            <div class="form-group col-md-4">
+                                <label>Salary Type</label>
+                                <select name="rateType" class="form-control" required>
+                                    <option value="Hour" <?= $p->rateType == 'Hour' ? 'selected' : '' ?>>Per Hour</option>
+                                    <option value="Day" <?= $p->rateType == 'Day' ? 'selected' : '' ?>>Per Day</option>
+                                    <option value="Month" <?= $p->rateType == 'Month' ? 'selected' : '' ?>>Per Month</option>
+                                </select>
+                            </div>
                             <div class="form-group col-md-4">
                                <label>Salary</label>
                                 <input type="text" class="form-control" name="rateAmount" value="<?= $p->rateAmount ?>" required>

@@ -19,7 +19,7 @@
 
                     <li>
                         <a href="javascript: void(0);" class="waves-effect">
-                            <i class="fas fa-archive"></i>
+                            <i class="fas fa-users"></i>
                             <span> Personnel </span>
                             <span class="menu-arrow"></span>
                         </a>
@@ -29,43 +29,40 @@
                         </ul>
                     </li>
 
-
-    <li>
-    <a href="javascript: void(0);" class="waves-effect">
-        <i class="fas fa-money-check-alt"></i>
-        <span> Loan Management </span>
-        <span class="menu-arrow"></span>
-    </a>
-    <ul class="nav-second-level nav" aria-expanded="false">
-        <li><a href="<?= base_url(); ?>Loan/cash_advance">Cash Advance</a></li>
-        <li><a href="<?= base_url(); ?>Loan/supply_loan">Supply Loan</a></li>
-    </ul>
-</li>
-
-
-
-                    <!-- <li>
+ <li>
                         <a href="javascript: void(0);" class="waves-effect">
-                            <i class="ion ion-md-paper"> </i>
-                            <span> To Do </span>
+                            <i class="fas fa-coins"></i>
+                            <span> Manage Loans </span>
                             <span class="menu-arrow"></span>
                         </a>
-                        <ul class="nav-second-level" aria-expanded="false">
-                            <li><a href="<?= base_url(); ?>ToDo/">ToDo</a></li>
+
+                        <ul class="nav-second-level nav" aria-expanded="false">
+                            <li><a href="<?= base_url(); ?>Loan/personnel_loan"> Personnel Loans</a></li>
                         </ul>
-                    </li> -->
+                        
+                    </li>
 
+                    <li>
+                        <a href="javascript: void(0);" class="waves-effect">
+                            <i class="fas fa-cogs"></i>
+                            <span> Settings </span>
+                            <span class="menu-arrow"></span>
+                        </a>
 
- <li>
-    <a href="javascript: void(0);" class="waves-effect">
-        <i class="fas fa-money-check-alt"></i>
-        <span> Settings </span>
-        <span class="menu-arrow"></span>
+                        <ul class="nav-second-level nav" aria-expanded="false">
+                            <li><a href="<?= base_url(); ?>Loan/loans_view">Loans</a></li>
+                        </ul>
+                         
+                    </li>
+  <!-- <li class="nav-item dropdown">
+    <a class="nav-link dropdown-toggle" href="#" id="loanDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        MANAGE LOAN
     </a>
-    <ul class="nav-second-level nav" aria-expanded="false">
-        <li><a href="<?= base_url(); ?>Loan">Manage Loans</a></li>
-    </ul>
-</li>
+    <div class="dropdown-menu" aria-labelledby="loanDropdown">
+        <a class="dropdown-item" href="<?= base_url('Loan/personnel_loan') ?>">Personnel Loan</a>
+    </div>
+</li> -->
+
                   
                         <ul class="nav-second-level" aria-expanded="false">
                             <!-- <li><a href="<?= base_url(); ?>Rate/index">Company Rate</a></li> -->
@@ -74,16 +71,7 @@
                         </ul>
                     </li>
 
-                    <li>
-                        <a href="javascript: void(0);" class="waves-effect">
-                            <i class="ion ion-md-settings"></i>
-                            <span> Manage Users </span>
-                            <span class="menu-arrow"></span>
-                        </a>
-                        <ul class="nav-second-level" aria-expanded="false">
-                             <li><a href="<?= base_url(); ?>Page/userAccounts">Users</a></li>
-                        </ul>
-                    </li>
+                 
                     <!-- 
                     <li>
                         <a href="<?= base_url(); ?>Page/changepassword" class="waves-effect">

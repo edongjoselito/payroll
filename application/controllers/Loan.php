@@ -5,418 +5,183 @@ class Loan extends CI_Controller {
 
     public function __construct() {
         parent::__construct();
+        $this->load->library('session');
         $this->load->model('Loan_model');
-         $this->load->model('Personnel_model');
-        
     }
 
-   public function index() {
-    $data['loans'] = $this->Loan_model->get_loans_with_personnel();
-    $data['personnel'] = $this->Loan_model->get_all_personnel();
-    $this->load->view('loan_view', $data);
+   public function personnel_loan() {
+    $settingsID = $this->session->userdata('settingsID');
+    $data['personnel'] = $this->Loan_model->get_personnel_by_settings($settingsID);
+    $data['assigned_loans'] = $this->Loan_model->get_assigned_loans($settingsID); // required
+    $this->load->view('personnel_loan', $data);
 }
 
 
-    public function add() {
-    $data = $this->input->post();
-    $this->Loan_model->insert_loan($data);
-    $this->session->set_flashdata('success', 'Loan added successfully!');
-    redirect('Loan');
-}
+    public function edit_loan($id) {
+        // Load edit form here
+    }
 
+    public function delete_loan($id) {
+        $this->db->where('personnelID', $id)->delete('personnel');
+        $this->session->set_flashdata('success', 'Personnel loan deleted successfully.');
+        redirect('Loan/personnel_loan');
+    }
 
-
-
- public function update() {
-    $loan_id = $this->input->post('loan_id');
+    public function get_loan_options()
+{
     $personnelID = $this->input->post('personnelID');
-    $description = $this->input->post('loan_description');
-    $type = $this->input->post('loan_type');
 
-    $this->load->model('Loan_model');
+    $person = $this->db->get_where('personnel', ['personnelID' => $personnelID])->row();
 
-    if ($this->Loan_model->is_duplicate($personnelID, $description, $type, $loan_id)) {
-        $this->session->set_flashdata('error', 'Duplicate loan entry detected.');
+    if (!$person) {
+        echo json_encode(['status' => 'error', 'message' => 'Personnel not found.']);
+        return;
+    }
+
+    // Match rateType → type_rate (e.g., 'Month' = 'monthly')
+    $rateMap = ['Hour' => 'hourly', 'Day' => 'daily', 'Month' => 'monthly'];
+    $mappedRate = $rateMap[$person->rateType] ?? '';
+
+    $loans = $this->db->get_where('loans', ['type_rate' => $mappedRate])->result();
+
+    echo json_encode([
+        'status' => 'success',
+        'loans' => $loans,
+        'person' => $person
+    ]);
+}
+public function update_personnel()
+{
+    $personnelID = $this->input->post('personnelID');
+
+    $data = [
+        'first_name'        => $this->input->post('first_name'),
+        'middle_name'       => $this->input->post('middle_name'),
+        'last_name'         => $this->input->post('last_name'),
+        'name_ext'          => $this->input->post('name_ext'),
+        'birthdate'         => $this->input->post('birthdate'),
+        'gender'            => $this->input->post('gender'),
+        'civil_status'      => $this->input->post('civil_status'),
+        'address'           => $this->input->post('address'),
+        'contact_number'    => $this->input->post('contact_number'),
+        'email'             => $this->input->post('email'),
+        'position'          => $this->input->post('position'),
+        'rateType'          => $this->input->post('rateType'),
+        'rateAmount'        => $this->input->post('rateAmount'),
+        'philhealth_number' => $this->input->post('philhealth_number'),
+        'pagibig_number'    => $this->input->post('pagibig_number'),
+        'sss_number'        => $this->input->post('sss_number'),
+        'tin_number'        => $this->input->post('tin_number'),
+    ];
+
+    $this->db->where('personnelID', $personnelID);
+    if ($this->db->update('personnel', $data)) {
+        $this->session->set_flashdata('success', 'Personnel updated successfully.');
     } else {
-        $data = [
-            'personnelID' => $personnelID,
-            'loan_description' => $description,
-            'loan_type' => $type,
+        $this->session->set_flashdata('error', 'Failed to update personnel.');
+    }
+
+    redirect('Loan/personnel_loan');
+}
+public function loans_view()
+{
+    $this->load->model('Loan_model');
+    $settingsID = $this->session->userdata('settingsID');
+$data['loans'] = $this->Loan_model->get_all_loans($settingsID);
+
+    $this->load->view('loans_view', $data);
+}
+public function add_loan_entry()
+{
+    $data = [
+        'settingsID'       => $this->session->userdata('settingsID'),
+        'loan_description' => $this->input->post('loan_description'),
+        'loan_amount'      => $this->input->post('loan_amount'),
+        'loan_type'        => $this->input->post('loan_type'),
+        'rateType'         => $this->input->post('rateType'),
+        'service_charge'   => $this->input->post('service_charge'),
+        'status'           => 1,
+        'created_at'       => date('Y-m-d H:i:s')
+    ];
+    $this->Loan_model->insert_loan($data);
+    redirect('Loan/loans_view');
+}
+
+
+    public function update_loan_entry() {
+        $loan_id = $this->input->post('loan_id');
+        $data = array(
+            'loan_description' => $this->input->post('loan_description'),
             'loan_amount' => $this->input->post('loan_amount'),
-            'salary_basis' => $this->input->post('salary_basis')
-        ];
+            'loan_type' => strtolower($this->input->post('loan_type')),
+            'rateType' => strtolower($this->input->post('rateType')),
+            'service_charge' => $this->input->post('service_charge')
+        );
 
         if ($this->Loan_model->update_loan($loan_id, $data)) {
             $this->session->set_flashdata('success', 'Loan updated successfully.');
         } else {
             $this->session->set_flashdata('error', 'Failed to update loan.');
         }
+
+        redirect('Loan/loans_view');
     }
 
-    redirect('Loan');
-}
+    public function delete_loan_entry($loan_id) {
+        if ($this->Loan_model->delete_loan($loan_id)) {
+            $this->session->set_flashdata('success', 'Loan deleted successfully.');
+        } else {
+            $this->session->set_flashdata('error', 'Failed to delete loan.');
+        }
 
-// ------------------Cash Advance----------------------------
+        redirect('Loan/loans_view');
+    }
 
-     public function cash_advance()
+    public function get_loans_by_ratetype()
 {
-   
-    $this->load->model('Loan_model');
-    $this->load->model('Personnel_model'); 
+    $rateType = strtolower($this->input->post('rateType'));
+    $settingsID = $this->session->userdata('settingsID'); // multitenant filter
 
-    $data['cash_advances'] = $this->Loan_model->get_cash_advances();
+    $loans = $this->Loan_model->get_loans_by_rate($rateType, $settingsID);
 
-
-    $data['personnel'] = $this->Personnel_model->get_all_personnel($this->session->userdata('settingsID'));
-
-    $data['title'] = "Cash Advance";
-
-    $this->load->view('cash_advance', $data);
-}
-
-
-public function save_cash_advance()
-{
-    $this->load->model('Loan_model');
-
-    $data = [
-        'personnelID'    => $this->input->post('personnelID'),
-        'amount'         => $this->input->post('amount'),
-        'date_requested' => $this->input->post('date_requested'),
-        'deduct_on'      => $this->input->post('deduct_on'),
-        'status'         => 'pending'
-    ];
-
-    if ($this->Loan_model->insert_cash_advance($data)) {
-        $this->session->set_flashdata('success', 'Cash advance saved successfully.');
+    if (!empty($loans)) {
+        echo json_encode(['status' => 'success', 'loans' => $loans]);
     } else {
-        $this->session->set_flashdata('error', 'Failed to save cash advance.');
+        echo json_encode(['status' => 'error', 'message' => 'No eligible loans found.']);
     }
-
-    redirect('Loan/cash_advance');
 }
-public function update_cash_advance()
-{
-    $id = $this->input->post('cash_id');
-    $data = [
-        'personnelID'     => $this->input->post('personnelID'),
-        'amount'          => $this->input->post('amount'),
-        'date_requested'  => $this->input->post('date_requested'),
-        'deduct_on'       => $this->input->post('deduct_on')
-    ];
-
-    $this->Loan_model->update_cash_advance($id, $data);
-
-    $this->session->set_flashdata('success', 'Cash advance updated successfully.');
-    redirect('Loan/cash_advance');
-}
-
-
-public function mark_cash_advance_deducted($id)
-{
-    $this->load->model('Loan_model');
-
-    $undo = $this->input->get('undo');
-    $newStatus = $undo ? 'pending' : 'deducted';
-
-    if ($this->Loan_model->update_cash_advance_status($id, $newStatus)) {
-        $msg = $undo ? 'Cash advance marked as pending again.' : 'Cash advance marked as deducted.';
-        $this->session->set_flashdata('success', $msg);
-    } else {
-        $this->session->set_flashdata('error', 'Failed to update status.');
-    }
-
-    redirect('Loan/cash_advance');
-}
-public function delete_cash_advance($id)
-{
-    $this->load->model('Loan_model');
-
-    if ($this->Loan_model->delete_cash_advance($id)) {
-        $this->session->set_flashdata('success', 'Cash advance deleted successfully.');
-    } else {
-        $this->session->set_flashdata('error', 'Failed to delete cash advance.');
-    }
-
-    redirect('Loan/cash_advance');
-}
-
-
-// -------------------------End Cash Advance ----------------
-//     ----------------------Supply Loan-------------------
-public function supply_loan()
-{
-    $this->load->model('Loan_model');
-    $data['personnel'] = $this->Loan_model->get_all_personnel();
-    $data['supply_loans'] = $this->Loan_model->get_supply_loans_from_loans(); // filtered from 'loans' table
-    
-    $this->load->view('supply_loan', $data);
-}
-
-
-
-public function save_supply_loan() {
-    $data = $this->input->post();
-    $personnel = $this->db->get_where('personnel', ['personnelID' => $data['personnelID']])->row();
-
-    if (!$personnel || $data['amount'] > $personnel->rateAmount * 2) {
-        $this->session->set_flashdata('error', 'Personnel not qualified for this loan amount.');
-        redirect('Loan/supply_loan');
-        return;
-    }
-
-    $insert = [
-        'personnelID' => $data['personnelID'],
-        'item_description' => $data['item_description'],
-        'loan_type' => $data['loan_type'],
-        'deduction_type' => $data['deduction_type'],
-        'amount' => $data['amount'],
-        'date_purchased' => $data['date_purchased'],
-        'status' => 'pending'
-    ];
-    $this->db->insert('supply_loans', $insert);
-    $this->session->set_flashdata('success', 'Supply loan saved.');
-    redirect('Loan/supply_loan');
-}
-
-public function mark_supply_loan_deducted($id)
-{
-    $this->load->model('Loan_model');
-
-    $undo = $this->input->get('undo');
-    $newStatus = $undo ? 'pending' : 'deducted';
-
-    if ($this->Loan_model->update_supply_loan_status($id, $newStatus)) {
-        $msg = $undo ? 'Supply loan marked as pending again.' : 'Supply loan marked as deducted.';
-        $this->session->set_flashdata('success', $msg);
-    } else {
-        $this->session->set_flashdata('error', 'Failed to update status.');
-    }
-
-    redirect('Loan/supply_loan');
-}
-
-public function delete_supply_loan($id)
-{
-    $this->load->model('Loan_model');
-    if ($this->Loan_model->delete_supply_loan($id)) {
-        $this->session->set_flashdata('success', 'Supply loan deleted successfully.');
-    } else {
-        $this->session->set_flashdata('error', 'Failed to delete supply loan.');
-    }
-    redirect('Loan/supply_loan');
-}
-public function update_supply_loan()
-{
-    $this->load->model('Loan_model');
-
-    $id = $this->input->post('supply_id');
-    $data = [
-        'personnelID'      => $this->input->post('personnelID'),
-        'item_description' => $this->input->post('item_description'),
-        'amount'           => $this->input->post('amount'),
-        'date_purchased'   => $this->input->post('date_purchased')
-    ];
-
-    if ($this->Loan_model->update_supply_loan($id, $data)) {
-        $this->session->set_flashdata('success', 'Supply loan updated successfully.');
-    } else {
-        $this->session->set_flashdata('error', 'Failed to update supply loan.');
-    }
-
-    redirect('Loan/supply_loan');
-}
-public function save_personnel() {
-    $data = [
-        'first_name' => $this->input->post('first_name'),
-        'middle_name' => $this->input->post('middle_name'),
-        'last_name' => $this->input->post('last_name'),
-        'name_ext' => $this->input->post('name_ext'),
-        'contact_number' => $this->input->post('contact_number'),
-        'email' => $this->input->post('email'),
-        'birthdate' => $this->input->post('birthdate'),
-        'gender' => $this->input->post('gender'),
-        'civil_status' => $this->input->post('civil_status'),
-        'address' => $this->input->post('address'),
-        'position' => $this->input->post('position'),
-        'rateType' => $this->input->post('rateType'),
-        'rateAmount' => $this->input->post('rateAmount'),
-        'philhealth_number' => $this->input->post('philhealth_number'),
-        'pagibig_number' => $this->input->post('pagibig_number'),
-        'sss_number' => $this->input->post('sss_number'),
-        'tin_number' => $this->input->post('tin_number'),
-         'settingsID' => $this->session->userdata('settingsID')
-    ];
-
-    $this->db->insert('personnel', $data); 
-
-    $this->session->set_flashdata('success', 'Personnel added successfully.');
-    redirect('Loan/supply_loan');
-}
-
-
-
-public function delete_loan($loanID) {
-    if ($this->Loan_model->delete_loan($loanID)) {
-        $this->session->set_flashdata('success', 'Loan deleted.');
-    } else {
-        $this->session->set_flashdata('error', 'Failed to delete loan.');
-    }
-    redirect('Loan/supply_loan');
-}
-
-public function update_loan() {
-    $loanID = $this->input->post('loanID');
-    $data = [
-        'loan_description' => $this->input->post('item_description'),
-        'loan_type' => $this->input->post('loan_type'),
-        'deduction_type' => $this->input->post('deduction_type'),
-        'loan_amount' => $this->input->post('amount'),
-        'date_issued' => $this->input->post('date_purchased')
-    ];
-    if ($this->Loan_model->update_loan($loanID, $data)) {
-        $this->session->set_flashdata('success', 'Loan updated.');
-    } else {
-        $this->session->set_flashdata('error', 'Update failed.');
-    }
-    redirect('Loan/supply_loan');
-}
-public function update_personnel($id)
-{
-    $data = [
-        'first_name'   => $this->input->post('first_name'),
-        'middle_name'  => $this->input->post('middle_name'),
-        'last_name'    => $this->input->post('last_name'),
-        'name_ext'     => $this->input->post('name_ext'),
-        'rateType'     => $this->input->post('rateType'),
-        'rateAmount'   => $this->input->post('rateAmount'),
-        'position'     => $this->input->post('position')
-    ];
-
-    $this->db->where('personnelID', $id);
-    $updated = $this->db->update('personnel', $data);
-
-    if ($updated) {
-        $this->session->set_flashdata('success', 'Personnel updated successfully.');
-    } else {
-        $this->session->set_flashdata('error', 'Failed to update personnel.');
-    }
-
-    redirect('Loan/supply_loan');
-}
-public function delete_personnel($id)
-{
-    $deleted = $this->db->delete('personnel', ['personnelID' => $id]);
-
-    if ($deleted) {
-        $this->session->set_flashdata('success', 'Personnel deleted successfully.');
-    } else {
-        $this->session->set_flashdata('error', 'Failed to delete personnel.');
-    }
-
-    redirect('Loan/supply_loan');
-}
-
-
-//     -------------------- End Supply Loan----------------
 public function save_personnel_loan()
 {
-    $this->load->model('Loan_model');
-    $data = $this->input->post();
+    $personnelID = $this->input->post('personnelID');
+    $loanID = $this->input->post('loan_id');
+    $loanAmount = $this->input->post('loan_amount');
+    $settingsID = $this->session->userdata('settingsID');
 
-    $personnel = $this->db->get_where('personnel', ['personnelID' => $data['personnelID']])->row();
-    $rateAmount = floatval($personnel->rateAmount);
+    // Check for duplicate (already assigned)
+    $exists = $this->db->get_where('personnelloans', [
+        'personnelID' => $personnelID,
+        'loan_id' => $loanID,
+        'status' => 1
+    ])->row();
 
-    if ($data['amount'] > $rateAmount * 2) {
-        $this->session->set_flashdata('error', 'Loan amount exceeds allowed maximum for this personnel.');
-        redirect('Loan/supply_loan');
-        return;
+    if ($exists) {
+        $this->session->set_flashdata('error', 'Loan already assigned to this personnel.');
+    } else {
+        $data = [
+            'personnelID' => $personnelID,
+            'loan_id'     => $loanID, // Correct column name
+            'amount'      => $loanAmount, // Use `amount`, not `loan_amount`
+            'settingsID'  => $settingsID,
+            'created_at'  => date('Y-m-d H:i:s'),
+            'status'      => 1
+        ];
+        $this->db->insert('personnelloans', $data);
+        $this->session->set_flashdata('success', 'Loan successfully assigned.');
     }
 
-    $loanData = [
-        'personnelID' => $data['personnelID'],
-        'loan_description' => $data['item_description'],
-        'loan_type' => $data['loan_type'],
-        'deduction_type' => $data['deduction_type'],
-        'loan_amount' => $data['amount'],
-        'date_issued' => $data['date_purchased'],
-        'status' => 'pending',
-        'loan_category' => 'supply',
-        'salary_basis' => $personnel->rateType
-    ];
-
-    $this->Loan_model->insert_loan($loanData);
-    $this->session->set_flashdata('success', 'Loan assigned successfully.');
-    redirect('Loan/supply_loan');
-}
-public function approve($id) {
-    $this->load->model('Loan_model');
-    $this->Loan_model->update_loan_status($id, 'approved');
-    $this->session->set_flashdata('success', 'Loan approved successfully.');
-    redirect('Loan');
+    redirect('Loan/personnel_loan');
 }
 
-public function disapprove($id) {
-    $this->load->model('Loan_model');
-    $this->Loan_model->update_loan_status($id, 'disapproved');
-    $this->session->set_flashdata('error', 'Loan disapproved.');
-    redirect('Loan');
-} 
 
-
-    // Approve via AJAX
-public function ajax_approve()
-{
-    $loan_id = $this->input->post('loan_id');
-    $success = $this->Loan_model->update_loan_status($loan_id, 'approved');
-
-    echo json_encode(['success' => $success]);
-}
-
-// Disapprove via AJAX
-public function ajax_disapprove()
-{
-    $loan_id = $this->input->post('loan_id');
-    $success = $this->Loan_model->update_loan_status($loan_id, 'disapproved');
-
-    echo json_encode(['success' => $success]);
-}
-
-// Delete via AJAX
-public function ajax_delete()
-{
-    $loan_id = $this->input->post('loan_id');
-    $success = $this->Loan_model->delete_loan($loan_id);
-
-    echo json_encode(['success' => $success]);
-}
-
-public function save_personnel_from_supply_loan()
-{
-    $data = [
-        'first_name'       => $this->input->post('first_name'),
-        'middle_name'      => $this->input->post('middle_name'),
-        'last_name'        => $this->input->post('last_name'),
-        'name_ext'         => $this->input->post('name_ext'),
-        'contact_number'   => $this->input->post('contact_number'),
-        'email'            => $this->input->post('email'),
-        'birthdate'        => $this->input->post('birthdate'),
-        'gender'           => $this->input->post('gender'),
-        'civil_status'     => $this->input->post('civil_status'),
-        'address'          => $this->input->post('address'),
-        'position'         => $this->input->post('position'),
-        'rateType'         => $this->input->post('rateType'),
-        'rateAmount'       => $this->input->post('rateAmount'),
-        'philhealth_number'=> $this->input->post('philhealth_number'),
-        'pagibig_number'   => $this->input->post('pagibig_number'),
-        'sss_number'       => $this->input->post('sss_number'),
-        'tin_number'       => $this->input->post('tin_number')
-    ];
-
-    $this->db->insert('personnel', $data);
-
-    $this->session->set_flashdata('success', 'Personnel successfully added.');
-    redirect('Loan/supply_loan');
-}
 
 }
