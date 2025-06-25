@@ -16,14 +16,47 @@ class Payroll extends CI_Controller {
         $this->load->view('payroll/generate', $data);
     }
 
-    public function generate() {
-        $cutoff = $this->input->post('cutoff');
-        $dateFrom = $this->input->post('date_from');
-        $dateTo = $this->input->post('date_to');
+    // public function generate() {
+    //     $cutoff = $this->input->post('cutoff');
+    //     $dateFrom = $this->input->post('date_from');
+    //     $dateTo = $this->input->post('date_to');
 
-        $payroll_data = $this->Payroll_model->generate_payroll($dateFrom, $dateTo, $cutoff);
-        $this->load->view('payroll/result', ['payroll' => $payroll_data]);
+    //     $payroll_data = $this->Payroll_model->generate_payroll($dateFrom, $dateTo, $cutoff);
+    //     $this->load->view('payroll/result', ['payroll' => $payroll_data]);
+    // }
+    public function generate() {
+    $cutoff = $this->input->post('cutoff');
+    $dateFrom = $this->input->post('date_from');
+    $dateTo = $this->input->post('date_to');
+
+    $settingsID = $this->session->userdata('settingsID');
+
+    // Generate payroll as usual
+    $payroll_data = $this->Payroll_model->generate_payroll($dateFrom, $dateTo, $cutoff);
+
+    // Auto-deduct cash advances due this cutoff
+    $this->load->model('Cashadvance_model');
+    $due_advances = $this->Cashadvance_model->get_due_cash_advances($cutoff, $settingsID);
+
+    foreach ($due_advances as $advance) {
+        // Mark as deducted
+        $this->Cashadvance_model->mark_cash_advance_deducted($advance->id);
+
+        // Optional: Save as payroll deduction record
+        $this->db->insert('payroll_deductions', [
+            'personnelID' => $advance->personnelID,
+            'amount' => $advance->amount,
+            'description' => 'Cash Advance',
+            'cutoff' => $cutoff,
+            'deducted_on' => date('Y-m-d'),
+            'settingsID' => $settingsID
+        ]);
     }
+
+    // Load results view
+    $this->load->view('payroll/result', ['payroll' => $payroll_data]);
+}
+
 
     public function save() {
         $payroll = $this->input->post('payroll'); // assume it's an array

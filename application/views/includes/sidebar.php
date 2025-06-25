@@ -28,6 +28,18 @@
                             <li><a href="<?= base_url(); ?>Personnel/manage"> Personnel List</a></li>
                         </ul>
                     </li>
+                     <li>
+                        <a href="javascript: void(0);" class="waves-effect">
+                            <i class="fas fa-hand-holding-usd"></i>
+                            <span> Borrow </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+
+                        <ul class="nav-second-level nav" aria-expanded="false">
+                            <li><a href="<?= base_url('Cashadvance') ?>">Cash Advance</a></li>
+                            <li><a href="<?= base_url('Material') ?>">Materials</a></li>
+                        </ul>
+                    </li>
 
  <li>
                         <a href="javascript: void(0);" class="waves-effect">

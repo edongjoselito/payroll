@@ -182,6 +182,71 @@ public function save_personnel_loan()
     redirect('Loan/personnel_loan');
 }
 
+// -----------CASH ADVANCED------------
+// public function cashadvance()
+// {
+//     $settingsID = $this->session->userdata('settingsID');
 
+//     $data['personnel'] = $this->db->where('settingsID', $settingsID)->get('personnel')->result();
+
+//     $this->db->select("ca.*, CONCAT(p.first_name, ' ', COALESCE(p.middle_name, ''), ' ', p.last_name) AS full_name");
+//     $this->db->from('cashadvance ca');
+//     $this->db->join('personnel p', 'p.personnelID = ca.personnelID');
+//     $this->db->where('ca.settingsID', $settingsID);
+//     $data['cash_advances'] = $this->db->get()->result();
+
+//     $this->load->view('cashadvance_view', $data);
+// }
+
+// public function save_cash_advance()
+// {
+//     $data = [
+//         'personnelID' => $this->input->post('personnelID'),
+//         'settingsID' => $this->session->userdata('settingsID'),
+//         'amount' => $this->input->post('amount'),
+//         'date_requested' => $this->input->post('date_requested'),
+//         'deduct_on' => $this->input->post('deduct_on'),
+//         'status' => 'pending'
+//     ];
+
+//     $this->db->insert('cashadvance', $data);
+//     $this->session->set_flashdata('success', 'Cash advance added successfully.');
+//     redirect('Loan/cashadvance');
+// }
+
+// public function update_cash_advance()
+// {
+//     $id = $this->input->post('cash_id');
+//     $data = [
+//         'personnelID' => $this->input->post('personnelID'),
+//         'amount' => $this->input->post('amount'),
+//         'date_requested' => $this->input->post('date_requested'),
+//         'deduct_on' => $this->input->post('deduct_on')
+//     ];
+
+//     $this->db->where('id', $id)->update('cashadvance', $data);
+//     $this->session->set_flashdata('success', 'Cash advance updated.');
+//     redirect('Loan/cashadvance');
+// }
+
+// public function delete_cash_advance($id)
+// {
+//     $this->db->where('id', $id)->delete('cashadvance');
+//     $this->session->set_flashdata('success', 'Cash advance deleted.');
+//     redirect('Loan/cashadvance');
+// }
+
+// public function mark_cash_advance_deducted($id)
+// {
+//     $undo = $this->input->get('undo');
+//     $status = ($undo == 1) ? 'pending' : 'deducted';
+
+//     $this->db->where('id', $id)->update('cashadvance', ['status' => $status]);
+//     $msg = $undo ? 'Deduction undone.' : 'Cash advance marked as deducted.';
+//     $this->session->set_flashdata('success', $msg);
+//     redirect('Loan/cashadvance');
+// }
+
+// -----------END CASH ADVANCED-------
 
 }
