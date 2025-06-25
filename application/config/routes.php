@@ -11,3 +11,4 @@ $route['Page/addNewSuperAdmin'] = 'Page/addNewSuperAdmin';
 
 $route['Loan/personnel_loan'] = 'Loan/personnel_loan';
 
+$route['Material/update'] = 'Material/update';

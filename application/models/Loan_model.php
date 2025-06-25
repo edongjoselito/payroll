@@ -74,4 +74,24 @@ public function get_assigned_loans($settingsID) {
 }
 
 
+
+// CASH ADVANCED---------------------
+// CASH ADVANCE
+    public function insert_cash_advance($data)
+    {
+        return $this->db->insert('cashadvance', $data);
+    }
+
+    public function update_cash_advance($id, $data)
+    {
+        return $this->db->where('id', $id)->update('cashadvance', $data);
+    }
+
+    public function delete_cash_advance($id)
+    {
+        return $this->db->delete('cashadvance', ['id' => $id]);
+    }
+
+    
+
 }

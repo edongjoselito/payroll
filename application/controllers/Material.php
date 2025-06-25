@@ -1,50 +1,37 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Material extends CI_Controller {  // <--- Must be exactly 'Material'
+class Material extends CI_Controller {
+
     public function __construct() {
         parent::__construct();
-        $this->load->model('Cashadvance_model'); // shared
-        $this->load->model('Personnel_model');
+        $this->load->model('Material_model');
+        $this->load->helper('url');
+        $this->load->library('session');
+
+        // Optional: Ensure only logged-in users can access
+        if (!$this->session->userdata('logged_in')) {
+            redirect('login');
+        }
     }
 
-public function index() {
-    $settingsID = $this->session->userdata('settingsID');
-    $data['materials'] = $this->Cashadvance_model->get_material_items(); // create this method
-    $data['materials_loan'] = $this->Cashadvance_model->get_all_material_loans($settingsID);
-    $data['personnel'] = $this->Personnel_model->get_all_personnel($settingsID);
-    $this->load->view('materialloan_view', $data);
-}
+    public function index() {
+        $settingsID = $this->session->userdata('settingsID');
+        $data['material_loans'] = $this->Material_model->get_material_loans($settingsID);
+        $data['personnel_list'] = $this->Material_model->get_personnel($settingsID);
 
-
+        $this->load->view('materials_loan_view', $data);
+    }
 
     public function save() {
-        $data = [
-            'personnelID'     => $this->input->post('personnelID'),
-            'amount'          => $this->input->post('amount'),
-            'date_requested'  => $this->input->post('date_requested'),
-            'deduct_on'       => $this->input->post('deduct_on'),
-            'remarks'         => $this->input->post('remarks'),
-            'loan_type'       => 'material', // distinguishes from cash
-            'settingsID'      => $this->session->userdata('settingsID'),
-            'status'          => 'pending'
-        ];
-
-        if ($this->Cashadvance_model->insert($data)) {
-            $this->session->set_flashdata('success', 'Material loan added.');
-        } else {
-            $this->session->set_flashdata('error', 'Failed to add material loan.');
-        }
-
+        $this->Material_model->save_material_loan($this->input->post());
+        $this->session->set_flashdata('success', 'Material loan saved successfully!');
         redirect('Material');
     }
 
     public function delete($id) {
-        if ($this->Cashadvance_model->delete($id)) {
-            $this->session->set_flashdata('success', 'Material loan deleted.');
-        } else {
-            $this->session->set_flashdata('error', 'Failed to delete record.');
-        }
+        $this->Material_model->delete_material_loan($id);
+        $this->session->set_flashdata('success', 'Material loan deleted successfully!');
         redirect('Material');
     }
 }

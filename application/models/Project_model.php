@@ -242,4 +242,9 @@ public function getPayrollData($settingsID, $projectID, $start, $end, $rateType 
 }
 
 
+
+
+public function getProjectBySettingsID($settingsID) {
+    return $this->db->where('settingsID', $settingsID)->get('project')->result();
+}
 }
