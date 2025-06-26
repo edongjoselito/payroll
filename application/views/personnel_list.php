@@ -137,7 +137,6 @@
                                 <option <?= ($p->civil_status == 'Widow') ? 'selected' : '' ?>>Widow</option>
                             </select>
                         </div>
-                       
                     </div>
 
                     <div class="form-group">
@@ -145,26 +144,24 @@
                         <textarea class="form-control" name="address" rows="2"><?= $p->address ?></textarea>
                     </div>
 
-                     <div class="form-row">
-
-               
-                         <div class="form-group col-md-4">
-                               <label>Position</label>
-                                <input type="text" class="form-control" name="position" value="<?= $p->position ?>" required>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label>Position</label>
+                            <input type="text" class="form-control" name="position" value="<?= $p->position ?>" required>
                         </div>
-                            <div class="form-group col-md-4">
-                                <label>Salary Type</label>
-                                <select name="rateType" class="form-control" required>
-                                    <option value="Hour" <?= $p->rateType == 'Hour' ? 'selected' : '' ?>>Per Hour</option>
-                                    <option value="Day" <?= $p->rateType == 'Day' ? 'selected' : '' ?>>Per Day</option>
-                                    <option value="Month" <?= $p->rateType == 'Month' ? 'selected' : '' ?>>Per Month</option>
-                                </select>
-                            </div>
-                            <div class="form-group col-md-4">
-                               <label>Salary</label>
-                                <input type="text" class="form-control" name="rateAmount" value="<?= $p->rateAmount ?>" required>
+                        <div class="form-group col-md-4">
+                            <label>Salary Type</label>
+                            <select name="rateType" class="form-control" required>
+                                <option value="Hour" <?= $p->rateType == 'Hour' ? 'selected' : '' ?>>Per Hour</option>
+                                <option value="Day" <?= $p->rateType == 'Day' ? 'selected' : '' ?>>Per Day</option>
+                                <option value="Month" <?= $p->rateType == 'Month' ? 'selected' : '' ?>>Per Month</option>
+                            </select>
                         </div>
+                        <div class="form-group col-md-4">
+                            <label>Salary</label>
+                            <input type="text" class="form-control" name="rateAmount" value="<?= $p->rateAmount ?>" required>
                         </div>
+                    </div>
 
                     <div class="form-row">
                         <div class="form-group col-md-3">
@@ -175,8 +172,7 @@
                             <label>Pag-IBIG Number</label>
                             <input class="form-control" name="pagibig_number" value="<?= $p->pagibig_number ?>">
                         </div>
-                        
-                            <div class="form-group col-md-3">
+                        <div class="form-group col-md-3">
                             <label>SSS Number</label>
                             <input class="form-control" name="sss_number" value="<?= $p->sss_number ?>">
                         </div>
@@ -184,7 +180,21 @@
                             <label>TIN Number</label>
                             <input class="form-control" name="tin_number" value="<?= $p->tin_number ?>">
                         </div>
-                        
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label>SSS Deduction</label>
+                            <input type="text" class="form-control" name="sss_deduct" value="<?= $p->sss_deduct ?>">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Pag-Ibig Deduction</label>
+                            <input type="text" class="form-control" name="pagibig_deduct" value="<?= $p->pagibig_deduct ?>">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>PhilHealth Deduction</label>
+                            <input type="text" class="form-control" name="philhealth_deduct" value="<?= $p->philhealth_deduct ?>">
+                        </div>
                     </div>
                 </div>
 
@@ -196,6 +206,7 @@
         </div>
     </div>
 </div>
+
 
 
 
@@ -278,7 +289,6 @@
                                 <option>Widow</option>
                             </select>
                         </div>
-                        
                     </div>
 
                     <div class="form-group">
@@ -286,28 +296,24 @@
                         <textarea class="form-control" name="address" rows="2"></textarea>
                     </div>
 
-                    
-                      <div class="form-row">
-
-               
-                         <div class="form-group col-md-4">
-                               <label>Position</label>
-                                <input type="text" class="form-control" name="position" required>
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label>Position</label>
+                            <input type="text" class="form-control" name="position" required>
                         </div>
-                           <div class="form-group col-md-4">
-                               <label>Salary Type</label>
+                        <div class="form-group col-md-4">
+                            <label>Salary Type</label>
                             <select name="rateType" class="form-control" required>
                                 <option value="Hour">Per Hour</option>
                                 <option value="Day">Per Day</option>
                                 <option value="Month">Per Month</option>
-
                             </select>
                         </div>
-                            <div class="form-group col-md-4">
-                               <label>Salary</label>
-                                <input type="text" class="form-control" name="rateAmount" required>
+                        <div class="form-group col-md-4">
+                            <label>Salary</label>
+                            <input type="text" class="form-control" name="rateAmount" required>
                         </div>
-                        </div>
+                    </div>
 
                     <div class="form-row">
                         <div class="form-group col-md-3">
@@ -327,6 +333,21 @@
                             <input class="form-control" name="tin_number">
                         </div>
                     </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label>SSS Deduction</label>
+                            <input type="text" class="form-control" name="sss_deduct">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>Pag-Ibig Deduction</label>
+                            <input type="text" class="form-control" name="pagibig_deduct">
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label>PhilHealth Deduction</label>
+                            <input type="text" class="form-control" name="philhealth_deduct">
+                        </div>
+                    </div>
                 </div>
 
                 <div class="modal-footer">
@@ -337,6 +358,7 @@
         </div>
     </div>
 </div>
+
 
 
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
