@@ -87,4 +87,57 @@ public function get_materials() {
     public function delete_material($id) {
         $this->db->where('id', $id)->delete('cashadvance');
     }
+
+
+public function get_max_borrowable_amount($personnelID, $date)
+{
+    $this->db->where('personnelID', $personnelID);
+    $personnel = $this->db->get('personnel')->row();
+
+    if (!$personnel) return 0;
+
+    $rateType = strtolower($personnel->rateType);
+    $rateAmount = floatval($personnel->rateAmount);
+    $sss = floatval($personnel->sss_deduct);
+    $pagibig = floatval($personnel->pagibig_deduct);
+    $philhealth = floatval($personnel->philhealth_deduct);
+
+    // Get attendance count on this date
+    $this->db->where('personnelID', $personnelID);
+    $this->db->where('attendance_date', $date);
+    $daysPresent = $this->db->count_all_results('personnelattendance');
+
+    // Calculate salary based on rateType
+    $salary = 0;
+    if ($rateType == 'hour' || $rateType == 'hourly') {
+        $this->db->select_sum('workDuration');
+        $this->db->where('personnelID', $personnelID);
+        $this->db->where('attendance_date', $date);
+        $query = $this->db->get('personnelattendance')->row();
+        $hoursWorked = floatval($query->workDuration ?? 0);
+        $salary = $rateAmount * $hoursWorked;
+    } elseif ($rateType == 'day' || $rateType == 'daily') {
+        $salary = $rateAmount * $daysPresent;
+    } elseif ($rateType == 'month' || $rateType == 'monthly') {
+        $salary = ($daysPresent > 0) ? $rateAmount / 30 * $daysPresent : 0;
+    }
+
+    // Total Deduction
+    $total_deduct = $sss + $pagibig + $philhealth;
+
+    // Borrowable amount
+    $borrowable = $salary - $total_deduct;
+
+    return max(0, round($borrowable, 2));
+}
+
+
+
+
+
+
+
+
+
+
 }

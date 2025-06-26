@@ -181,6 +181,36 @@ public function save_personnel_loan()
 
     redirect('Loan/personnel_loan');
 }
+public function update_personnel_loan()
+{
+    $this->load->model('Loan_model');
+
+    $loanID = $this->input->post('loanID');
+    $data = [
+        'personnelID' => $this->input->post('personnelID'),
+        'loan_description' => $this->input->post('loan_description'),
+        'amount' => $this->input->post('amount'),
+        'date_assigned' => $this->input->post('date_assigned')
+    ];
+
+    if ($this->Loan_model->update_personnel_loan($loanID, $data)) {
+        $this->session->set_flashdata('success', 'Loan updated successfully.');
+    } else {
+        $this->session->set_flashdata('error', 'Failed to update loan.');
+    }
+    redirect('Loan/personnel_loan');
+}
+
+public function delete_personnel_loan($id)
+{
+    $this->load->model('Loan_model');
+    if ($this->Loan_model->delete_personnel_loan($id)) {
+        $this->session->set_flashdata('success', 'Loan deleted successfully.');
+    } else {
+        $this->session->set_flashdata('error', 'Failed to delete loan.');
+    }
+    redirect('Loan/personnel_loan');
+}
 
 // -----------CASH ADVANCED------------
 // public function cashadvance()

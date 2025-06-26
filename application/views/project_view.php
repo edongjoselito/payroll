@@ -138,7 +138,6 @@
                                                             <label>End Date</label>
                                                             <input type="date" name="end" class="form-control" required>
                                                           </div>
-                                                        </div>
                                                         <div class="form-group">
                                                         <label>Salary Type</label>
                                                         <select name="rateType" class="form-control">
@@ -148,7 +147,7 @@
                                                             <option value="Month">Per Month</option>
                                                         </select>
                                                         </div>
-
+                                                        </div>
                                                         <div class="modal-footer">
                                                           <button type="submit" class="btn btn-primary">Generate</button>
                                                           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>

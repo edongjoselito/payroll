@@ -92,6 +92,20 @@ public function get_assigned_loans($settingsID) {
         return $this->db->delete('cashadvance', ['id' => $id]);
     }
 
-    
+    public function update_personnel_loan($loanID, $data)
+{
+    $this->db->where('loanID', $loanID);
+    return $this->db->update('personnelloans', $data);
+}
+
+public function delete_personnel_loan($id)
+{
+    return $this->db->delete('personnelloans', ['loanID' => $id]);
+}
+
+
+
+
+
 
 }

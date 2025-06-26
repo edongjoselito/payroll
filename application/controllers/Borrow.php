@@ -30,11 +30,20 @@ public function insert_cash_advance($data) {
     ];
     $this->db->insert('cashadvance', $insert);
 }
-    public function save_cash_advance() {
-        $this->Borrow_model->insert_cash_advance($this->input->post());
+   public function save_cash_advance() {
+    $data = $this->input->post();
+    $max = $this->Borrow_model->get_max_borrowable_amount($data['personnelID'], $data['date']);
+
+    if ($data['amount'] > $max) {
+        $this->session->set_flashdata('error', "Amount exceeds allowed cash advance. Max is ₱" . number_format($max, 2));
+    } else {
+        $this->Borrow_model->insert_cash_advance($data);
         $this->session->set_flashdata('success', 'Cash Advance Saved Successfully!');
-        redirect('Borrow/cash_advance');
     }
+
+    redirect('Borrow/cash_advance');
+}
+
 
     public function update_cash_advance() {
         $this->Borrow_model->update_cash_advance($this->input->post());
@@ -75,4 +84,9 @@ public function insert_cash_advance($data) {
         $this->session->set_flashdata('success', 'Material Loan Deleted Successfully!');
         redirect('Borrow/materials_loan');
     }
+
+
+
+
+    
 }

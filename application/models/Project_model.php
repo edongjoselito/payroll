@@ -205,7 +205,9 @@ public function getAttendanceLogs($settingsID, $projectID)
 
 public function getPayrollData($settingsID, $projectID, $start, $end, $rateType = null)
 {
-    $this->db->select('p.personnelID, p.first_name, p.last_name, p.position, p.rateType, p.rateAmount');
+    // Step 1: Get assigned personnel with static deductions
+    $this->db->select('p.personnelID, p.first_name, p.last_name, p.position, p.rateType, p.rateAmount,
+                      p.sss_deduct, p.pagibig_deduct, p.philhealth_deduct');
     $this->db->from('project_personnel_assignment a');
     $this->db->join('personnel p', 'p.personnelID = a.personnelID');
     $this->db->where('a.settingsID', $settingsID);
@@ -218,7 +220,7 @@ public function getPayrollData($settingsID, $projectID, $start, $end, $rateType 
     $this->db->order_by('p.last_name', 'ASC');
     $assignedPersonnel = $this->db->get()->result();
 
-    // Step 2: Get all attendance logs within date range
+    // Step 2: Get attendance logs
     $this->db->select('personnelID, attendance_date, attendance_status, workDuration');
     $this->db->from('personnelattendance');
     $this->db->where('settingsID', $settingsID);
@@ -227,20 +229,37 @@ public function getPayrollData($settingsID, $projectID, $start, $end, $rateType 
     $this->db->where('attendance_date <=', $end);
     $logs = $this->db->get()->result();
 
-    // Step 3: Group attendance by personnelID and date
     $logMap = [];
     foreach ($logs as $log) {
         $logMap[$log->personnelID][$log->attendance_date] = $log;
     }
 
-    // Step 4: Attach attendance to each assigned personnel
+    // Step 3: Get Cash Advance from `cashadvance` table
+    $this->db->select('personnelID, SUM(amount) as total_ca');
+    $this->db->from('cashadvance');
+    $this->db->where('settingsID', $settingsID);
+    $this->db->where('date >=', $start);
+    $this->db->where('date <=', $end);
+    $this->db->group_by('personnelID');
+    $cashAdvances = $this->db->get()->result();
+
+    $caMap = [];
+    foreach ($cashAdvances as $ca) {
+        $caMap[$ca->personnelID] = $ca->total_ca;
+    }
+
+    // Step 4: Merge attendance + deduction info
     foreach ($assignedPersonnel as &$p) {
         $p->logs = $logMap[$p->personnelID] ?? [];
+
+        $p->cash_advance = $caMap[$p->personnelID] ?? 0;
+        $p->sss = $p->sss_deduct ?? 0;
+        $p->pagibig = $p->pagibig_deduct ?? 0;
+        $p->philhealth = $p->philhealth_deduct ?? 0;
     }
 
     return $assignedPersonnel;
 }
-
 
 
 

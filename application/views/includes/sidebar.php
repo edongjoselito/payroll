@@ -28,7 +28,16 @@
                             <li><a href="<?= base_url(); ?>Personnel/manage"> Personnel List</a></li>
                         </ul>
                     </li>
-                   
+                     <li>
+                        <a href="javascript: void(0);" class="waves-effect">
+                            <i class="ion ion-md-cloud-upload"></i>
+                            <span> Projects </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <ul class="nav-second-level" aria-expanded="false">
+                            <li><a href="<?= base_url(); ?>Project/project_view">Project List</a></li>
+                        </ul>
+                    </li>
 
  <li>
                         <a href="javascript: void(0);" class="waves-effect">

@@ -56,8 +56,6 @@
     <?php endif; ?>
 </div>
 
-
-
 <table class="payroll-table">
   <thead>
     <tr>
@@ -75,9 +73,9 @@
         endwhile;
         ?>
         <th colspan="2">TOTAL TIME/DAYS</th>
+        <th rowspan="2">Total Deduction</th>
         <th rowspan="2">Total Amount</th>
-        <th rowspan="2">signature</th>
-
+        <th rowspan="2">Signature</th>
     </tr>
     <tr>
         <?php
@@ -133,17 +131,33 @@
         $remainingMinutes = $totalMinutes % 60;
         $totalTimeFormatted = $totalHours . ':' . str_pad($remainingMinutes, 2, '0', STR_PAD_LEFT);
 
-        // Calculate total amount
-        if ($row->rateType === 'Hour') {
-            $amount = ($totalMinutes / 60) * $row->rateAmount;
-        } elseif ($row->rateType === 'Day') {
-            $amount = $totalDays * $row->rateAmount;
-        } else {
-            $amount = 0;
-        }
+        // Compute Salary
+      if ($row->rateType === 'Hour') {
+    $salary = ($totalMinutes / 60) * $row->rateAmount;
+} elseif ($row->rateType === 'Day') {
+    $salary = $totalDays * $row->rateAmount;
+} elseif ($row->rateType === 'Month') {
+    $salary = ($row->rateAmount / 22) * $totalDays; 
+} else {
+    $salary = 0;
+}
+
+
+$total_deduction = $row->cash_advance + $row->sss + $row->pagibig + $row->philhealth;
+$amount = $salary - $total_deduction;
+
+        // Get deductions
+        $ca = $row->cash_advance ?? 0;
+        $sss = $row->sss ?? 0;
+        $pagibig = $row->pagibig ?? 0;
+        $philhealth = $row->philhealth ?? 0;
+
+        $total_deduction = $ca + $sss + $pagibig + $philhealth;
+        $amount = $salary - $total_deduction;
         ?>
         <td><?= $totalTimeFormatted ?></td>
         <td><?= $totalDays ?></td>
+        <td><?= number_format($total_deduction, 2) ?></td>
         <td><?= number_format($amount, 2) ?></td>
         <td></td>
     </tr>
