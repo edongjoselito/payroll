@@ -1,6 +1,3 @@
-<?php
-// payroll_report_view.php
-?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -57,7 +54,7 @@
 </div>
 
 <table class="payroll-table">
-  <thead>
+    <thead>
     <tr>
         <th rowspan="2">L/N</th>
         <th rowspan="2">NAME</th>
@@ -73,8 +70,13 @@
         endwhile;
         ?>
         <th colspan="2">TOTAL TIME/DAYS</th>
-        <th rowspan="2">Total Deduction</th>
-        <th rowspan="2">Total Amount</th>
+        <th>SSS</th>
+        <th>Pag-IBIG</th>
+        <th>PhilHealth</th>
+        <th>CA</th>
+        <th>Total Deduction</th>
+        <th>Gross Salary</th>
+        <th>Net Pay</th>
         <th rowspan="2">Signature</th>
     </tr>
     <tr>
@@ -88,81 +90,83 @@
         ?>
         <th>Time</th>
         <th>Days</th>
+        <th colspan="7"></th>
     </tr>
-</thead>
+    </thead>
 
-<tbody>
-<?php $ln = 1; foreach ($attendance_data as $row): ?>
-    <tr>
-        <td><?= $ln++ ?></td>
-        <td><?= htmlspecialchars($row->first_name . ' ' . $row->last_name) ?></td>
-        <td><?= htmlspecialchars($row->position) ?></td>
-        <td><?= $row->rateType === 'Day' ? number_format($row->rateAmount, 2) : '' ?></td>
-        <td><?= $row->rateType === 'Hour' ? number_format($row->rateAmount, 2) : '' ?></td>
+    <tbody>
+    <?php $ln = 1; foreach ($attendance_data as $row): ?>
+        <tr>
+            <td><?= $ln++ ?></td>
+            <td><?= htmlspecialchars($row->first_name . ' ' . $row->last_name) ?></td>
+            <td><?= htmlspecialchars($row->position) ?></td>
+            <td><?= $row->rateType === 'Day' ? number_format($row->rateAmount, 2) : '' ?></td>
+            <td><?= $row->rateType === 'Hour' ? number_format($row->rateAmount, 2) : '' ?></td>
 
-        <?php
-        $totalMinutes = 0;
-        $totalDays = 0;
-        $startDate = strtotime($start);
-        $endDate = strtotime($end);
+            <?php
+            $totalMinutes = 0;
+            $totalDays = 0;
+            $startDate = strtotime($start);
+            $endDate = strtotime($end);
 
-        while ($startDate <= $endDate):
-            $curDate = date('Y-m-d', $startDate);
-            $log = $row->logs[$curDate] ?? null;
+            while ($startDate <= $endDate):
+                $curDate = date('Y-m-d', $startDate);
+                $log = $row->logs[$curDate] ?? null;
 
-            if ($log && $log->attendance_status === 'Present') {
-                $parts = explode(':', $log->workDuration);
-                $hours = isset($parts[0]) ? (int)$parts[0] : 0;
-                $minutes = isset($parts[1]) ? (int)$parts[1] : 0;
-                $totalMinutes += ($hours * 60) + $minutes;
-                $totalDays++;
+                if ($log && $log->attendance_status === 'Present') {
+                    $parts = explode(':', $log->workDuration);
+                    $hours = isset($parts[0]) ? (int)$parts[0] : 0;
+                    $minutes = isset($parts[1]) ? (int)$parts[1] : 0;
+                    $totalMinutes += ($hours * 60) + $minutes;
+                    $totalDays++;
+                    echo "<td>{$log->workDuration}</td>";
+                } elseif ($log && $log->attendance_status === 'Absent') {
+                    echo "<td class='absent'>Absent</td>";
+                } else {
+                    echo "<td>-</td>";
+                }
 
-                echo "<td>{$log->workDuration}</td>";
-            } elseif ($log && $log->attendance_status === 'Absent') {
-                echo "<td class='absent'>Absent</td>";
+                $startDate = strtotime('+1 day', $startDate);
+            endwhile;
+
+            $totalHours = floor($totalMinutes / 60);
+            $remainingMinutes = $totalMinutes % 60;
+            $totalTimeFormatted = $totalHours . ':' . str_pad($remainingMinutes, 2, '0', STR_PAD_LEFT);
+
+            // Salary computation
+            if ($row->rateType === 'Hour') {
+                $salary = ($totalMinutes / 60) * $row->rateAmount;
+            } elseif ($row->rateType === 'Day') {
+                $salary = $totalDays * $row->rateAmount;
+            } elseif ($row->rateType === 'Month') {
+                $salary = ($row->rateAmount / 22) * $totalDays;
             } else {
-                echo "<td>-</td>";
+                $salary = 0;
             }
 
-            $startDate = strtotime('+1 day', $startDate);
-        endwhile;
+            // Deductions
+            $ca = $row->cash_advance ?? 0;
+            $sss = $row->sss ?? 0;
+            $pagibig = $row->pagibig ?? 0;
+            $philhealth = $row->philhealth ?? 0;
 
-        $totalHours = floor($totalMinutes / 60);
-        $remainingMinutes = $totalMinutes % 60;
-        $totalTimeFormatted = $totalHours . ':' . str_pad($remainingMinutes, 2, '0', STR_PAD_LEFT);
+            $total_deduction = $ca + $sss + $pagibig + $philhealth;
+            $netPay = $salary - $total_deduction;
+            ?>
 
-        // Compute Salary
-      if ($row->rateType === 'Hour') {
-    $salary = ($totalMinutes / 60) * $row->rateAmount;
-} elseif ($row->rateType === 'Day') {
-    $salary = $totalDays * $row->rateAmount;
-} elseif ($row->rateType === 'Month') {
-    $salary = ($row->rateAmount / 22) * $totalDays; 
-} else {
-    $salary = 0;
-}
-
-
-$total_deduction = $row->cash_advance + $row->sss + $row->pagibig + $row->philhealth;
-$amount = $salary - $total_deduction;
-
-        // Get deductions
-        $ca = $row->cash_advance ?? 0;
-        $sss = $row->sss ?? 0;
-        $pagibig = $row->pagibig ?? 0;
-        $philhealth = $row->philhealth ?? 0;
-
-        $total_deduction = $ca + $sss + $pagibig + $philhealth;
-        $amount = $salary - $total_deduction;
-        ?>
-        <td><?= $totalTimeFormatted ?></td>
-        <td><?= $totalDays ?></td>
-        <td><?= number_format($total_deduction, 2) ?></td>
-        <td><?= number_format($amount, 2) ?></td>
-        <td></td>
-    </tr>
-<?php endforeach; ?>
-</tbody>
+            <td><?= $totalTimeFormatted ?></td>
+            <td><?= $totalDays ?></td>
+            <td><?= number_format($sss, 2) ?></td>
+            <td><?= number_format($pagibig, 2) ?></td>
+            <td><?= number_format($philhealth, 2) ?></td>
+            <td><?= number_format($ca, 2) ?></td>
+            <td><?= number_format($total_deduction, 2) ?></td>
+            <td><?= number_format($salary, 2) ?></td>
+            <td><?= number_format($netPay, 2) ?></td>
+            <td></td>
+        </tr>
+    <?php endforeach; ?>
+    </tbody>
 </table>
 
 <div class="signature">

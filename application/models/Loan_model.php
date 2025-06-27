@@ -14,15 +14,19 @@ public function insert_loan($data) {
         return $this->db->insert('loans', $data);
     }
 
-    public function update_loan($loanID, $data) {
-        $this->db->where('loandID', $loanID);
-        return $this->db->update('loans', $data);
-    }
+   public function update_loan($loan_id, $data)
+{
+    $this->db->where('loan_id', $loan_id);
+    return $this->db->update('loans', $data);
+}
 
-    public function delete_loan($loanID) {
-        $this->db->where('loanID', $loanID);
-        return $this->db->delete('loans');
-    }
+
+   public function delete_loan($loan_id)
+{
+    $this->db->where('loan_id', $loan_id);
+    return $this->db->delete('loans');
+}
+
 
     public function get_loans_by_rate_type($rateType) {
         $this->db->where('rateType', $rateType);
@@ -39,9 +43,11 @@ public function insert_loan($data) {
 }
 
 
-    public function get_loan_by_id($loan_id) {
-        return $this->db->get_where('loans', ['loan_id' => $loan_id])->row();
-    }
+   public function get_loan_by_id($loan_id)
+{
+    return $this->db->get_where('loans', ['loan_id' => $loan_id])->row();
+}
+
     public function get_loans_by_rate($rateType, $settingsID)
 {
     return $this->db->where('rateType', $rateType)
@@ -55,6 +61,7 @@ public function insert_personnel_loan($data)
     return $this->db->insert('personnelloans', $data);
 }
 
+
 public function check_existing_personnel_loan($personnelID, $loan_id)
 {
     return $this->db->where('personnelID', $personnelID)
@@ -63,15 +70,21 @@ public function check_existing_personnel_loan($personnelID, $loan_id)
                     ->get('personnelloans')
                     ->num_rows() > 0;
 }
-public function get_assigned_loans($settingsID) {
-    $this->db->select('pl.*, p.first_name, p.last_name, p.position, l.loan_description');
+public function get_assigned_loans($settingsID)
+{
+    $this->db->select('pl.*, p.first_name, p.last_name, p.position, l.loan_description AS loan_name');
+
     $this->db->from('personnelloans pl');
-    $this->db->join('personnel p', 'p.personnelID = pl.personnelID');
-    $this->db->join('loans l', 'l.loan_id = pl.loan_id');
+    $this->db->join('personnel p', 'pl.personnelID = p.personnelID', 'left');
+    $this->db->join('loans l', 'pl.loan_id = l.loan_id', 'left');
     $this->db->where('pl.settingsID', $settingsID);
     $this->db->where('pl.status', 1);
     return $this->db->get()->result();
 }
+
+
+
+
 
 
 
@@ -92,11 +105,12 @@ public function get_assigned_loans($settingsID) {
         return $this->db->delete('cashadvance', ['id' => $id]);
     }
 
-    public function update_personnel_loan($loanID, $data)
+public function update_personnel_loan($loan_id, $data)
 {
-    $this->db->where('loanID', $loanID);
+    $this->db->where('loan_id', $loan_id);
     return $this->db->update('personnelloans', $data);
 }
+
 
 public function delete_personnel_loan($id)
 {
@@ -104,6 +118,16 @@ public function delete_personnel_loan($id)
 }
 
 
+public function get_cash_advance_within_range($personnelID, $start, $end)
+{
+    return $this->db->select_sum('amount')
+        ->where('personnelID', $personnelID)
+        ->where('date >=', $start)
+        ->where('date <=', $end)
+        ->get('cashadvance')
+        ->row()
+        ->amount ?? 0;
+}
 
 
 
