@@ -180,26 +180,29 @@ public function get_loans_all()
 
 public function save_personnel_loan()
 {
+    $settingsID = $this->session->userdata('settingsID');
+    $personnelID = $this->input->post('personnelID');
+    $loan_id = $this->input->post('loan_id');
+
+    // Check if this personnel already has the same loan
+    if ($this->Loan_model->check_existing_personnel_loan($personnelID, $loan_id)) {
+        $this->session->set_flashdata('error', 'This personnel already has this loan assigned.');
+        redirect('Loan/personnel_loan');
+        return;
+    }
+
     $data = [
-        'settingsID'        => $this->session->userdata('settingsID'),
-        'personnelID'       => $this->input->post('personnelID'),
-        'loan_id'           => $this->input->post('loan_id'),
+        'settingsID'        => $settingsID,
+        'personnelID'       => $personnelID,
+        'loan_id'           => $loan_id,
         'loan_description'  => $this->input->post('loan_description'),
         'amount'            => $this->input->post('loan_amount'),
         'monthly_deduction' => $this->input->post('monthly_deduction'),
+        'status'            => 1,
         'created_at'        => date('Y-m-d H:i:s'),
     ];
 
-    // Validate personnelID to ensure it's not null
-    if (empty($data['personnelID'])) {
-        $this->session->set_flashdata('error', 'Personnel ID is missing or invalid.');
-        redirect('Loan/personnel_loan');
-    }
-
-    $this->load->model('Loan_model');
-    $inserted = $this->Loan_model->insert_personnel_loan($data);
-
-    if ($inserted) {
+    if ($this->Loan_model->assign_personnel_loan($data)) {
         $this->session->set_flashdata('success', 'Loan assigned successfully.');
     } else {
         $this->session->set_flashdata('error', 'Failed to assign loan.');
@@ -207,6 +210,12 @@ public function save_personnel_loan()
 
     redirect('Loan/personnel_loan');
 }
+
+
+
+
+
+
 
 
 
@@ -314,5 +323,6 @@ public function delete_personnel_loan($loanID)
 // }
 
 // -----------END CASH ADVANCED-------
+
 
 }

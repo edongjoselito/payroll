@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Payroll Report</title>
+    <?php include('includes/head.php'); ?>
     <style>
         body {
             font-family: 'Calibri', 'Arial', sans-serif;
@@ -106,7 +107,7 @@
         <th>SSS</th>
         <th>Pag-IBIG</th>
         <th>PhilHealth</th>
-        <th>CA</th>
+        <th>Cash Advance</th>
         <th>Loan</th>
         <th>Total Deduction</th>
         <th>Gross Salary</th>
@@ -198,9 +199,7 @@
 <td><?= number_format($ca, 2) ?></td>
 <?php
 $loanDisplay = number_format($loan, 2);
-if ($loan == 0) {
-    $loanDisplay .= ' (Fully Paid)';
-}
+
 ?>
 <td><?= $loanDisplay ?></td>
 
@@ -215,16 +214,17 @@ if ($loan == 0) {
 </table>
 
 <div class="signature">
-    <div>
+    <div><br><br><br>
         Prepared by:<br><br><br>
         <strong>Kimmy T. Aban</strong><br>
         OFC-Admin
     </div>
-    <div>
+    <div><br><br><br>
         Checked by:<br><br><br>
         <strong>Eloisa A. Cabanilla</strong><br>
         Admin/Finance Mngr.
     </div>
 </div>
+
 </body>
 </html>

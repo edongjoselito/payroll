@@ -79,16 +79,22 @@ public function insert_personnel_loan($data)
                         ->num_rows() > 0;
     }
 
-    public function get_assigned_loans($settingsID)
-    {
-        $this->db->select('pl.*, p.first_name, p.last_name, p.position, l.loan_description AS loan_name');
-        $this->db->from('personnelloans pl');
-        $this->db->join('personnel p', 'pl.personnelID = p.personnelID', 'left');
-        $this->db->join('loans l', 'pl.loan_id = l.loan_id', 'left');
-        $this->db->where('pl.settingsID', $settingsID);
-        $this->db->where('pl.status', 1);
-        return $this->db->get()->result();
-    }
+public function get_assigned_loans($settingsID)
+{
+    $this->db->select('pl.*, p.first_name, p.last_name, p.position, l.loan_description as loan_name'); // Removed l.term_months
+    $this->db->from('personnelloans pl');
+    $this->db->join('personnel p', 'p.personnelID = pl.personnelID');
+    $this->db->join('loans l', 'l.loan_id = pl.loan_id');
+    $this->db->where('pl.settingsID', $settingsID);
+    $query = $this->db->get();
+    return $query->result();
+}
+public function assign_personnel_loan($data)
+{
+    return $this->db->insert('personnelloans', $data);
+}
+
+
 
   public function update_personnel_loan($settingsID, $personnelID, $loan_id, $data)
 {

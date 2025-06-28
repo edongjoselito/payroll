@@ -65,7 +65,7 @@
                                                 <td><?= $p->pagibig_number ?></td>
                                                 <td><?= $p->tin_number ?></td>
                                                 <td>
-                                                    <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal<?= $p->personnelID ?>">Edit</button>
+                                                    <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#editModal<?= $p->personnelID ?>">Edit</button>
                                                     <a href="<?= base_url('personnel/delete/'.$p->personnelID) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this record?')">Delete</a>
                                                 </td>
                                             </tr>
