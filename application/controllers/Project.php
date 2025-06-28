@@ -60,7 +60,9 @@ public function attendance_list($settingsID)
 
     $data['settingsID'] = $settingsID;
     $data['projectID'] = $projectID;
-    $data['project'] = $this->Project_model->getProjectBySettingsID($settingsID);
+    $data['project'] = $this->Project_model->getProjectDetails($settingsID, $projectID);
+
+    // $data['project'] = $this->Project_model->getProjectBySettingsID($settingsID);
     $data['attendance_logs'] = $this->Project_model->getAttendanceLogs($settingsID, $projectID);
 
     $this->load->view('attendance_list_view', $data);
@@ -201,8 +203,7 @@ public function payroll_report($settingsID)
     $projectID = $this->input->get('pid');
     $start     = $this->input->get('start');
     $end       = $this->input->get('end');
-    $rateType = $this->input->get('rateType');
-
+    $rateType  = $this->input->get('rateType');
 
     $this->load->model('Project_model');
 
@@ -216,8 +217,12 @@ public function payroll_report($settingsID)
     $data['projectID'] = $projectID;
     $data['start'] = $start;
     $data['end'] = $end;
-$data['project'] = $this->Project_model->getProjectDetails($settingsID, $projectID);
-$data['attendance_data'] = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end, $rateType);
+    
+    // Existing data fetch
+    $data['project'] = $this->Project_model->getProjectDetails($settingsID, $projectID);
+    $data['attendance_data'] = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end, $rateType);
+
+    $data['personnel_loans'] = $this->Project_model->getPersonnelLoans($settingsID, $projectID);
 
     $this->load->view('payroll_report_view', $data);
 }

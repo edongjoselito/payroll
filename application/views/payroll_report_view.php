@@ -5,49 +5,82 @@
     <title>Payroll Report</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            font-size: 11px;
-            margin: 0;
-            padding: 20px;
+            font-family: 'Calibri', 'Arial', sans-serif;
+            font-size: 13px;
+            margin: 20px;
+            color: #000;
+            background: #fff;
         }
-        .header, .footer {
+
+        .header {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
         }
-        .payroll-table {
+
+        .header h2 {
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .header p {
+            margin: 3px 0;
+            font-size: 14px;
+        }
+
+        table {
             width: 100%;
             border-collapse: collapse;
-            table-layout: fixed;
+            font-size: 13px;
         }
-        .payroll-table th,
-        .payroll-table td {
+
+        th, td {
             border: 1px solid #000;
-            padding: 3px;
+            padding: 6px 8px;
             text-align: center;
             vertical-align: middle;
         }
+
+        th {
+            background-color: #d9d9d9;
+            font-weight: bold;
+        }
+
+        .absent {
+            background-color: #f4cccc;
+            color: #000;
+        }
+
         .signature {
-            margin-top: 30px;
-            width: 100%;
+            margin-top: 50px;
             display: flex;
             justify-content: space-between;
+            font-size: 13px;
         }
+
         .signature div {
             width: 45%;
             text-align: center;
         }
-        .absent {
-            background-color: red;
-            color: white;
+
+        .signature strong {
+            margin-top: 10px;
+            display: block;
+            font-size: 14px;
+        }
+
+        @media print {
+            th, .absent {
+                -webkit-print-color-adjust: exact;
+            }
         }
     </style>
 </head>
 <body>
+
 <div class="header">
     <h2>PROJECT: <?= $project->projectTitle ?? 'N/A' ?></h2>
     <p>LOCATION: <?= $project->projectLocation ?? 'Unknown' ?></p>
     <p>PERIOD: <?= date('F d, Y', strtotime($start)) ?> - <?= date('F d, Y', strtotime($end)) ?></p>
-
     <?php if (!empty($_GET['rateType'])): ?>
         <p>SALARY TYPE: Per <?= htmlspecialchars($_GET['rateType']) ?></p>
     <?php endif; ?>
@@ -74,6 +107,7 @@
         <th>Pag-IBIG</th>
         <th>PhilHealth</th>
         <th>CA</th>
+        <th>Loan</th>
         <th>Total Deduction</th>
         <th>Gross Salary</th>
         <th>Net Pay</th>
@@ -150,20 +184,31 @@
             $pagibig = $row->pagibig ?? 0;
             $philhealth = $row->philhealth ?? 0;
 
-            $total_deduction = $ca + $sss + $pagibig + $philhealth;
+           $loan = $personnel_loans[$row->personnelID] ?? 0;
+             $total_deduction = $ca + $sss + $pagibig + $philhealth + $loan;
             $netPay = $salary - $total_deduction;
+
             ?>
 
             <td><?= $totalTimeFormatted ?></td>
             <td><?= $totalDays ?></td>
-            <td><?= number_format($sss, 2) ?></td>
-            <td><?= number_format($pagibig, 2) ?></td>
-            <td><?= number_format($philhealth, 2) ?></td>
-            <td><?= number_format($ca, 2) ?></td>
-            <td><?= number_format($total_deduction, 2) ?></td>
-            <td><?= number_format($salary, 2) ?></td>
-            <td><?= number_format($netPay, 2) ?></td>
-            <td></td>
+          <td><?= number_format($sss, 2) ?></td>
+<td><?= number_format($pagibig, 2) ?></td>
+<td><?= number_format($philhealth, 2) ?></td>
+<td><?= number_format($ca, 2) ?></td>
+<?php
+$loanDisplay = number_format($loan, 2);
+if ($loan == 0) {
+    $loanDisplay .= ' (Fully Paid)';
+}
+?>
+<td><?= $loanDisplay ?></td>
+
+<td><?= number_format($total_deduction, 2) ?></td>
+<td><?= number_format($salary, 2) ?></td>
+<td><?= number_format($netPay, 2) ?></td>
+<td></td>
+
         </tr>
     <?php endforeach; ?>
     </tbody>
@@ -171,12 +216,12 @@
 
 <div class="signature">
     <div>
-        Prepared by:<br><br>
+        Prepared by:<br><br><br>
         <strong>Kimmy T. Aban</strong><br>
         OFC-Admin
     </div>
     <div>
-        Checked by:<br><br>
+        Checked by:<br><br><br>
         <strong>Eloisa A. Cabanilla</strong><br>
         Admin/Finance Mngr.
     </div>

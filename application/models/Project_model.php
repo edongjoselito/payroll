@@ -203,6 +203,63 @@ public function getAttendanceLogs($settingsID, $projectID)
 
 
 
+// public function getPayrollData($settingsID, $projectID, $start, $end, $rateType = null)
+// {
+//     // Step 1: Get assigned personnel with static deductions
+//     $this->db->select('p.personnelID, p.first_name, p.last_name, p.position, p.rateType, p.rateAmount,
+//                       p.sss_deduct, p.pagibig_deduct, p.philhealth_deduct');
+//     $this->db->from('project_personnel_assignment a');
+//     $this->db->join('personnel p', 'p.personnelID = a.personnelID');
+//     $this->db->where('a.settingsID', $settingsID);
+//     $this->db->where('a.projectID', $projectID);
+
+//     if (!empty($rateType)) {
+//         $this->db->where('p.rateType', $rateType);
+//     }
+
+//     $this->db->order_by('p.last_name', 'ASC');
+//     $assignedPersonnel = $this->db->get()->result();
+
+//     // Step 2: Get attendance logs
+//     $this->db->select('personnelID, attendance_date, attendance_status, workDuration');
+//     $this->db->from('personnelattendance');
+//     $this->db->where('settingsID', $settingsID);
+//     $this->db->where('projectID', $projectID);
+//     $this->db->where('attendance_date >=', $start);
+//     $this->db->where('attendance_date <=', $end);
+//     $logs = $this->db->get()->result();
+
+//     $logMap = [];
+//     foreach ($logs as $log) {
+//         $logMap[$log->personnelID][$log->attendance_date] = $log;
+//     }
+
+//     // Step 3: Get Cash Advance from `cashadvance` table
+//     $this->db->select('personnelID, SUM(amount) as total_ca');
+//     $this->db->from('cashadvance');
+//     $this->db->where('settingsID', $settingsID);
+//     $this->db->where('date >=', $start);
+//     $this->db->where('date <=', $end);
+//     $this->db->group_by('personnelID');
+//     $cashAdvances = $this->db->get()->result();
+
+//     $caMap = [];
+//     foreach ($cashAdvances as $ca) {
+//         $caMap[$ca->personnelID] = $ca->total_ca;
+//     }
+
+//     // Step 4: Merge attendance + deduction info
+//     foreach ($assignedPersonnel as &$p) {
+//         $p->logs = $logMap[$p->personnelID] ?? [];
+
+//         $p->cash_advance = $caMap[$p->personnelID] ?? 0;
+//         $p->sss = $p->sss_deduct ?? 0;
+//         $p->pagibig = $p->pagibig_deduct ?? 0;
+//         $p->philhealth = $p->philhealth_deduct ?? 0;
+//     }
+
+//     return $assignedPersonnel;
+// }
 public function getPayrollData($settingsID, $projectID, $start, $end, $rateType = null)
 {
     // Step 1: Get assigned personnel with static deductions
@@ -234,7 +291,7 @@ public function getPayrollData($settingsID, $projectID, $start, $end, $rateType 
         $logMap[$log->personnelID][$log->attendance_date] = $log;
     }
 
-    // Step 3: Get Cash Advance from `cashadvance` table
+    // Step 3: Get Cash Advance
     $this->db->select('personnelID, SUM(amount) as total_ca');
     $this->db->from('cashadvance');
     $this->db->where('settingsID', $settingsID);
@@ -248,22 +305,86 @@ public function getPayrollData($settingsID, $projectID, $start, $end, $rateType 
         $caMap[$ca->personnelID] = $ca->total_ca;
     }
 
-    // Step 4: Merge attendance + deduction info
+    // Step 4: Merge all into each personnel
     foreach ($assignedPersonnel as &$p) {
         $p->logs = $logMap[$p->personnelID] ?? [];
-
         $p->cash_advance = $caMap[$p->personnelID] ?? 0;
         $p->sss = $p->sss_deduct ?? 0;
         $p->pagibig = $p->pagibig_deduct ?? 0;
         $p->philhealth = $p->philhealth_deduct ?? 0;
+
+        $loanDeduction = 0;
+
+        $this->db->select('loan_id, personnelID, amount, term_months, deduction_type, remaining_balance');
+        $this->db->where('personnelID', $p->personnelID);
+        $this->db->where('settingsID', $settingsID);
+        $this->db->where('status', 1);
+        $activeLoans = $this->db->get('personnelloans')->result();
+
+        foreach ($activeLoans as $loan) {
+            // Calculate how much to deduct per cutoff
+            switch (strtolower($loan->deduction_type)) {
+                case 'daily':
+                    $deductPerCutoff = ($loan->amount / $loan->term_months) / 22;
+                    break;
+                case 'weekly':
+                    $deductPerCutoff = ($loan->amount / $loan->term_months) / 4;
+                    break;
+                case 'monthly':
+                default:
+                    $deductPerCutoff = $loan->amount / $loan->term_months;
+                    break;
+            }
+
+            $remaining = ($loan->remaining_balance !== null) ? $loan->remaining_balance : $loan->amount;
+            $newRemaining = $remaining - $deductPerCutoff;
+
+            if ($newRemaining <= 0) {
+                $newRemaining = 0;
+                $this->db->where('loan_id', $loan->loan_id)->update('personnelloans', [
+                    'remaining_balance' => 0,
+                    'status' => 0
+                ]);
+            } else {
+                $this->db->where('loan_id', $loan->loan_id)->update('personnelloans', [
+                    'remaining_balance' => $newRemaining
+                ]);
+            }
+
+            $loanDeduction += $deductPerCutoff;
+        }
+
+        $p->loan = $loanDeduction;
     }
 
     return $assignedPersonnel;
 }
 
 
+// Pa display sa personnel lon in payroll_report
+public function getPersonnelLoans($settingsID)
+{
+    $this->db->select('pl.personnelID, SUM(pl.amount) AS loan_deduction');
+    $this->db->from('personnelloans pl');
+    $this->db->join('personnel p', 'pl.personnelID = p.personnelID');
+    $this->db->where('p.settingsID', $settingsID);
+    $this->db->group_by('pl.personnelID');
+    
+    $query = $this->db->get();
+    $result = [];
+    foreach ($query->result() as $row) {
+        $result[$row->personnelID] = $row->loan_deduction;
+    }
+    return $result;
+}
 
 public function getProjectBySettingsID($settingsID) {
-    return $this->db->where('settingsID', $settingsID)->get('project')->result();
+    return $this->db
+        ->where('settingsID', $settingsID)
+        ->get('project')
+        ->result();
 }
+
+
+// ---------------------------------------------
 }

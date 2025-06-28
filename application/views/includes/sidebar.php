@@ -54,13 +54,13 @@
 <li>
     <a href="javascript: void(0);" class="waves-effect">
         <i class="fas fa-hand-holding-usd"></i>
-        <span> Borrow </span>
+        <span> Deductions </span>
         <span class="menu-arrow"></span>
     </a>
 
     <ul class="nav-second-level nav" aria-expanded="false">
         <li><a href="<?= base_url(); ?>Borrow/cash_advance">Cash Advance</a></li>
-        <li><a href="<?= base_url(); ?>Borrow/materials_loan">Materials</a></li>
+        <li><a href="<?= base_url(); ?>Borrow/materials_loan">Others</a></li>
     </ul>
 </li>
 

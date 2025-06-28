@@ -2,9 +2,10 @@
 <html lang="en">
 <?php include('includes/head.php'); ?>
 <body>
-<link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.css">
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.css">
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/buttons.bootstrap4.min.css">
+
 <div id="wrapper">
     <?php include('includes/top-nav-bar.php'); ?>
     <?php include('includes/sidebar.php'); ?>
@@ -12,7 +13,6 @@
     <div class="content-page">
         <div class="content">
             <div class="container-fluid">
-
                 <div class="page-title-box d-flex justify-content-between align-items-center">
                     <h4 class="page-title">Manage Loans</h4>
                     <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#addLoanModal">
@@ -32,11 +32,9 @@
                             <table id="datatable" class="table table-bordered dt-responsive nowrap">
                                 <thead>
                                     <tr>
-                                        <th>Description</th>
-                                        <th>Amount</th>
-                                        <th>Loan Type</th>
-                                        <th>Rate Type</th>
-                                        <th>Service Charge</th>
+                                        <th>Loan Description</th>
+                                        <th>Loan Amount</th>
+                                        <th>Monthly Deduction</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -45,11 +43,9 @@
                                         <tr>
                                             <td><?= $loan->loan_description ?></td>
                                             <td>₱<?= number_format($loan->loan_amount, 2) ?></td>
-                                            <td><?= ucfirst($loan->loan_type) ?></td>
-                                            <td><?= ucfirst($loan->rateType) ?></td>
-                                            <td><?= number_format($loan->service_charge, 2) ?>%</td>
+                                            <td>₱<?= number_format($loan->monthly_deduction ?? 0, 2) ?></td>
                                             <td>
-                                                <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal<?= $loan->loan_id ?>">Edit</button>
+                                                <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#editModal<?= $loan->loan_id ?>">Edit</button>
                                                 <a href="<?= base_url('Loan/delete_loan_entry/'.$loan->loan_id) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this loan?')">Delete</a>
                                             </td>
                                         </tr>
@@ -71,26 +67,11 @@
                                                             </div>
                                                             <div class="form-group">
                                                                 <label>Loan Amount</label>
-                                                                <input type="number" name="loan_amount" class="form-control" value="<?= $loan->loan_amount ?>" step="0.01" required>
+                                                                <input type="number" name="loan_amount" class="form-control" step="0.01" value="<?= $loan->loan_amount ?>" required>
                                                             </div>
                                                             <div class="form-group">
-                                                                <label>Loan Type</label>
-                                                                <select name="loan_type" class="form-control" required>
-                                                                    <option <?= $loan->loan_type == 'short' ? 'selected' : '' ?>>Short Term</option>
-                                                                    <option <?= $loan->loan_type == 'long' ? 'selected' : '' ?>>Long Term</option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label>Rate Type</label>
-                                                                <select name="rateType" class="form-control" required>
-                                                                    <option <?= $loan->rateType == 'day' ? 'selected' : '' ?>>Per Day</option>
-                                                                    <option <?= $loan->rateType == 'week' ? 'selected' : '' ?>>Per Week</option>
-                                                                    <option <?= $loan->rateType == 'month' ? 'selected' : '' ?>>Per Month</option>
-                                                                </select>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label>Service Charge (%)</label>
-                                                                <input type="number" name="service_charge" class="form-control" step="0.01" value="<?= $loan->service_charge ?>" required>
+                                                                <label>Monthly Deduction</label>
+                                                                <input type="number" name="monthly_deduction" class="form-control" step="0.01" value="<?= $loan->monthly_deduction ?? 0 ?>" required>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
@@ -127,23 +108,8 @@
                                         <input type="number" name="loan_amount" class="form-control" step="0.01" required>
                                     </div>
                                     <div class="form-group">
-                                        <label>Loan Type</label>
-                                        <select name="loan_type" class="form-control" required>
-                                            <option value="short">Short Term</option>
-                                            <option value="long">Long Term</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Rate Type</label>
-                                        <select name="rateType" class="form-control" required>
-                                            <option value="day">Per Day</option>
-                                            <option value="week">Per Week</option>
-                                            <option value="month">Per Month</option>
-                                        </select>
-                                    </div>
-                                    <div class="form-group">
-                                        <label>Service Charge (%)</label>
-                                        <input type="number" name="service_charge" class="form-control" step="0.01" required>
+                                        <label>Monthly Deduction</label>
+                                        <input type="number" name="monthly_deduction" class="form-control" step="0.01" required>
                                     </div>
                                 </div>
                                 <div class="modal-footer">
@@ -161,6 +127,7 @@
     </div>
 </div>
 
+<!-- Scripts -->
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/datatables/jquery.dataTables.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.js"></script>

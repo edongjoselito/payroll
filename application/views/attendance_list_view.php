@@ -36,7 +36,8 @@
         <div class="d-flex justify-content-between align-items-center mb-2">
             <div>
                 <h4 class="page-title mb-1">Attendance Logs</h4>
-                <div class="text-muted small">Project: <strong><?= $project[0]->projectTitle ?? '' ?></strong></div>
+               <div class="text-muted small">Project: <strong><?= $project->projectTitle ?? '' ?></strong></div>
+
             </div>
             <a href="<?= base_url('project/project_view') ?>" class="btn btn-secondary btn-sm">
                  Back to Projects
