@@ -247,14 +247,16 @@ public function update_personnel_loan()
 }
 
 
-public function delete_personnel_loan($loanID)
+public function delete_personnel_loan($loan_id, $personnelID)
 {
-    $this->db->where('loan_id', $loanID); // ✅ Correct column name
+    $this->db->where('loan_id', $loan_id);
+    $this->db->where('personnelID', $personnelID);
     $this->db->delete('personnelloans');
 
     $this->session->set_flashdata('success', 'Personnel loan deleted successfully.');
     redirect('Loan/personnel_loan');
 }
+
 
 
 // -----------CASH ADVANCED------------

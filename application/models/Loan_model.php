@@ -81,7 +81,7 @@ public function insert_personnel_loan($data)
 
 public function get_assigned_loans($settingsID)
 {
-    $this->db->select('pl.*, p.first_name, p.last_name, p.position, l.loan_description as loan_name'); // Removed l.term_months
+    $this->db->select('pl.*, p.first_name, p.last_name, p.position, l.loan_description as loan_name'); 
     $this->db->from('personnelloans pl');
     $this->db->join('personnel p', 'p.personnelID = pl.personnelID');
     $this->db->join('loans l', 'l.loan_id = pl.loan_id');

@@ -66,7 +66,8 @@
           data-term="<?= $loan->term_months ?>">
           Edit
         </button>
-        <a href="<?= base_url('Loan/delete_personnel_loan/' . $loan->loan_id) ?>" 
+        <a href="<?= base_url('Loan/delete_personnel_loan/' . $loan->loan_id . '/' . $loan->personnelID) ?>"
+
            class="btn btn-danger btn-sm" 
            onclick="return confirm('Delete this loan?')">
            Delete
