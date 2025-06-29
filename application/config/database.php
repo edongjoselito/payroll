@@ -9,7 +9,7 @@ $db['default'] = array(
 
 	'hostname' => '127.0.0.1',
 	'username' => 'root',
-	'password' => '',
+	'password' => 'moth34board',
 	'database' => 'payroll',
 
 	'dbdriver' => 'mysqli',

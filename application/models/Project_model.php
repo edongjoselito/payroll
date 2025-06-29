@@ -262,7 +262,6 @@ public function getAttendanceLogs($settingsID, $projectID)
 // }
 public function getPayrollData($settingsID, $projectID, $start, $end, $rateType = null)
 {
-    // Step 1: Get assigned personnel with static deductions
     $this->db->select('p.personnelID, p.first_name, p.last_name, p.position, p.rateType, p.rateAmount,
                       p.sss_deduct, p.pagibig_deduct, p.philhealth_deduct');
     $this->db->from('project_personnel_assignment a');
@@ -274,10 +273,9 @@ public function getPayrollData($settingsID, $projectID, $start, $end, $rateType 
         $this->db->where('p.rateType', $rateType);
     }
 
-    $this->db->order_by('p.last_name', 'ASC');
     $assignedPersonnel = $this->db->get()->result();
 
-    // Step 2: Get attendance logs
+    // Attendance logs
     $this->db->select('personnelID, attendance_date, attendance_status, workDuration');
     $this->db->from('personnelattendance');
     $this->db->where('settingsID', $settingsID);
@@ -291,38 +289,44 @@ public function getPayrollData($settingsID, $projectID, $start, $end, $rateType 
         $logMap[$log->personnelID][$log->attendance_date] = $log;
     }
 
-    // Step 3: Get Cash Advance
-    $this->db->select('personnelID, SUM(amount) as total_ca');
+    // Categorized Deductions
+    $this->db->select('personnelID, description, SUM(amount) as total');
     $this->db->from('cashadvance');
     $this->db->where('settingsID', $settingsID);
     $this->db->where('date >=', $start);
     $this->db->where('date <=', $end);
-    $this->db->group_by('personnelID');
-    $cashAdvances = $this->db->get()->result();
+    $this->db->group_by(['personnelID', 'description']);
+    $deductions = $this->db->get()->result();
 
-    $caMap = [];
-    foreach ($cashAdvances as $ca) {
-        $caMap[$ca->personnelID] = $ca->total_ca;
+    $deductionMap = [];
+    foreach ($deductions as $d) {
+        $desc = strtolower(trim($d->description));
+        $deductionMap[$d->personnelID][$desc] = $d->total;
     }
 
-    // Step 4: Merge all into each personnel
     foreach ($assignedPersonnel as &$p) {
         $p->logs = $logMap[$p->personnelID] ?? [];
-        $p->cash_advance = $caMap[$p->personnelID] ?? 0;
+        $p->deductions = $deductionMap[$p->personnelID] ?? [];
+
+        $p->ca_cashadvance = $p->deductions['cash advance'] ?? 0;
+        $p->ca_hardhat = $p->deductions['hardhat'] ?? 0;
+        $p->ca_pondo = $p->deductions['pondo'] ?? 0;
+        $p->ca_hardware = $p->deductions['hardware'] ?? 0;
+        $p->ca_safety_shoes = $p->deductions['safety shoes'] ?? 0;
+
         $p->sss = $p->sss_deduct ?? 0;
         $p->pagibig = $p->pagibig_deduct ?? 0;
         $p->philhealth = $p->philhealth_deduct ?? 0;
 
+        // Get loans
         $loanDeduction = 0;
-
-        $this->db->select('loan_id, personnelID, amount, term_months, deduction_type, remaining_balance');
+        $this->db->select('loan_id, amount, term_months, deduction_type, remaining_balance');
         $this->db->where('personnelID', $p->personnelID);
         $this->db->where('settingsID', $settingsID);
         $this->db->where('status', 1);
         $activeLoans = $this->db->get('personnelloans')->result();
 
         foreach ($activeLoans as $loan) {
-            // Calculate how much to deduct per cutoff
             switch (strtolower($loan->deduction_type)) {
                 case 'daily':
                     $deductPerCutoff = ($loan->amount / $loan->term_months) / 22;
@@ -330,25 +334,19 @@ public function getPayrollData($settingsID, $projectID, $start, $end, $rateType 
                 case 'weekly':
                     $deductPerCutoff = ($loan->amount / $loan->term_months) / 4;
                     break;
-                case 'monthly':
                 default:
                     $deductPerCutoff = $loan->amount / $loan->term_months;
                     break;
             }
 
-            $remaining = ($loan->remaining_balance !== null) ? $loan->remaining_balance : $loan->amount;
+            $remaining = $loan->remaining_balance ?? $loan->amount;
             $newRemaining = $remaining - $deductPerCutoff;
 
+            $this->db->where('loan_id', $loan->loan_id);
             if ($newRemaining <= 0) {
-                $newRemaining = 0;
-                $this->db->where('loan_id', $loan->loan_id)->update('personnelloans', [
-                    'remaining_balance' => 0,
-                    'status' => 0
-                ]);
+                $this->db->update('personnelloans', ['remaining_balance' => 0, 'status' => 0]);
             } else {
-                $this->db->where('loan_id', $loan->loan_id)->update('personnelloans', [
-                    'remaining_balance' => $newRemaining
-                ]);
+                $this->db->update('personnelloans', ['remaining_balance' => $newRemaining]);
             }
 
             $loanDeduction += $deductPerCutoff;
@@ -359,8 +357,6 @@ public function getPayrollData($settingsID, $projectID, $start, $end, $rateType 
 
     return $assignedPersonnel;
 }
-
-
 // Pa display sa personnel lon in payroll_report
 public function getPersonnelLoans($settingsID)
 {

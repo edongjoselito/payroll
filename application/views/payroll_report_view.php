@@ -12,63 +12,52 @@
             color: #000;
             background: #fff;
         }
-
         .header {
             text-align: center;
             margin-bottom: 20px;
         }
-
         .header h2 {
             font-size: 18px;
             margin: 0;
         }
-
         .header p {
             margin: 3px 0;
             font-size: 14px;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
         }
-
         th, td {
             border: 1px solid #000;
             padding: 6px 8px;
             text-align: center;
             vertical-align: middle;
         }
-
         th {
             background-color: #d9d9d9;
             font-weight: bold;
         }
-
         .absent {
             background-color: #f4cccc;
             color: #000;
         }
-
         .signature {
             margin-top: 50px;
             display: flex;
             justify-content: space-between;
             font-size: 13px;
         }
-
         .signature div {
             width: 45%;
             text-align: center;
         }
-
         .signature strong {
             margin-top: 10px;
             display: block;
             font-size: 14px;
         }
-
         @media print {
             th, .absent {
                 -webkit-print-color-adjust: exact;
@@ -99,33 +88,37 @@
         $startDate = strtotime($start);
         $endDate = strtotime($end);
         while ($startDate <= $endDate):
-            echo '<th>' . date('M d', $startDate) . '</th>';
+            echo '<th colspan="2">' . date('M d', $startDate) . '</th>';
             $startDate = strtotime('+1 day', $startDate);
         endwhile;
         ?>
-        <th colspan="2">TOTAL TIME/DAYS</th>
-        <th>SSS</th>
-        <th>Pag-IBIG</th>
-        <th>PhilHealth</th>
-        <th>Cash Advance</th>
-        <th>Loan</th>
-        <th>Total Deduction</th>
-        <th>Gross Salary</th>
-        <th>Net Pay</th>
-        <th rowspan="2">Signature</th>
+        <th rowspan="2">Total Time</th>
+        <th rowspan="2">Total Days</th>
+        <th rowspan="2">Gross Salary</th>
+        <th rowspan="2">W.C.A</th>
+        <th rowspan="2">HARDHAT</th>
+        <th rowspan="2">SSS Loan</th>
+        <?php $monthYear = date('F Y', strtotime($start)); ?>
+        <th rowspan="2">SSS (<?= $monthYear ?>)</th>
+        <th rowspan="2">PHIC (<?= $monthYear ?>)</th>
+        <th rowspan="2">Pondo</th>
+        <th rowspan="2">HARDWARE</th>
+        <th rowspan="2">Safety Shoes</th>
+        <th rowspan="2">Loan</th>
+        <th rowspan="2">Total Deduction</th>
+        <th rowspan="2">Net Pay</th>
+        <th rowspan="1" colspan="3">Signature</th>
     </tr>
     <tr>
         <?php
         $startDate = strtotime($start);
         $endDate = strtotime($end);
         while ($startDate <= $endDate):
-            echo '<th>' . date('l', $startDate) . '</th>';
+            echo '<th>Reg.</th><th>O.T</th>';
             $startDate = strtotime('+1 day', $startDate);
         endwhile;
         ?>
-        <th>Time</th>
-        <th>Days</th>
-        <th colspan="7"></th>
+        <th colspan="16"></th>
     </tr>
     </thead>
 
@@ -137,38 +130,31 @@
             <td><?= htmlspecialchars($row->position) ?></td>
             <td><?= $row->rateType === 'Day' ? number_format($row->rateAmount, 2) : '' ?></td>
             <td><?= $row->rateType === 'Hour' ? number_format($row->rateAmount, 2) : '' ?></td>
-
             <?php
             $totalMinutes = 0;
             $totalDays = 0;
             $startDate = strtotime($start);
             $endDate = strtotime($end);
-
             while ($startDate <= $endDate):
                 $curDate = date('Y-m-d', $startDate);
                 $log = $row->logs[$curDate] ?? null;
-
                 if ($log && $log->attendance_status === 'Present') {
                     $parts = explode(':', $log->workDuration);
                     $hours = isset($parts[0]) ? (int)$parts[0] : 0;
                     $minutes = isset($parts[1]) ? (int)$parts[1] : 0;
                     $totalMinutes += ($hours * 60) + $minutes;
                     $totalDays++;
-                    echo "<td>{$log->workDuration}</td>";
+                    echo "<td>{$hours}</td><td>{$minutes}</td>";
                 } elseif ($log && $log->attendance_status === 'Absent') {
-                    echo "<td class='absent'>Absent</td>";
+                    echo "<td class='absent' colspan='2'>Absent</td>";
                 } else {
-                    echo "<td>-</td>";
+                    echo "<td colspan='2'>-</td>";
                 }
-
                 $startDate = strtotime('+1 day', $startDate);
             endwhile;
-
             $totalHours = floor($totalMinutes / 60);
             $remainingMinutes = $totalMinutes % 60;
             $totalTimeFormatted = $totalHours . ':' . str_pad($remainingMinutes, 2, '0', STR_PAD_LEFT);
-
-            // Salary computation
             if ($row->rateType === 'Hour') {
                 $salary = ($totalMinutes / 60) * $row->rateAmount;
             } elseif ($row->rateType === 'Day') {
@@ -178,36 +164,33 @@
             } else {
                 $salary = 0;
             }
-
-            // Deductions
-            $ca = $row->cash_advance ?? 0;
+            $cash_advance = $row->ca_cashadvance ?? 0;
+            $hardhat = $row->ca_hardhat ?? 0;
+            $pondo = $row->ca_pondo ?? 0;
+            $hardware = $row->ca_hardware ?? 0;
+            $safety = $row->ca_safety_shoes ?? 0;
             $sss = $row->sss ?? 0;
             $pagibig = $row->pagibig ?? 0;
             $philhealth = $row->philhealth ?? 0;
-
-           $loan = $personnel_loans[$row->personnelID] ?? 0;
-             $total_deduction = $ca + $sss + $pagibig + $philhealth + $loan;
+            $loan = $row->loan ?? 0;
+            $total_deduction = $cash_advance + $hardhat + $pondo + $hardware + $safety + $sss + $pagibig + $philhealth + $loan;
             $netPay = $salary - $total_deduction;
-
             ?>
-
             <td><?= $totalTimeFormatted ?></td>
             <td><?= $totalDays ?></td>
-          <td><?= number_format($sss, 2) ?></td>
-<td><?= number_format($pagibig, 2) ?></td>
-<td><?= number_format($philhealth, 2) ?></td>
-<td><?= number_format($ca, 2) ?></td>
-<?php
-$loanDisplay = number_format($loan, 2);
-
-?>
-<td><?= $loanDisplay ?></td>
-
-<td><?= number_format($total_deduction, 2) ?></td>
-<td><?= number_format($salary, 2) ?></td>
-<td><?= number_format($netPay, 2) ?></td>
-<td></td>
-
+            <td><?= number_format($salary, 2) ?></td>
+            <td><?= number_format($cash_advance, 2) ?></td>
+            <td><?= number_format($hardhat, 2) ?></td>
+            <td>0.00</td>
+            <td><?= number_format($sss, 2) ?></td>
+            <td><?= number_format($philhealth, 2) ?></td>
+            <td><?= number_format($pondo, 2) ?></td>
+            <td><?= number_format($hardware, 2) ?></td>
+            <td><?= number_format($safety, 2) ?></td>
+            <td><?= number_format($loan, 2) ?></td>
+            <td><?= number_format($total_deduction, 2) ?></td>
+            <td><?= number_format($netPay, 2) ?></td>
+            <td></td>
         </tr>
     <?php endforeach; ?>
     </tbody>
