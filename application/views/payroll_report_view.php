@@ -58,11 +58,91 @@
             display: block;
             font-size: 14px;
         }
-        @media print {
-            th, .absent {
-                -webkit-print-color-adjust: exact;
-            }
-        }
+   @media print {
+    body {
+        margin: 0;
+        font-size: 12px;
+        -webkit-print-color-adjust: exact !important;
+    }
+
+    @page {
+        size: 8.5in 13in landscape;
+        margin: 1cm;
+    }
+
+    .btn, .modal, .no-print {
+        display: none !important;
+    }
+
+    .payroll-table th,
+    .payroll-table td {
+        font-size: 11px;
+        padding: 5px;
+    }
+
+    .signature {
+        page-break-inside: avoid;
+    }
+}
+
+/* Formal table headers and clean font */
+table {
+    font-family: 'Calibri', 'Arial', sans-serif;
+    font-size: 12px;
+    border-collapse: collapse;
+    width: 100%;
+}
+th, td {
+    border: 1px solid #000;
+    text-align: center;
+    vertical-align: middle;
+    padding: 6px 8px;
+}
+th {
+    background-color: #f1f1f1;
+}
+
+/* Payslip Modal Styling */
+.modal-content {
+    width: 100%;
+    max-width: 600px;
+    margin: auto;
+    font-family: 'Calibri', sans-serif;
+    font-size: 12px;
+    padding: 20px;
+    border: 1px solid #333;
+}
+
+.modal-body {
+    padding: 10px;
+}
+
+.modal-body ul {
+    padding-left: 20px;
+}
+
+.modal-header h5 {
+    font-size: 16px;
+}
+
+/* Payslip Print Layout (A5 portrait - 1/2 A4) */
+@media print {
+    .modal-content {
+        width: 100%;
+        max-width: 5.8in;
+        height: 8.3in;
+        margin: auto;
+        border: none;
+        box-shadow: none;
+        font-size: 12px;
+    }
+
+    .modal-header,
+    .modal-footer {
+        display: none;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -233,7 +313,12 @@ $otTotalMinutes = 0;
     <td><?= number_format($safety, 2) ?></td>
     <td><?= number_format($loan, 2) ?></td>
     <td><?= number_format($total_deduction, 2) ?></td>
-    <td><?= number_format($netPay, 2) ?></td>
+    <td>
+    <a href="#" class="btn btn-link btn-sm" data-toggle="modal" data-target="#payslipModal<?= $ln ?>">
+        <?= number_format($netPay, 2) ?>
+    </a>
+</td>
+
     <td></td>
 </tr>
 
@@ -254,6 +339,78 @@ $otTotalMinutes = 0;
         Admin/Finance Mngr.
     </div>
 </div>
+
+<div class="modal fade" id="payslipModal<?= $ln ?>" tabindex="-1" role="dialog" aria-labelledby="payslipLabel<?= $ln ?>" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content" id="printablePayslip<?= $ln ?>">
+      <div class="modal-header bg-primary text-white">
+        <h5 class="modal-title" id="payslipLabel<?= $ln ?>">Payslip - <?= htmlspecialchars($row->first_name . ' ' . $row->last_name) ?></h5>
+        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="row">
+          <div class="col-md-6">
+            <p><strong>Employee:</strong> <?= htmlspecialchars($row->first_name . ' ' . $row->last_name) ?></p>
+            <p><strong>Position:</strong> <?= htmlspecialchars($row->position) ?></p>
+            <p><strong>Rate:</strong> <?= number_format($row->rateAmount, 2) ?> / <?= $row->rateType ?></p>
+          </div>
+          <div class="col-md-6 text-right">
+            <p><strong>Period:</strong><br><?= date('F d', strtotime($start)) ?> - <?= date('F d, Y', strtotime($end)) ?></p>
+            <p><strong>Printed:</strong> <?= date('F d, Y') ?></p>
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Earnings</h6>
+            <ul class="list-unstyled">
+              <li>Regular Time: <?= $regTotalFormatted ?> hrs</li>
+              <li>Overtime: <?= $otTotalFormatted ?> hrs</li>
+              <li>Total Days: <?= $totalDays ?></li>
+              <li><strong>Gross Salary: <?= number_format($salary, 2) ?></strong></li>
+            </ul>
+          </div>
+          <div class="col-md-6">
+            <h6>Deductions</h6>
+            <ul class="list-unstyled">
+              <li>Cash Advance: <?= number_format($cash_advance, 2) ?></li>
+              <li>Hardhat: <?= number_format($hardhat, 2) ?></li>
+              <li>SSS: <?= number_format($sss, 2) ?></li>
+              <li>PHIC: <?= number_format($philhealth, 2) ?></li>
+              <li>Pag-IBIG: <?= number_format($pagibig, 2) ?></li>
+              <li>Pondo: <?= number_format($pondo, 2) ?></li>
+              <li>Hardware: <?= number_format($hardware, 2) ?></li>
+              <li>Safety Shoes: <?= number_format($safety, 2) ?></li>
+              <li>Loan: <?= number_format($loan, 2) ?></li>
+              <li><strong>Total Deduction: <?= number_format($total_deduction, 2) ?></strong></li>
+            </ul>
+          </div>
+        </div>
+        <hr>
+        <div class="text-right">
+          <h5><strong>Net Pay: <?= number_format($netPay, 2) ?></strong></h5>
+          <button onclick="printPayslip('printablePayslip<?= $ln ?>')" class="btn btn-sm btn-secondary mt-2"><i class="fas fa-print"></i> Print</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  function printPayslip(elementId) {
+    var printContents = document.getElementById(elementId).innerHTML;
+    var originalContents = document.body.innerHTML;
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+    location.reload(); // to restore modal functionality
+  }
+</script>
+
+
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
 
 </body>
 </html>
