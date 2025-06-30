@@ -69,4 +69,8 @@ class Login_model extends CI_Model
                                                                                                                                                                                                                                                                   $query = "insert into sur_d1 values('0',$d1_answer)";
                                                                                                                                                                                                                                                                   $this->db->query($query);
                                                                                                                                                                                                                                                                 }
-                                                                                                                                                                                                                                                              }
+                                          public function insert_personnel_loan($data)
+{
+    return $this->db->insert('personnelloans', $data);
+}
+                                                                                                                                                                                                                    }

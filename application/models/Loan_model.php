@@ -51,6 +51,13 @@ public function get_all_loans()
     return $this->db->get('loans')->result();  
 }
 
+public function get_loan_description($loan_id)
+{
+    $loan = $this->db->get_where('loans', ['loan_id' => $loan_id])->row();
+    return $loan ? $loan->loan_description : '';
+}
+
+
 
 
   
@@ -81,14 +88,19 @@ public function insert_personnel_loan($data)
 
 public function get_assigned_loans($settingsID)
 {
-    $this->db->select('pl.*, p.first_name, p.last_name, p.position, l.loan_description as loan_name'); 
+    $this->db->select('pl.loan_id, pl.personnelID, pl.loan_description, pl.amount, pl.monthly_deduction, pl.date_assigned, p.first_name, p.last_name, p.position, pl.date_assigned');
     $this->db->from('personnelloans pl');
     $this->db->join('personnel p', 'p.personnelID = pl.personnelID');
-    $this->db->join('loans l', 'l.loan_id = pl.loan_id');
     $this->db->where('pl.settingsID', $settingsID);
+    $this->db->where('pl.status', 1); // Only active loans
     $query = $this->db->get();
     return $query->result();
 }
+
+
+
+
+
 public function assign_personnel_loan($data)
 {
     return $this->db->insert('personnelloans', $data);
@@ -96,12 +108,13 @@ public function assign_personnel_loan($data)
 
 
 
-  public function update_personnel_loan($settingsID, $personnelID, $loan_id, $data)
+public function update_personnel_loan($settingsID, $personnelID, $loan_id, $data)
 {
-    $this->db->where('settingsID', $settingsID);
-    $this->db->where('personnelID', $personnelID);
-    $this->db->where('loan_id', $loan_id);
-    return $this->db->update('personnelloans', $data);
+   $this->db->where('settingsID', $settingsID);
+$this->db->where('personnelID', $personnelID);
+$this->db->where('loan_id', $loan_id);
+return $this->db->update('personnelloans', $data);
+
 }
 
 

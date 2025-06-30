@@ -9,14 +9,16 @@ class Loan extends CI_Controller {
         $this->load->model('Loan_model');
     }
 
- public function personnel_loan()
+public function personnel_loan()
 {
     $settingsID = $this->session->userdata('settingsID');
-    $data['assigned_loans'] = $this->Loan_model->get_assigned_loans($settingsID); // ✅ Must be this
+    $data['assigned_loans'] = $this->Loan_model->get_assigned_loans($settingsID);
     $data['personnel'] = $this->Loan_model->get_personnel_by_settings($settingsID);
+    $data['loans'] = $this->Loan_model->get_all_loans(); // ✅ Add this
 
     $this->load->view('personnel_loan', $data);
 }
+
 
 
 
@@ -58,39 +60,39 @@ public function delete_loan($loan_id)
         'person' => $person
     ]);
 }
-public function update_personnel()
-{
-    $personnelID = $this->input->post('personnelID');
+// public function update_personnel()
+// {
+//     $personnelID = $this->input->post('personnelID');
 
-    $data = [
-        'first_name'        => $this->input->post('first_name'),
-        'middle_name'       => $this->input->post('middle_name'),
-        'last_name'         => $this->input->post('last_name'),
-        'name_ext'          => $this->input->post('name_ext'),
-        'birthdate'         => $this->input->post('birthdate'),
-        'gender'            => $this->input->post('gender'),
-        'civil_status'      => $this->input->post('civil_status'),
-        'address'           => $this->input->post('address'),
-        'contact_number'    => $this->input->post('contact_number'),
-        'email'             => $this->input->post('email'),
-        'position'          => $this->input->post('position'),
-        'rateType'          => $this->input->post('rateType'),
-        'rateAmount'        => $this->input->post('rateAmount'),
-        'philhealth_number' => $this->input->post('philhealth_number'),
-        'pagibig_number'    => $this->input->post('pagibig_number'),
-        'sss_number'        => $this->input->post('sss_number'),
-        'tin_number'        => $this->input->post('tin_number'),
-    ];
+//     $data = [
+//         'first_name'        => $this->input->post('first_name'),
+//         'middle_name'       => $this->input->post('middle_name'),
+//         'last_name'         => $this->input->post('last_name'),
+//         'name_ext'          => $this->input->post('name_ext'),
+//         'birthdate'         => $this->input->post('birthdate'),
+//         'gender'            => $this->input->post('gender'),
+//         'civil_status'      => $this->input->post('civil_status'),
+//         'address'           => $this->input->post('address'),
+//         'contact_number'    => $this->input->post('contact_number'),
+//         'email'             => $this->input->post('email'),
+//         'position'          => $this->input->post('position'),
+//         'rateType'          => $this->input->post('rateType'),
+//         'rateAmount'        => $this->input->post('rateAmount'),
+//         'philhealth_number' => $this->input->post('philhealth_number'),
+//         'pagibig_number'    => $this->input->post('pagibig_number'),
+//         'sss_number'        => $this->input->post('sss_number'),
+//         'tin_number'        => $this->input->post('tin_number'),
+//     ];
 
-    $this->db->where('personnelID', $personnelID);
-    if ($this->db->update('personnel', $data)) {
-        $this->session->set_flashdata('success', 'Personnel updated successfully.');
-    } else {
-        $this->session->set_flashdata('error', 'Failed to update personnel.');
-    }
+//     $this->db->where('personnelID', $personnelID);
+//     if ($this->db->update('personnel', $data)) {
+//         $this->session->set_flashdata('success', 'Personnel updated successfully.');
+//     } else {
+//         $this->session->set_flashdata('error', 'Failed to update personnel.');
+//     }
 
-    redirect('Loan/personnel_loan');
-}
+//     redirect('Loan/personnel_loan');
+// }
 public function loans_view()
 {
     $this->load->model('Loan_model');
@@ -211,6 +213,43 @@ public function save_personnel_loan()
     redirect('Loan/personnel_loan');
 }
 
+public function assign_personnel_loan()
+{
+    $loan_id = $this->input->post('loan_id');
+    $personnelID = $this->input->post('personnelID');
+    $description = $this->Loan_model->get_loan_description($loan_id); // Optional
+    $amount = $this->input->post('loan_amount');
+    $monthly = $this->input->post('monthly_deduction');
+    $settingsID = $this->session->userdata('settingsID');
+
+    if (!$loan_id || !$personnelID || !$amount || !$monthly) {
+        $this->session->set_flashdata('error', 'All fields are required.');
+        redirect('Loan/personnel_loan');
+        return;
+    }
+
+    $data = [
+        'loan_id'           => $loan_id,
+        'personnelID'       => $personnelID,
+        'loan_description'  => $description,
+        'amount'            => $amount,
+        'monthly_deduction' => $monthly,
+        'rateType'          => '',
+        'settingsID'        => $settingsID,
+        'date_assigned'     => date('Y-m-d'),
+        'status'            => 1,
+        'created_at'        => date('Y-m-d H:i:s')
+    ];
+
+    if ($this->Loan_model->insert_personnel_loan($data)) {
+        $this->session->set_flashdata('success', 'Loan assigned successfully.');
+    } else {
+        $this->session->set_flashdata('error', 'Failed to assign loan.');
+    }
+
+    redirect('Loan/personnel_loan');
+}
+
 
 
 
@@ -226,15 +265,19 @@ public function save_personnel_loan()
 public function update_personnel_loan()
 {
     $settingsID = $this->session->userdata('settingsID');
-    $personnelID = $this->input->post('personnelID');
     $loan_id = $this->input->post('loan_id');
+    $personnelID = $this->input->post('personnelID');
     $loan_amount = $this->input->post('loan_amount');
     $monthly_deduction = $this->input->post('monthly_deduction');
+    $loan_description = $this->input->post('loan_description');
+
+    log_message('error', 'UPDATE LOAN DEBUG — loan_id=' . $loan_id . ' | personnelID=' . $personnelID);
 
     if ($personnelID && $loan_id) {
         $data = [
             'amount' => $loan_amount,
-            'monthly_deduction' => $monthly_deduction
+            'monthly_deduction' => $monthly_deduction,
+            'loan_description' => $loan_description
         ];
 
         $this->Loan_model->update_personnel_loan($settingsID, $personnelID, $loan_id, $data);
@@ -243,8 +286,12 @@ public function update_personnel_loan()
         $this->session->set_flashdata('error', 'Missing data. Update failed.');
     }
 
-    redirect('Loan/personnel_loan'); 
+    redirect('Loan/personnel_loan');
 }
+
+
+
+
 
 
 public function delete_personnel_loan($loan_id, $personnelID)

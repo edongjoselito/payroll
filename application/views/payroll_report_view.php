@@ -156,7 +156,9 @@ th {
     <?php endif; ?>
 </div>
 
-<table class="payroll-table">
+<div style="overflow-x: auto; width: 100%;">
+  <table class="payroll-table">
+
   <thead>
 <tr>
     <th rowspan="2">L/N</th>
@@ -326,14 +328,16 @@ $otTotalMinutes = 0;
     <?php endforeach; ?>
     </tbody>
 </table>
-
+</div>
 <div class="signature">
-    <div><br><br><br>
+    <div>
+        <br><br><br>
         Prepared by:<br><br><br>
         <strong>Kimmy T. Aban</strong><br>
         OFC-Admin
     </div>
-    <div><br><br><br>
+    <div>
+        <br><br><br>
         Checked by:<br><br><br>
         <strong>Eloisa A. Cabanilla</strong><br>
         Admin/Finance Mngr.
