@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Payroll Report</title>
     <?php include('includes/head.php'); ?>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
             font-family: 'Calibri', 'Arial', sans-serif;
@@ -58,91 +59,32 @@
             display: block;
             font-size: 14px;
         }
-   @media print {
-    body {
-        margin: 0;
-        font-size: 12px;
-        -webkit-print-color-adjust: exact !important;
-    }
+        @media print {
+            body {
+                margin: 0;
+                font-size: 12px;
+                -webkit-print-color-adjust: exact !important;
+            }
 
-    @page {
-        size: 8.5in 13in landscape;
-        margin: 1cm;
-    }
+            @page {
+                size: 8.5in 13in landscape;
+                margin: 1cm;
+            }
 
-    .btn, .modal, .no-print {
-        display: none !important;
-    }
+            .btn, .modal, .no-print {
+                display: none !important;
+            }
 
-    .payroll-table th,
-    .payroll-table td {
-        font-size: 11px;
-        padding: 5px;
-    }
+            .payroll-table th,
+            .payroll-table td {
+                font-size: 11px;
+                padding: 5px;
+            }
 
-    .signature {
-        page-break-inside: avoid;
-    }
-}
-
-/* Formal table headers and clean font */
-table {
-    font-family: 'Calibri', 'Arial', sans-serif;
-    font-size: 12px;
-    border-collapse: collapse;
-    width: 100%;
-}
-th, td {
-    border: 1px solid #000;
-    text-align: center;
-    vertical-align: middle;
-    padding: 6px 8px;
-}
-th {
-    background-color: #f1f1f1;
-}
-
-/* Payslip Modal Styling */
-.modal-content {
-    width: 100%;
-    max-width: 600px;
-    margin: auto;
-    font-family: 'Calibri', sans-serif;
-    font-size: 12px;
-    padding: 20px;
-    border: 1px solid #333;
-}
-
-.modal-body {
-    padding: 10px;
-}
-
-.modal-body ul {
-    padding-left: 20px;
-}
-
-.modal-header h5 {
-    font-size: 16px;
-}
-
-/* Payslip Print Layout (A5 portrait - 1/2 A4) */
-@media print {
-    .modal-content {
-        width: 100%;
-        max-width: 5.8in;
-        height: 8.3in;
-        margin: auto;
-        border: none;
-        box-shadow: none;
-        font-size: 12px;
-    }
-
-    .modal-header,
-    .modal-footer {
-        display: none;
-    }
-}
-
+            .signature {
+                page-break-inside: avoid;
+            }
+        }
     </style>
 </head>
 <body>
@@ -157,16 +99,14 @@ th {
 </div>
 
 <div style="overflow-x: auto; width: 100%;">
-  <table class="payroll-table">
-
-  <thead>
+<table class="payroll-table">
+<thead>
 <tr>
     <th rowspan="2">L/N</th>
     <th rowspan="2">NAME</th>
     <th rowspan="2">POSITION</th>
     <th rowspan="2">RATE</th>
     <th rowspan="2">Rate / Hour</th>
-
     <?php
     $startDate = strtotime($start);
     $endDate = strtotime($end);
@@ -175,15 +115,13 @@ th {
         $startDate = strtotime('+1 day', $startDate);
     endwhile;
     ?>
-
     <th colspan="3">TOTAL TIME</th>
     <th rowspan="2">Gross Salary</th>
     <th rowspan="2">W.C.A</th>
     <th rowspan="2">HARDHAT</th>
     <th rowspan="2">SSS Loan</th>
-    <?php $monthYear = date('F Y', strtotime($start)); ?>
-    <th rowspan="2">SSS (<?= $monthYear ?>)</th>
-    <th rowspan="2">PHIC (<?= $monthYear ?>)</th>
+    <th rowspan="2">SSS (<?= date('F Y', strtotime($start)) ?>)</th>
+    <th rowspan="2">PHIC</th>
     <th rowspan="2">Pondo</th>
     <th rowspan="2">HARDWARE</th>
     <th rowspan="2">Safety Shoes</th>
@@ -201,89 +139,63 @@ th {
         $startDate = strtotime('+1 day', $startDate);
     endwhile;
     ?>
-    <th>Reg.</th>
-    <th>O.T</th>
-    <th>Days</th>
+    <th>Reg.</th><th>O.T</th><th>Days</th>
 </tr>
 </thead>
-
-
-    <tbody>
-    <?php $ln = 1; foreach ($attendance_data as $row): ?>
-     <?php
+<tbody>
+<?php $ln = 1; foreach ($attendance_data as $row): ?>
+<tr>
+<?php
 $regTotalMinutes = 0;
 $otTotalMinutes = 0;
+$totalMinutes = 0;
+$totalDays = 0;
+$startDate = strtotime($start);
+$endDate = strtotime($end);
 ?>
-<tr>
-    <td><?= $ln++ ?></td>
+    <td><?= $ln ?></td>
     <td><?= htmlspecialchars($row->first_name . ' ' . $row->last_name) ?></td>
     <td><?= htmlspecialchars($row->position) ?></td>
     <td><?= $row->rateType === 'Day' ? number_format($row->rateAmount, 2) : '' ?></td>
     <td><?= $row->rateType === 'Hour' ? number_format($row->rateAmount, 2) : '' ?></td>
 
     <?php
-    $totalMinutes = 0;
-    $totalDays = 0;
-    $startDate = strtotime($start);
-    $endDate = strtotime($end);
-
-    while ($startDate <= $endDate):
-        $curDate = date('Y-m-d', $startDate);
+    $loopDate = strtotime($start);
+    while ($loopDate <= $endDate):
+        $curDate = date('Y-m-d', $loopDate);
         $log = $row->logs[$curDate] ?? null;
 
         if ($log && $log->attendance_status === 'Present') {
-            $parts = explode(':', $log->workDuration);
-            $hours = isset($parts[0]) ? (int)$parts[0] : 0;
-            $minutes = isset($parts[1]) ? (int)$parts[1] : 0;
-            $workMinutes = ($hours * 60) + $minutes;
+           $parts = explode(':', $log->workDuration);
+$h = isset($parts[0]) ? (int)$parts[0] : 0;
+$m = isset($parts[1]) ? (int)$parts[1] : 0;
+$workMinutes = ($h * 60) + $m;
+
+            $reg = min($workMinutes, 480);
+            $ot = max(0, $workMinutes - 480);
+
+            $regTotalMinutes += $reg;
+            $otTotalMinutes += $ot;
             $totalMinutes += $workMinutes;
             $totalDays++;
 
-            // Cap regular at 480 minutes (8 hours)
-            $regMinutes = min(480, $workMinutes);
-            $otMinutes = max(0, $workMinutes - 480);
-
-            $regTotalMinutes += $regMinutes;
-            $otTotalMinutes += $otMinutes;
-
-            $regH = floor($regMinutes / 60);
-            $regM = $regMinutes % 60;
-            $otH = floor($otMinutes / 60);
-            $otM = $otMinutes % 60;
-
-            $regDisplay = $regM > 0 ? "{$regH}:" . str_pad($regM, 2, '0', STR_PAD_LEFT) : "{$regH}";
-            $otDisplay = $otM > 0 ? "{$otH}:" . str_pad($otM, 2, '0', STR_PAD_LEFT) : "{$otH}";
-
-            echo "<td>{$regDisplay}</td><td>{$otDisplay}</td>";
+            echo "<td>" . floor($reg / 60) . "</td><td>" . floor($ot / 60) . "</td>";
         } elseif ($log && $log->attendance_status === 'Absent') {
-            echo "<td class='absent' colspan='2'>Absent</td>";
+            echo "<td colspan='2' class='absent'>Absent</td>";
         } else {
             echo "<td colspan='2'>-</td>";
         }
 
-        $startDate = strtotime('+1 day', $startDate);
+        $loopDate = strtotime('+1 day', $loopDate);
     endwhile;
 
-    $regH = floor($regTotalMinutes / 60);
-    $regM = $regTotalMinutes % 60;
-    $otH = floor($otTotalMinutes / 60);
-    $otM = $otTotalMinutes % 60;
-
-    $regTotalFormatted = $regM > 0 ? "{$regH}:" . str_pad($regM, 2, '0', STR_PAD_LEFT) : "{$regH}";
-    $otTotalFormatted  = $otM > 0 ? "{$otH}:" . str_pad($otM, 2, '0', STR_PAD_LEFT) : "{$otH}";
-
-    $totalHours = floor($totalMinutes / 60);
-    $remainingMinutes = $totalMinutes % 60;
-    $totalTimeFormatted = $totalHours . ':' . str_pad($remainingMinutes, 2, '0', STR_PAD_LEFT);
-
+    $salary = 0;
     if ($row->rateType === 'Hour') {
         $salary = ($totalMinutes / 60) * $row->rateAmount;
     } elseif ($row->rateType === 'Day') {
         $salary = $totalDays * $row->rateAmount;
     } elseif ($row->rateType === 'Month') {
         $salary = ($row->rateAmount / 22) * $totalDays;
-    } else {
-        $salary = 0;
     }
 
     $cash_advance = $row->ca_cashadvance ?? 0;
@@ -298,12 +210,13 @@ $otTotalMinutes = 0;
 
     $total_deduction = $cash_advance + $hardhat + $pondo + $hardware + $safety + $sss + $pagibig + $philhealth + $loan;
     $netPay = $salary - $total_deduction;
+
+    $regFormatted = floor($regTotalMinutes / 60);
+    $otFormatted = floor($otTotalMinutes / 60);
     ?>
-
-    <td><?= $regTotalFormatted ?></td>
-    <td><?= $otTotalFormatted ?></td>
+    <td><?= $regFormatted ?></td>
+    <td><?= $otFormatted ?></td>
     <td><?= $totalDays ?></td>
-
     <td><?= number_format($salary, 2) ?></td>
     <td><?= number_format($cash_advance, 2) ?></td>
     <td><?= number_format($hardhat, 2) ?></td>
@@ -316,39 +229,19 @@ $otTotalMinutes = 0;
     <td><?= number_format($loan, 2) ?></td>
     <td><?= number_format($total_deduction, 2) ?></td>
     <td>
-    <a href="#" class="btn btn-link btn-sm" data-toggle="modal" data-target="#payslipModal<?= $ln ?>">
-        <?= number_format($netPay, 2) ?>
-    </a>
-</td>
-
-    <td></td>
+        <a href="#" class="btn btn-link btn-sm" data-toggle="modal" data-target="#payslipModal<?= $ln ?>">
+            <?= number_format($netPay, 2) ?>
+        </a>
+    </td>
+    <td colspan="3"></td>
 </tr>
 
-
-    <?php endforeach; ?>
-    </tbody>
-</table>
-</div>
-<div class="signature">
-    <div>
-        <br><br><br>
-        Prepared by:<br><br><br>
-        <strong>Kimmy T. Aban</strong><br>
-        OFC-Admin
-    </div>
-    <div>
-        <br><br><br>
-        Checked by:<br><br><br>
-        <strong>Eloisa A. Cabanilla</strong><br>
-        Admin/Finance Mngr.
-    </div>
-</div>
-
-<div class="modal fade" id="payslipModal<?= $ln ?>" tabindex="-1" role="dialog" aria-labelledby="payslipLabel<?= $ln ?>" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
+<!-- Payslip Modal -->
+<div class="modal fade" id="payslipModal<?= $ln ?>" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content" id="printablePayslip<?= $ln ?>">
       <div class="modal-header bg-primary text-white">
-        <h5 class="modal-title" id="payslipLabel<?= $ln ?>">Payslip - <?= htmlspecialchars($row->first_name . ' ' . $row->last_name) ?></h5>
+        <h5 class="modal-title">Payslip - <?= htmlspecialchars($row->first_name . ' ' . $row->last_name) ?></h5>
         <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
       </div>
       <div class="modal-body p-4">
@@ -368,8 +261,8 @@ $otTotalMinutes = 0;
           <div class="col-md-6">
             <h6>Earnings</h6>
             <ul class="list-unstyled">
-              <li>Regular Time: <?= $regTotalFormatted ?> hrs</li>
-              <li>Overtime: <?= $otTotalFormatted ?> hrs</li>
+              <li>Regular Time: <?= $regFormatted ?> hrs</li>
+              <li>Overtime: <?= $otFormatted ?> hrs</li>
               <li>Total Days: <?= $totalDays ?></li>
               <li><strong>Gross Salary: <?= number_format($salary, 2) ?></strong></li>
             </ul>
@@ -399,22 +292,38 @@ $otTotalMinutes = 0;
     </div>
   </div>
 </div>
+<?php $ln++; endforeach; ?>
+</tbody>
+</table>
+</div>
+
+<div class="signature">
+    <div>
+        <br><br><br>
+        Prepared by:<br><br><br>
+        <strong>Kimmy T. Aban</strong><br>
+        OFC-Admin
+    </div>
+    <div>
+        <br><br><br>
+        Checked by:<br><br><br>
+        <strong>Eloisa A. Cabanilla</strong><br>
+        Admin/Finance Mngr.
+    </div>
+</div>
+
 <script>
-  function printPayslip(elementId) {
+function printPayslip(elementId) {
     var printContents = document.getElementById(elementId).innerHTML;
     var originalContents = document.body.innerHTML;
     document.body.innerHTML = printContents;
     window.print();
     document.body.innerHTML = originalContents;
-    location.reload(); // to restore modal functionality
-  }
+    location.reload(); // Restore modal functionality
+}
 </script>
 
-
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-
-
 </body>
 </html>
