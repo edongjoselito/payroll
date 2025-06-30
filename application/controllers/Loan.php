@@ -215,26 +215,30 @@ public function save_personnel_loan()
 
 public function assign_personnel_loan()
 {
-    $loan_id = $this->input->post('loan_id');
     $personnelID = $this->input->post('personnelID');
-    $description = $this->Loan_model->get_loan_description($loan_id); // Optional
-    $amount = $this->input->post('loan_amount');
-    $monthly = $this->input->post('monthly_deduction');
-    $settingsID = $this->session->userdata('settingsID');
+    $description = $this->input->post('loan_description');
+    $amount      = $this->input->post('loan_amount');
+    $monthly     = $this->input->post('monthly_deduction');
+    $settingsID  = $this->session->userdata('settingsID');
 
-    if (!$loan_id || !$personnelID || !$amount || !$monthly) {
+    if (!$personnelID || !$description || !$amount || !$monthly) {
         $this->session->set_flashdata('error', 'All fields are required.');
         redirect('Loan/personnel_loan');
         return;
     }
 
+    // Create unique loan_id for personnel loan assignment
+    $this->db->select_max('loan_id');
+    $max = $this->db->get('personnelloans')->row();
+    $new_loan_id = $max ? $max->loan_id + 1 : 1;
+
     $data = [
-        'loan_id'           => $loan_id,
-        'personnelID'       => $personnelID,
+        'loan_id'           => $new_loan_id,
         'loan_description'  => $description,
         'amount'            => $amount,
         'monthly_deduction' => $monthly,
         'rateType'          => '',
+        'personnelID'       => $personnelID,
         'settingsID'        => $settingsID,
         'date_assigned'     => date('Y-m-d'),
         'status'            => 1,
@@ -250,18 +254,6 @@ public function assign_personnel_loan()
     redirect('Loan/personnel_loan');
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
 public function update_personnel_loan()
 {
     $settingsID = $this->session->userdata('settingsID');
@@ -271,27 +263,23 @@ public function update_personnel_loan()
     $monthly_deduction = $this->input->post('monthly_deduction');
     $loan_description = $this->input->post('loan_description');
 
-    log_message('error', 'UPDATE LOAN DEBUG — loan_id=' . $loan_id . ' | personnelID=' . $personnelID);
-
-    if ($personnelID && $loan_id) {
+    if ($personnelID && $loan_id && $loan_amount && $monthly_deduction && $loan_description) {
         $data = [
-            'amount' => $loan_amount,
+            'amount'            => $loan_amount,
             'monthly_deduction' => $monthly_deduction,
-            'loan_description' => $loan_description
+            'loan_description'  => $loan_description
         ];
-
-        $this->Loan_model->update_personnel_loan($settingsID, $personnelID, $loan_id, $data);
-        $this->session->set_flashdata('success', 'Loan updated successfully.');
+        if ($this->Loan_model->update_personnel_loan($settingsID, $personnelID, $loan_id, $data)) {
+            $this->session->set_flashdata('success', 'Loan updated successfully.');
+        } else {
+            $this->session->set_flashdata('error', 'Database update failed.');
+        }
     } else {
         $this->session->set_flashdata('error', 'Missing data. Update failed.');
     }
 
     redirect('Loan/personnel_loan');
 }
-
-
-
-
 
 
 public function delete_personnel_loan($loan_id, $personnelID)

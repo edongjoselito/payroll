@@ -110,11 +110,10 @@ public function assign_personnel_loan($data)
 
 public function update_personnel_loan($settingsID, $personnelID, $loan_id, $data)
 {
-   $this->db->where('settingsID', $settingsID);
-$this->db->where('personnelID', $personnelID);
-$this->db->where('loan_id', $loan_id);
-return $this->db->update('personnelloans', $data);
-
+    $this->db->where('settingsID', $settingsID);
+    $this->db->where('personnelID', $personnelID);
+    $this->db->where('loan_id', $loan_id);
+    return $this->db->update('personnelloans', $data);
 }
 
 
