@@ -64,7 +64,7 @@
     </ul>
 </li>
 
-                    <li>
+                    <!-- <li>
                         <a href="javascript: void(0);" class="waves-effect">
                             <i class="fas fa-cogs"></i>
                             <span> Settings </span>
@@ -75,7 +75,7 @@
                             <li><a href="<?= base_url(); ?>Loan/loans_view">Loans</a></li>
                         </ul>
                          
-                    </li>
+                    </li> -->
   <!-- <li class="nav-item dropdown">
     <a class="nav-link dropdown-toggle" href="#" id="loanDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
         MANAGE LOAN

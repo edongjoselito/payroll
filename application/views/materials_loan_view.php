@@ -131,10 +131,17 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Description</label>
-                        <input type="text" name="description" class="form-control" required>
-                    </div>
+                   <div class="form-group">
+    <label for="description">Description</label>
+    <select name="description" class="form-control" required>
+        <option value="">Select item</option>
+        <option value="hardhat">Hard Hat</option>
+        <option value="pondo">Pondo</option>
+        <option value="hardware">Hardware</option>
+        <option value="safety shoes">Safety Shoes</option>
+    </select>
+</div>
+
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label>Amount</label>
