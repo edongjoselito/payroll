@@ -11,12 +11,13 @@
     <?php include('includes/sidebar.php'); ?>
 
     <div class="content-page">
-        <div class="content">
+        <div class="content">   
             <div class="container-fluid">
 
                 <div class="page-title-box d-flex justify-content-between align-items-center">
                     <!-- <h4 class="page-title">Personnel List</h4> -->
-                    <button class="btn btn-primary btn-md" data-toggle="modal" data-target="#addModal">Add New</button>
+                  <a href="<?= base_url('personnel/create') ?>" class="btn btn-primary btn-md">Add New</a>
+
                 </div>
                 <!-- <hr style="border:0; height:2px; background:linear-gradient(to right, #34A853, #FBBC05, #4285F4); border-radius:1px; margin:20px 0;"/> -->
 
@@ -65,13 +66,14 @@
                                                 <td><?= $p->pagibig_number ?></td>
                                                 <td><?= $p->tin_number ?></td>
                                                 <td>
-                                                    <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#editModal<?= $p->personnelID ?>">Edit</button>
+                                                    <a href="<?= base_url('personnel/edit/'.$p->personnelID) ?>" class="btn btn-info btn-sm">Edit</a>
+
                                                     <a href="<?= base_url('personnel/delete/'.$p->personnelID) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this record?')">Delete</a>
                                                 </td>
                                             </tr>
 
 
-<!-- Edit Modal -->
+<!-- Edit Modal
 <div class="modal fade" id="editModal<?= $p->personnelID ?>" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -205,7 +207,7 @@
             </form>
         </div>
     </div>
-</div>
+</div> -->
 
 
 
@@ -226,7 +228,7 @@
 </div>
 <!-- Add Modal -->
 <!-- Add Modal -->
-<div class="modal fade" id="addModal" tabindex="-1">
+<!-- <div class="modal fade" id="addModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form method="post" action="<?= base_url('personnel/store') ?>">
@@ -357,7 +359,7 @@
             </form>
         </div>
     </div>
-</div>
+</div> -->
 
 
 

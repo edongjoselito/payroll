@@ -15,9 +15,10 @@
       <div class="container-fluid">
         <div class="page-title-box d-flex justify-content-between align-items-center">
           <h4 class="page-title">Personnel's Loan</h4>
-          <button class="btn btn-primary btn-md" data-toggle="modal" data-target="#assignLoanModal">
-            <i class="mdi mdi-plus"></i> Add Loan
-          </button>
+          <a href="<?= base_url('Loan/add_personnel_loan') ?>" class="btn btn-primary btn-md">
+  <i class="mdi mdi-plus"></i> Add Loan
+</a>
+
         </div>
 
         <?php if ($this->session->flashdata('success')): ?>
@@ -58,14 +59,11 @@
       <td><?= $loan->term_months ?> month(s)</td>
       <td><?= date('Y-m-d', strtotime($loan->created_at)) ?></td>
       <td>
-        <button class="btn btn-info btn-sm btn-edit" 
-          data-personnelid="<?= $loan->personnelID ?>"
-          data-loanid="<?= $loan->loan_id ?>"
-          data-amount="<?= $loan->amount ?>"
-          data-monthly="<?= $loan->monthly_deduction ?>"
-          data-term="<?= $loan->term_months ?>">
-          Edit
-        </button>
+        <a href="<?= base_url('Loan/edit_personnel_loan/' . $loan->loan_id . '/' . $loan->personnelID) ?>" 
+   class="btn btn-info btn-sm">
+   Edit
+</a>
+
         <a href="<?= base_url('Loan/delete_personnel_loan/' . $loan->loan_id . '/' . $loan->personnelID) ?>"
 
            class="btn btn-danger btn-sm" 

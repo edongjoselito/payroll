@@ -48,10 +48,20 @@ public function delete($personnelID) {
 }
 
 
+// NEW PERSONNEL --------------
+
+public function create()
+{
+    $this->load->view('personnel/create');
+}
+
+public function edit($id)
+{
+    $data['personnel'] = $this->Personnel_model->get_by_id($id);
+    $this->load->view('personnel/edit', $data);
+}
 
 
-
-
-
+// END-----------------------
 
 }

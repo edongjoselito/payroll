@@ -37,5 +37,10 @@ public function get_all_personnel($settingsID)
 }
 
 // --------------END----------
+public function get_by_id($id)
+{
+    return $this->db->get_where('personnel', ['personnelID' => $id])->row();
+}
+
 }
 
