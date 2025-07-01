@@ -50,7 +50,7 @@
                                                     <td><?= $u->position ?></td>
                                                     <td><?= $u->acctStat ?></td>
                                                     <td>
-                                                        <button class="btn btn-warning btn-sm" data-toggle="modal" data-target="#editModal<?= $u->username ?>">Edit</button>
+                                                        <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#editModal<?= $u->username ?>">Edit</button>
                                                         <a href="<?= base_url('User/delete/'.$u->username) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this user?')">Delete</a>
                                                     </td>
                                                 </tr>
