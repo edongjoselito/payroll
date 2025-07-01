@@ -84,6 +84,12 @@
         <a class="dropdown-item" href="<?= base_url('Loan/personnel_loan') ?>">Personnel Loan</a>
     </div>
 </li> -->
+<li>
+    <a href="<?= base_url(); ?>User" class="waves-effect">
+        <i class="fas fa-user-cog"></i>
+        <span> Manage Users </span>
+    </a>
+</li>
 
                   
                      <li>
@@ -92,6 +98,7 @@
         <span> Company Information </span>
     </a>
 </li>
+
 
 
                  
