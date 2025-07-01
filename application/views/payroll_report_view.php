@@ -5,102 +5,143 @@
     <title>Payroll Report</title>
     <?php include('includes/head.php'); ?>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body {
-            font-family: 'Calibri', 'Arial', sans-serif;
-            font-size: 13px;
-            margin: 20px;
-            color: #000;
-            background: #fff;
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .header h2 {
-            font-size: 18px;
-            margin: 0;
-        }
-        .header p {
-            margin: 3px 0;
-            font-size: 14px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-        th, td {
-            border: 1px solid #000;
-            padding: 6px 8px;
-            text-align: center;
-            vertical-align: middle;
-        }
-        th {
-            background-color: #d9d9d9;
-            font-weight: bold;
-        }
-        .absent {
-            background-color: #f4cccc;
-            color: #000;
-        }
-        .signature {
-            margin-top: 50px;
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
-        }
-        .signature div {
-            width: 45%;
-            text-align: center;
-        }
-        .signature strong {
-            margin-top: 10px;
-            display: block;
-            font-size: 14px;
-        }
-      @media print {
+   <style>
     body {
-        margin: 0;
-        font-size: 10px;
-        -webkit-print-color-adjust: exact !important;
+      font-family: 'Calibri', 'Arial', sans-serif;
+      font-size: 13px;
+      margin: 20px;
+      color: #000;
+      background: #fff;
     }
 
-   @page {
-  size: A4 landscape;
-  margin: 1cm;
-}
-
-
-    .btn, .modal, .no-print {
-        display: none !important;
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
     }
 
-    .payroll-table {
-        width: 100% !important;
-        table-layout: fixed;
-        font-size: 10px;
+    .header h2 {
+      font-size: 18px;
+      margin: 0;
     }
 
-    .payroll-table th,
-    .payroll-table td {
-        word-wrap: break-word;
-        padding: 3px;
-        font-size: 10px;
+    .header p {
+      margin: 3px 0;
+      font-size: 14px;
     }
 
-    .header,
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th, td {
+      border: 1px solid #000;
+      padding: 6px 8px;
+      text-align: center;
+      vertical-align: middle;
+    }
+
+    th {
+      background-color: #d9d9d9;
+      font-weight: bold;
+    }
+
+    .absent {
+      background-color: #f4cccc;
+      color: #000;
+    }
+
     .signature {
-        page-break-inside: avoid;
+      margin-top: 50px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      page-break-inside: avoid;
     }
 
-    /* Force the scroll container to expand in print */
-    .scrollable-wrapper {
-        overflow: visible !important;
+    .signature div {
+      width: 45%;
+      text-align: center;
     }
+
+    .signature strong {
+      margin-top: 10px;
+      display: block;
+      font-size: 14px;
+    }
+
+    .scrollable-wrapper {
+      overflow-x: auto;
+      width: 100%;
+    }
+
+
+    /* === PRINT FIXES === */
+  @media print {
+  @page {
+    size: A4 landscape;
+    margin: 0.5cm;
+  }
+
+  body {
+    margin: 0;
+    font-size: 10px;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    overflow: visible !important;
+  }
+
+  .btn, .modal, .no-print {
+    display: none !important;
+  }
+
+  .scrollable-wrapper {
+    overflow: visible !important;
+  }
+
+  .payroll-table {
+    width: 100% !important;
+    table-layout: auto !important;
+    font-size: 9px;
+  }
+
+  .payroll-table th,
+  .payroll-table td {
+    word-wrap: break-word;
+    padding: 2px !important;
+    font-size: 9px !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid;
+  }
+
+  .payroll-table th:first-child,
+  .payroll-table td:first-child {
+    min-width: 25px;
+    max-width: 30px;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  table, thead, tbody, tr, td, th {
+    page-break-inside: avoid !important;
+  }
+
+  .header, .signature {
+    page-break-inside: avoid;
+  }
+
+  .signature {
+    page-break-before: always;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+  }
 }
 
-    </style>
+  </style>
 </head>
 <body>
 
@@ -118,7 +159,7 @@
     </button>
 </div>
 
-<div style="overflow-x: auto; width: 100%;">
+<div class="scrollable-wrapper">
 <table class="payroll-table">
 <thead>
 <tr>
@@ -317,20 +358,23 @@ $workMinutes = ($h * 60) + $m;
 </table>
 </div>
 
-<div class="signature">
+<div class="page-break">
+  <div class="signature">
     <div>
-        <br><br><br>
-        Prepared by:<br><br><br>
-        <strong>Kimmy T. Aban</strong><br>
-        OFC-Admin
+      <br><br><br>
+      Prepared by:<br><br><br>
+      <strong>Kimmy T. Aban</strong><br>
+      OFC-Admin
     </div>
     <div>
-        <br><br><br>
-        Checked by:<br><br><br>
-        <strong>Eloisa A. Cabanilla</strong><br>
-        Admin/Finance Mngr.
+      <br><br><br>
+      Checked by:<br><br><br>
+      <strong>Eloisa A. Cabanilla</strong><br>
+      Admin/Finance Mngr.
     </div>
+  </div>
 </div>
+
 
 <script>
 function printPayslip(elementId) {
