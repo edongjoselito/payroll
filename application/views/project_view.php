@@ -112,6 +112,15 @@
        title="Delete Project">
         <i class="fas fa-trash-alt"></i>
     </a>
+  <a href="<?= base_url('Project/payroll_summary/' . $proj->settingsID . '/' . $proj->projectID) ?>"
+   class="btn btn-secondary btn-sm"
+   data-toggle="tooltip"
+   title="Payroll Report"
+   target="_blank">
+    <i class="fas fa-file-alt"></i>
+</a>
+
+
 </td>
 
                                                 </tr>

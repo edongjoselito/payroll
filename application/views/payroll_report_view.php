@@ -59,32 +59,47 @@
             display: block;
             font-size: 14px;
         }
-        @media print {
-            body {
-                margin: 0;
-                font-size: 12px;
-                -webkit-print-color-adjust: exact !important;
-            }
+      @media print {
+    body {
+        margin: 0;
+        font-size: 10px;
+        -webkit-print-color-adjust: exact !important;
+    }
 
-            @page {
-                size: 8.5in 13in landscape;
-                margin: 1cm;
-            }
+   @page {
+  size: A4 landscape;
+  margin: 1cm;
+}
 
-            .btn, .modal, .no-print {
-                display: none !important;
-            }
 
-            .payroll-table th,
-            .payroll-table td {
-                font-size: 11px;
-                padding: 5px;
-            }
+    .btn, .modal, .no-print {
+        display: none !important;
+    }
 
-            .signature {
-                page-break-inside: avoid;
-            }
-        }
+    .payroll-table {
+        width: 100% !important;
+        table-layout: fixed;
+        font-size: 10px;
+    }
+
+    .payroll-table th,
+    .payroll-table td {
+        word-wrap: break-word;
+        padding: 3px;
+        font-size: 10px;
+    }
+
+    .header,
+    .signature {
+        page-break-inside: avoid;
+    }
+
+    /* Force the scroll container to expand in print */
+    .scrollable-wrapper {
+        overflow: visible !important;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -96,6 +111,11 @@
     <?php if (!empty($_GET['rateType'])): ?>
         <p>SALARY TYPE: Per <?= htmlspecialchars($_GET['rateType']) ?></p>
     <?php endif; ?>
+</div>
+<div class="text-right no-print mb-3">
+    <button onclick="window.print()" class="btn btn-primary">
+        <i class="fas fa-print"></i> Print Payroll Summary
+    </button>
 </div>
 
 <div style="overflow-x: auto; width: 100%;">

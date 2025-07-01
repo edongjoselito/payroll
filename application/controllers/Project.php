@@ -226,5 +226,31 @@ public function payroll_report($settingsID)
 
     $this->load->view('payroll_report_view', $data);
 }
+// PAYROLL SUMMARY-----------
+
+public function payroll_summary($settingsID, $projectID)
+{
+    $start = $this->input->get('start') ?? date('Y-m-01'); // Default: 1st of the month
+    $end = $this->input->get('end') ?? date('Y-m-t');       // Default: last day of the month
+    $rateType = $this->input->get('rateType');              // Optional
+
+    $this->load->model('Project_model');
+
+    $data['project'] = $this->Project_model->getProject($settingsID, $projectID);
+    $data['attendance_data'] = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end, $rateType);
+    $data['start'] = $start;
+    $data['end'] = $end;
+
+    $this->load->view('payroll_report_view', $data);
+}
+
+
+
+
+// -------END----------------
+
+
+
+
 
 }

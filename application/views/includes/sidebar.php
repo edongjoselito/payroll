@@ -86,12 +86,13 @@
 </li> -->
 
                   
-                        <ul class="nav-second-level" aria-expanded="false">
-                            <!-- <li><a href="<?= base_url(); ?>Rate/index">Company Rate</a></li> -->
-                            <li><a href="#">Company Information</a></li>
-                            <!-- <li><a href="#">Login Page Image</a></li> -->
-                        </ul>
-                    </li>
+                     <li>
+    <a href="<?= base_url(); ?>Company/edit" class="waves-effect">
+        <i class="fas fa-building"></i>
+        <span> Company Information </span>
+    </a>
+</li>
+
 
                  
                     <!-- 
