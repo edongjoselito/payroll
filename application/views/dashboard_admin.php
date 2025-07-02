@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+<title>PMS - Dashboard</title>
 
 <?php include('includes/head.php'); ?>
 
