@@ -44,7 +44,7 @@
                 <p><strong>Head Position:</strong><br><?= $info->sHeadPosition ?></p>
               </div>
 
-              <div class="col-md-6">
+              <!-- <div class="col-md-6">
                 <h5 class="text-info mb-3">Visual Assets</h5>
                 <div class="mb-3">
                   <strong>Company Logo:</strong><br>
@@ -63,7 +63,7 @@
                     <p class="text-muted">No letterhead uploaded.</p>
                   <?php endif; ?>
                 </div>
-              </div>
+              </div> -->
 
             </div>
           </div>
@@ -128,13 +128,13 @@
                 <label>Company Head</label>
                 <input type="text" name="SchoolHead" class="form-control" value="<?= $info->SchoolHead ?>" required>
               </div>
-              <div class="form-group">
+              <!-- <div class="form-group">
                 <label>Company Logo</label>
                 <?php if (!empty($info->schoolLogo)): ?>
                   <img src="data:image/png;base64,<?= base64_encode($info->schoolLogo) ?>" class="img-thumbnail mb-2" style="max-height: 80px;">
                 <?php endif; ?>
                 <input type="file" name="schoolLogo" class="form-control">
-              </div>
+              </div> -->
             </div>
 
             <div class="col-md-6">
@@ -146,13 +146,13 @@
                 <label>Head Position</label>
                 <input type="text" name="sHeadPosition" class="form-control" value="<?= $info->sHeadPosition ?>" required>
               </div>
-              <div class="form-group">
+              <!-- <div class="form-group">
                 <label>Letter Head</label>
                 <?php if (!empty($info->letterHead)): ?>
                   <img src="data:image/png;base64,<?= base64_encode($info->letterHead) ?>" class="img-thumbnail mb-2" style="max-height: 80px;">
                 <?php endif; ?>
                 <input type="file" name="letterHead" class="form-control">
-              </div>
+              </div> -->
             </div>
           </div>
 
