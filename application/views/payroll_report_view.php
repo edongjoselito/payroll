@@ -358,22 +358,34 @@ $workMinutes = ($h * 60) + $m;
 </table>
 </div>
 
-<div class="page-break">
-  <div class="signature">
-    <div>
-      <br><br><br>
-      Prepared by:<br><br><br>
-      <strong>Kimmy T. Aban</strong><br>
-      OFC-Admin
-    </div>
-    <div>
-      <br><br><br>
-      Checked by:<br><br><br>
-      <strong>Eloisa A. Cabanilla</strong><br>
-      Admin/Finance Mngr.
-    </div>
+<?php if (!empty($signatories)): ?>
+<div class="row mt-5 signature">
+  <div class="col text-center">
+    <p><strong>Prepared by:</strong></p>
+    <p style="margin: 0;">
+      <span style="display: inline-block; border-bottom: 1px solid #000; min-width: 250px; font-size: 14px; font-weight: bold;">
+        <?= $signatories->prepared_by_name ?? '' ?>
+      </span>
+    </p>
+    <p style="margin-top: 5px; font-size: 13px;">
+      <em><?= $signatories->prepared_by_position ?? '' ?></em>
+    </p>
+  </div>
+  <div class="col text-center">
+    <p><strong>Checked by:</strong></p>
+    <p style="margin: 0;">
+      <span style="display: inline-block; border-bottom: 1px solid #000; min-width: 250px; font-size: 14px; font-weight: bold;">
+        <?= $signatories->checked_by_name ?? '' ?>
+      </span>
+    </p>
+    <p style="margin-top: 5px; font-size: 13px;">
+      <em><?= $signatories->checked_by_position ?? '' ?></em>
+    </p>
   </div>
 </div>
+<?php endif; ?>
+
+
 
 
 <script>

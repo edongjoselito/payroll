@@ -80,6 +80,31 @@
                 </div>
               </div>
 
+              <hr>
+              <h5 class="mt-4"><strong>Signatories</strong></h5>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Prepared By (Name)</label>
+                    <input type="text" name="prepared_by_name" class="form-control" value="<?= $info->prepared_by_name ?? '' ?>">
+                  </div>
+                  <div class="form-group">
+                    <label>Prepared By (Position)</label>
+                    <input type="text" name="prepared_by_position" class="form-control" value="<?= $info->prepared_by_position ?? '' ?>">
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Checked By (Name)</label>
+                    <input type="text" name="checked_by_name" class="form-control" value="<?= $info->checked_by_name ?? '' ?>">
+                  </div>
+                  <div class="form-group">
+                    <label>Checked By (Position)</label>
+                    <input type="text" name="checked_by_position" class="form-control" value="<?= $info->checked_by_position ?? '' ?>">
+                  </div>
+                </div>
+              </div>
+
               <button type="submit" class="btn btn-success">Save Data</button>
               <a href="<?= base_url('Company') ?>" class="btn btn-secondary">Cancel</a>
             </form>

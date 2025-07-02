@@ -206,7 +206,7 @@ public function payroll_report($settingsID)
     $rateType  = $this->input->get('rateType');
 
     $this->load->model('Project_model');
-
+   $this->load->model('SettingsModel');
     if (empty($start) || empty($end)) {
         $this->session->set_flashdata('error', 'Start and end dates are required.');
         redirect('project/project_view');
@@ -219,6 +219,7 @@ public function payroll_report($settingsID)
     $data['end'] = $end;
     
     // Existing data fetch
+    $data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
     $data['project'] = $this->Project_model->getProjectDetails($settingsID, $projectID);
     $data['attendance_data'] = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end, $rateType);
 
@@ -235,11 +236,15 @@ public function payroll_summary($settingsID, $projectID)
     $rateType = $this->input->get('rateType');              // Optional
 
     $this->load->model('Project_model');
+    $this->load->model('SettingsModel'); // Add this if not already
 
     $data['project'] = $this->Project_model->getProject($settingsID, $projectID);
     $data['attendance_data'] = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end, $rateType);
     $data['start'] = $start;
     $data['end'] = $end;
+
+    // ✅ Add this to make signatories work
+    $data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
 
     $this->load->view('payroll_report_view', $data);
 }

@@ -1638,6 +1638,12 @@ public function update_company_info($id, $data) {
 }
 
     // SIGNATORIES------------
+   public function get_signatories($settingsID)
+{
+    return $this->db->get_where('o_srms_settings', ['settingsID' => $settingsID])->row();
+}
+
+
     // END-------------------
 
 }

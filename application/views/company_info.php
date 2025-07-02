@@ -67,9 +67,34 @@
           </div>
         </div>
 
+     </div>
+</div>
+
+<!-- Signatories Card -->
+<div class="container-fluid mt-3">
+  <div class="card">
+    <div class="card-body">
+      <h5 class="text-info mb-3">Signatories</h5>
+      <div class="row">
+        <div class="col-md-6">
+          <p><strong>Prepared By:</strong><br>
+            <?= $info->prepared_by_name ?? 'N/A' ?><br>
+            <small><?= $info->prepared_by_position ?? '' ?></small>
+          </p>
+        </div>
+        <div class="col-md-6">
+          <p><strong>Checked By:</strong><br>
+            <?= $info->checked_by_name ?? 'N/A' ?><br>
+            <small><?= $info->checked_by_position ?? '' ?></small>
+          </p>
+        </div>
       </div>
     </div>
-    <?php include('includes/footer.php'); ?>
+  </div>
+</div>
+
+<?php include('includes/footer.php'); ?>
+
   </div>
 </div>
 <!-- Edit Company Info Modal -->
@@ -82,46 +107,73 @@
           <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
         </div>
 
-        <div class="modal-body">
-          <input type="hidden" name="settingsID" value="<?= $info->settingsID ?>">
-          <div class="row">
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Company Name</label>
-                <input type="text" name="SchoolName" class="form-control" value="<?= $info->SchoolName ?>" required>
-              </div>
-              <div class="form-group">
-                <label>Company Head</label>
-                <input type="text" name="SchoolHead" class="form-control" value="<?= $info->SchoolHead ?>" required>
-              </div>
-              <div class="form-group">
-                <label>Company Logo</label>
-                <?php if (!empty($info->schoolLogo)): ?>
-                  <img src="data:image/png;base64,<?= base64_encode($info->schoolLogo) ?>" class="img-thumbnail mb-2" style="max-height: 80px;">
-                <?php endif; ?>
-                <input type="file" name="schoolLogo" class="form-control">
-              </div>
-            </div>
+       <!-- Inside modal-body -->
+<div class="modal-body">
+  <input type="hidden" name="settingsID" value="<?= $info->settingsID ?>">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="form-group">
+        <label>Company Name</label>
+        <input type="text" name="SchoolName" class="form-control" value="<?= $info->SchoolName ?>" required>
+      </div>
+      <div class="form-group">
+        <label>Company Head</label>
+        <input type="text" name="SchoolHead" class="form-control" value="<?= $info->SchoolHead ?>" required>
+      </div>
+      <div class="form-group">
+        <label>Company Logo</label>
+        <?php if (!empty($info->schoolLogo)): ?>
+          <img src="data:image/png;base64,<?= base64_encode($info->schoolLogo) ?>" class="img-thumbnail mb-2" style="max-height: 80px;">
+        <?php endif; ?>
+        <input type="file" name="schoolLogo" class="form-control">
+      </div>
+    </div>
 
-            <div class="col-md-6">
-              <div class="form-group">
-                <label>Company Address</label>
-                <input type="text" name="SchoolAddress" class="form-control" value="<?= $info->SchoolAddress ?>" required>
-              </div>
-              <div class="form-group">
-                <label>Head Position</label>
-                <input type="text" name="sHeadPosition" class="form-control" value="<?= $info->sHeadPosition ?>" required>
-              </div>
-              <div class="form-group">
-                <label>Letter Head</label>
-                <?php if (!empty($info->letterHead)): ?>
-                  <img src="data:image/png;base64,<?= base64_encode($info->letterHead) ?>" class="img-thumbnail mb-2" style="max-height: 80px;">
-                <?php endif; ?>
-                <input type="file" name="letterHead" class="form-control">
-              </div>
-            </div>
-          </div>
-        </div>
+    <div class="col-md-6">
+      <div class="form-group">
+        <label>Company Address</label>
+        <input type="text" name="SchoolAddress" class="form-control" value="<?= $info->SchoolAddress ?>" required>
+      </div>
+      <div class="form-group">
+        <label>Head Position</label>
+        <input type="text" name="sHeadPosition" class="form-control" value="<?= $info->sHeadPosition ?>" required>
+      </div>
+      <div class="form-group">
+        <label>Letter Head</label>
+        <?php if (!empty($info->letterHead)): ?>
+          <img src="data:image/png;base64,<?= base64_encode($info->letterHead) ?>" class="img-thumbnail mb-2" style="max-height: 80px;">
+        <?php endif; ?>
+        <input type="file" name="letterHead" class="form-control">
+      </div>
+    </div>
+  </div>
+
+  <hr>
+  <h5 class="mt-4"><strong>Signatories</strong></h5>
+  <div class="row">
+    <div class="col-md-6">
+      <div class="form-group">
+        <label>Prepared By (Name)</label>
+        <input type="text" name="prepared_by_name" class="form-control" value="<?= $info->prepared_by_name ?? '' ?>">
+      </div>
+      <div class="form-group">
+        <label>Prepared By (Position)</label>
+        <input type="text" name="prepared_by_position" class="form-control" value="<?= $info->prepared_by_position ?? '' ?>">
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="form-group">
+        <label>Checked By (Name)</label>
+        <input type="text" name="checked_by_name" class="form-control" value="<?= $info->checked_by_name ?? '' ?>">
+      </div>
+      <div class="form-group">
+        <label>Checked By (Position)</label>
+        <input type="text" name="checked_by_position" class="form-control" value="<?= $info->checked_by_position ?? '' ?>">
+      </div>
+    </div>
+  </div>
+</div>
+
 
         <div class="modal-footer">
           <button type="submit" class="btn btn-success">Save Changes</button>
