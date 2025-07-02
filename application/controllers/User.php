@@ -36,7 +36,7 @@ class User extends CI_Controller {
             'IDNumber'    => $this->input->post('IDNumber'),
             'settingsID'  => $this->session->userdata('settingsID'),
             'dateCreated' => date('Y-m-d'),
-            'acctStat'    => 'Active'
+            'acctStat'    => 'active'
         ];
 
         $this->User_model->insert_user($data);

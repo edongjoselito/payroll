@@ -357,9 +357,10 @@ $workMinutes = ($h * 60) + $m;
 </tbody>
 </table>
 </div>
-
+<br>
 <?php if (!empty($signatories)): ?>
 <div class="row mt-5 signature">
+  <!-- Prepared by -->
   <div class="col text-center">
     <p><strong>Prepared by:</strong></p>
     <p style="margin: 0;">
@@ -371,6 +372,8 @@ $workMinutes = ($h * 60) + $m;
       <em><?= $signatories->prepared_by_position ?? '' ?></em>
     </p>
   </div>
+
+  <!-- Checked by -->
   <div class="col text-center">
     <p><strong>Checked by:</strong></p>
     <p style="margin: 0;">
@@ -382,19 +385,22 @@ $workMinutes = ($h * 60) + $m;
       <em><?= $signatories->checked_by_position ?? '' ?></em>
     </p>
   </div>
-   <div class="col text-center">
-    <p><br></p>
+
+  <!-- 3rd signatory (no label) -->
+  <div class="col text-center">
+    <p style="margin: 0;"><br><br></p>
     <p style="margin: 0;">
       <span style="display: inline-block; border-bottom: 1px solid #000; min-width: 250px; font-size: 14px; font-weight: bold;">
-        <?= $signatories->prepared_by_name ?? '' ?>
+        <?= $signatories->additional_name ?? '' ?>
       </span>
     </p>
     <p style="margin-top: 5px; font-size: 13px;">
-      <em><?= $signatories->prepared_by_position ?? '' ?></em>
+      <em><?= $signatories->additional_position ?? '' ?></em>
     </p>
   </div>
 </div>
 <?php endif; ?>
+
 
 
 

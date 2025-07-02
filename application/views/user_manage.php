@@ -103,8 +103,7 @@
                             <label>Position</label>
                             <select name="position" class="form-control" required>
                                 <option value="Admin" <?= $u->position == 'Admin' ? 'selected' : '' ?>>Admin</option>
-                                <option value="Staff" <?= $u->position == 'Staff' ? 'selected' : '' ?>>Staff</option>
-                                <option value="Personnel" <?= $u->position == 'Personnel' ? 'selected' : '' ?>>Personnel</option>
+                               
                             </select>
                         </div>
                     </div>
@@ -199,8 +198,7 @@
                             <label>Position <span class="text-danger">*</span></label>
                             <select name="position" class="form-control" required>
                                 <option value="Admin">Admin</option>
-                                <option value="Staff">Staff</option>
-                                <option value="Personnel">Personnel</option>
+                               
                             </select>
                         </div>
                         <div class="form-group col-md-6">
