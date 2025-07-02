@@ -1626,7 +1626,18 @@ public function getSuperAdminbyIds($settingsID)
         return $query->result();
     }
     
-    // Signatories
-    
+public function get_company_info($settingsID) {
+    return $this->db->get_where('o_srms_settings', ['settingsID' => $settingsID])->row();
+}
+
+
+public function update_company_info($id, $data) {
+    unset($data['settingsID']);
+    $this->db->where('settingsID', $id);
+    return $this->db->update('o_srms_settings', $data);
+}
+
+    // SIGNATORIES------------
+    // END-------------------
 
 }

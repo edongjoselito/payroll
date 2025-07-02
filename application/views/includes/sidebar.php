@@ -91,13 +91,15 @@
     </a>
 </li>
 
-                  
-                     <li>
-    <a href="<?= base_url(); ?>Company/edit" class="waves-effect">
+<li>
+    <a href="<?= base_url('Company') ?>" class="waves-effect">
         <i class="fas fa-building"></i>
         <span> Company Information </span>
     </a>
 </li>
+
+
+
 
 
 
