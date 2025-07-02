@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
+    <title>PMS - Company Info</title>
+
 <?php include('includes/head.php'); ?>
 
 <body>

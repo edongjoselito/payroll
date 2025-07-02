@@ -1,5 +1,7 @@
         <!DOCTYPE html>
         <html lang="en">
+            <title>PMS - Manage Users</title>
+
         <?php include('includes/head.php'); ?>
 
         <body>

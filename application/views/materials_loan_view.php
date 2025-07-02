@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
+    <title>PMS - Materials</title>
+
 <?php include('includes/head.php'); ?>
 
 <body>

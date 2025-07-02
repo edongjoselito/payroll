@@ -1,5 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
+    <title>PMS - Cash Advance</title>
+
 <?php include('includes/head.php'); ?>
 
 <body>

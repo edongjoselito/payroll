@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-
+<title>PMS - Project List</title>
 <?php include('includes/head.php'); ?>
 
 <body>
