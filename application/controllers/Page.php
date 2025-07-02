@@ -145,6 +145,9 @@ public function addNewSuperAdmin()
 }
 
 
+public function personnel_dashboard() {
+    $this->load->view('personnel_dashboard'); // or echo test message
+}
 
 
 

@@ -203,6 +203,7 @@ class Login extends CI_Controller
 
         // Validate user credentials
         $validate = $this->Login_model->validate($username, $password);
+        
 
         if ($validate->num_rows() > 0) {
             $data = $validate->row_array();
