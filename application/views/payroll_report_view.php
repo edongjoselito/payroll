@@ -382,6 +382,17 @@ $workMinutes = ($h * 60) + $m;
       <em><?= $signatories->checked_by_position ?? '' ?></em>
     </p>
   </div>
+   <div class="col text-center">
+    <p><br></p>
+    <p style="margin: 0;">
+      <span style="display: inline-block; border-bottom: 1px solid #000; min-width: 250px; font-size: 14px; font-weight: bold;">
+        <?= $signatories->prepared_by_name ?? '' ?>
+      </span>
+    </p>
+    <p style="margin-top: 5px; font-size: 13px;">
+      <em><?= $signatories->prepared_by_position ?? '' ?></em>
+    </p>
+  </div>
 </div>
 <?php endif; ?>
 
