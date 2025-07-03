@@ -305,8 +305,17 @@ $endDate = strtotime($end);
     <td><?= $ln ?></td>
     <td><?= htmlspecialchars($row->first_name . ' ' . $row->last_name) ?></td>
     <td><?= htmlspecialchars($row->position) ?></td>
-    <td><?= $row->rateType === 'Day' ? number_format($row->rateAmount, 2) : '' ?></td>
-    <td><?= $row->rateType === 'Hour' ? number_format($row->rateAmount, 2) : '' ?></td>
+    
+  <td colspan="2">
+  <?php if ($row->rateType === 'Day'): ?>
+    ₱<?= number_format($row->rateAmount, 2) ?> / day
+  <?php elseif ($row->rateType === 'Hour'): ?>
+    ₱<?= number_format($row->rateAmount, 2) ?> / hour
+  <?php elseif ($row->rateType === 'Month'): ?>
+    ₱<?= number_format($row->rateAmount, 2) ?> / month
+  <?php endif; ?>
+</td>
+
 
     <?php
     $loopDate = strtotime($start);
