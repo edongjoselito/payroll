@@ -41,6 +41,62 @@
       text-align: center;
       vertical-align: middle;
     }
+thead th {
+  padding: 4px 6px !important;
+  font-size: 11px !important;
+  line-height: 1.2;
+  vertical-align: middle !important;
+  text-align: center;
+  font-weight: 600;
+}
+
+tbody td {
+  padding: 4px 6px;
+  font-size: 11.5px;
+  line-height: 1.2;
+  vertical-align: middle;
+  text-align: center;
+}
+tbody td:nth-child(2) {
+  text-align: left;
+}
+.signature strong {
+  font-size: 13px;
+}
+tbody td:nth-last-child(-n+10) {
+  font-size: 10.5px;
+}
+.signature {
+  margin-top: 60px;
+  padding-top: 30px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  page-break-inside: avoid;
+}
+
+.signature div {
+  width: 32%;
+  text-align: center;
+}
+
+.signature p {
+  margin: 3px 0;
+}
+
+.signature .name-line {
+  display: inline-block;
+  border-bottom: 1px solid #000;
+  min-width: 250px;
+  font-size: 16px;
+  font-weight: 600;
+  padding-bottom: 2px;
+}
+
+.signature em {
+  font-size: 14px;
+  color: #333;
+}
 
     th {
       background-color: #d9d9d9;
@@ -52,24 +108,16 @@
       color: #000;
     }
 
-    .signature {
-      margin-top: 50px;
-      display: flex;
-      justify-content: space-between;
-      font-size: 13px;
-      page-break-inside: avoid;
-    }
 
-    .signature div {
-      width: 45%;
-      text-align: center;
-    }
 
-    .signature strong {
-      margin-top: 10px;
-      display: block;
-      font-size: 14px;
-    }
+
+
+.signature strong {
+  margin-top: 10px;
+  display: block;
+  font-size: 14px;
+}
+
 
     .scrollable-wrapper {
       overflow-x: auto;
@@ -79,6 +127,13 @@
 
     /* === PRINT FIXES === */
   @media print {
+     body {
+    transform: scale(0.75);
+    transform-origin: top left;
+  }
+    .signature {
+    margin-top: 10px;
+  }
   @page {
     size: A4 landscape;
     margin: 0.5cm;
@@ -133,26 +188,36 @@
     page-break-inside: avoid;
   }
 
-  .signature {
-    page-break-before: always;
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-  }
+.signature {
+  margin-top: 100px;
+  padding-top: 50px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  page-break-inside: avoid;
+}
+
+.signature div {
+  width: 30%;
+  text-align: center;
+}
+
+
 }
 
   </style>
 </head>
 <body>
 
-<div class="header">
-    <h2>PROJECT: <?= $project->projectTitle ?? 'N/A' ?></h2>
-    <p>LOCATION: <?= $project->projectLocation ?? 'Unknown' ?></p>
-    <p>PERIOD: <?= date('F d, Y', strtotime($start)) ?> - <?= date('F d, Y', strtotime($end)) ?></p>
+<div class="header text-left mb-3" style="margin-left: 10px; font-size: 13px; line-height: 1.6;">
+    <p><strong>PROJECT</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?= $project->projectTitle ?? 'N/A' ?></p>
+    <p><strong>LOCATION</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?= $project->projectLocation ?? 'Unknown' ?></p>
+    <p><strong>PERIOD</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?= date('F d, Y', strtotime($start)) ?> - <?= date('F d, Y', strtotime($end)) ?></p>
     <?php if (!empty($_GET['rateType'])): ?>
-        <p>SALARY TYPE: Per <?= htmlspecialchars($_GET['rateType']) ?></p>
+    <p><strong>SALARY TYPE</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Per <?= htmlspecialchars($_GET['rateType']) ?></p>
     <?php endif; ?>
 </div>
+
 <div class="text-right no-print mb-3">
     <button onclick="window.print()" class="btn btn-primary">
         <i class="fas fa-print"></i> Print Payroll Summary
@@ -163,11 +228,11 @@
 <table class="payroll-table">
 <thead>
 <tr>
-    <th rowspan="2">L/N</th>
-    <th rowspan="2">NAME</th>
-    <th rowspan="2">POSITION</th>
-    <th rowspan="2">RATE</th>
-    <th rowspan="2">Rate / Hour</th>
+    <th rowspan="3">L/N</th>
+    <th rowspan="3">NAME</th>
+    <th rowspan="3">POSITION</th>
+    <th rowspan="3">RATE</th>
+    <th rowspan="3">Rate / Hour</th>
     <?php
     $startDate = strtotime($start);
     $endDate = strtotime($end);
@@ -177,19 +242,35 @@
     endwhile;
     ?>
     <th colspan="3">TOTAL TIME</th>
-    <th rowspan="2">Gross Salary</th>
-    <th rowspan="2">W.C.A</th>
-    <th rowspan="2">HARDHAT</th>
-    <th rowspan="2">SSS Loan</th>
-    <th rowspan="2">SSS (<?= date('F Y', strtotime($start)) ?>)</th>
-    <th rowspan="2">PHIC</th>
-    <th rowspan="2">Pondo</th>
-    <th rowspan="2">HARDWARE</th>
-    <th rowspan="2">Safety Shoes</th>
-    <th rowspan="2">Loan</th>
-    <th rowspan="2">Total Deduction</th>
-    <th rowspan="2">Net Pay</th>
-    <th rowspan="2" colspan="3">Signature</th>
+    <th colspan="2">AMOUNT</th>
+    <th rowspan="3">TOTAL</th>
+    <th rowspan="3">W.C.A</th>
+    <th rowspan="3">HARDHAT</th>
+    <th rowspan="3">SSS (<?= date('F Y', strtotime($start)) ?>)</th>
+    <th rowspan="3">Pag-IBIG (<?= date('F Y', strtotime($start)) ?>)</th>
+    <th rowspan="3">PHIC</th>
+    <th rowspan="3">Pondo</th>
+    <th rowspan="3">HARDWARE</th>
+    <th rowspan="3">Safety Shoes</th>
+    <th rowspan="3">Loan</th>
+    <th rowspan="3">Total Deduction</th>
+    <th rowspan="3">Take Home Pay</th>
+    <th rowspan="3" colspan="3">Signature</th>
+</tr>
+<tr>
+    <?php
+    $startDate = strtotime($start);
+    $endDate = strtotime($end);
+    while ($startDate <= $endDate):
+        echo '<th colspan="2">' . date('l', $startDate) . '</th>';
+        $startDate = strtotime('+1 day', $startDate);
+    endwhile;
+    ?>
+    <th rowspan="2">Reg.</th>
+    <th rowspan="2">O.T</th>
+    <th rowspan="2">Days</th>
+    <th rowspan="2">Reg.</th>
+    <th rowspan="2">O.T</th>
 </tr>
 <tr>
     <?php
@@ -200,13 +281,20 @@
         $startDate = strtotime('+1 day', $startDate);
     endwhile;
     ?>
-    <th>Reg.</th><th>O.T</th><th>Days</th>
 </tr>
 </thead>
+
+
 <tbody>
+  <?php $totalPayroll = 0; ?>
+
 <?php $ln = 1; foreach ($attendance_data as $row): ?>
+  
 <tr>
 <?php
+
+$regAmount = 0;
+$otAmount = 0;
 $regTotalMinutes = 0;
 $otTotalMinutes = 0;
 $totalMinutes = 0;
@@ -234,6 +322,10 @@ $workMinutes = ($h * 60) + $m;
 
             $reg = min($workMinutes, 480);
             $ot = max(0, $workMinutes - 480);
+$regHours = floor($reg / 60);
+$otHours = floor($ot / 60);
+$regAmount += ($regHours * $row->rateAmount);
+$otAmount += ($otHours * ($row->rateAmount * 1.25)); // OT is 125% of base rate
 
             $regTotalMinutes += $reg;
             $otTotalMinutes += $ot;
@@ -250,14 +342,8 @@ $workMinutes = ($h * 60) + $m;
         $loopDate = strtotime('+1 day', $loopDate);
     endwhile;
 
-    $salary = 0;
-    if ($row->rateType === 'Hour') {
-        $salary = ($totalMinutes / 60) * $row->rateAmount;
-    } elseif ($row->rateType === 'Day') {
-        $salary = $totalDays * $row->rateAmount;
-    } elseif ($row->rateType === 'Month') {
-        $salary = ($row->rateAmount / 22) * $totalDays;
-    }
+ $salary = $regAmount + $otAmount;
+
 
     $cash_advance = $row->ca_cashadvance ?? 0;
     $hardhat = $row->ca_hardhat ?? 0;
@@ -270,7 +356,12 @@ $workMinutes = ($h * 60) + $m;
     $loan = $row->loan ?? 0;
 
     $total_deduction = $cash_advance + $hardhat + $pondo + $hardware + $safety + $sss + $pagibig + $philhealth + $loan;
-    $netPay = $salary - $total_deduction;
+   $netPay = $salary - $total_deduction;
+if ($netPay > 0) {
+    $totalPayroll += $netPay; 
+}
+
+
 
     $regFormatted = floor($regTotalMinutes / 60);
     $otFormatted = floor($otTotalMinutes / 60);
@@ -278,22 +369,28 @@ $workMinutes = ($h * 60) + $m;
     <td><?= $regFormatted ?></td>
     <td><?= $otFormatted ?></td>
     <td><?= $totalDays ?></td>
-    <td><?= number_format($salary, 2) ?></td>
+    <td><?= number_format($regAmount, 2) ?></td>
+<td><?= number_format($otAmount, 2) ?></td>
+<td><?= number_format($regAmount + $otAmount, 2) ?></td>
+
     <td><?= number_format($cash_advance, 2) ?></td>
     <td><?= number_format($hardhat, 2) ?></td>
-    <td>0.00</td>
     <td><?= number_format($sss, 2) ?></td>
+    <td><?= number_format($pagibig, 2) ?></td>
+
     <td><?= number_format($philhealth, 2) ?></td>
     <td><?= number_format($pondo, 2) ?></td>
     <td><?= number_format($hardware, 2) ?></td>
     <td><?= number_format($safety, 2) ?></td>
     <td><?= number_format($loan, 2) ?></td>
     <td><?= number_format($total_deduction, 2) ?></td>
-    <td>
-        <a href="#" class="btn btn-link btn-sm" data-toggle="modal" data-target="#payslipModal<?= $ln ?>">
-            <?= number_format($netPay, 2) ?>
-        </a>
-    </td>
+   <td>
+  <span class="d-print-block d-none"><?= number_format($netPay, 2) ?></span> <!-- Show on print -->
+  <a href="#" class="btn btn-link btn-sm d-print-none" data-toggle="modal" data-target="#payslipModal<?= $ln ?>">
+    <?= number_format($netPay, 2) ?>
+  </a>
+</td>
+
     <td colspan="3"></td>
 </tr>
 
@@ -355,7 +452,15 @@ $workMinutes = ($h * 60) + $m;
 </div>
 <?php $ln++; endforeach; ?>
 </tbody>
+
 </table>
+<div style="text-align: right; font-weight: bold; font-size: 15px; margin-top: 10px;">
+    TOTAL PAYROLL = ₱ <?= number_format($totalPayroll ?? 0, 2) ?>
+</div>
+
+
+
+
 </div>
 <br>
 <?php if (!empty($signatories)): ?>
@@ -363,43 +468,28 @@ $workMinutes = ($h * 60) + $m;
   <!-- Prepared by -->
   <div class="col text-center">
     <p><strong>Prepared by:</strong></p>
-    <p style="margin: 0;">
-      <span style="display: inline-block; border-bottom: 1px solid #000; min-width: 250px; font-size: 14px; font-weight: bold;">
-        <?= $signatories->prepared_by_name ?? '' ?>
-      </span>
-    </p>
-    <p style="margin-top: 5px; font-size: 13px;">
-      <em><?= $signatories->prepared_by_position ?? '' ?></em>
-    </p>
+    <br><br>
+    <p class="name-line"><?= $signatories->prepared_by_name ?? '' ?></p>
+    <p><em><?= $signatories->prepared_by_position ?? '' ?></em></p>
   </div>
 
   <!-- Checked by -->
   <div class="col text-center">
     <p><strong>Checked by:</strong></p>
-    <p style="margin: 0;">
-      <span style="display: inline-block; border-bottom: 1px solid #000; min-width: 250px; font-size: 14px; font-weight: bold;">
-        <?= $signatories->checked_by_name ?? '' ?>
-      </span>
-    </p>
-    <p style="margin-top: 5px; font-size: 13px;">
-      <em><?= $signatories->checked_by_position ?? '' ?></em>
-    </p>
+    <br><br>
+    <p class="name-line"><?= $signatories->checked_by_name ?? '' ?></p>
+    <p><em><?= $signatories->checked_by_position ?? '' ?></em></p>
   </div>
 
-  <!-- 3rd signatory (no label) -->
+  <!-- 3rd Signatory -->
   <div class="col text-center">
-    <p style="margin: 0;"><br><br></p>
-    <p style="margin: 0;">
-      <span style="display: inline-block; border-bottom: 1px solid #000; min-width: 250px; font-size: 14px; font-weight: bold;">
-        <?= $signatories->additional_name ?? '' ?>
-      </span>
-    </p>
-    <p style="margin-top: 5px; font-size: 13px;">
-      <em><?= $signatories->additional_position ?? '' ?></em>
-    </p>
+    <br><br><br><br>
+    <p class="name-line"><?= $signatories->additional_name ?? '' ?></p>
+    <p><em><?= $signatories->additional_position ?? '' ?></em></p>
   </div>
 </div>
 <?php endif; ?>
+
 
 
 
