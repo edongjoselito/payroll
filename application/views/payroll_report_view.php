@@ -552,7 +552,7 @@ if ($netPay > 0) {
 <?php endif; ?>
 
 
-/*
+<!-- /*
 |--------------------------------------------------------------------------
 | PAYROLL COMPUTATION METHOD
 |--------------------------------------------------------------------------
@@ -606,7 +606,7 @@ if ($netPay > 0) {
 |   Only Sundays are excluded.
 |   Use getWorkingDaysInMonth($startDate)
 |
-*/
+*/ -->
 
 
 
