@@ -1,3 +1,21 @@
+<?php
+function getWorkingDaysInMonth($anyDateInMonth) {
+    $year = date('Y', strtotime($anyDateInMonth));
+    $month = date('m', strtotime($anyDateInMonth));
+    $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+    $workingDays = 0;
+
+    for ($day = 1; $day <= $daysInMonth; $day++) {
+        $weekday = date('w', strtotime("$year-$month-$day")); // 0=Sunday
+        if ($weekday != 0) {
+            $workingDays++;
+        }
+    }
+
+    return $workingDays;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -210,10 +228,13 @@ tbody td:nth-last-child(-n+10) {
   </style>
 </head>
 <body>
+  
 <div class="header text-left mb-3" style="margin-left: 10px; font-size: 13px; line-height: 1.6;">
     <p><strong>PROJECT</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?= $project->projectTitle ?? 'N/A' ?></p>
     <p><strong>LOCATION</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?= $project->projectLocation ?? 'Unknown' ?></p>
     <p><strong>PERIOD</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?= date('F d, Y', strtotime($start)) ?> - <?= date('F d, Y', strtotime($end)) ?></p>
+    <p><strong>WORKING DAYS</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?= getWorkingDaysInMonth($start) ?> days</p>
+
     <?php if (!empty($_GET['rateType'])): ?>
     <p><strong>SALARY TYPE</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Per <?= htmlspecialchars($_GET['rateType']) ?></p>
     <?php endif; ?>
@@ -334,8 +355,24 @@ $workMinutes = ($h * 60) + $m;
             $ot = max(0, $workMinutes - 480);
 $regHours = floor($reg / 60);
 $otHours = floor($ot / 60);
-$regAmount += ($regHours * $row->rateAmount);
-$otAmount += ($otHours * ($row->rateAmount * 1.25)); // OT is 125% of base rate
+if ($row->rateType === 'Hour') {
+    $regAmount += $regHours * $row->rateAmount;
+    $otAmount += $otHours * ($row->rateAmount * 1.25);
+} elseif ($row->rateType === 'Day') {
+    $regAmount += ($regHours / 8) * $row->rateAmount;
+    $otAmount += $otHours * ($row->rateAmount / 8) * 1.25;
+} elseif ($row->rateType === 'Month') {
+  $workingDaysInMonth = getWorkingDaysInMonth($start);
+
+    $dailyRate = $row->rateAmount / $workingDaysInMonth;
+    $hourlyRate = $dailyRate / 8;
+
+$regAmount += ($regHours / 8) * $dailyRate;
+
+    $otAmount += $otHours * $hourlyRate * 1.25;
+    
+}
+
 
             $regTotalMinutes += $reg;
             $otTotalMinutes += $ot;
@@ -417,7 +454,21 @@ if ($netPay > 0) {
           <div class="col-md-6">
             <p><strong>Employee:</strong> <?= htmlspecialchars($row->first_name . ' ' . $row->last_name) ?></p>
             <p><strong>Position:</strong> <?= htmlspecialchars($row->position) ?></p>
-            <p><strong>Rate:</strong> <?= number_format($row->rateAmount, 2) ?> / <?= $row->rateType ?></p>
+          <?php if ($row->rateType === 'Month'): ?>
+    <?php
+        $workingDaysInMonth = getWorkingDaysInMonth($start);
+        $dailyRate = $row->rateAmount / $workingDaysInMonth;
+        $hourlyRate = $dailyRate / 8;
+        $otRate = $hourlyRate * 1.25;
+    ?>
+    <p><strong>Rate:</strong> ₱<?= number_format($row->rateAmount, 2) ?> / Month</p>
+    <p><strong>Daily Rate:</strong> ₱<?= number_format($dailyRate, 2) ?></p>
+    <p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p>
+    <p><strong>Overtime Rate (125%):</strong> ₱<?= number_format($otRate, 2) ?></p>
+<?php else: ?>
+    <p><strong>Rate:</strong> ₱<?= number_format($row->rateAmount, 2) ?> / <?= $row->rateType ?></p>
+<?php endif; ?>
+
           </div>
           <div class="col-md-6 text-right">
             <p><strong>Period:</strong><br><?= date('F d', strtotime($start)) ?> - <?= date('F d, Y', strtotime($end)) ?></p>
@@ -501,6 +552,61 @@ if ($netPay > 0) {
 <?php endif; ?>
 
 
+/*
+|--------------------------------------------------------------------------
+| PAYROLL COMPUTATION METHOD
+|--------------------------------------------------------------------------
+|
+| kani na payroll supports Hourly, Daily, and Monthly.
+|
+| 1. REGULAR TIME PAY:
+| -------------------------------------------------------------------------
+| * Per Hour Rate (ex: ₱10/hour)
+|    - If employee worked 16 regular hours:
+|      → Reg Pay = 16 hrs × ₱10 = ₱160.00
+|
+|* Per Day Rate (ex: ₱400/day)
+|    - If employee worked 2 full days:
+|      → Reg Pay = 2 days × ₱400 = ₱800.00
+|
+| * Per Month Rate (ex ₱10,000/month)
+|    - Working days in the month are computed (Dayoff Sundays).
+|      Example: July has 27 working days → Daily Rate = ₱10,000 / 27 = ₱370.37
+|      → Hourly Rate = ₱370.37 / 8 hrs = ₱46.30
+|      → If 16 regular hours worked: Reg Pay = 16 × ₱46.30 = ₱740.80
+|
+| 2. OVERTIME PAY (applies to all salary types):
+| -------------------------------------------------------------------------
+| - OT Rate is 125% of the hourly rate.
+|   Example: ₱46.30 × 1.25 = ₱57.87 (OT Rate)
+| - If 4 OT hours worked: OT Pay = 4 hrs × ₱57.87 = ₱231.48
+|
+| 3. GROSS SALARY:
+| -------------------------------------------------------------------------
+|   Gross Pay = Regular Pay + OT Pay
+|   Example: ₱740.80 + ₱231.48 = ₱972.28
+|
+| 4. DEDUCTIONS:
+| -------------------------------------------------------------------------
+|   Deductions include: SSS, PHIC, Pag-IBIG, Loans, etc.
+|   Example:
+|     - SSS: ₱50.00
+|     - PHIC: ₱50.00
+|     - Pag-IBIG: ₱50.00
+|     → Total Deductions = ₱150.00
+|
+| 5. NET PAY:
+| -------------------------------------------------------------------------
+|   Net Pay = Gross Pay − Deductions
+|   Example: ₱972.28 − ₱150.00 = ₱822.28
+|
+| 6. WORKING DAYS IN MONTH:
+| -------------------------------------------------------------------------
+|   Automatically calculated based on the payroll start date.
+|   Only Sundays are excluded.
+|   Use getWorkingDaysInMonth($startDate)
+|
+*/
 
 
 
