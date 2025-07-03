@@ -43,7 +43,7 @@
     }
 thead th {
   padding: 4px 6px !important;
-  font-size: 11px !important;
+  font-size: 14px !important;
   line-height: 1.2;
   vertical-align: middle !important;
   text-align: center;
@@ -88,13 +88,13 @@ tbody td:nth-last-child(-n+10) {
   display: inline-block;
   border-bottom: 1px solid #000;
   min-width: 250px;
-  font-size: 16px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 400;
   padding-bottom: 2px;
 }
 
 .signature em {
-  font-size: 14px;
+  font-size: 13px;
   color: #333;
 }
 
@@ -115,7 +115,7 @@ tbody td:nth-last-child(-n+10) {
 .signature strong {
   margin-top: 10px;
   display: block;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 
@@ -178,6 +178,8 @@ tbody td:nth-last-child(-n+10) {
 
   thead {
     display: table-header-group;
+     font-size: 14px !important;
+
   }
 
   table, thead, tbody, tr, td, th {
@@ -208,7 +210,6 @@ tbody td:nth-last-child(-n+10) {
   </style>
 </head>
 <body>
-
 <div class="header text-left mb-3" style="margin-left: 10px; font-size: 13px; line-height: 1.6;">
     <p><strong>PROJECT</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?= $project->projectTitle ?? 'N/A' ?></p>
     <p><strong>LOCATION</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?= $project->projectLocation ?? 'Unknown' ?></p>
