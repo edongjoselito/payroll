@@ -206,7 +206,9 @@ public function payroll_report($settingsID)
     $rateType  = $this->input->get('rateType');
 
     $this->load->model('Project_model');
-   $this->load->model('SettingsModel');
+    $this->load->model('SettingsModel');
+    $this->load->model('OtherDeduction_model');  // ✅ Make sure this is loaded
+
     if (empty($start) || empty($end)) {
         $this->session->set_flashdata('error', 'Start and end dates are required.');
         redirect('project/project_view');
@@ -217,17 +219,36 @@ public function payroll_report($settingsID)
     $data['projectID'] = $projectID;
     $data['start'] = $start;
     $data['end'] = $end;
-    
+    $data['rateType'] = $rateType;
+
     // Existing data fetch
     $data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
     $data['project'] = $this->Project_model->getProjectDetails($settingsID, $projectID);
-    $data['attendance_data'] = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end, $rateType);
+    $payroll = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end, $rateType);
 
+    // 💡 Fetch Other Deductions and group by personnelID
+    $deductions = $this->OtherDeduction_model->get_deductions_by_date_range($start, $end, $settingsID);
+    $groupedDeductions = [];
+
+    foreach ($deductions as $deduction) {
+        $pid = trim($deduction->personnelID);
+        if (!isset($groupedDeductions[$pid])) {
+            $groupedDeductions[$pid] = 0;
+        }
+        $groupedDeductions[$pid] += $deduction->amount;
+    }
+
+    // 🔁 Merge deductions into each payroll row
+    foreach ($payroll as &$row) {
+        $pid = trim($row->personnelID);
+        $row->other_deduction = $groupedDeductions[$pid] ?? 0;
+    }
+
+    $data['attendance_data'] = $payroll;
     $data['personnel_loans'] = $this->Project_model->getPersonnelLoans($settingsID, $projectID);
 
     $this->load->view('payroll_report_view', $data);
 }
-// PAYROLL SUMMARY-----------
 
 public function payroll_summary($settingsID, $projectID)
 {
@@ -236,18 +257,40 @@ public function payroll_summary($settingsID, $projectID)
     $rateType = $this->input->get('rateType');              // Optional
 
     $this->load->model('Project_model');
-    $this->load->model('SettingsModel'); // Add this if not already
+    $this->load->model('SettingsModel');
+    $this->load->model('OtherDeduction_model'); // ✅ Load the model
 
-    $data['project'] = $this->Project_model->getProject($settingsID, $projectID);
-    $data['attendance_data'] = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end, $rateType);
     $data['start'] = $start;
     $data['end'] = $end;
+    $data['rateType'] = $rateType;
 
-    // ✅ Add this to make signatories work
+    $data['project'] = $this->Project_model->getProject($settingsID, $projectID);
+    $payroll = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end, $rateType);
+
+    // ✅ Fetch and group other deductions
+    $deductions = $this->OtherDeduction_model->get_deductions_by_date_range($start, $end, $settingsID);
+    $groupedDeductions = [];
+
+    foreach ($deductions as $deduction) {
+        $pid = trim($deduction->personnelID);
+        if (!isset($groupedDeductions[$pid])) {
+            $groupedDeductions[$pid] = 0;
+        }
+        $groupedDeductions[$pid] += $deduction->amount;
+    }
+
+    // ✅ Inject other_deduction into each payroll row
+    foreach ($payroll as &$row) {
+        $pid = trim($row->personnelID);
+        $row->other_deduction = $groupedDeductions[$pid] ?? 0;
+    }
+
+    $data['attendance_data'] = $payroll;
     $data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
 
     $this->load->view('payroll_report_view', $data);
 }
+
 
 
 

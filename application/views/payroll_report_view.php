@@ -266,16 +266,13 @@ tbody td:nth-last-child(-n+10) {
     <th colspan="3">TOTAL TIME</th>
     <th colspan="2">AMOUNT</th>
     <th rowspan="3">TOTAL</th>
-    <th rowspan="3">W.C.A</th>
-    <th rowspan="3">HARDHAT</th>
+       <th rowspan="3">Cash Advance</th>
     <th rowspan="3">SSS (<?= date('F Y', strtotime($start)) ?>)</th>
     <th rowspan="3">Pag-IBIG (<?= date('F Y', strtotime($start)) ?>)</th>
     <th rowspan="3">PHIC</th>
-    <th rowspan="3">Pondo</th>
-    <th rowspan="3">HARDWARE</th>
-    <th rowspan="3">Safety Shoes</th>
     <th rowspan="3">Loan</th>
-    <th rowspan="3">Total Deduction</th>
+    <th rowspan="3">Other Deduction</th>
+<th rowspan="3">Total Deduction</th>
     <th rowspan="3">Take Home Pay</th>
     <th rowspan="3" colspan="3">Signature</th>
 </tr>
@@ -393,16 +390,13 @@ $regAmount += ($regHours / 8) * $dailyRate;
 
 
     $cash_advance = $row->ca_cashadvance ?? 0;
-    $hardhat = $row->ca_hardhat ?? 0;
-    $pondo = $row->ca_pondo ?? 0;
-    $hardware = $row->ca_hardware ?? 0;
-    $safety = $row->ca_safety_shoes ?? 0;
+   $other_deduction = $row->other_deduction ?? 0;
     $sss = $row->sss ?? 0;
     $pagibig = $row->pagibig ?? 0;
     $philhealth = $row->philhealth ?? 0;
     $loan = $row->loan ?? 0;
 
-    $total_deduction = $cash_advance + $hardhat + $pondo + $hardware + $safety + $sss + $pagibig + $philhealth + $loan;
+   $total_deduction = $cash_advance + $sss + $pagibig + $philhealth + $loan + $other_deduction;
    $netPay = $salary - $total_deduction;
 if ($netPay > 0) {
     $totalPayroll += $netPay; 
@@ -421,15 +415,14 @@ if ($netPay > 0) {
 <td><?= number_format($regAmount + $otAmount, 2) ?></td>
 
     <td><?= number_format($cash_advance, 2) ?></td>
-    <td><?= number_format($hardhat, 2) ?></td>
     <td><?= number_format($sss, 2) ?></td>
     <td><?= number_format($pagibig, 2) ?></td>
 
     <td><?= number_format($philhealth, 2) ?></td>
-    <td><?= number_format($pondo, 2) ?></td>
-    <td><?= number_format($hardware, 2) ?></td>
-    <td><?= number_format($safety, 2) ?></td>
     <td><?= number_format($loan, 2) ?></td>
+    <td><?= number_format($row->other_deduction ?? 0, 2) ?>
+</td>
+
     <td><?= number_format($total_deduction, 2) ?></td>
    <td>
   <span class="d-print-block d-none"><?= number_format($netPay, 2) ?></span> <!-- Show on print -->
@@ -490,14 +483,12 @@ if ($netPay > 0) {
             <h6>Deductions</h6>
             <ul class="list-unstyled">
               <li>Cash Advance: <?= number_format($cash_advance, 2) ?></li>
-              <li>Hardhat: <?= number_format($hardhat, 2) ?></li>
               <li>SSS: <?= number_format($sss, 2) ?></li>
               <li>PHIC: <?= number_format($philhealth, 2) ?></li>
               <li>Pag-IBIG: <?= number_format($pagibig, 2) ?></li>
-              <li>Pondo: <?= number_format($pondo, 2) ?></li>
-              <li>Hardware: <?= number_format($hardware, 2) ?></li>
-              <li>Safety Shoes: <?= number_format($safety, 2) ?></li>
               <li>Loan: <?= number_format($loan, 2) ?></li>
+              <li>Other Deduction: <?= number_format($other_deduction, 2) ?></li>
+
               <li><strong>Total Deduction: <?= number_format($total_deduction, 2) ?></strong></li>
             </ul>
           </div>

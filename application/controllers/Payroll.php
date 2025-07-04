@@ -24,25 +24,41 @@ class Payroll extends CI_Controller {
     //     $payroll_data = $this->Payroll_model->generate_payroll($dateFrom, $dateTo, $cutoff);
     //     $this->load->view('payroll/result', ['payroll' => $payroll_data]);
     // }
-    public function generate() {
+ public function generate() {
     $cutoff = $this->input->post('cutoff');
     $dateFrom = $this->input->post('date_from');
     $dateTo = $this->input->post('date_to');
-
     $settingsID = $this->session->userdata('settingsID');
 
-    // Generate payroll as usual
+    // Generate payroll
     $payroll_data = $this->Payroll_model->generate_payroll($dateFrom, $dateTo, $cutoff);
 
-    // Auto-deduct cash advances due this cutoff
+    // Load Other Deductions (material type)
+    $this->load->model('OtherDeduction_model');
+    $other_deductions = $this->OtherDeduction_model->get_deductions_by_date_range($dateFrom, $dateTo, $settingsID);
+
+    // Group by personnelID
+    $groupedDeductions = [];
+    foreach ($other_deductions as $deduction) {
+        $pid = (int) $deduction->personnelID;
+        if (!isset($groupedDeductions[$pid])) {
+            $groupedDeductions[$pid] = 0;
+        }
+        $groupedDeductions[$pid] += $deduction->amount;
+    }
+
+    // Inject into each row
+    foreach ($payroll_data as &$row) {
+        $pid = (int) $row->personnelID;
+        $row->other_deduction = $groupedDeductions[$pid] ?? 0;
+    }
+
+    // Auto-deduct Cash Advances
     $this->load->model('Cashadvance_model');
     $due_advances = $this->Cashadvance_model->get_due_cash_advances($cutoff, $settingsID);
 
     foreach ($due_advances as $advance) {
-        // Mark as deducted
         $this->Cashadvance_model->mark_cash_advance_deducted($advance->id);
-
-        // Optional: Save as payroll deduction record
         $this->db->insert('payroll_deductions', [
             'personnelID' => $advance->personnelID,
             'amount' => $advance->amount,
@@ -53,9 +69,10 @@ class Payroll extends CI_Controller {
         ]);
     }
 
-    // Load results view
+    // Render payroll result
     $this->load->view('payroll/result', ['payroll' => $payroll_data]);
 }
+
 
 
     public function save() {
