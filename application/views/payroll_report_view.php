@@ -2,19 +2,11 @@
 function getWorkingDaysInMonth($anyDateInMonth) {
     $year = date('Y', strtotime($anyDateInMonth));
     $month = date('m', strtotime($anyDateInMonth));
-    $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-    $workingDays = 0;
-
-    for ($day = 1; $day <= $daysInMonth; $day++) {
-        $weekday = date('w', strtotime("$year-$month-$day")); // 0=Sunday
-        if ($weekday != 0) {
-            $workingDays++;
-        }
-    }
-
-    return $workingDays;
+    
+    return cal_days_in_month(CAL_GREGORIAN, $month, $year);
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -23,42 +15,43 @@ function getWorkingDaysInMonth($anyDateInMonth) {
     <title>PMS - Payroll Report</title>
     <?php include('includes/head.php'); ?>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-   <style>
-    body {
-      font-family: 'Calibri', 'Arial', sans-serif;
-      font-size: 13px;
-      margin: 20px;
-      color: #000;
-      background: #fff;
-    }
+  <style>
+body {
+  font-family: 'Calibri', 'Arial', sans-serif;
+  font-size: 13px;
+  margin: 20px;
+  color: #000;
+  background: #fff;
+}
 
-    .header {
-      text-align: center;
-      margin-bottom: 20px;
-    }
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
 
-    .header h2 {
-      font-size: 18px;
-      margin: 0;
-    }
+.header h2 {
+  font-size: 18px;
+  margin: 0;
+}
 
-    .header p {
-      margin: 3px 0;
-      font-size: 14px;
-    }
+.header p {
+  margin: 3px 0;
+  font-size: 14px;
+}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-    }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
 
-    th, td {
-      border: 1px solid #000;
-      padding: 6px 8px;
-      text-align: center;
-      vertical-align: middle;
-    }
+th, td {
+  border: 1px solid #000;
+  padding: 6px 8px;
+  text-align: center;
+  vertical-align: middle;
+}
+
 thead th {
   padding: 4px 6px !important;
   font-size: 14px !important;
@@ -75,15 +68,19 @@ tbody td {
   vertical-align: middle;
   text-align: center;
 }
+
 tbody td:nth-child(2) {
   text-align: left;
 }
+
 .signature strong {
   font-size: 13px;
 }
+
 tbody td:nth-last-child(-n+10) {
   font-size: 10.5px;
 }
+
 .signature {
   margin-top: 60px;
   padding-top: 30px;
@@ -116,56 +113,61 @@ tbody td:nth-last-child(-n+10) {
   color: #333;
 }
 
-    th {
-      background-color: #d9d9d9;
-      font-weight: bold;
-    }
-
-    .absent {
-      background-color: #f4cccc;
-      color: #000;
-    }
-
-
-
-
-
-.signature strong {
-  margin-top: 10px;
-  display: block;
-  font-size: 13px;
+th {
+  background-color: #d9d9d9;
+  font-weight: bold;
 }
 
+.absent {
+  background-color: #f4cccc;
+  color: #000;
+}
 
-    .scrollable-wrapper {
-      overflow-x: auto;
-      width: 100%;
-    }
+.scrollable-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
 
+/* Payslip Modal Styling */
+.modal-content {
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  color: #000;
+  font-family: Arial, sans-serif;
+}
 
-    /* === PRINT FIXES === */
-  @media print {
-     body {
+.modal-header {
+  background: #fff !important;
+  color: #000 !important;
+  border-bottom: 1px solid #ddd;
+}
+
+.modal-body h6 {
+  font-weight: bold;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 4px;
+  margin-bottom: 10px;
+}
+
+/* === PRINT FIXES === */
+@media print {
+  body {
     transform: scale(0.75);
     transform-origin: top left;
+    margin: 0;
+    font-size: 10px;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
-    .signature {
-    margin-top: 10px;
-  }
+
   @page {
     size: A4 landscape;
     margin: 0.5cm;
   }
 
-  body {
-    margin: 0;
-    font-size: 10px;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    overflow: visible !important;
-  }
-
-  .btn, .modal, .no-print {
+  .btn, .modal, .no-print, .modal-backdrop {
     display: none !important;
   }
 
@@ -196,8 +198,7 @@ tbody td:nth-last-child(-n+10) {
 
   thead {
     display: table-header-group;
-     font-size: 14px !important;
-
+    font-size: 14px !important;
   }
 
   table, thead, tbody, tr, td, th {
@@ -208,24 +209,38 @@ tbody td:nth-last-child(-n+10) {
     page-break-inside: avoid;
   }
 
-.signature {
-  margin-top: 100px;
-  padding-top: 50px;
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  page-break-inside: avoid;
+  .signature {
+    margin-top: 100px;
+    padding-top: 50px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    page-break-inside: avoid;
+  }
+
+  .signature div {
+    width: 30%;
+    text-align: center;
+  }
+
+  /* Print only the modal for payslip, half-page layout */
+  .modal-content, .modal-content * {
+    visibility: visible;
+  }
+
+  .modal-content {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50%;
+    overflow: hidden;
+    padding: 20px;
+    box-sizing: border-box;
+  }
 }
+</style>
 
-.signature div {
-  width: 30%;
-  text-align: center;
-}
-
-
-}
-
-  </style>
 </head>
 <body>
   
@@ -438,7 +453,8 @@ if ($netPay > 0) {
 <div class="modal fade" id="payslipModal<?= $ln ?>" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-lg">
     <div class="modal-content" id="printablePayslip<?= $ln ?>">
-      <div class="modal-header bg-primary text-white">
+      <div class="modal-header" style="background: #fff; border-bottom: 1px solid #ddd;">
+
         <h5 class="modal-title">Payslip - <?= htmlspecialchars($row->first_name . ' ' . $row->last_name) ?></h5>
         <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
       </div>
@@ -543,61 +559,53 @@ if ($netPay > 0) {
 <?php endif; ?>
 
 
-<!-- /*
+<!--
+/*
 |--------------------------------------------------------------------------
 | PAYROLL COMPUTATION METHOD
 |--------------------------------------------------------------------------
-|
-| kani na payroll supports Hourly, Daily, and Monthly.
+| This system supports: Hourly, Daily, and Monthly rates.
+| Salary is based strictly on actual hours or days worked.
 |
 | 1. REGULAR TIME PAY:
 | -------------------------------------------------------------------------
-| * Per Hour Rate (ex: ₱10/hour)
-|    - If employee worked 16 regular hours:
-|      → Reg Pay = 16 hrs × ₱10 = ₱160.00
+| • Hourly Rate (e.g. ₱10/hour):
+|     → Reg Pay = Hours worked × ₱10
 |
-|* Per Day Rate (ex: ₱400/day)
-|    - If employee worked 2 full days:
-|      → Reg Pay = 2 days × ₱400 = ₱800.00
+| • Daily Rate (e.g. ₱400/day):
+|     → Reg Pay = (Hours worked ÷ 8) × ₱400
 |
-| * Per Month Rate (ex ₱10,000/month)
-|    - Working days in the month are computed (Dayoff Sundays).
-|      Example: July has 27 working days → Daily Rate = ₱10,000 / 27 = ₱370.37
-|      → Hourly Rate = ₱370.37 / 8 hrs = ₱46.30
-|      → If 16 regular hours worked: Reg Pay = 16 × ₱46.30 = ₱740.80
+| • Monthly Rate (e.g. ₱10,000/month):
+|     → Total days in month are counted (including Sundays)
+|     → Daily Rate = ₱10,000 ÷ total days in month
+|     → Hourly Rate = Daily Rate ÷ 8
+|     → Reg Pay = Hours worked × Hourly Rate
 |
-| 2. OVERTIME PAY (applies to all salary types):
+| 2. OVERTIME PAY:
 | -------------------------------------------------------------------------
-| - OT Rate is 125% of the hourly rate.
-|   Example: ₱46.30 × 1.25 = ₱57.87 (OT Rate)
-| - If 4 OT hours worked: OT Pay = 4 hrs × ₱57.87 = ₱231.48
+| • Overtime is paid at 125% of the hourly rate
+|     → OT Pay = OT hours × Hourly Rate × 1.25
 |
-| 3. GROSS SALARY:
+| 3. GROSS PAY:
 | -------------------------------------------------------------------------
-|   Gross Pay = Regular Pay + OT Pay
-|   Example: ₱740.80 + ₱231.48 = ₱972.28
+| • Gross Pay = Regular Pay + OT Pay
 |
 | 4. DEDUCTIONS:
 | -------------------------------------------------------------------------
-|   Deductions include: SSS, PHIC, Pag-IBIG, Loans, etc.
-|   Example:
-|     - SSS: ₱50.00
-|     - PHIC: ₱50.00
-|     - Pag-IBIG: ₱50.00
-|     → Total Deductions = ₱150.00
+| • Includes SSS, PHIC, Pag-IBIG, Loans, etc.
+| • Total Deductions = sum of all applicable deductions
 |
 | 5. NET PAY:
 | -------------------------------------------------------------------------
-|   Net Pay = Gross Pay − Deductions
-|   Example: ₱972.28 − ₱150.00 = ₱822.28
+| • Net Pay = Gross Pay − Total Deductions
 |
-| 6. WORKING DAYS IN MONTH:
+| 6. WORKING DAYS:
 | -------------------------------------------------------------------------
-|   Automatically calculated based on the payroll start date.
-|   Only Sundays are excluded.
-|   Use getWorkingDaysInMonth($startDate)
-|
-*/ -->
+| • Uses getWorkingDaysInMonth($startDate)
+| • Counts all days in the month (Sundays included)
+*/
+-->
+
 
 
 
