@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-    <title>PMS - Materials</title>
+<title>PMS - Other Deductions</title>
 
 <?php include('includes/head.php'); ?>
 
@@ -18,7 +18,7 @@
 <div class="container-fluid">
 
     <div class="page-title-box d-flex justify-content-between align-items-center">
-        <button class="btn btn-primary btn-md" data-toggle="modal" data-target="#addMaterialModal">+ Add Materials</button>
+        <button class="btn btn-primary btn-md" data-toggle="modal" data-target="#addMaterialModal">+ Add Other Deduction</button>
     </div>
 
     <?php if ($this->session->flashdata('success')): ?>
@@ -55,18 +55,18 @@
                             <td><?= date('Y-m-d', strtotime($row->date)) ?></td>
                             <td>
                                 <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#editMaterialModal<?= $row->id ?>">Edit</button>
-                                <a href="<?= base_url('Material/delete/'.$row->id) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this record?')">Delete</a>
+                               <a href="<?= base_url('Borrow/delete_material/'.$row->id) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this record?')">Delete</a>
+
                             </td>
                         </tr>
 
+                        <!-- Edit Modal -->
                         <div class="modal fade" id="editMaterialModal<?= $row->id ?>" tabindex="-1">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                 <form method="post" action="<?= base_url('Material/save'); ?>">
-
-
+                                    <form method="post" action="<?= base_url('Borrow/save_material'); ?>">
                                         <div class="modal-header">
-                                            <h5 class="modal-title">Edit Materials</h5>
+                                            <h5 class="modal-title">Edit Other Deduction</h5>
                                             <button type="button" class="close" data-dismiss="modal">&times;</button>
                                         </div>
                                         <div class="modal-body">
@@ -116,9 +116,10 @@
 <div class="modal fade" id="addMaterialModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="post" action="<?= base_url('Material/save') ?>">
+            <form method="post" action="<?= base_url('Borrow/save_material') ?>">
+
                 <div class="modal-header">
-                    <h5 class="modal-title">Add Materials</h5>
+                    <h5 class="modal-title">Add Other Deduction</h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
@@ -133,17 +134,10 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-                   <div class="form-group">
-    <label for="description">Description</label>
-    <select name="description" class="form-control" required>
-        <option value="">Select item</option>
-        <option value="hardhat">Hard Hat</option>
-        <option value="pondo">Pondo</option>
-        <option value="hardware">Hardware</option>
-        <option value="safety shoes">Safety Shoes</option>
-    </select>
-</div>
-
+                    <div class="form-group">
+                        <label>Description</label>
+                        <input type="text" name="description" class="form-control" required>
+                    </div>
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label>Amount</label>

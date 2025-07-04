@@ -6,7 +6,8 @@ class Borrow extends CI_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->model('Borrow_model');      // For Cash Advance
-        $this->load->model('Material_model');    // For Materials Loan
+        $this->load->model('OtherDeduction_model');
+
         $this->load->helper('url');
         $this->load->library('session');
     }
@@ -54,28 +55,32 @@ public function insert_cash_advance($data) {
     // ------------------------------
     // MATERIALS LOAN
     // ------------------------------
-    public function materials_loan() {
-        $settingsID = $this->session->userdata('settingsID');
-        $data['material_loans'] = $this->Material_model->get_material_loans($settingsID);
-        $data['personnel_list'] = $this->Material_model->get_personnel($settingsID);
-        $this->load->view('materials_loan_view', $data);
-    }
+  public function materials_loan() {
+    $settingsID = $this->session->userdata('settingsID');
+    
+    // ✅ Assign returned result to the correct variable
+    $data['material_loans'] = $this->OtherDeduction_model->get_other_deductions($settingsID);
+    $data['personnel_list'] = $this->OtherDeduction_model->get_personnel($settingsID);
+    
+    $this->load->view('materials_loan_view', $data);
+}
 
-    public function save_material() {
-        $this->Material_model->save_material_loan($this->input->post());
-        $this->session->set_flashdata('success', 'Material Loan Saved Successfully!');
-        redirect('Borrow/materials_loan');
-    }
 
-    public function update_material() {
-        $this->Material_model->save_material_loan($this->input->post()); // same as save for edit
-        $this->session->set_flashdata('success', 'Material Loan Updated Successfully!');
-        redirect('Borrow/materials_loan');
-    }
+public function save_material() {
+    $this->OtherDeduction_model->save_other_deduction($this->input->post());
+    $this->session->set_flashdata('success', 'Other Deduction Saved Successfully!');
+    redirect('Borrow/materials_loan');
+}
+
+ public function update_material() {
+    $this->OtherDeduction_model->save_other_deduction($this->input->post());
+    $this->session->set_flashdata('success', 'Other Deduction Updated Successfully!');
+    redirect('Borrow/materials_loan');
+}
 
     public function delete_material($id) {
-        $this->Material_model->delete_material_loan($id);
-        $this->session->set_flashdata('success', 'Material Loan Deleted Successfully!');
+        $this->OtherDeduction_model->delete_other_deduction($id);
+        $this->session->set_flashdata('success', 'Other Deduction Deleted Successfully!');
         redirect('Borrow/materials_loan');
     }
 
