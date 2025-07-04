@@ -515,7 +515,7 @@ if ($netPay > 0) {
 
 </div>
 <br>
-<?php if (!empty($signatories)): ?>
+<?php if (!empty($signatories) && $show_signatories): ?>
 <div class="row mt-5 signature">
   <!-- Prepared by -->
   <div class="col text-center">

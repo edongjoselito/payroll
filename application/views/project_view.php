@@ -67,57 +67,59 @@
                                                     <!-- <td><?= htmlspecialchars($proj->projectLocation) ?></td> -->
                                                  <td>
 
-    <a href="<?= base_url('project/assign_personnel/' . $proj->settingsID . '/' . $proj->projectID) ?>"
-       class="btn btn-success btn-sm"
-       data-toggle="tooltip"
-       title="Assign Personnel">
-        <i class="fas fa-user-plus"></i>
-    </a>
+<a href="<?= base_url('project/assign_personnel/' . $proj->settingsID . '/' . $proj->projectID) ?>"
+   class="btn btn-success btn-sm"
+   data-toggle="tooltip"
+   title="Assign Personnel">
+    <i class="fas fa-user-plus"></i>
+</a>
 
-    <a href="<?= base_url('project/attendance/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>"
-       class="btn btn-info btn-sm"
-       data-toggle="tooltip"
-       title="View Attendance">
-        <i class="fas fa-calendar-check"></i>
-    </a>
+<a href="<?= base_url('project/attendance/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>"
+   class="btn btn-info btn-sm"
+   data-toggle="tooltip"
+   title="View Attendance">
+    <i class="fas fa-calendar-check"></i>
+</a>
 
-    <a href="<?= base_url('project/attendance_list/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>"
-       class="btn btn-primary btn-sm"
-       data-toggle="tooltip"
-       title="Attendance List">
-        <i class="fas fa-list"></i>
-    </a>
+<a href="<?= base_url('project/attendance_list/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>"
+   class="btn btn-primary btn-sm"
+   data-toggle="tooltip"
+   title="Attendance List">
+    <i class="fas fa-list"></i>
+</a>
 
+<button class="btn btn-dark btn-sm"
+        data-toggle="modal"
+        data-target="#payrollModal<?= $proj->projectID ?>"
+        data-toggle="tooltip"
+        title="Payroll">
+    <i class="fas fa-money-check-alt"></i>
+</button>
 
-    <button class="btn btn-dark btn-sm"
-            data-toggle="modal"
-            data-target="#payrollModal<?= $proj->projectID ?>"
-            data-toggle="tooltip"
-            title="Payroll">
-        <i class="fas fa-money-check-alt"></i>
-    </button>
+<button class="btn btn-warning btn-sm"
+        data-toggle="modal"
+        data-target="#editModal<?= $proj->projectID ?>"
+        data-toggle="tooltip"
+        title="Edit Project">
+    <i class="fas fa-edit"></i>
+</button>
 
-    <button class="btn btn-warning btn-sm"
-            data-toggle="modal"
-            data-target="#editModal<?= $proj->projectID ?>"
-            data-toggle="tooltip"
-            title="Edit Project">
-        <i class="fas fa-edit"></i>
-    </button>
-
-    <a href="<?= base_url('Project/delete/' . $proj->projectID) ?>"
-       class="btn btn-danger btn-sm"
-       onclick="return confirm('Delete this project?')"
-       data-toggle="tooltip"
-       title="Delete Project">
-        <i class="fas fa-trash-alt"></i>
-    </a>
-  <a href="<?= base_url('Project/payroll_summary/' . $proj->settingsID . '/' . $proj->projectID) ?>"
+<a href="<?= base_url('Project/payroll_summary/' . $proj->settingsID . '/' . $proj->projectID) ?>"
    class="btn btn-secondary btn-sm"
    data-toggle="tooltip"
-   title="Payroll Report"
+   title="Payroll Summary"
    target="_blank">
     <i class="fas fa-file-alt"></i>
+</a>
+
+<a href="<?= base_url('Project/delete/' . $proj->projectID) ?>"
+   class="btn btn-danger btn-sm"
+   onclick="return confirm('Delete this project?')"
+   data-toggle="tooltip"
+   title="Delete Project">
+    <i class="fas fa-trash-alt"></i>
+</a>
+
 </a>
 
 

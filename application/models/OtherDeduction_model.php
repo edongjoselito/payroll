@@ -71,15 +71,18 @@ class OtherDeduction_model extends CI_Model {
         return $this->db->insert('cashadvance', $data);
     }
 
-public function get_deductions_by_date_range($from, $to, $settingsID) {
-    return $this->db->where('type', 'material')
-                    ->where('settingsID', $settingsID)
-                    ->where('date >=', $from)
-                    ->where('date <=', $to)
-                    ->get('cashadvance')
-                    ->result();
+public function get_deductions_by_date_range($from, $to, $settingsID)
+{
+    return $this->db
+        ->select('personnelID, amount, description, date')
+        ->from('cashadvance')
+        ->where('date >=', $from)
+        ->where('date <=', $to)
+        ->where('settingsID', $settingsID)
+        ->where('type', 'material') // ✅ THIS is critical
+        ->get()
+        ->result();
 }
-
 
 
 

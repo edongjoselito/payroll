@@ -207,7 +207,7 @@ public function payroll_report($settingsID)
 
     $this->load->model('Project_model');
     $this->load->model('SettingsModel');
-    $this->load->model('OtherDeduction_model');  // ✅ Make sure this is loaded
+    $this->load->model('OtherDeduction_model');
 
     if (empty($start) || empty($end)) {
         $this->session->set_flashdata('error', 'Start and end dates are required.');
@@ -221,12 +221,11 @@ public function payroll_report($settingsID)
     $data['end'] = $end;
     $data['rateType'] = $rateType;
 
-    // Existing data fetch
     $data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
     $data['project'] = $this->Project_model->getProjectDetails($settingsID, $projectID);
     $payroll = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end, $rateType);
 
-    // 💡 Fetch Other Deductions and group by personnelID
+    // Group other deductions by personnel
     $deductions = $this->OtherDeduction_model->get_deductions_by_date_range($start, $end, $settingsID);
     $groupedDeductions = [];
 
@@ -238,7 +237,6 @@ public function payroll_report($settingsID)
         $groupedDeductions[$pid] += $deduction->amount;
     }
 
-    // 🔁 Merge deductions into each payroll row
     foreach ($payroll as &$row) {
         $pid = trim($row->personnelID);
         $row->other_deduction = $groupedDeductions[$pid] ?? 0;
@@ -247,18 +245,28 @@ public function payroll_report($settingsID)
     $data['attendance_data'] = $payroll;
     $data['personnel_loans'] = $this->Project_model->getPersonnelLoans($settingsID, $projectID);
 
+    // ✅ Always show signatories for modal-triggered report
+    $data['show_signatories'] = true;
+
     $this->load->view('payroll_report_view', $data);
 }
 
+
 public function payroll_summary($settingsID, $projectID)
 {
-    $start = $this->input->get('start') ?? date('Y-m-01'); // Default: 1st of the month
-    $end = $this->input->get('end') ?? date('Y-m-t');       // Default: last day of the month
-    $rateType = $this->input->get('rateType');              // Optional
+    $start = $this->input->get('start');
+    $end   = $this->input->get('end');
+    $rateType = $this->input->get('rateType'); // Optional
+
+    // If not set, fallback to full month
+    $defaultStart = date('Y-m-01');
+    $defaultEnd = date('Y-m-t');
+    $start = $start ?? $defaultStart;
+    $end   = $end ?? $defaultEnd;
 
     $this->load->model('Project_model');
     $this->load->model('SettingsModel');
-    $this->load->model('OtherDeduction_model'); // ✅ Load the model
+    $this->load->model('OtherDeduction_model');
 
     $data['start'] = $start;
     $data['end'] = $end;
@@ -267,7 +275,7 @@ public function payroll_summary($settingsID, $projectID)
     $data['project'] = $this->Project_model->getProject($settingsID, $projectID);
     $payroll = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end, $rateType);
 
-    // ✅ Fetch and group other deductions
+    // Fetch and group other deductions
     $deductions = $this->OtherDeduction_model->get_deductions_by_date_range($start, $end, $settingsID);
     $groupedDeductions = [];
 
@@ -279,7 +287,7 @@ public function payroll_summary($settingsID, $projectID)
         $groupedDeductions[$pid] += $deduction->amount;
     }
 
-    // ✅ Inject other_deduction into each payroll row
+    // Inject other_deduction into each payroll row
     foreach ($payroll as &$row) {
         $pid = trim($row->personnelID);
         $row->other_deduction = $groupedDeductions[$pid] ?? 0;
@@ -288,9 +296,12 @@ public function payroll_summary($settingsID, $projectID)
     $data['attendance_data'] = $payroll;
     $data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
 
+    // ✅ Show signatories ONLY if user selected a custom range (GET params are explicitly set)
+    $isCustomRange = $this->input->get('start') && $this->input->get('end');
+    $data['show_signatories'] = $isCustomRange;
+
     $this->load->view('payroll_report_view', $data);
 }
-
 
 
 
