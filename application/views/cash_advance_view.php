@@ -72,16 +72,28 @@
                                                 <label>Personnel</label>
                                                 <input class="form-control" value="<?= $row->fullname ?>" readonly>
                                             </div>
-                                            <div class="form-row">
-                                                <div class="form-group col-md-6">
-                                                    <label>Amount</label>
-                                                    <input type="number" name="amount" class="form-control" value="<?= $row->amount ?>" required>
-                                                </div>
-                                                <div class="form-group col-md-6">
-                                                    <label>Date</label>
-                                                    <input type="date" name="date" class="form-control" value="<?= $row->date ?>" required>
-                                                </div>
-                                            </div>
+                                           <div class="form-row">
+    <div class="form-group col-md-6">
+        <label>Amount</label>
+        <input type="number" name="amount" class="form-control" value="<?= $row->amount ?>" required>
+    </div>
+    <div class="form-group col-md-6">
+        <label>Date</label>
+        <input type="date" name="date" class="form-control" value="<?= $row->date ?>" required>
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group col-md-6">
+        <label>Deduct From</label>
+        <input type="date" name="deduct_from" class="form-control" value="<?= $row->deduct_from ?? '' ?>">
+    </div>
+    <div class="form-group col-md-6">
+        <label>Deduct To</label>
+        <input type="date" name="deduct_to" class="form-control" value="<?= $row->deduct_to ?? '' ?>">
+    </div>
+</div>
+
                                         </div>
                                         <div class="modal-footer">
                                             <button type="submit" class="btn btn-primary">Update</button>
@@ -125,16 +137,28 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label>Amount</label>
-                            <input type="number" name="amount" class="form-control" required>
-                        </div>
-                        <div class="form-group col-md-6">
-                            <label>Date</label>
-                            <input type="date" name="date" class="form-control" required>
-                        </div>
-                    </div>
+                <div class="form-row">
+    <div class="form-group col-md-6">
+        <label>Amount</label>
+        <input type="number" name="amount" class="form-control" required>
+    </div>
+    <div class="form-group col-md-6">
+        <label>Date</label>
+        <input type="date" name="date" class="form-control" required>
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="form-group col-md-6">
+        <label>Deduct From</label>
+        <input type="date" name="deduct_from" class="form-control">
+    </div>
+    <div class="form-group col-md-6">
+        <label>Deduct To</label>
+        <input type="date" name="deduct_to" class="form-control">
+    </div>
+</div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success">Save</button>

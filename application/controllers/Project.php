@@ -245,7 +245,6 @@ public function payroll_report($settingsID)
     $data['attendance_data'] = $payroll;
     $data['personnel_loans'] = $this->Project_model->getPersonnelLoans($settingsID, $projectID);
 
-    // ✅ Always show signatories for modal-triggered report
     $data['show_signatories'] = true;
 
     $this->load->view('payroll_report_view', $data);
@@ -296,9 +295,8 @@ public function payroll_summary($settingsID, $projectID)
     $data['attendance_data'] = $payroll;
     $data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
 
-    // ✅ Show signatories ONLY if user selected a custom range (GET params are explicitly set)
-    $isCustomRange = $this->input->get('start') && $this->input->get('end');
-    $data['show_signatories'] = $isCustomRange;
+  $data['show_signatories'] = true;
+  $data['is_summary'] = true;
 
     $this->load->view('payroll_report_view', $data);
 }

@@ -25,15 +25,20 @@ class Borrow_model extends CI_Model {
 }
 
 
-    public function insert_cash_advance($data) {
-        $insert = [
-            'personnelID' => $data['personnelID'],
-            'description' => 'Cash Advance',
-            'amount' => $data['amount'],
-            'date' => $data['date']
-        ];
-        $this->db->insert('cashadvance', $insert);
-    }
+  public function insert_cash_advance($data) {
+    $insert = [
+        'personnelID'  => $data['personnelID'],
+        'description'  => 'Cash Advance',
+        'amount'       => $data['amount'],
+        'date'         => $data['date'],
+        'deduct_from'  => $data['deduct_from'],
+        'deduct_to'    => $data['deduct_to'],
+        'settingsID'   => $this->session->userdata('settingsID'),
+        'type'         => 'cash'
+    ];
+    return $this->db->insert('cashadvance', $insert);
+}
+
 
     public function update_cash_advance($data) {
         $update = [

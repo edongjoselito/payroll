@@ -43,6 +43,8 @@
                             <th>Description</th>
                             <th>Amount</th>
                             <th>Date</th>
+                            <th>Deduct From</th>
+                                <th>Deduct To</th>
                             <th>Manage</th>
                         </tr>
                     </thead>
@@ -53,6 +55,8 @@
                             <td><?= $row->description ?></td>
                             <td>₱<?= number_format($row->amount, 2) ?></td>
                             <td><?= date('Y-m-d', strtotime($row->date)) ?></td>
+                             <td><?= $row->deduct_from ? date('Y-m-d', strtotime($row->deduct_from)) : '' ?></td>
+    <td><?= $row->deduct_to ? date('Y-m-d', strtotime($row->deduct_to)) : '' ?></td>
                             <td>
                                 <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#editMaterialModal<?= $row->id ?>">Edit</button>
                                <a href="<?= base_url('Borrow/delete_material/'.$row->id) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this record?')">Delete</a>
@@ -90,6 +94,18 @@
                                                     <input type="date" name="date" class="form-control" value="<?= $row->date ?>" required>
                                                 </div>
                                             </div>
+                                           <div class="form-row">
+    <div class="form-group col-md-6">
+        <label>Deduct From</label>
+        <input type="date" name="deduct_from" class="form-control" value="<?= $row->deduct_from ?? '' ?>">
+    </div>
+    <div class="form-group col-md-6">
+        <label>Deduct To</label>
+        <input type="date" name="deduct_to" class="form-control" value="<?= $row->deduct_to ?? '' ?>">
+    </div>
+</div>
+
+
                                         </div>
                                         <div class="modal-footer">
                                             <button type="submit" class="btn btn-primary">Update</button>
@@ -122,32 +138,47 @@
                     <h5 class="modal-title">Add Other Deduction</h5>
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label>Personnel</label>
-                        <select name="personnelID" class="form-control" required>
-                            <option value="">Select Personnel</option>
-                            <?php foreach($personnel_list as $p): ?>
-                                <option value="<?= $p->personnelID ?>">
-                                    <?= $p->first_name . ' ' . ($p->middle_name ? substr($p->middle_name, 0, 1) . '. ' : '') . $p->last_name . ($p->name_ext ? ' ' . $p->name_ext : '') ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Description</label>
-                        <input type="text" name="description" class="form-control" required>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group col-md-6">
-                            <label>Amount</label>
-                            <input type="number" name="amount" class="form-control" required>
-                        </div>
-                        <div class="form-group col-md-6">
-                            <label>Date</label>
-                            <input type="date" name="date" class="form-control" required>
-                        </div>
-                    </div>
+               <div class="modal-body">
+    <div class="form-group">
+        <label>Personnel</label>
+        <select name="personnelID" class="form-control" required>
+            <option value="">Select Personnel</option>
+            <?php foreach($personnel_list as $p): ?>
+                <option value="<?= $p->personnelID ?>">
+                    <?= $p->first_name . ' ' . ($p->middle_name ? substr($p->middle_name, 0, 1) . '. ' : '') . $p->last_name . ($p->name_ext ? ' ' . $p->name_ext : '') ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Description</label>
+        <input type="text" name="description" class="form-control" required>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label>Amount</label>
+            <input type="number" name="amount" class="form-control" required>
+        </div>
+        <div class="form-group col-md-6">
+            <label>Date</label>
+            <input type="date" name="date" class="form-control" required>
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-group col-md-6">
+            <label>Deduct From</label>
+            <input type="date" name="deduct_from" class="form-control">
+        </div>
+        <div class="form-group col-md-6">
+            <label>Deduct To</label>
+            <input type="date" name="deduct_to" class="form-control">
+        </div>
+    </div>
+
+
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success">Save</button>

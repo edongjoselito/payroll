@@ -24,7 +24,7 @@ class Payroll extends CI_Controller {
     //     $payroll_data = $this->Payroll_model->generate_payroll($dateFrom, $dateTo, $cutoff);
     //     $this->load->view('payroll/result', ['payroll' => $payroll_data]);
     // }
- public function generate() {
+public function generate() {
     $cutoff = $this->input->post('cutoff');
     $dateFrom = $this->input->post('date_from');
     $dateTo = $this->input->post('date_to');
@@ -37,7 +37,7 @@ class Payroll extends CI_Controller {
     $this->load->model('OtherDeduction_model');
     $other_deductions = $this->OtherDeduction_model->get_deductions_by_date_range($dateFrom, $dateTo, $settingsID);
 
-    // Group by personnelID
+    // Group other deductions by personnelID
     $groupedDeductions = [];
     foreach ($other_deductions as $deduction) {
         $pid = (int) $deduction->personnelID;
@@ -47,10 +47,31 @@ class Payroll extends CI_Controller {
         $groupedDeductions[$pid] += $deduction->amount;
     }
 
-    // Inject into each row
+    // Load Personnel Loan deductions
+    $this->load->model('Loan_model');
+
+    // Inject deductions into payroll rows
     foreach ($payroll_data as &$row) {
         $pid = (int) $row->personnelID;
+
+        // Other Deduction
         $row->other_deduction = $groupedDeductions[$pid] ?? 0;
+
+        // Personnel Loan Deduction
+        $loan = $this->Loan_model->get_personnel_loan($pid, $settingsID);
+        $row->loan_deduction = $loan->monthly_deduction ?? 0;
+
+        // Save loan deduction to payroll_deductions table if any
+        if (!empty($row->loan_deduction)) {
+            $this->db->insert('payroll_deductions', [
+                'personnelID' => $pid,
+                'amount' => $row->loan_deduction,
+                'description' => 'Personnel Loan',
+                'cutoff' => $cutoff,
+                'deducted_on' => date('Y-m-d'),
+                'settingsID' => $settingsID
+            ]);
+        }
     }
 
     // Auto-deduct Cash Advances
@@ -72,6 +93,7 @@ class Payroll extends CI_Controller {
     // Render payroll result
     $this->load->view('payroll/result', ['payroll' => $payroll_data]);
 }
+
 
 
 

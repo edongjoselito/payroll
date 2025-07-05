@@ -289,7 +289,10 @@ th {
     <th rowspan="3">Other Deduction</th>
 <th rowspan="3">Total Deduction</th>
     <th rowspan="3">Take Home Pay</th>
+   <?php if (empty($is_summary)): ?>
     <th rowspan="3" colspan="3">Signature</th>
+<?php endif; ?>
+
 </tr>
 <tr>
     <?php
@@ -446,7 +449,10 @@ if ($netPay > 0) {
   </a>
 </td>
 
+ <?php if (empty($is_summary)): ?>
     <td colspan="3"></td>
+<?php endif; ?>
+
 </tr>
 
 <!-- Payslip Modal -->

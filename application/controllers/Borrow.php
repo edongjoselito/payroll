@@ -21,30 +21,31 @@ class Borrow extends CI_Controller {
         $data['personnel'] = $this->Borrow_model->get_personnel($settingsID);
         $this->load->view('cash_advance_view', $data);
     }
-public function insert_cash_advance($data) {
-    $insert = [
-        'personnelID' => $data['personnelID'],
-        'description' => 'Cash Advance',
+
+
+
+
+// public function save_cash_advance() {
+//     $data = $this->input->post();
+//     $this->Borrow_model->insert_cash_advance($data);
+//     $this->session->set_flashdata('success', 'Cash Advance Saved Successfully!');
+//     redirect('Borrow/cash_advance');
+// }
+
+
+
+
+   public function update_cash_advance($data) {
+    $update = [
         'amount' => $data['amount'],
         'date' => $data['date'],
-        'settingsID' => $this->session->userdata('settingsID')
+        'deduct_from' => $data['deduct_from'] ?? null,
+        'deduct_to' => $data['deduct_to'] ?? null,
     ];
-    $this->db->insert('cashadvance', $insert);
-}
- public function save_cash_advance() {
-    $data = $this->input->post();
-    $this->Borrow_model->insert_cash_advance($data);
-    $this->session->set_flashdata('success', 'Cash Advance Saved Successfully!');
-    redirect('Borrow/cash_advance');
+    $this->db->where('id', $data['id']);
+    $this->db->update('cashadvance', $update);
 }
 
-
-
-    public function update_cash_advance() {
-        $this->Borrow_model->update_cash_advance($this->input->post());
-        $this->session->set_flashdata('success', 'Cash Advance Updated Successfully!');
-        redirect('Borrow/cash_advance');
-    }
 
     public function delete_cash_advance($id) {
         $this->Borrow_model->delete_cash_advance($id);

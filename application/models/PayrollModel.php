@@ -103,4 +103,5 @@ class PayrollModel extends CI_Model
 	$query=$this->db->query("select * from studeprofile p join alum_reg a on p.StudentNumber=a.StudentNumber where a.StudentNumber='".$id."'");
 	return $query->result();
 	}	
+	
 }
