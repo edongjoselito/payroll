@@ -90,6 +90,16 @@
         <span> Manage Users </span>
     </a>
 </li>
+<li>
+    <a href="javascript: void(0);" class="waves-effect">
+        <i class="fas fa-file-alt"></i>
+        <span> Reports </span>
+        <span class="menu-arrow"></span>
+    </a>
+    <ul class="nav-second-level nav" aria-expanded="false">
+        <li><a href="<?= base_url(); ?>Report/payroll_logs">Payroll Logs</a></li>
+    </ul>
+</li>
 
 <li>
     <a href="<?= base_url('Company') ?>" class="waves-effect">
