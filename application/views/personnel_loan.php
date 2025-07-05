@@ -36,6 +36,7 @@
         <div class="card">
           <div class="card-body">
             <?php if (!empty($assigned_loans)): ?>
+              
               <div class="table-responsive">
                 <table id="datatable" class="table table-bordered table-striped dt-responsive nowrap" style="width:100%">
                  <thead class="thead-light">
@@ -46,7 +47,9 @@
                     <th>Amount</th>
                     <th>Monthly Deduction</th>
                     <th>Date Assigned</th>
-                    <th>Action</th>
+                 <th>Status</th>
+<th>Action</th>
+
                   </tr>
                 </thead>
                <tbody>
@@ -58,8 +61,16 @@
     <td>₱<?= number_format($loan->amount, 2) ?></td>
     <td>₱<?= number_format($loan->monthly_deduction, 2) ?></td>
     <td><?= $loan->date_assigned ? date('Y-m-d', strtotime($loan->date_assigned)) : 'N/A' ?></td>
-    <td>
-    <button class="btn btn-info btn-sm edit-btn"
+  <td>
+  <?php if ($loan->status == 1): ?>
+    <span class="badge badge-success">Active</span>
+  <?php else: ?>
+    <span class="badge badge-secondary">Deducted</span>
+  <?php endif; ?>
+</td>
+<td>
+  <button class="btn btn-info btn-sm edit-btn"
+
 
     data-loanid="<?= $loan->loan_id ?>"
     data-personnelid="<?= $loan->personnelID ?>"

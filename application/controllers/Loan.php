@@ -12,12 +12,20 @@ class Loan extends CI_Controller {
 public function personnel_loan()
 {
     $settingsID = $this->session->userdata('settingsID');
+
+    if (!$settingsID) {
+        $this->session->set_flashdata('error', 'Session expired. Please log in again.');
+        redirect('Login'); 
+        return;
+    }
+
     $data['assigned_loans'] = $this->Loan_model->get_assigned_loans($settingsID);
     $data['personnel'] = $this->Loan_model->get_personnel_by_settings($settingsID);
-    $data['loans'] = $this->Loan_model->get_all_loans(); // ✅ Add this
+    $data['loans'] = $this->Loan_model->get_all_loans();
 
     $this->load->view('personnel_loan', $data);
 }
+
 
 
 

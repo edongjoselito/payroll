@@ -61,7 +61,9 @@
                         <div class="modal fade" id="editCashModal<?= $row->id ?>" tabindex="-1">
                             <div class="modal-dialog">
                                 <div class="modal-content">
-                                    <form method="post" action="<?= base_url('Borrow/update_cash_advance') ?>">
+                                   <form method="post" action="<?= base_url('Borrow/update_cash_advance/' . $row->id) ?>">
+
+
                                         <div class="modal-header">
                                             <h5 class="modal-title">Edit Cash Advance</h5>
                                             <button type="button" class="close" data-dismiss="modal">&times;</button>

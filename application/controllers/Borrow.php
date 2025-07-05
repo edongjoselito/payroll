@@ -23,6 +23,29 @@ class Borrow extends CI_Controller {
     }
 
 
+public function save_cash_advance()
+{
+    $this->load->model('Loan_model');
+
+    $data = [
+        'personnelID' => $this->input->post('personnelID'),
+        'amount' => $this->input->post('amount'),
+        'description' => 'Cash Advance',
+        'date' => $this->input->post('date'),
+        'settingsID' => $this->session->userdata('settingsID')
+    ];
+
+    $inserted = $this->Loan_model->insert_cash_advance($data);
+
+    if ($inserted) {
+        $this->session->set_flashdata('success', 'Cash advance saved.');
+    } else {
+        $this->session->set_flashdata('error', 'Failed to save cash advance.');
+    }
+
+    redirect('Borrow/cash_advance');
+
+}
 
 
 // public function save_cash_advance() {
@@ -35,16 +58,22 @@ class Borrow extends CI_Controller {
 
 
 
-   public function update_cash_advance($data) {
+public function update_cash_advance($id)
+{
     $update = [
-        'amount' => $data['amount'],
-        'date' => $data['date'],
-        'deduct_from' => $data['deduct_from'] ?? null,
-        'deduct_to' => $data['deduct_to'] ?? null,
+        'amount' => $this->input->post('amount'),
+        'date' => $this->input->post('date'),
+        'deduct_from' => $this->input->post('deduct_from') ?? null,
+        'deduct_to' => $this->input->post('deduct_to') ?? null,
     ];
-    $this->db->where('id', $data['id']);
+
+    $this->db->where('id', $id);
     $this->db->update('cashadvance', $update);
+
+    $this->session->set_flashdata('success', 'Cash advance updated successfully!');
+    redirect('Borrow/cash_advance');
 }
+
 
 
     public function delete_cash_advance($id) {

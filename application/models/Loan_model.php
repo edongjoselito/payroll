@@ -88,11 +88,10 @@ public function insert_personnel_loan($data)
 
 public function get_assigned_loans($settingsID)
 {
-    $this->db->select('pl.loan_id, pl.personnelID, pl.loan_description, pl.amount, pl.monthly_deduction, pl.date_assigned, p.first_name, p.last_name, p.position, pl.date_assigned');
+    $this->db->select('pl.loan_id, pl.personnelID, pl.loan_description, pl.amount, pl.monthly_deduction, pl.date_assigned, p.first_name, p.last_name, p.position, pl.date_assigned, pl.status');
     $this->db->from('personnelloans pl');
     $this->db->join('personnel p', 'p.personnelID = pl.personnelID');
     $this->db->where('pl.settingsID', $settingsID);
-    $this->db->where('pl.status', 1); // Only active loans
     $query = $this->db->get();
     return $query->result();
 }

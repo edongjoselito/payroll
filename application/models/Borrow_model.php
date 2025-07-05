@@ -40,13 +40,18 @@ class Borrow_model extends CI_Model {
 }
 
 
-    public function update_cash_advance($data) {
-        $update = [
-            'amount' => $data['amount'],
-            'date' => $data['date']
-        ];
-        $this->db->where('id', $data['id'])->update('cashadvance', $update);
-    }
+public function update_cash_advance($data) {
+    $update = [
+        'amount' => $data['amount'],
+        'date' => $data['date'],
+        'deduct_from' => $data['deduct_from'] ?? null,
+        'deduct_to' => $data['deduct_to'] ?? null,
+    ];
+    $this->db->where('id', $data['id']);
+    $this->db->update('cashadvance', $update);
+}
+
+
 
     public function delete_cash_advance($id) {
         $this->db->where('id', $id)->delete('cashadvance');

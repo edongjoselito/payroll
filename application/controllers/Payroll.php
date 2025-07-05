@@ -50,6 +50,21 @@ public function generate() {
     // Load Personnel Loan deductions
     $this->load->model('Loan_model');
 
+    // ✅ Load total cash advance per personnel between dateFrom and dateTo
+    $this->load->model('Cashadvance_model');
+    $cash_advance_query = $this->db->select('personnelID, SUM(amount) as total_amount')
+        ->from('cashadvance')
+        ->where('settingsID', $settingsID)
+        ->where('date >=', $dateFrom)
+        ->where('date <=', $dateTo)
+        ->group_by('personnelID')
+        ->get()->result();
+
+    $cashAdvanceMap = [];
+    foreach ($cash_advance_query as $ca) {
+        $cashAdvanceMap[(int)$ca->personnelID] = $ca->total_amount;
+    }
+
     // Inject deductions into payroll rows
     foreach ($payroll_data as &$row) {
         $pid = (int) $row->personnelID;
@@ -60,6 +75,9 @@ public function generate() {
         // Personnel Loan Deduction
         $loan = $this->Loan_model->get_personnel_loan($pid, $settingsID);
         $row->loan_deduction = $loan->monthly_deduction ?? 0;
+
+        // ✅ Cash Advance Amount for display
+        $row->cash_advance = $cashAdvanceMap[$pid] ?? 0;
 
         // Save loan deduction to payroll_deductions table if any
         if (!empty($row->loan_deduction)) {
@@ -74,8 +92,7 @@ public function generate() {
         }
     }
 
-    // Auto-deduct Cash Advances
-    $this->load->model('Cashadvance_model');
+    // Auto-deduct Cash Advances (mark as deducted and log)
     $due_advances = $this->Cashadvance_model->get_due_cash_advances($cutoff, $settingsID);
 
     foreach ($due_advances as $advance) {
