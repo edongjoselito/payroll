@@ -134,7 +134,9 @@ public function assign_personnel($settingsID, $projectID)
     // ✅ Fix: Pass both parameters
     $data['personnel'] = $this->Project_model->get_all_personnel($settingsID, $projectID);
     $data['assignments'] = $this->Project_model->get_assignments_by_project($projectID);
-$data['project'] = $this->Project_model->getProject($settingsID, $projectID);
+$project = $this->Project_model->getProject($settingsID, $projectID);
+$data['project'] = is_array($project) ? $project[0] : $project;
+
 
     $this->load->view('assign_personnel', $data);
 }
@@ -257,15 +259,16 @@ public function payroll_summary($settingsID, $projectID)
     $end   = $this->input->get('end');
     $rateType = $this->input->get('rateType'); // Optional
 
-    // If not set, fallback to full month
+    // Fallback to current month
     $defaultStart = date('Y-m-01');
-    $defaultEnd = date('Y-m-t');
+    $defaultEnd   = date('Y-m-t');
     $start = $start ?? $defaultStart;
     $end   = $end ?? $defaultEnd;
 
     $this->load->model('Project_model');
     $this->load->model('SettingsModel');
     $this->load->model('OtherDeduction_model');
+    $this->load->model('Report_model'); // Needed for logging
 
     $data['start'] = $start;
     $data['end'] = $end;
@@ -274,7 +277,7 @@ public function payroll_summary($settingsID, $projectID)
     $data['project'] = $this->Project_model->getProject($settingsID, $projectID);
     $payroll = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end, $rateType);
 
-    // Fetch and group other deductions
+    // Group other deductions by personnel
     $deductions = $this->OtherDeduction_model->get_deductions_by_date_range($start, $end, $settingsID);
     $groupedDeductions = [];
 
@@ -286,20 +289,39 @@ public function payroll_summary($settingsID, $projectID)
         $groupedDeductions[$pid] += $deduction->amount;
     }
 
-    // Inject other_deduction into each payroll row
+    $totalNetPay = 0;
+
     foreach ($payroll as &$row) {
         $pid = trim($row->personnelID);
         $row->other_deduction = $groupedDeductions[$pid] ?? 0;
+        $totalNetPay += $row->netpay ?? 0; // Using netpay instead of gross
     }
+
+    // ✅ Save to payroll_logs table
+$log_data = [
+    'projectID'      => $projectID,
+    'project_title'  => $data['project']->project_title ?? '',
+    'location'       => $data['project']->location ?? '',
+    'period'         => date('F Y', strtotime($start)),
+    'date_from'      => $start,
+    'date_to'        => $end,
+    'payroll_date'   => date('Y-m-d'),
+    'total_gross'    => $totalNetPay,
+    'date_saved'     => date('Y-m-d H:i:s')
+];
+
+
+
+    $this->Report_model->insert_payroll_log($log_data);
 
     $data['attendance_data'] = $payroll;
     $data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
-
-  $data['show_signatories'] = true;
-  $data['is_summary'] = true;
+    $data['show_signatories'] = true;
+    $data['is_summary'] = true;
 
     $this->load->view('payroll_report_view', $data);
 }
+
 
 
 
