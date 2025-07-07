@@ -16,8 +16,9 @@ class Borrow extends CI_Controller {
     // CASH ADVANCE
     // ------------------------------
     public function cash_advance() {
-        $settingsID = $this->session->userdata('settingsID');
-        $data['cash_advances'] = $this->Borrow_model->get_cash_advances($settingsID);
+       $settingsID = $this->session->userdata('settingsID');
+$data['cash_advances'] = $this->Borrow_model->get_cash_advances_by_settings($settingsID);
+
         $data['personnel'] = $this->Borrow_model->get_personnel($settingsID);
         $this->load->view('cash_advance_view', $data);
     }
@@ -83,7 +84,7 @@ public function update_cash_advance($id)
     }
 
     // ------------------------------
-    // MATERIALS LOAN
+    // OTHER DEDUCTIONS
     // ------------------------------
   public function materials_loan() {
     $settingsID = $this->session->userdata('settingsID');
