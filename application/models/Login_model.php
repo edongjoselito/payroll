@@ -8,14 +8,19 @@ class Login_model extends CI_Model
     return $query->result();
   }
 
-  function validate($username, $password)
-  {
-    $this->db->where('username', $username);
-    $this->db->where('password', $password);
-    $this->db->like('acctStat', 'active');
-    $result = $this->db->get('o_users', 1);
-    return $result;
-  }
+  // function validate($username, $password)
+  // {
+  //   $this->db->where('username', $username);
+  //   $this->db->where('password', $password);
+  //   $this->db->like('acctStat', 'active');
+  //   $result = $this->db->get('o_users', 1);
+  //   return $result;
+  // }
+  public function get_user_by_username($username)
+{
+    return $this->db->get_where('o_users', ['username' => $username])->row();
+}
+
   public function forgotPassword($email)
   {
     $this->db->select('email');

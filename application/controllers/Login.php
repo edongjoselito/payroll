@@ -194,119 +194,89 @@ class Login extends CI_Controller
     }
 
 
-    function auth()
-    {
-        $username = $this->input->post('username', TRUE);
-        $password = sha1($this->input->post('password', TRUE));
-        $sy = $this->input->post('sy', TRUE);
-        $semester = $this->input->post('semester', TRUE);
+   function auth()
+{
+    $username = $this->input->post('username', TRUE);
+    $password = $this->input->post('password', TRUE);
+    $sy = $this->input->post('sy', TRUE);
+    $semester = $this->input->post('semester', TRUE);
 
-        // Validate user credentials
-        $validate = $this->Login_model->validate($username, $password);
-        
+    // Fetch user data
+    $user = $this->Login_model->get_user_by_username($username);
 
-        if ($validate->num_rows() > 0) {
-            $data = $validate->row_array();
-            $username = $data['username'];
-            $fname = $data['fName'];
-            $mname = $data['mName'];
-            $lname = $data['lName'];
-            $avatar = $data['avatar'];
-            $email = $data['email'];
-            $level = $data['position'];
-            $IDNumber = $data['IDNumber'];
-            $settingsID = $data['settingsID'];
-            $acctStat = $data['acctStat']; // Assuming `acctStat` is a column in the database
+    if ($user) {
+        $storedHash = $user->password;
 
-            if ($acctStat === 'active') {
-                // User data to be stored in session
-                $user_data = array(
-                    'username'  => $username,
-                    'fname'  => $fname,
-                    'mname'  => $mname,
-                    'lname'  => $lname,
-                    'avatar'  => $avatar,
-                    'email'     => $email,
-                    'level'     => $level,
-                    'IDNumber'     => $IDNumber,
-                    'sy' => $sy,
-                    'semester' => $semester,
-                    'settingsID' => $settingsID,
-                    'logged_in' => TRUE
-                );
-                $this->session->set_userdata($user_data);
-
-                // Redirect based on user level
-                switch ($level) {
-                    case 'Admin':
-                        redirect('page/admin');
-                        break;
-                    case 'School Admin':
-                        redirect('page/school_admin');
-                        break;
-                    case 'Registrar':
-                        redirect('page/registrar');
-                        break;
-                    case 'Head Registrar':
-                        redirect('page/registrar');
-                        break;
-                    case 'Super Admin':
-                        redirect('page/superAdmin');
-                        break;
-                    case 'Property Custodian':
-                        redirect('page/p_custodian');
-                        break;
-                    case 'Academic Officer':
-                        redirect('page/a_officer');
-                        break;
-                    case 'Student':
-                        redirect('page/student');
-                        break;
-                    case 'Stude Applicant':
-                        redirect('page/student_registration');
-                        break;
-                    case 'Accounting':
-                        redirect('page/accounting');
-                        break;
-                    case 'Instructor':
-                        redirect('page/Instructor');
-                        break;
-                    case 'Teacher/Adviser':
-                        redirect('page/adviser');
-                        break;
-                    case 'HR Admin':
-                        redirect('page/hr');
-                        break;
-                    case 'Guidance':
-                        redirect('page/guidance');
-                        break;
-                    case 'School Nurse':
-                        redirect('page/medical');
-                        break;
-                    case 'IT':
-                        redirect('page/IT');
-                        break;
-                    case 'Librarian':
-                        redirect('page/library');
-                        break;
-                    case 'Principal':
-                        redirect('page/s_principal');
-                        break;
-                    default:
-                        // Handle unexpected levels
-                        $this->session->set_flashdata('danger', 'Unauthorized access.');
-                        redirect('login');
-                }
+        // Handle old SHA1 passwords
+        if (strlen($storedHash) === 40 && ctype_xdigit($storedHash)) {
+            if (sha1($password) === $storedHash) {
+                // ✅ Matches old SHA1 — upgrade to secure hash
+                $newHash = password_hash($password, PASSWORD_DEFAULT);
+                $this->db->where('username', $username)->update('o_users', ['password' => $newHash]);
             } else {
-                $this->session->set_flashdata('danger', 'Your account is not active. Please contact support.');
+                // Invalid SHA1 password
+                $this->session->set_flashdata('danger', 'The username or password is incorrect!');
                 redirect('login');
+                return;
             }
-        } else {
+        } elseif (!password_verify($password, $storedHash)) {
+            // bcrypt/secure hash failed
             $this->session->set_flashdata('danger', 'The username or password is incorrect!');
             redirect('login');
+            return;
         }
-    }
 
+        // ✅ Valid password — continue login
+        $acctStat = $user->acctStat;
+        if (strtolower($acctStat) === 'active') {
+            $user_data = array(
+                'username' => $user->username,
+                'fname' => $user->fName,
+                'mname' => $user->mName,
+                'lname' => $user->lName,
+                'avatar' => $user->avatar,
+                'email' => $user->email,
+                'level' => $user->position,
+                'IDNumber' => $user->IDNumber,
+                'sy' => $sy,
+                'semester' => $semester,
+                'settingsID' => $user->settingsID,
+                'logged_in' => TRUE
+            );
+            $this->session->set_userdata($user_data);
+
+            // Role-based redirection
+            switch ($user->position) {
+                case 'Admin': redirect('page/admin'); break;
+                case 'School Admin': redirect('page/school_admin'); break;
+                case 'Registrar': case 'Head Registrar': redirect('page/registrar'); break;
+                case 'Super Admin': redirect('page/superAdmin'); break;
+                case 'Property Custodian': redirect('page/p_custodian'); break;
+                case 'Academic Officer': redirect('page/a_officer'); break;
+                case 'Student': redirect('page/student'); break;
+                case 'Stude Applicant': redirect('page/student_registration'); break;
+                case 'Accounting': redirect('page/accounting'); break;
+                case 'Instructor': redirect('page/Instructor'); break;
+                case 'Teacher/Adviser': redirect('page/adviser'); break;
+                case 'HR Admin': redirect('page/hr'); break;
+                case 'Guidance': redirect('page/guidance'); break;
+                case 'School Nurse': redirect('page/medical'); break;
+                case 'IT': redirect('page/IT'); break;
+                case 'Librarian': redirect('page/library'); break;
+                case 'Principal': redirect('page/s_principal'); break;
+                default:
+                    $this->session->set_flashdata('danger', 'Unauthorized access.');
+                    redirect('login');
+            }
+        } else {
+            $this->session->set_flashdata('danger', 'Your account is not active. Please contact support.');
+            redirect('login');
+        }
+    } else {
+        $this->session->set_flashdata('danger', 'The username or password is incorrect!');
+        redirect('login');
+    }
+}
 
 
     function logout()

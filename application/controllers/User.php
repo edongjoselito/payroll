@@ -25,7 +25,8 @@ class User extends CI_Controller {
 
         $data = [
             'username'    => $this->input->post('username'),
-            'password' => sha1($this->input->post('password')),
+           'password' => password_hash($this->input->post('password'), PASSWORD_DEFAULT),
+
 
             'position'    => $this->input->post('position'),
             'fName'       => $fName,
@@ -58,10 +59,10 @@ class User extends CI_Controller {
             'acctStat'   => $this->input->post('acctStat')
         ];
 
-        if (!empty($this->input->post('password'))) {
-            $data['password'] = sha1($this->input->post('password'));
+       if ($this->input->post('password')) {
+    $data['password'] = password_hash($this->input->post('password'), PASSWORD_DEFAULT);
+}
 
-        }
 
         $this->User_model->update_user($username, $data);
         redirect('User');
