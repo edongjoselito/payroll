@@ -14,7 +14,23 @@
                         </a>
                     </li>
 
-                      
+<!-- <li>
+    <a href="javascript: void(0);" class="waves-effect">
+        <i class="fas fa-calendar-check"></i>
+        <span> Attendance </span>
+        <span class="menu-arrow"></span>
+    </a>
+
+    <ul class="nav-second-level nav" aria-expanded="false">
+        <li><a href="<?= base_url('Monthly/officeAttendance') ?>">Office Attendance</a></li>
+        <li><a href="<?= base_url('Monthly/presentPersonnel') ?>">Present Personnel</a></li>
+        <li><a href="<?= base_url('Monthly') ?>">Monthly Payroll</a></li>
+    </ul>
+</li> -->
+
+
+
+
 
 
                     <li>
