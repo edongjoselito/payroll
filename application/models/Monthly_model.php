@@ -2,17 +2,18 @@
 class Monthly_model extends CI_Model {
 
     // Get attendance records for a given month for office-based personnel
-  public function getMonthlyAttendance($month)
+public function getMonthlyAttendance($month)
 {
     $start = $month . '-01';
     $end = date("Y-m-t", strtotime($start));
     $settingsID = $this->session->userdata('settingsID');
 
-    $this->db->select("a.*, CONCAT(p.first_name, ' ', COALESCE(p.middle_name, ''), ' ', p.last_name, ' ', COALESCE(p.name_ext, '')) AS fullname");
+    $this->db->select("p.personnelID, CONCAT(p.first_name, ' ', COALESCE(p.middle_name, ''), ' ', p.last_name, ' ', COALESCE(p.name_ext, '')) AS fullname");
     $this->db->from('personnelattendance a');
     $this->db->join('personnel p', 'p.personnelID = a.personnelID');
     $this->db->where("a.attendance_date BETWEEN '$start' AND '$end'");
     $this->db->where('p.settingsID', $settingsID);
+    $this->db->group_by('p.personnelID'); // ✅ This line removes duplicates
     return $this->db->get()->result();
 }
 

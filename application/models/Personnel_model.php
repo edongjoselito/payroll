@@ -42,5 +42,14 @@ public function get_by_id($id)
     return $this->db->get_where('personnel', ['personnelID' => $id])->row();
 }
 
+public function getNameByID($personnelID) {
+    $this->db->select('first_name, last_name');
+    $this->db->from('personnel');
+    $this->db->where('personnelID', $personnelID);
+    $row = $this->db->get()->row();
+    return $row ? $row->last_name . ', ' . $row->first_name : '';
+}
+
+
 }
 

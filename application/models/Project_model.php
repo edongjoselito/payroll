@@ -376,6 +376,113 @@ public function getProjectBySettingsID($settingsID) {
 
 // ---------------------------------------------
 
+public function save_batch_attendance_range($data)
+{
+    if (!empty($data)) {
+        // Optional: delete existing records within that range to prevent duplicates
+        foreach ($data as $row) {
+            $this->db->where([
+                'personnelID'     => $row['personnelID'],
+                'projectID'       => $row['projectID'],
+                'settingsID'      => $row['settingsID'],
+                'attendance_date' => $row['attendance_date']
+            ]);
+            $this->db->delete('personnelattendance');
+        }
+
+        // Now insert new batch
+        $this->db->insert_batch('personnelattendance', $data);
+    }
+}
+public function save_or_update_weekly_total_duration($settingsID, $projectID, $personnelID, $start, $end, $duration)
+{
+    // This is only useful if you're tracking summary per week in another table
+    // Otherwise, just keep it in the attendance form and don't store it
+
+    $data = [
+        'settingsID' => $settingsID,
+        'projectID' => $projectID,
+        'personnelID' => $personnelID,
+        'week_start' => $start,
+        'week_end' => $end,
+        'totalDuration' => $duration
+    ];
+
+    // example table: weekly_attendance_summary
+    $this->db->where([
+        'settingsID' => $settingsID,
+        'projectID' => $projectID,
+        'personnelID' => $personnelID,
+        'week_start' => $start,
+        'week_end' => $end
+    ]);
+
+    $exists = $this->db->get('weekly_attendance_summary')->row();
+
+    if ($exists) {
+        $this->db->where('id', $exists->id);
+        $this->db->update('weekly_attendance_summary', $data);
+    } else {
+        $this->db->insert('weekly_attendance_summary', $data);
+    }
+}
+public function getAttendanceByRange($settingsID, $projectID, $start, $end)
+{
+    $this->db->where('settingsID', $settingsID);
+    $this->db->where('projectID', $projectID);
+    $this->db->where('attendance_date >=', $start);
+    $this->db->where('attendance_date <=', $end);
+    $query = $this->db->get('personnelattendance');
+
+    $result = [];
+    foreach ($query->result() as $row) {
+        $key = $row->personnelID . '_' . $row->attendance_date;
+        $result[$key] = $row;
+    }
+    return $result;
+}
+public function getWeeklyDurations($settingsID, $projectID, $start, $end)
+{
+    $this->db->where('settingsID', $settingsID);
+    $this->db->where('projectID', $projectID);
+    $this->db->where('week_start', $start);
+    $this->db->where('week_end', $end);
+    $query = $this->db->get('weekly_attendance_summary');
+
+    $result = [];
+    foreach ($query->result() as $row) {
+        $result[$row->personnelID] = $row->totalDuration;
+    }
+    return $result;
+}
+public function getPersonnelRates($settingsID, $projectID)
+{
+    $this->db->select('p.personnelID, p.rateType, p.rateAmount');
+    $this->db->from('personnel p');
+    $this->db->where('p.settingsID', $settingsID);
+    return $this->db->get()->result();
+}
+public function getUniquePersonnel($settingsID)
+{
+    $this->db->distinct();
+    $this->db->select('personnelID, first_name, last_name');
+    $this->db->from('personnel');
+    $this->db->where('settingsID', $settingsID);
+    return $this->db->get()->result();
+}
+public function getPersonnelWithAttendance($settingsID, $projectID, $start, $end)
+{
+   $this->db->distinct(); 
+$this->db->select('p.personnelID, p.first_name, p.last_name');
+
+    $this->db->from('personnel p');
+    $this->db->join('advisory_attendance a', 'a.personnelID = p.personnelID');
+    $this->db->where('p.settingsID', $settingsID);
+    $this->db->where('a.projectID', $projectID);
+    $this->db->where('a.attendance_date >=', $start);
+    $this->db->where('a.attendance_date <=', $end);
+    return $this->db->get()->result();
+}
 
 
 }

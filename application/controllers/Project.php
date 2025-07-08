@@ -121,6 +121,98 @@ public function save_attendance()
 
 
 
+public function weekly_attendance_report()
+{
+    $settingsID = $this->input->post('settingsID');
+    $projectID = $this->input->post('projectID');
+    $start = $this->input->post('start_date');
+    $end = $this->input->post('end_date');
+
+    // generate date range
+    $dates = [];
+    $period = new DatePeriod(new DateTime($start), new DateInterval('P1D'), (new DateTime($end))->modify('+1 day'));
+    foreach ($period as $date) {
+        $dates[] = $date->format('Y-m-d');
+    }
+
+    $this->load->model('Project_model');
+    $personnels = $this->Project_model->getAssignedPersonnel($settingsID, $projectID);
+
+    $data = compact('settingsID', 'projectID', 'start', 'end', 'dates', 'personnels');
+    $this->load->view('attendance_weekly_report_view', $data);
+}
+public function save_weekly_attendance()
+{
+    $settingsID = $this->input->post('settingsID');
+    $projectID  = $this->input->post('projectID');
+    $start      = $this->input->post('start');
+    $end        = $this->input->post('end');
+    $attendData = $this->input->post('attendance');
+    $workHours  = $this->input->post('work_duration');
+
+    $this->load->model('Project_model');
+
+    $batchData = [];
+
+    foreach ($attendData as $personnelID => $dates) {
+        foreach ($this->generateDateRange($start, $end) as $date) {
+            $status = isset($dates[$date]) ? 'Present' : 'Absent';
+
+            $batchData[] = [
+                'settingsID'        => $settingsID,
+                'projectID'         => $projectID,
+                'personnelID'       => $personnelID,
+                'attendance_date'   => $date,
+                'attendance_status' => $status
+            ];
+        }
+    }
+
+    // Save individual attendance rows
+    $this->Project_model->save_batch_attendance_range($batchData);
+
+    // Save weekly total duration
+    foreach ($workHours as $personnelID => $duration) {
+        $this->Project_model->save_or_update_weekly_total_duration($settingsID, $projectID, $personnelID, $start, $end, $duration);
+    }
+
+    $this->session->set_flashdata('success', 'Weekly attendance saved successfully.');
+  redirect("project/weekly_attendance_report_summary?settingsID={$settingsID}&projectID={$projectID}&start={$start}&end={$end}");
+
+}
+
+private function generateDateRange($start, $end) {
+    $dates = [];
+    $period = new DatePeriod(new DateTime($start), new DateInterval('P1D'), (new DateTime($end))->modify('+1 day'));
+    foreach ($period as $date) {
+        $dates[] = $date->format('Y-m-d');
+    }
+    return $dates;
+}
+public function weekly_attendance_report_summary()
+{
+    $settingsID = $this->input->get('settingsID');
+    $projectID  = $this->input->get('projectID');
+    $start      = $this->input->get('start');
+    $end        = $this->input->get('end');
+
+    $this->load->model('Project_model');
+
+    $personnels = $this->Project_model->getAssignedPersonnel($settingsID, $projectID);
+
+    $dates = [];
+    $period = new DatePeriod(new DateTime($start), new DateInterval('P1D'), (new DateTime($end))->modify('+1 day'));
+    foreach ($period as $date) {
+        $dates[] = $date->format('Y-m-d');
+    }
+
+    // Fetch previously saved data
+    $attendance = $this->Project_model->getAttendanceByRange($settingsID, $projectID, $start, $end);
+    $durations = $this->Project_model->getWeeklyDurations($settingsID, $projectID, $start, $end);
+
+    $data = compact('settingsID', 'projectID', 'start', 'end', 'dates', 'personnels', 'attendance', 'durations');
+    $this->load->view('attendance_weekly_report_summary_view', $data);
+}
 
 
 
