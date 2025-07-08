@@ -46,47 +46,6 @@
         <hr class="mt-0">
     </div>
 </div>
-<div class="card mb-3">
-    <div class="card-body">
-        <h5>Generate Weekly Report</h5>
-        <!-- This button now triggers the modal -->
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#dateModal">
-            Generate
-        </button>
-    </div>
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="dateModal" tabindex="-1" role="dialog" aria-labelledby="dateModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <form method="post" action="<?= base_url('project/weekly_attendance_report') ?>" class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="dateModalLabel">Select Date Range</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span>&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" name="settingsID" value="<?= $settingsID ?>">
-        <input type="hidden" name="projectID" value="<?= $projectID ?>">
-
-        <div class="form-group">
-            <label for="start_date">Start Date</label>
-            <input type="date" name="start_date" id="start_date" class="form-control" required>
-        </div>
-
-        <div class="form-group">
-            <label for="end_date">End Date</label>
-            <input type="date" name="end_date" id="end_date" class="form-control" required>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="submit" class="btn btn-success">Generate Report</button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-      </div>
-    </form>
-  </div>
-</div>
 
                     <!-- Attendance Records -->
                     <?php if (empty($attendance_logs)): ?>

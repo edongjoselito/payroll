@@ -484,5 +484,10 @@ $this->db->select('p.personnelID, p.first_name, p.last_name');
     return $this->db->get()->result();
 }
 
+public function getAllPersonnel()
+{
+    $this->db->where('rateType', 'Month');
+    return $this->db->get('personnel')->result();
+}
 
 }
