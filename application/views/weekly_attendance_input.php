@@ -127,7 +127,8 @@
                 <?php endforeach; ?>
 
                 <div class="table-responsive mt-3">
-                  <table class="table table-bordered table-hover table-striped nowrap" style="width:100%">
+               <table id="attendanceTable" class="table table-bordered table-hover table-striped nowrap" style="width:100%">
+
                     <thead class="thead-light sticky-top bg-light">
                       <tr>
                         <th>Personnel</th>
@@ -188,6 +189,38 @@
     $('#from').trigger('focus');
   });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('#attendanceTable td').forEach(function (cell) {
+    const checkbox = cell.querySelector('input[type="checkbox"]');
+    const input = cell.querySelector('input[type="number"]');
+
+    if (checkbox && input) {
+      toggleState(checkbox, input);
+
+      checkbox.addEventListener('change', function () {
+        toggleState(this, input);
+      });
+    }
+
+    function toggleState(checkbox, input) {
+      if (checkbox.checked) {
+        input.removeAttribute('readonly');
+        input.style.pointerEvents = 'auto';
+        input.style.backgroundColor = '';
+        input.style.borderColor = ''; 
+      } else {
+        input.setAttribute('readonly', 'readonly');
+        input.style.pointerEvents = 'none';
+        input.style.backgroundColor = '#e9ecef';
+        input.style.borderColor = 'red';
+      }
+    }
+  });
+});
+</script>
+
+
 
 </body>
 </html>
