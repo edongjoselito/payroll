@@ -143,10 +143,7 @@
                     <?php endforeach; ?>
                   </tbody>
                 </table>
-                <div class="mt-2">
-  <span class="badge badge-success">✔ Present</span>
-  <span class="badge badge-danger">✘ Absent</span>
-</div>
+               
               </div>
             <?php elseif (isset($project)): ?>
               <div class="alert alert-warning">
