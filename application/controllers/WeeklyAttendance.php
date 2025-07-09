@@ -10,7 +10,8 @@ class WeeklyAttendance extends CI_Controller {
     }
 
     public function index() {
-        $data['projects'] = $this->WeeklyAttendance_model->getProjects();
+       $data['projects'] = $this->WeeklyAttendance_model->getProjects($this->session->userdata('settingsID'));
+
         $this->load->view('weekly_attendance_input', $data);
     }
 
@@ -19,7 +20,8 @@ class WeeklyAttendance extends CI_Controller {
         $from = $this->input->post('from');
         $to = $this->input->post('to');
 
-        $data['projects'] = $this->WeeklyAttendance_model->getProjects();
+      $data['projects'] = $this->WeeklyAttendance_model->getProjects($this->session->userdata('settingsID'));
+
       $settingsID = $this->session->userdata('settingsID');
 $data['employees'] = $this->WeeklyAttendance_model->getEmployeesByProject($projectID, $settingsID);
 
@@ -45,7 +47,8 @@ $data['employees'] = $this->WeeklyAttendance_model->getEmployeesByProject($proje
 
 
     public function records() {
-        $data['projects'] = $this->WeeklyAttendance_model->getProjects();
+       $data['projects'] = $this->WeeklyAttendance_model->getProjects($this->session->userdata('settingsID'));
+
 
         if ($this->input->post()) {
             $projectID = $this->input->post('project');

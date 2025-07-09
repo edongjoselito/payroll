@@ -1,14 +1,28 @@
 <?php
 class WeeklyAttendance_model extends CI_Model {
 
-    public function getProjects() {
-        return $this->db->get('project')->result();
-    }
-    
-    
-public function getEmployeesByProject($projectID, $settingsID) {
-    return $this->db->where('settingsID', $settingsID)->get('personnel')->result();
+public function getProjects() {
+    $settingsID = $this->session->userdata('settingsID');
+
+    return $this->db
+        ->where('settingsID', $settingsID)
+        ->get('project')
+        ->result();
 }
+
+
+    
+    
+public function getEmployeesByProject($projectID) {
+    $settingsID = $this->session->userdata('settingsID');
+
+    return $this->db
+        ->where('settingsID', $settingsID)
+        ->get('personnel')
+        ->result();
+}
+
+
 
 
 
@@ -67,7 +81,8 @@ public function getAttendanceRecords($projectID, $from, $to) {
     $this->db->where('a.projectID', $projectID);
     $this->db->where('a.date >=', $from);
     $this->db->where('a.date <=', $to);
-    $this->db->where('a.settingsID', $settingsID); // ✅ filter by company
+       $this->db->where('p.settingsID', $this->session->userdata('settingsID'));
+
 
     $query = $this->db->get();
     $result = [];
@@ -82,13 +97,14 @@ public function getAttendanceRecords($projectID, $from, $to) {
 public function getWorkHours($projectID, $from, $to) {
     $settingsID = $this->session->userdata('settingsID');
 
-    $this->db->select('personnelID, SUM(work_duration) as total_hours');
-    $this->db->from('attendance');
-    $this->db->where('projectID', $projectID);
-    $this->db->where('date >=', $from);
-    $this->db->where('date <=', $to);
-    $this->db->where('settingsID', $settingsID);
-    $this->db->group_by('personnelID');
+    $this->db->select('a.personnelID, SUM(a.work_duration) as total_hours');
+    $this->db->from('attendance a');
+    $this->db->join('personnel p', 'p.personnelID = a.personnelID');
+    $this->db->where('a.projectID', $projectID);
+    $this->db->where('a.date >=', $from);
+    $this->db->where('a.date <=', $to);
+    $this->db->where('p.settingsID', $settingsID);
+    $this->db->group_by('a.personnelID');
 
     $query = $this->db->get();
     $hours = [];
@@ -97,5 +113,6 @@ public function getWorkHours($projectID, $from, $to) {
     }
     return $hours;
 }
+
 
 }
