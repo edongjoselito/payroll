@@ -141,7 +141,13 @@
                       </tr>
                     </thead>
                     <tbody>
-                      <?php foreach ($employees as $emp): ?>
+                      
+                    <?php
+usort($employees, function($a, $b) {
+    return strcasecmp($a->last_name, $b->last_name);
+});
+foreach ($employees as $emp): ?>
+
                         <tr>
                           <td><?= $emp->last_name . ', ' . $emp->first_name ?></td>
                           <?php foreach ($dates as $date): ?>
