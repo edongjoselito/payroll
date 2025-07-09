@@ -3,7 +3,7 @@
 <title>PMS - Weekly Attendance</title>
 
 <?php include('includes/head.php'); ?>
-<sm>
+<style>
   thead th {
     position: sticky;
     top: 0;
@@ -11,7 +11,16 @@
     z-index: 2;
   }
 
+  th:first-child,
+  td:first-child {
+    position: sticky;
+    left: 0;
+    background: #f8f9fa; 
+    z-index: 1;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.05); 
+  }
 </style>
+
 
 <body>
      

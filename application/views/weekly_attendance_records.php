@@ -2,7 +2,36 @@
 <html lang="en">
 <title>PMS - Attendance Records</title>
 <?php include('includes/head.php'); ?>
+<style>
+  thead th {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 2;
+  }
 
+  th:first-child,
+  td:first-child {
+    position: sticky;
+    left: 0;
+    background: #f8f9fa; 
+    z-index: 1;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.05); 
+  }
+   @media print {
+    .btn, .modal, .modal-backdrop, .navbar, .sidebar, .page-title, .alert, .modal-open body {
+      display: none !important;
+    }
+
+    table {
+      font-size: 12px;
+    }
+
+    th, td {
+      border: 1px solid #000 !important;
+    }
+  }
+</style>
 <body>
 <div id="wrapper">
   <?php include('includes/top-nav-bar.php'); ?>
@@ -77,6 +106,11 @@
               <div class="alert alert-info">
                 <strong><i class="mdi mdi-briefcase-check"></i> Project:</strong> <?= $project->projectTitle ?>
               </div>
+<div class="mb-3 text-end">
+  <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+    <i class="mdi mdi-printer"></i> Print Attendance
+  </button>
+</div>
 
               <div class="table-responsive">
                 <table class="table table-bordered table-striped nowrap" style="width: 100%;">
@@ -94,9 +128,14 @@
                       <tr>
                         <td><?= $person['name'] ?></td>
                         <?php foreach ($dates as $d): ?>
-                          <td class="text-center">
-                            <?= isset($person['dates'][$d]) && $person['dates'][$d] == 'Present' ? '✔' : '✘' ?>
-                          </td>
+                       <?php
+  $status = isset($person['dates'][$d]) ? $person['dates'][$d] : 'Absent';
+  $isAbsent = $status !== 'Present';
+?>
+<td class="text-center <?= $isAbsent ? 'bg-danger text-white font-weight-bold' : '' ?>">
+  <?= $status === 'Present' ? '✔' : '✘' ?>
+</td>
+
                         <?php endforeach; ?>
                    <td><?= isset($hours[$pid]) ? number_format($hours[$pid], 2) : '0.00' ?></td>
 
@@ -104,6 +143,10 @@
                     <?php endforeach; ?>
                   </tbody>
                 </table>
+                <div class="mt-2">
+  <span class="badge badge-success">✔ Present</span>
+  <span class="badge badge-danger">✘ Absent</span>
+</div>
               </div>
             <?php elseif (isset($project)): ?>
               <div class="alert alert-warning">
