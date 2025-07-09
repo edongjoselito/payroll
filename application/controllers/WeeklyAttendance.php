@@ -82,6 +82,19 @@ $data['employees'] = $this->WeeklyAttendance_model->getEmployeesByProject($proje
     }
 
 
+private function convertToMinutes($input)
+{
+    $input = strval($input);
+    $parts = explode('.', $input);
+    $hours = (int) $parts[0];
+    $minutes = isset($parts[1]) ? (int) str_pad($parts[1], 2, '0', STR_PAD_RIGHT) : 0;
+
+    if ($minutes > 59) {
+        $minutes = 59;
+    }
+
+    return ($hours * 60) + $minutes;
+}
 
 
 

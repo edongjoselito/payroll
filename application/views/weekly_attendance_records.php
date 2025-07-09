@@ -1,5 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+  <?php
+function formatHoursAndMinutes($decimal) {
+    $hours = floor($decimal);
+    $minutes = round(($decimal - $hours) * 60);
+    return "{$hours} hr" . ($hours != 1 ? "s" : "") . " and {$minutes} mins";
+}
+?>
+
 <title>PMS - Attendance Records</title>
 <?php include('includes/head.php'); ?>
 <style>
@@ -9,6 +17,16 @@
     background-color: #fff;
     z-index: 2;
   }
+td, th {
+  vertical-align: middle !important;
+  text-align: center;
+}
+
+td {
+  min-height: 40px;
+  height: 40px;
+}
+
 
   th:first-child,
   td:first-child {
@@ -103,6 +121,13 @@
           <div class="card-body">
 
             <?php if (!empty($attendances)): ?>
+              <?php
+// Sort attendances array by name alphabetically
+uasort($attendances, function($a, $b) {
+    return strcmp($a['name'], $b['name']);
+});
+?>
+
               <div class="alert alert-info">
                 <strong><i class="mdi mdi-briefcase-check"></i> Project:</strong> <?= $project->projectTitle ?>
               </div>
@@ -135,7 +160,7 @@
                       <?php foreach ($dates as $d): ?>
                         <th><?= date('M d', strtotime($d)) ?></th>
                       <?php endforeach; ?>
-                      <th>Total Hours</th>
+                      <th>Total Hours and Minutes</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -147,12 +172,18 @@
   $status = isset($person['dates'][$d]) ? $person['dates'][$d] : 'Absent';
   $isAbsent = $status !== 'Present';
 ?>
-<td class="text-center <?= $isAbsent ? 'bg-danger text-white font-weight-bold' : '' ?>">
-  <?= $status === 'Present' ? '✔' : '✘' ?>
+<td class="text-center">
+  <?php if ($status === 'Present'): ?>
+     <span style="color: green;">Present</span>
+  <?php else: ?>
+    <span style="color: red;">Absent</span>
+  <?php endif; ?>
 </td>
 
+
                         <?php endforeach; ?>
-                   <td><?= isset($hours[$pid]) ? number_format($hours[$pid], 2) : '0.00' ?></td>
+                 <td><?= isset($hours[$pid]) ? formatHoursAndMinutes($hours[$pid]) : '0 hrs and 0 mins' ?></td>
+
 
                       </tr>
                     <?php endforeach; ?>

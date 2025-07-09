@@ -110,11 +110,14 @@
                 <div class="alert alert-info mb-3">
                   <strong><i class="mdi mdi-briefcase-check"></i> Selected Project:</strong> <?= htmlspecialchars($project->projectTitle) ?>
                 </div>
-                <small class="text-muted">
-                  ✅ All checkboxes are marked as <strong>Present</strong> by default. 
-                  <br>❌ <strong>Uncheck a box</strong> to mark as <strong>Absent</strong>.
-                  <br>🕒 <strong>Work duration</strong> in hours is required per date.
-                </small>
+ <small style="color: #000; font-size: 13px; display: block; line-height: 1.5;">
+  ✅ All checkboxes are marked as <strong>Present</strong> by default. 
+  <br>❌ <strong>Uncheck a box</strong> to mark as <strong>Absent</strong>.
+  <br>🕒 <strong>Work duration</strong> in hours is required per date.
+  <br> ✍️ <strong>Hours computation:</strong> 1.2 = 1 hr and 2 mins, 1.20 = 1 hr and 20 mins.
+</small>
+
+
               <?php endif; ?>
 
               <form method="post" action="<?= base_url('WeeklyAttendance/save') ?>">
@@ -147,10 +150,11 @@
                                 name="attendance[<?= $emp->personnelID ?>][<?= $date ?>][status]"
                                 value="Present" checked>
                               <br>
-                              <input type="number"
-                                name="attendance[<?= $emp->personnelID ?>][<?= $date ?>][hours]"
-                                step="0.5" min="0" max="24" placeholder="hrs"
-                                style="width: 60px; margin-top: 3px;">
+                              <input type="text"
+    name="attendance[<?= $emp->personnelID ?>][<?= $date ?>][hours]"
+    placeholder="hours"
+    style="width: 70px; margin-top: 3px;">
+
                             </td>
                           <?php endforeach; ?>
                         </tr>
@@ -193,7 +197,7 @@
 document.addEventListener('DOMContentLoaded', function () {
   document.querySelectorAll('#attendanceTable td').forEach(function (cell) {
     const checkbox = cell.querySelector('input[type="checkbox"]');
-    const input = cell.querySelector('input[type="number"]');
+    const input = cell.querySelector('input[name*="[hours]"]'); // Match any input named like [hours]
 
     if (checkbox && input) {
       toggleState(checkbox, input);
@@ -208,12 +212,13 @@ document.addEventListener('DOMContentLoaded', function () {
         input.removeAttribute('readonly');
         input.style.pointerEvents = 'auto';
         input.style.backgroundColor = '';
-        input.style.borderColor = ''; 
+        input.style.borderColor = '';
       } else {
         input.setAttribute('readonly', 'readonly');
         input.style.pointerEvents = 'none';
         input.style.backgroundColor = '#e9ecef';
         input.style.borderColor = 'red';
+        input.value = ''; // Optional: clear value when unchecked
       }
     }
   });

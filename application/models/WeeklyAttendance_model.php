@@ -26,34 +26,47 @@ public function getEmployeesByProject($projectID) {
 
 
 
-  public function saveAttendance($data) {
+ public function saveAttendance($data) {
     $dates = $data['dates'];
     $projectID = $data['projectID'];
     $from = $data['from'];
     $to = $data['to'];
     $attendance = $data['attendance'];
-    $settingsID = $data['settingsID']; // <- from session
+    $settingsID = $data['settingsID'];
 
     foreach ($attendance as $personnelID => $rows) {
         $totalHours = 0;
 
         foreach ($rows as $date => $entry) {
             $status = isset($entry['status']) ? 'Present' : 'Absent';
-            $hours = isset($entry['hours']) ? floatval($entry['hours']) : 0;
-            $totalHours += $hours;
 
-            // Insert or replace attendance per date
+            $raw = isset($entry['hours']) ? strval($entry['hours']) : '0';
+            $parts = explode('.', $raw);
+
+            $hours = (int)$parts[0];
+            $mins = 0;
+
+            if (isset($parts[1])) {
+                $minsStr = str_pad($parts[1], 2, '0', STR_PAD_LEFT); 
+                $mins = (int)$minsStr;
+                if ($mins > 59) $mins = 59;
+            }
+
+            $converted = $hours + ($mins / 60);
+            $totalHours += $converted;
+
+            // Save per-day attendance
             $this->db->replace('attendance', [
                 'personnelID'    => $personnelID,
                 'projectID'      => $projectID,
                 'date'           => $date,
                 'status'         => $status,
-                'work_duration'  => $hours,
+                'work_duration'  => $converted,
                 'settingsID'     => $settingsID
             ]);
         }
 
-        // Insert or replace total work hours
+        // Save total weekly hours
         $this->db->replace('work_hours', [
             'personnelID'  => $personnelID,
             'projectID'    => $projectID,
@@ -64,6 +77,7 @@ public function getEmployeesByProject($projectID) {
         ]);
     }
 }
+
 
 
 
