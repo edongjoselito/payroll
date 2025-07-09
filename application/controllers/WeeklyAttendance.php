@@ -19,7 +19,6 @@ class WeeklyAttendance extends CI_Controller {
         $from = $this->input->post('from');
         $to = $this->input->post('to');
 
-        // ✅ Get data
         $data['projects'] = $this->WeeklyAttendance_model->getProjects();
         $data['employees'] = $this->WeeklyAttendance_model->getEmployeesByProject($projectID); 
         $data['project'] = $this->WeeklyAttendance_model->getProjectById($projectID);
@@ -32,10 +31,28 @@ class WeeklyAttendance extends CI_Controller {
     }
 
     public function save() {
-        $post = $this->input->post();
+        $post = $this->input->post(); // contains attendance, projectID, from, to, dates[]
         $this->WeeklyAttendance_model->saveAttendance($post);
-        $this->session->set_flashdata('msg', '<div class="alert alert-success">Attendance saved successfully. please go to View Attendance to view</div>');
+
+        $this->session->set_flashdata('msg', '<div class="alert alert-success">Weekly attendance has been saved successfully. Please go to View Attendance to view it.</div>');
         redirect('WeeklyAttendance');
+    }
+
+    public function records() {
+        $data['projects'] = $this->WeeklyAttendance_model->getProjects();
+
+        if ($this->input->post()) {
+            $projectID = $this->input->post('project');
+            $from = $this->input->post('from');
+            $to = $this->input->post('to');
+
+            $data['project'] = $this->WeeklyAttendance_model->getProjectById($projectID);
+            $data['dates'] = $this->getDateRange($from, $to);
+            $data['attendances'] = $this->WeeklyAttendance_model->getAttendanceRecords($projectID, $from, $to);
+            $data['hours'] = $this->WeeklyAttendance_model->getWorkHours($projectID, $from, $to);
+        }
+
+        $this->load->view('weekly_attendance_records', $data);
     }
 
     private function getDateRange($from, $to) {
@@ -50,24 +67,4 @@ class WeeklyAttendance extends CI_Controller {
 
         return $dates;
     }
-
-
-//     DISPLAY SAVED ATTENDANCE
-public function records() {
-    $data['projects'] = $this->WeeklyAttendance_model->getProjects();
-
-    if ($this->input->post()) {
-        $projectID = $this->input->post('project');
-        $from = $this->input->post('from');
-        $to = $this->input->post('to');
-
-        $data['project'] = $this->WeeklyAttendance_model->getProjectById($projectID);
-        $data['dates'] = $this->getDateRange($from, $to);
-        $data['attendances'] = $this->WeeklyAttendance_model->getAttendanceRecords($projectID, $from, $to);
-        $data['hours'] = $this->WeeklyAttendance_model->getWorkHours($projectID, $from, $to);
-    }
-
-    $this->load->view('weekly_attendance_records', $data);
-}
-
 }

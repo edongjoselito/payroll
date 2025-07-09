@@ -98,7 +98,8 @@
                             <?= isset($person['dates'][$d]) && $person['dates'][$d] == 'Present' ? '✔' : '✘' ?>
                           </td>
                         <?php endforeach; ?>
-                        <td><?= isset($hours[$pid]) ? $hours[$pid] : '0' ?></td>
+                   <td><?= isset($hours[$pid]) ? number_format($hours[$pid], 2) : '0.00' ?></td>
+
                       </tr>
                     <?php endforeach; ?>
                   </tbody>

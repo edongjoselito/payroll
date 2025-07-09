@@ -3,8 +3,18 @@
 <title>PMS - Weekly Attendance</title>
 
 <?php include('includes/head.php'); ?>
+<sm>
+  thead th {
+    position: sticky;
+    top: 0;
+    background-color: #fff;
+    z-index: 2;
+  }
+
+</style>
 
 <body>
+     
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.css">
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.css">
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/buttons.bootstrap4.min.css">
@@ -91,10 +101,10 @@
                 <div class="alert alert-info mb-3">
                   <strong><i class="mdi mdi-briefcase-check"></i> Selected Project:</strong> <?= htmlspecialchars($project->projectTitle) ?>
                 </div>
-                <div class="alert alert-light py-1 px-3 mb-0"></div>
                 <small class="text-muted">
                   ✅ All checkboxes are marked as <strong>Present</strong> by default. 
-                  <br>❌ <strong>Uncheck a box</strong> to mark the personnel as <strong>Absent</strong> for that day.
+                  <br>❌ <strong>Uncheck a box</strong> to mark as <strong>Absent</strong>.
+                  <br>🕒 <strong>Work duration</strong> in hours is required per date.
                 </small>
               <?php endif; ?>
 
@@ -113,9 +123,8 @@
                       <tr>
                         <th>Personnel</th>
                         <?php foreach ($dates as $date): ?>
-                          <th><?= date('M d', strtotime($date)) ?></th>
+                          <th class="text-center"><?= date('M d', strtotime($date)) ?><br><small>Status / Hours</small></th>
                         <?php endforeach; ?>
-                        <th>Total Hours</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -124,12 +133,16 @@
                           <td><?= $emp->last_name . ', ' . $emp->first_name ?></td>
                           <?php foreach ($dates as $date): ?>
                             <td class="text-center">
-                              <input type="checkbox" name="personnel[<?= $emp->personnelID ?>][present][<?= $date ?>]" checked>
+                              <input type="checkbox"
+                                name="attendance[<?= $emp->personnelID ?>][<?= $date ?>][status]"
+                                value="Present" checked>
+                              <br>
+                              <input type="number"
+                                name="attendance[<?= $emp->personnelID ?>][<?= $date ?>][hours]"
+                                step="0.5" min="0" max="24" placeholder="hrs"
+                                style="width: 60px; margin-top: 3px;">
                             </td>
                           <?php endforeach; ?>
-                          <td>
-                            <input type="number" name="personnel[<?= $emp->personnelID ?>][hours]" step="0.1" min="0" class="form-control" required>
-                          </td>
                         </tr>
                       <?php endforeach; ?>
                     </tbody>
