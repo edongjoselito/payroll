@@ -20,7 +20,9 @@ class WeeklyAttendance extends CI_Controller {
         $to = $this->input->post('to');
 
         $data['projects'] = $this->WeeklyAttendance_model->getProjects();
-        $data['employees'] = $this->WeeklyAttendance_model->getEmployeesByProject($projectID); 
+      $settingsID = $this->session->userdata('settingsID');
+$data['employees'] = $this->WeeklyAttendance_model->getEmployeesByProject($projectID, $settingsID);
+
         $data['project'] = $this->WeeklyAttendance_model->getProjectById($projectID);
         $data['dates'] = $this->getDateRange($from, $to);
         $data['projectID'] = $projectID;
@@ -30,13 +32,17 @@ class WeeklyAttendance extends CI_Controller {
         $this->load->view('weekly_attendance_input', $data);
     }
 
-    public function save() {
-        $post = $this->input->post(); // contains attendance, projectID, from, to, dates[]
-        $this->WeeklyAttendance_model->saveAttendance($post);
+   public function save() {
+    $post = $this->input->post(); // contains attendance, projectID, from, to, dates[]
+    
+    $post['settingsID'] = $this->session->userdata('settingsID');
 
-        $this->session->set_flashdata('msg', '<div class="alert alert-success">Weekly attendance has been saved successfully. Please go to View Attendance to view it.</div>');
-        redirect('WeeklyAttendance');
-    }
+    $this->WeeklyAttendance_model->saveAttendance($post);
+
+    $this->session->set_flashdata('msg', '<div class="alert alert-success">Weekly attendance has been saved successfully. Please go to View Attendance to view it.</div>');
+    redirect('WeeklyAttendance');
+}
+
 
     public function records() {
         $data['projects'] = $this->WeeklyAttendance_model->getProjects();
