@@ -33,7 +33,7 @@ $data['employees'] = $this->WeeklyAttendance_model->getEmployeesByProject($proje
     }
 
    public function save() {
-    $post = $this->input->post(); // contains attendance, projectID, from, to, dates[]
+    $post = $this->input->post();
     
     $post['settingsID'] = $this->session->userdata('settingsID');
 
