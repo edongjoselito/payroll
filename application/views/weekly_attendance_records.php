@@ -138,7 +138,7 @@ uasort($attendances, function($a, $b) {
 </div>
 <!-- Warning Message -->
 <div class="alert alert-warning">
-  <strong>Note:</strong> Delete Attendance to avoid duplication of hours or do not generate again with the same date range.
+  <strong>Note:</strong> Delete Attendance to avoid duplication of hours, wrong date range, avoid generating with the same date range.
 </div>
 
 <!-- Delete Button Form -->
