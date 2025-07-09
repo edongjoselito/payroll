@@ -420,26 +420,6 @@ $log_data = [
 
 // -------END----------------
 
-public function weekly_attendance_generate()
-{
-    $this->load->model('Project_model');
-    $data['personnel'] = $this->Project_model->getAllPersonnel();
-
-    $from = $this->input->get('from');
-    $to = $this->input->get('to');
-    $data['dates'] = [];
-
-    if ($from && $to) {
-        $start = new DateTime($from);
-        $end = new DateTime($to);
-        while ($start <= $end) {
-            $data['dates'][] = $start->format('Y-m-d');
-            $start->modify('+1 day');
-        }
-    }
-
-    $this->load->view('project/weekly_attendance_generate', $data);
-}
 
 
 
