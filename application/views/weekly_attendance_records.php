@@ -111,6 +111,21 @@
     <i class="mdi mdi-printer"></i> Print Attendance
   </button>
 </div>
+<!-- Warning Message -->
+<div class="alert alert-warning">
+  <strong>Note:</strong> Delete Attendance to avoid duplication of hours or do not generate again with the same date range.
+</div>
+
+<!-- Delete Button Form -->
+<form action="<?= base_url('WeeklyAttendance/deleteAttendance') ?>" method="post" onsubmit="return confirm('Are you sure you want to delete all attendance records for this date range?')">
+  <input type="hidden" name="projectID" value="<?= $projectID ?>">
+  <input type="hidden" name="from" value="<?= $from ?>">
+  <input type="hidden" name="to" value="<?= $to ?>">
+
+  <button type="submit" class="btn btn-danger btn-sm mb-3">
+    <i class="mdi mdi-delete"></i> Delete Attendance
+  </button>
+</form>
 
               <div class="table-responsive">
                 <table class="table table-bordered table-striped nowrap" style="width: 100%;">

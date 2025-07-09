@@ -115,4 +115,20 @@ public function getWorkHours($projectID, $from, $to) {
 }
 
 
+
+
+
+public function deleteAttendanceByDateRange($projectID, $from, $to)
+{
+    $this->db->where('projectID', $projectID);
+    $this->db->where('date >=', $from);
+    $this->db->where('date <=', $to);
+    $this->db->delete('attendance');
+
+    $this->db->where('projectID', $projectID);
+    $this->db->where('`from` >=', $from);
+    $this->db->where('`to` <=', $to);
+    $this->db->delete('work_hours');
+}
+
 }

@@ -46,23 +46,27 @@ $data['employees'] = $this->WeeklyAttendance_model->getEmployeesByProject($proje
 }
 
 
-    public function records() {
-       $data['projects'] = $this->WeeklyAttendance_model->getProjects($this->session->userdata('settingsID'));
+   public function records() {
+    $data['projects'] = $this->WeeklyAttendance_model->getProjects($this->session->userdata('settingsID'));
 
+    if ($this->input->post()) {
+        $projectID = $this->input->post('project');
+        $from = $this->input->post('from');
+        $to = $this->input->post('to');
 
-        if ($this->input->post()) {
-            $projectID = $this->input->post('project');
-            $from = $this->input->post('from');
-            $to = $this->input->post('to');
+        $data['project'] = $this->WeeklyAttendance_model->getProjectById($projectID);
+        $data['dates'] = $this->getDateRange($from, $to);
+        $data['attendances'] = $this->WeeklyAttendance_model->getAttendanceRecords($projectID, $from, $to);
+        $data['hours'] = $this->WeeklyAttendance_model->getWorkHours($projectID, $from, $to);
 
-            $data['project'] = $this->WeeklyAttendance_model->getProjectById($projectID);
-            $data['dates'] = $this->getDateRange($from, $to);
-            $data['attendances'] = $this->WeeklyAttendance_model->getAttendanceRecords($projectID, $from, $to);
-            $data['hours'] = $this->WeeklyAttendance_model->getWorkHours($projectID, $from, $to);
-        }
-
-        $this->load->view('weekly_attendance_records', $data);
+        $data['projectID'] = $projectID;
+        $data['from'] = $from;
+        $data['to'] = $to;
     }
+
+    $this->load->view('weekly_attendance_records', $data);
+}
+
 
     private function getDateRange($from, $to) {
         $start = new DateTime($from);
@@ -76,4 +80,26 @@ $data['employees'] = $this->WeeklyAttendance_model->getEmployeesByProject($proje
 
         return $dates;
     }
+
+
+
+
+
+
+public function deleteAttendance()
+{
+    $projectID = $this->input->post('projectID');
+    $from = $this->input->post('from');
+    $to = $this->input->post('to');
+
+    $this->load->model('WeeklyAttendance_model');
+    $this->WeeklyAttendance_model->deleteAttendanceByDateRange($projectID, $from, $to);
+
+    $this->session->set_flashdata('msg', 'Attendance for the selected range has been deleted successfully.');
+    redirect('WeeklyAttendance');
+}
+
+
+
+
 }
