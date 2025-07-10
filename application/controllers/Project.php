@@ -302,6 +302,8 @@ public function payroll_report($settingsID)
     $this->load->model('Project_model');
     $this->load->model('SettingsModel');
     $this->load->model('OtherDeduction_model');
+    $this->load->model('WeeklyAttendance_model');
+
 
     if (empty($start) || empty($end)) {
         $this->session->set_flashdata('error', 'Start and end dates are required.');
@@ -331,10 +333,14 @@ public function payroll_report($settingsID)
         $groupedDeductions[$pid] += $deduction->amount;
     }
 
-    foreach ($payroll as &$row) {
-        $pid = trim($row->personnelID);
-        $row->other_deduction = $groupedDeductions[$pid] ?? 0;
-    }
+   foreach ($payroll as &$row) {
+    $pid = trim($row->personnelID);
+    $row->other_deduction = $groupedDeductions[$pid] ?? 0;
+
+    // ✅ Add total work hours
+    $row->total_hours = $this->WeeklyAttendance_model->get_total_work_hours($pid, $projectID, $start, $end);
+}
+
 
     $data['attendance_data'] = $payroll;
     $data['personnel_loans'] = $this->Project_model->getPersonnelLoans($settingsID, $projectID);

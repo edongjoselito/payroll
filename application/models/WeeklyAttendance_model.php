@@ -145,4 +145,27 @@ public function deleteAttendanceByDateRange($projectID, $from, $to)
     $this->db->delete('work_hours');
 }
 
+
+
+
+
+//----------------------------------------- LINK TO PAYROLL-----------------------------
+
+public function get_total_work_hours($personnelID, $projectID, $from, $to)
+{
+    $this->db->select_sum('total_hours');
+    $this->db->from('work_hours');
+    $this->db->where('personnelID', $personnelID);
+    $this->db->where('projectID', $projectID);
+    $this->db->where('from >=', $from);
+    $this->db->where('to <=', $to);
+
+    $query = $this->db->get()->row();
+
+    return $query ? $query->total_hours : 0;
+}
+
+
+// ----------------------------------------END---------------------------------------------
+
 }

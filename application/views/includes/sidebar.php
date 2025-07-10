@@ -31,13 +31,14 @@
 <li>
     <a href="javascript: void(0);" class="waves-effect">
         <i class="fas fa-calendar-check"></i>
-        <span> Attendance </span>
+        <span> Payroll </span>
         <span class="menu-arrow"></span>
     </a>
 
     <ul class="nav-second-level nav" aria-expanded="false">
-        <li><a href="<?= base_url(); ?>WeeklyAttendance">Weekly Attendance</a></li>
+        <li><a href="<?= base_url(); ?>WeeklyAttendance"> Attendance</a></li>
         <li><a href="<?= base_url(); ?>WeeklyAttendance/records">View Attendance</a></li>
+         <li><a href="<?= base_url(); ?>WeeklyAttendance/">Generate Payroll</a></li>
     </ul>
 </li>
 

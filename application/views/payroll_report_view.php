@@ -278,7 +278,8 @@ th {
         $startDate = strtotime('+1 day', $startDate);
     endwhile;
     ?>
-    <th colspan="3">TOTAL TIME</th>
+  <th colspan="4">TOTAL TIME</th>
+
     <th colspan="2">AMOUNT</th>
     <th rowspan="3">TOTAL</th>
        <th rowspan="3">Cash Advance</th>
@@ -306,6 +307,8 @@ th {
     <th rowspan="2">Reg.</th>
     <th rowspan="2">O.T</th>
     <th rowspan="2">Days</th>
+    <th rowspan="2">Work Hours</th>
+
     <th rowspan="2">Reg.</th>
     <th rowspan="2">O.T</th>
 </tr>
@@ -428,6 +431,8 @@ if ($netPay > 0) {
     <td><?= $regFormatted ?></td>
     <td><?= $otFormatted ?></td>
     <td><?= $totalDays ?></td>
+    <td><?= $row->total_hours ?? 0 ?></td>
+
     <td><?= number_format($regAmount, 2) ?></td>
 <td><?= number_format($otAmount, 2) ?></td>
 <td><?= number_format($regAmount + $otAmount, 2) ?></td>
