@@ -363,19 +363,19 @@ while ($loopDate <= $endDate):
     $log = $row->logs[$curDate] ?? null;
 
     if ($log && $log->attendance_status === 'Present') {
-      $raw = trim($log->workDuration);
-$raw = (string)$raw; // ← this is the key fix
+     $raw = trim($log->workDuration);
 $workMinutes = 0;
 
-if (strpos($raw, '.') !== false) {
+if (preg_match('/^\d+\.\d{1,2}$/', $raw)) {
     list($hr, $min) = explode('.', $raw);
     $hr = (int)$hr;
-    $min = (int)$min;
-    $min = min($min, 59); // cap for safety
+    $min = (int)str_pad($min, 2, '0', STR_PAD_RIGHT); // Fix: properly treat '1.3' as 1 hour 30 mins
+    $min = min($min, 59); // optional safety
     $workMinutes = ($hr * 60) + $min;
 } else {
     $workMinutes = ((int)$raw) * 60;
 }
+
 
 
 
@@ -448,7 +448,6 @@ $otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60,
 
 <td><?= $customDecimal ?></td>
 <td><?= floor($otTotalMinutes / 60) ?></td>
-<td><?= number_format($totalDays, 2) ?></td>
 <td><?= number_format($regAmount, 2) ?></td>
 <td><?= number_format($otAmount, 2) ?></td>
 <td><?= number_format($salary, 2) ?></td>

@@ -332,13 +332,13 @@ public function payroll_report($settingsID)
         $groupedDeductions[$pid] += $deduction->amount;
     }
 
-    // ✅ Load raw daily logs from both attendance and work_hours
-    $this->db->select('attendance.personnelID, attendance.date, attendance.status, work_hours.total_hours as work_duration');
-    $this->db->from('attendance');
-    $this->db->join('work_hours', 'attendance.personnelID = work_hours.personnelID AND DATE(attendance.date) BETWEEN work_hours.from AND work_hours.to', 'left');
-    $this->db->where('attendance.projectID', $projectID);
-    $this->db->where('attendance.date >=', $start);
-    $this->db->where('attendance.date <=', $end);
+    // ✅ Load raw daily logs from attendance and work_hours
+    $this->db->select('a.personnelID, a.date, a.status, wh.total_hours as work_duration');
+    $this->db->from('attendance a');
+    $this->db->join('work_hours wh', 'a.personnelID = wh.personnelID AND a.projectID = wh.projectID AND a.date BETWEEN wh.from AND wh.to', 'left');
+    $this->db->where('a.projectID', $projectID);
+    $this->db->where('a.date >=', $start);
+    $this->db->where('a.date <=', $end);
     $query = $this->db->get();
     $daily_logs = $query->result();
 
@@ -366,16 +366,17 @@ public function payroll_report($settingsID)
 
         // Total work hours already fetched
         $row->total_hours = $this->WeeklyAttendance_model->get_total_work_hours($pid, $projectID, $start, $end);
-// Override decimal formatting: e.g., 2.50 instead of 2.83
-$raw = $row->total_hours;
-if (strpos($raw, '.') !== false) {
-    [$h, $m] = explode('.', $raw);
-    $m = str_pad($m, 2, '0'); // Pad 5 → 05
-    if ($m > 59) $m = 59; // cap if typo
-    $row->total_hours_display = $h . '.' . $m;
-} else {
-    $row->total_hours_display = $raw . '.00';
-}
+
+        // ✅ Fix: Convert decimal time (e.g., 1.30) into 1h 30m = 1.50
+        $decimal = floatval($row->total_hours);
+        $hours = floor($decimal);
+        $minutes = round(($decimal - $hours) * 100); // assumes 1.30 means 1 hr 30 mins
+        if ($minutes >= 60) {
+            $hours += floor($minutes / 60);
+            $minutes = $minutes % 60;
+        }
+        $decimal_time = $hours + ($minutes / 100);
+        $row->total_hours_display = number_format($decimal_time, 2, '.', '');
 
         $row->reg_hours_per_day = [];
         $row->present_days = 0;
