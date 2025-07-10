@@ -278,12 +278,19 @@ public function getPayrollData($settingsID, $projectID, $start, $end, $rateType 
     $assignedPersonnel = $this->db->get()->result();
 
     // Step 2: Get attendance logs
-    $this->db->select('personnelID, attendance_date, attendance_status, workDuration');
-    $this->db->from('personnelattendance');
-    $this->db->where('settingsID', $settingsID);
-    $this->db->where('projectID', $projectID);
-    $this->db->where('attendance_date >=', $start);
-    $this->db->where('attendance_date <=', $end);
+  $this->db->select('a.personnelID, a.date AS attendance_date, a.status AS attendance_status, 
+                  COALESCE(w.total_hours, 0) AS workDuration');
+$this->db->from('attendance a');
+$this->db->join('work_hours w', 
+    'a.personnelID = w.personnelID 
+     AND a.projectID = w.projectID 
+     AND a.date BETWEEN w.from AND w.to', 
+     'left');
+$this->db->where('a.settingsID', $settingsID);
+$this->db->where('a.projectID', $projectID);
+$this->db->where('a.date >=', $start);
+$this->db->where('a.date <=', $end);
+
     $logs = $this->db->get()->result();
 
     $logMap = [];

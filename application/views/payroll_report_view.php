@@ -278,7 +278,7 @@ th {
         $startDate = strtotime('+1 day', $startDate);
     endwhile;
     ?>
-  <th colspan="4">TOTAL TIME</th>
+  <th colspan="3">TOTAL TIME</th>
 
     <th colspan="2">AMOUNT</th>
     <th rowspan="3">TOTAL</th>
@@ -307,7 +307,6 @@ th {
     <th rowspan="2">Reg.</th>
     <th rowspan="2">O.T</th>
     <th rowspan="2">Days</th>
-    <th rowspan="2">Work Hours</th>
 
     <th rowspan="2">Reg.</th>
     <th rowspan="2">O.T</th>
@@ -357,108 +356,121 @@ $endDate = strtotime($end);
 </td>
 
 
-    <?php
-    $loopDate = strtotime($start);
-    while ($loopDate <= $endDate):
-        $curDate = date('Y-m-d', $loopDate);
-        $log = $row->logs[$curDate] ?? null;
+ <?php
+$loopDate = strtotime($start);
+while ($loopDate <= $endDate):
+    $curDate = date('Y-m-d', $loopDate);
+    $log = $row->logs[$curDate] ?? null;
 
-        if ($log && $log->attendance_status === 'Present') {
-           $parts = explode(':', $log->workDuration);
-$h = isset($parts[0]) ? (int)$parts[0] : 0;
-$m = isset($parts[1]) ? (int)$parts[1] : 0;
-$workMinutes = ($h * 60) + $m;
+    if ($log && $log->attendance_status === 'Present') {
+      $raw = trim($log->workDuration);
+$raw = (string)$raw; // ← this is the key fix
+$workMinutes = 0;
 
-            $reg = min($workMinutes, 480);
-            $ot = max(0, $workMinutes - 480);
-$regHours = floor($reg / 60);
-$otHours = floor($ot / 60);
-if ($row->rateType === 'Hour') {
-    $regAmount += $regHours * $row->rateAmount;
-    $otAmount += $otHours * ($row->rateAmount * 1.25);
-} elseif ($row->rateType === 'Day') {
-    $regAmount += ($regHours / 8) * $row->rateAmount;
-    $otAmount += $otHours * ($row->rateAmount / 8) * 1.25;
-} elseif ($row->rateType === 'Month') {
-  $workingDaysInMonth = getWorkingDaysInMonth($start);
-
-    $dailyRate = $row->rateAmount / $workingDaysInMonth;
-    $hourlyRate = $dailyRate / 8;
-
-$regAmount += ($regHours / 8) * $dailyRate;
-
-    $otAmount += $otHours * $hourlyRate * 1.25;
-    
+if (strpos($raw, '.') !== false) {
+    list($hr, $min) = explode('.', $raw);
+    $hr = (int)$hr;
+    $min = (int)$min;
+    $min = min($min, 59); // cap for safety
+    $workMinutes = ($hr * 60) + $min;
+} else {
+    $workMinutes = ((int)$raw) * 60;
 }
 
 
-            $regTotalMinutes += $reg;
-            $otTotalMinutes += $ot;
-            $totalMinutes += $workMinutes;
-            $totalDays++;
 
-            echo "<td>" . floor($reg / 60) . "</td><td>" . floor($ot / 60) . "</td>";
-        } elseif ($log && $log->attendance_status === 'Absent') {
-            echo "<td colspan='2' class='absent'>Absent</td>";
-        } else {
-            echo "<td colspan='2'>-</td>";
+        $reg = min($workMinutes, 480);
+        $ot = max(0, $workMinutes - 480);
+        $regHours = $reg / 60;
+        $otHours  = $ot / 60;
+
+        if ($row->rateType === 'Hour') {
+            $regAmount += $regHours * $row->rateAmount;
+            $otAmount += $otHours * ($row->rateAmount * 1.25);
+        } elseif ($row->rateType === 'Day') {
+            $regAmount += ($regHours / 8) * $row->rateAmount;
+            $otAmount += $otHours * ($row->rateAmount / 8) * 1.25;
+        } elseif ($row->rateType === 'Month') {
+            $workingDaysInMonth = getWorkingDaysInMonth($start);
+            $dailyRate = $row->rateAmount / $workingDaysInMonth;
+            $hourlyRate = $dailyRate / 8;
+            $regAmount += ($regHours / 8) * $dailyRate;
+            $otAmount += $otHours * $hourlyRate * 1.25;
         }
 
-        $loopDate = strtotime('+1 day', $loopDate);
-    endwhile;
+        $regTotalMinutes += $reg;
+        $otTotalMinutes += $ot;
+        $totalMinutes += $workMinutes;
 
- $salary = $regAmount + $otAmount;
+        $totalDays += round($workMinutes / 480, 2); // 1 day = 480 mins
 
+        echo "<td>" . number_format($regHours, 2) . "</td><td>" . number_format($otHours, 2) . "</td>";
+    } elseif ($log && $log->attendance_status === 'Absent') {
+        echo "<td colspan='2' class='absent'>Absent</td>";
+    } else {
+        echo "<td colspan='2'>-</td>";
+    }
 
-    $cash_advance = $row->ca_cashadvance ?? 0;
-   $other_deduction = $row->other_deduction ?? 0;
-    $sss = $row->sss ?? 0;
-    $pagibig = $row->pagibig ?? 0;
-    $philhealth = $row->philhealth ?? 0;
-    $loan = $row->loan ?? 0;
+    $loopDate = strtotime('+1 day', $loopDate);
+endwhile;
 
-   $total_deduction = $cash_advance + $sss + $pagibig + $philhealth + $loan + $other_deduction;
-   $netPay = $salary - $total_deduction;
+// Totals
+$salary = $regAmount + $otAmount;
+$cash_advance = $row->ca_cashadvance ?? 0;
+$other_deduction = $row->other_deduction ?? 0;
+$sss = $row->sss ?? 0;
+$pagibig = $row->pagibig ?? 0;
+$philhealth = $row->philhealth ?? 0;
+$loan = $row->loan ?? 0;
+$total_deduction = $cash_advance + $sss + $pagibig + $philhealth + $loan + $other_deduction;
+$netPay = $salary - $total_deduction;
 if ($netPay > 0) {
-    $totalPayroll += $netPay; 
+    $totalPayroll += $netPay;
 }
 
+// Ensure integers to avoid float-string conversion warning
+$regTotalMinutes = intval($regTotalMinutes);
+$otTotalMinutes = intval($otTotalMinutes);
+
+$totalMinutesFormatted = $regTotalMinutes + $otTotalMinutes;
+$formattedH = floor($totalMinutesFormatted / 60);
+$formattedM = $totalMinutesFormatted % 60;
+$customDecimal = $formattedH . '.' . str_pad($formattedM, 2, '0', STR_PAD_LEFT);
+
+// Also reformat these as strings to avoid PHP 8.1 float warnings
+$regFormatted = floor($regTotalMinutes / 60) . '.' . str_pad($regTotalMinutes % 60, 2, '0', STR_PAD_LEFT);
+$otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60, 2, '0', STR_PAD_LEFT);
 
 
-    $regFormatted = floor($regTotalMinutes / 60);
-    $otFormatted = floor($otTotalMinutes / 60);
-    ?>
-    <td><?= $regFormatted ?></td>
-    <td><?= $otFormatted ?></td>
-    <td><?= $totalDays ?></td>
-    <td><?= $row->total_hours ?? 0 ?></td>
+$regFormatted = floor($regTotalMinutes / 60) . '.' . str_pad($regTotalMinutes % 60, 2, '0', STR_PAD_LEFT);
+$otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60, 2, '0', STR_PAD_LEFT);
+?>
 
-    <td><?= number_format($regAmount, 2) ?></td>
+<td><?= $customDecimal ?></td>
+<td><?= floor($otTotalMinutes / 60) ?></td>
+<td><?= number_format($totalDays, 2) ?></td>
+<td><?= number_format($regAmount, 2) ?></td>
 <td><?= number_format($otAmount, 2) ?></td>
-<td><?= number_format($regAmount + $otAmount, 2) ?></td>
-
-    <td><?= number_format($cash_advance, 2) ?></td>
-    <td><?= number_format($sss, 2) ?></td>
-    <td><?= number_format($pagibig, 2) ?></td>
-
-    <td><?= number_format($philhealth, 2) ?></td>
-    <td><?= number_format($loan, 2) ?></td>
-    <td><?= number_format($row->other_deduction ?? 0, 2) ?>
-</td>
-
-    <td><?= number_format($total_deduction, 2) ?></td>
-   <td>
-  <span class="d-print-block d-none"><?= number_format($netPay, 2) ?></span> <!-- Show on print -->
+<td><?= number_format($salary, 2) ?></td>
+<td><?= number_format($cash_advance, 2) ?></td>
+<td><?= number_format($sss, 2) ?></td>
+<td><?= number_format($pagibig, 2) ?></td>
+<td><?= number_format($philhealth, 2) ?></td>
+<td><?= number_format($loan, 2) ?></td>
+<td><?= number_format($other_deduction, 2) ?></td>
+<td><?= number_format($total_deduction, 2) ?></td>
+<td>
+  <span class="d-print-block d-none"><?= number_format($netPay, 2) ?></span>
   <a href="#" class="btn btn-link btn-sm d-print-none" data-toggle="modal" data-target="#payslipModal<?= $ln ?>">
     <?= number_format($netPay, 2) ?>
   </a>
 </td>
 
- <?php if (empty($is_summary)): ?>
-    <td colspan="3"></td>
+<?php if (empty($is_summary)): ?>
+  <td colspan="3"></td>
 <?php endif; ?>
-
 </tr>
+
 
 <!-- Payslip Modal -->
 <div class="modal fade" id="payslipModal<?= $ln ?>" tabindex="-1" role="dialog">

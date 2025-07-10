@@ -304,7 +304,6 @@ public function payroll_report($settingsID)
     $this->load->model('OtherDeduction_model');
     $this->load->model('WeeklyAttendance_model');
 
-
     if (empty($start) || empty($end)) {
         $this->session->set_flashdata('error', 'Start and end dates are required.');
         redirect('project/project_view');
@@ -333,22 +332,72 @@ public function payroll_report($settingsID)
         $groupedDeductions[$pid] += $deduction->amount;
     }
 
-   foreach ($payroll as &$row) {
-    $pid = trim($row->personnelID);
-    $row->other_deduction = $groupedDeductions[$pid] ?? 0;
+    // ✅ Load raw daily logs from both attendance and work_hours
+    $this->db->select('attendance.personnelID, attendance.date, attendance.status, work_hours.total_hours as work_duration');
+    $this->db->from('attendance');
+    $this->db->join('work_hours', 'attendance.personnelID = work_hours.personnelID AND DATE(attendance.date) BETWEEN work_hours.from AND work_hours.to', 'left');
+    $this->db->where('attendance.projectID', $projectID);
+    $this->db->where('attendance.date >=', $start);
+    $this->db->where('attendance.date <=', $end);
+    $query = $this->db->get();
+    $daily_logs = $query->result();
 
-    // ✅ Add total work hours
-    $row->total_hours = $this->WeeklyAttendance_model->get_total_work_hours($pid, $projectID, $start, $end);
+    // ✅ Format logs into array [personnelID][date]
+    $logs = [];
+    $dateList = [];
+
+    foreach ($daily_logs as $log) {
+        $date = date('Y-m-d', strtotime($log->date));
+        $logs[$log->personnelID][$date] = [
+            'status' => $log->status,
+            'hours'  => floatval($log->work_duration ?? 0)
+        ];
+        $dateList[$date] = true;
+    }
+
+    ksort($dateList); // Sort by date ascending
+    $data['dates'] = array_keys($dateList);
+    $data['logs'] = $logs;
+
+    // ✅ Augment each payroll row with REG hours and present day count
+    foreach ($payroll as &$row) {
+        $pid = trim($row->personnelID);
+        $row->other_deduction = $groupedDeductions[$pid] ?? 0;
+
+        // Total work hours already fetched
+        $row->total_hours = $this->WeeklyAttendance_model->get_total_work_hours($pid, $projectID, $start, $end);
+// Override decimal formatting: e.g., 2.50 instead of 2.83
+$raw = $row->total_hours;
+if (strpos($raw, '.') !== false) {
+    [$h, $m] = explode('.', $raw);
+    $m = str_pad($m, 2, '0'); // Pad 5 → 05
+    if ($m > 59) $m = 59; // cap if typo
+    $row->total_hours_display = $h . '.' . $m;
+} else {
+    $row->total_hours_display = $raw . '.00';
 }
 
+        $row->reg_hours_per_day = [];
+        $row->present_days = 0;
+
+        foreach ($data['dates'] as $date) {
+            $day_log = $logs[$pid][$date] ?? null;
+            if ($day_log && $day_log['status'] === 'Present') {
+                $row->reg_hours_per_day[$date] = $day_log['hours'];
+                $row->present_days++;
+            } else {
+                $row->reg_hours_per_day[$date] = '-';
+            }
+        }
+    }
 
     $data['attendance_data'] = $payroll;
     $data['personnel_loans'] = $this->Project_model->getPersonnelLoans($settingsID, $projectID);
-
     $data['show_signatories'] = true;
 
     $this->load->view('payroll_report_view', $data);
 }
+
 
 
 public function payroll_summary($settingsID, $projectID)
