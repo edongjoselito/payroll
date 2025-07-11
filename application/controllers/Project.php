@@ -332,13 +332,14 @@ public function payroll_report($settingsID)
         $groupedDeductions[$pid] += $deduction->amount;
     }
 
-    // ✅ Load raw daily logs from attendance and work_hours
-    $this->db->select('a.personnelID, a.date, a.status, wh.total_hours as work_duration');
-    $this->db->from('attendance a');
-    $this->db->join('work_hours wh', 'a.personnelID = wh.personnelID AND a.projectID = wh.projectID AND a.date BETWEEN wh.from AND wh.to', 'left');
-    $this->db->where('a.projectID', $projectID);
-    $this->db->where('a.date >=', $start);
-    $this->db->where('a.date <=', $end);
+   // ✅ Load raw daily logs from attendance only
+$this->db->select('personnelID, date, status, work_duration');
+$this->db->from('attendance');
+$this->db->where('projectID', $projectID);
+$this->db->where('date >=', $start);
+$this->db->where('date <=', $end);
+$this->db->where('settingsID', $settingsID); // Optional if used
+
     $query = $this->db->get();
     $daily_logs = $query->result();
 
@@ -359,15 +360,12 @@ public function payroll_report($settingsID)
     $data['dates'] = array_keys($dateList);
     $data['logs'] = $logs;
 
-    // ✅ Augment each payroll row with REG hours and present day count
     foreach ($payroll as &$row) {
         $pid = trim($row->personnelID);
         $row->other_deduction = $groupedDeductions[$pid] ?? 0;
 
-        // Total work hours already fetched
         $row->total_hours = $this->WeeklyAttendance_model->get_total_work_hours($pid, $projectID, $start, $end);
 
-        // ✅ Fix: Convert decimal time (e.g., 1.30) into 1h 30m = 1.50
         $decimal = floatval($row->total_hours);
         $hours = floor($decimal);
         $minutes = round(($decimal - $hours) * 100); // assumes 1.30 means 1 hr 30 mins
@@ -378,18 +376,22 @@ public function payroll_report($settingsID)
         $decimal_time = $hours + ($minutes / 100);
         $row->total_hours_display = number_format($decimal_time, 2, '.', '');
 
-        $row->reg_hours_per_day = [];
-        $row->present_days = 0;
+       $row->reg_hours_per_day = [];
+$row->present_days = 0;
+$row->total_reg_hours = 0;
 
-        foreach ($data['dates'] as $date) {
-            $day_log = $logs[$pid][$date] ?? null;
-            if ($day_log && $day_log['status'] === 'Present') {
-                $row->reg_hours_per_day[$date] = $day_log['hours'];
-                $row->present_days++;
-            } else {
-                $row->reg_hours_per_day[$date] = '-';
-            }
-        }
+foreach ($data['dates'] as $date) {
+    $day_log = $logs[$pid][$date] ?? null;
+    if ($day_log && $day_log['status'] === 'Present') {
+        $hours = $day_log['hours'];
+        $row->reg_hours_per_day[$date] = $hours;
+        $row->total_reg_hours += $hours;
+        $row->present_days++; // Count only present days
+    } else {
+        $row->reg_hours_per_day[$date] = '-';
+    }
+}
+
     }
 
     $data['attendance_data'] = $payroll;

@@ -174,7 +174,12 @@ uasort($attendances, function($a, $b) {
 ?>
 <td class="text-center">
   <?php if ($status === 'Present'): ?>
-     <span style="color: green;">Present</span>
+    <span style="color: green;">
+      Present
+      <?php if (isset($person['hours'][$d])): ?>
+        <br><small>(<?= number_format($person['hours'][$d], 2) ?> hrs)</small>
+      <?php endif; ?>
+    </span>
   <?php else: ?>
     <span style="color: red;">Absent</span>
   <?php endif; ?>

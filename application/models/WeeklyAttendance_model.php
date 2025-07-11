@@ -26,7 +26,7 @@ public function getEmployeesByProject($projectID) {
 
 
 
- public function saveAttendance($data) {
+public function saveAttendance($data) {
     $dates = $data['dates'];
     $projectID = $data['projectID'];
     $from = $data['from'];
@@ -40,22 +40,11 @@ public function getEmployeesByProject($projectID) {
         foreach ($rows as $date => $entry) {
             $status = isset($entry['status']) ? 'Present' : 'Absent';
 
-            $raw = isset($entry['hours']) ? strval($entry['hours']) : '0';
-            $parts = explode('.', $raw);
-
-            $hours = (int)$parts[0];
-            $mins = 0;
-
-            if (isset($parts[1])) {
-                $minsStr = str_pad($parts[1], 2, '0', STR_PAD_LEFT); 
-                $mins = (int)$minsStr;
-                if ($mins > 59) $mins = 59;
-            }
-
-            $converted = $hours + ($mins / 60);
+            // ✅ Clean decimal-based conversion
+            $converted = isset($entry['hours']) ? floatval($entry['hours']) : 0.0;
             $totalHours += $converted;
 
-            // Save per-day attendance
+            // ✅ Save per-day attendance with decimal hours
             $this->db->replace('attendance', [
                 'personnelID'    => $personnelID,
                 'projectID'      => $projectID,
@@ -66,7 +55,7 @@ public function getEmployeesByProject($projectID) {
             ]);
         }
 
-        // Save total weekly hours
+        // ✅ Save total weekly hours
         $this->db->replace('work_hours', [
             'personnelID'  => $personnelID,
             'projectID'    => $projectID,
@@ -77,8 +66,6 @@ public function getEmployeesByProject($projectID) {
         ]);
     }
 }
-
-
 
 
     public function getProjectById($id) {

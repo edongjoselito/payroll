@@ -156,10 +156,12 @@ foreach ($employees as $emp): ?>
                                 name="attendance[<?= $emp->personnelID ?>][<?= $date ?>][status]"
                                 value="Present" checked>
                               <br>
-                              <input type="text"
+                           <input type="number"
     name="attendance[<?= $emp->personnelID ?>][<?= $date ?>][hours]"
-    placeholder="hours"
+    placeholder="e.g. 8, 7.75"
+    step="0.25" min="0" max="24"
     style="width: 70px; margin-top: 3px;">
+
 
                             </td>
                           <?php endforeach; ?>

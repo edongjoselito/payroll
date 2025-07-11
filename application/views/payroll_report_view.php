@@ -363,27 +363,17 @@ while ($loopDate <= $endDate):
     $log = $row->logs[$curDate] ?? null;
 
     if ($log && $log->attendance_status === 'Present') {
-     $raw = trim($log->workDuration);
-$workMinutes = 0;
+        // ✅ Fix: parse decimal hours correctly
+        $raw = trim($log->workDuration);
+        $decimalHours = floatval($raw);
+        $workMinutes = $decimalHours * 60;
 
-if (preg_match('/^\d+\.\d{1,2}$/', $raw)) {
-    list($hr, $min) = explode('.', $raw);
-    $hr = (int)$hr;
-    $min = (int)str_pad($min, 2, '0', STR_PAD_RIGHT); // Fix: properly treat '1.3' as 1 hour 30 mins
-    $min = min($min, 59); // optional safety
-    $workMinutes = ($hr * 60) + $min;
-} else {
-    $workMinutes = ((int)$raw) * 60;
-}
-
-
-
-
-        $reg = min($workMinutes, 480);
-        $ot = max(0, $workMinutes - 480);
+        $reg = min($workMinutes, 480); // max 8 hours regular
+        $ot = max(0, $workMinutes - 480); // anything beyond 8 hrs
         $regHours = $reg / 60;
         $otHours  = $ot / 60;
 
+        // 💰 Salary computation based on rate type
         if ($row->rateType === 'Hour') {
             $regAmount += $regHours * $row->rateAmount;
             $otAmount += $otHours * ($row->rateAmount * 1.25);
@@ -398,13 +388,15 @@ if (preg_match('/^\d+\.\d{1,2}$/', $raw)) {
             $otAmount += $otHours * $hourlyRate * 1.25;
         }
 
+        // ⏱️ Total accumulations
         $regTotalMinutes += $reg;
         $otTotalMinutes += $ot;
         $totalMinutes += $workMinutes;
+        $totalDays += round($workMinutes / 480, 2); // 1 day = 480 minutes
 
-        $totalDays += round($workMinutes / 480, 2); // 1 day = 480 mins
-
+        // 🖨️ Output to table
         echo "<td>" . number_format($regHours, 2) . "</td><td>" . number_format($otHours, 2) . "</td>";
+
     } elseif ($log && $log->attendance_status === 'Absent') {
         echo "<td colspan='2' class='absent'>Absent</td>";
     } else {
@@ -413,6 +405,7 @@ if (preg_match('/^\d+\.\d{1,2}$/', $raw)) {
 
     $loopDate = strtotime('+1 day', $loopDate);
 endwhile;
+
 
 // Totals
 $salary = $regAmount + $otAmount;
