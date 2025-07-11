@@ -304,13 +304,15 @@ $this->db->where('a.date <=', $end);
     $this->db->where('settingsID', $settingsID);
     $this->db->where('date >=', $start);
     $this->db->where('date <=', $end);
-    $this->db->like('description', 'Cash Advance');
+    $this->db->where("LOWER(description) LIKE '%cash advance%'");
+
     $this->db->group_by('personnelID');
     $cashAdvances = $this->db->get()->result();
 
     $caMap = [];
     foreach ($cashAdvances as $ca) {
-        $caMap[$ca->personnelID] = $ca->total_ca;
+       $caMap[trim($ca->personnelID)] = $ca->total_ca;
+
     }
 
     // Step 3-B: Other Deductions (excluding 'Cash Advance')
@@ -344,7 +346,9 @@ $this->db->where('a.date <=', $end);
     // Step 5: Merge all data to personnel
     foreach ($assignedPersonnel as &$p) {
         $p->logs = $logMap[$p->personnelID] ?? [];
-        $p->ca_cashadvance = $caMap[$p->personnelID] ?? 0;
+       $pid = trim($p->personnelID);
+$p->ca_cashadvance = $caMap[$pid] ?? 0;
+
         $p->other_deduction = $otherMap[$p->personnelID] ?? 0;
         $p->loan = $loanMap[$p->personnelID] ?? 0;
         $p->sss = $p->sss_deduct ?? 0;
@@ -356,7 +360,7 @@ $this->db->where('a.date <=', $end);
 }
 
 
-// Pa display sa personnel lon in payroll_report
+// Pa display sa personnel loan in payroll_report
 public function getPersonnelLoans($settingsID)
 {
     $this->db->select('pl.personnelID, SUM(pl.amount) AS loan_deduction');
