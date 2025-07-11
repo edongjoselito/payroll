@@ -3,6 +3,8 @@
 <title>PMS - Attendance</title>
 
 <?php include('includes/head.php'); ?>
+<?php $flash = $this->session->flashdata('attendance_exists'); ?>
+
 <style>
   thead th {
     position: sticky;
@@ -45,11 +47,34 @@
         </div>
 
         <?php if ($this->session->flashdata('msg')): ?>
+          
           <div class="alert alert-success alert-dismissible fade show">
             <?= $this->session->flashdata('msg') ?>
             <button type="button" class="close" data-dismiss="alert">&times;</button>
           </div>
         <?php endif; ?>
+<!-- <?php if (isset($flash['projectID'], $flash['from'], $flash['to'])): ?>
+  <div class="alert alert-warning">
+    <strong>⚠ Attendance already exists for this date range.</strong><br>
+    Would you like to view or delete the existing records?
+
+    <div class="mt-2">
+      <a href="<?= base_url('WeeklyAttendance/records?project=' . $flash['projectID'] . '&from=' . $flash['from'] . '&to=' . $flash['to']) ?>" class="btn btn-info btn-sm">
+        <i class="mdi mdi-eye"></i> View Records
+      </a>
+
+      <form action="<?= base_url('WeeklyAttendance/deleteAttendance') ?>" method="post" style="display:inline;">
+        <input type="hidden" name="projectID" value="<?= $flash['projectID'] ?>">
+        <input type="hidden" name="from" value="<?= $flash['from'] ?>">
+        <input type="hidden" name="to" value="<?= $flash['to'] ?>">
+        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this attendance data?');">
+          <i class="mdi mdi-delete"></i> Delete
+        </button>
+      </form>
+    </div>
+  </div>
+<?php endif; ?> -->
+
 
         <div class="card">
           <div class="card-body">
@@ -184,6 +209,52 @@ foreach ($employees as $emp): ?>
 
       </div>
     </div>
+<?php if ($flash): ?>
+<!-- Modal -->
+<div class="modal fade" id="existingAttendanceModal" tabindex="-1" role="dialog" aria-labelledby="existingAttendanceLabel" aria-hidden="true">
+  <div class="modal-dialog modal-md modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title" id="existingAttendanceLabel">
+          ⚠ Attendance Already Exists
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span>&times;</span>
+        </button>
+      </div>
+     <?php
+  $fromFormatted = date("F d, Y", strtotime($flash['from']));
+  $toFormatted = date("F d, Y", strtotime($flash['to']));
+  $projectTitle = $flash['projectTitle'] ?? 'N/A';
+?>
+<div class="modal-body text-dark">
+  <strong>Attendance already exists for this date range:</strong>
+  <p>
+    📁 <strong>Project:</strong> <?= htmlspecialchars($projectTitle) ?><br>
+    📅 <strong>Period:</strong> <?= $fromFormatted ?> to <?= $toFormatted ?>
+  </p>
+  <small>You can either <b>view</b> or <b>delete</b> this data.</small>
+</div>
+
+<div class="modal-footer">
+  <a href="<?= base_url('WeeklyAttendance/records?project=' . $flash['projectID'] . '&from=' . $flash['from'] . '&to=' . $flash['to']) ?>" class="btn btn-info">
+    <i class="mdi mdi-eye"></i> View Records
+  </a>
+  <form action="<?= base_url('WeeklyAttendance/deleteAttendance') ?>" method="post" style="display:inline;">
+    <input type="hidden" name="projectID" value="<?= $flash['projectID'] ?>">
+    <input type="hidden" name="from" value="<?= $flash['from'] ?>">
+    <input type="hidden" name="to" value="<?= $flash['to'] ?>">
+    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this attendance data?');">
+      <i class="mdi mdi-delete"></i> Delete
+    </button>
+  </form>
+  <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+</div>
+
+    </div>
+  </div>
+</div>
+<?php endif; ?>
 
     <?php include('includes/footer.php'); ?>
   </div>
@@ -231,6 +302,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   });
 });
+</script>
+<script>
+  <?php if ($flash): ?>
+    $(document).ready(function() {
+      $('#existingAttendanceModal').modal('show');
+    });
+  <?php endif; ?>
 </script>
 
 

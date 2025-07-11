@@ -15,24 +15,42 @@ class WeeklyAttendance extends CI_Controller {
         $this->load->view('weekly_attendance_input', $data);
     }
 
-    public function generate() {
-        $projectID = $this->input->post('project');
-        $from = $this->input->post('from');
-        $to = $this->input->post('to');
+public function generate() {
+    $projectID = $this->input->post('project');
+    $from = $this->input->post('from');
+    $to = $this->input->post('to');
 
-      $data['projects'] = $this->WeeklyAttendance_model->getProjects($this->session->userdata('settingsID'));
+    $settingsID = $this->session->userdata('settingsID');
+    $data['projects'] = $this->WeeklyAttendance_model->getProjects($settingsID);
 
-      $settingsID = $this->session->userdata('settingsID');
-$data['employees'] = $this->WeeklyAttendance_model->getEmployeesByProject($projectID, $settingsID);
+    // ✅ Get project details early to use project title in flashdata
+    $project = $this->WeeklyAttendance_model->getProjectById($projectID);
 
-        $data['project'] = $this->WeeklyAttendance_model->getProjectById($projectID);
-        $data['dates'] = $this->getDateRange($from, $to);
-        $data['projectID'] = $projectID;
-        $data['from'] = $from;
-        $data['to'] = $to;
-
-        $this->load->view('weekly_attendance_input', $data);
+    // ✅ Check for existing attendance
+    if ($this->WeeklyAttendance_model->attendanceExists($projectID, $from, $to)) {
+        // Pass params via flashdata to allow view/delete options
+        $this->session->set_flashdata('attendance_exists', [
+            'projectID'     => $projectID,
+            'from'          => $from,
+            'to'            => $to,
+            'projectTitle'  => $project ? $project->projectTitle : 'N/A'
+        ]);
+        redirect('WeeklyAttendance');
+        return;
     }
+
+    // Normal flow
+    $data['employees'] = $this->WeeklyAttendance_model->getEmployeesByProject($projectID, $settingsID);
+    $data['project'] = $project;
+    $data['dates'] = $this->getDateRange($from, $to);
+    $data['projectID'] = $projectID;
+    $data['from'] = $from;
+    $data['to'] = $to;
+
+    $this->load->view('weekly_attendance_input', $data);
+}
+
+
 
    public function save() {
     $post = $this->input->post();
@@ -46,26 +64,61 @@ $data['employees'] = $this->WeeklyAttendance_model->getEmployeesByProject($proje
 }
 
 
-   public function records() {
+  public function records()
+{
     $data['projects'] = $this->WeeklyAttendance_model->getProjects($this->session->userdata('settingsID'));
 
-    if ($this->input->post()) {
+    // ✅ Support GET parameters (for auto-view after generating)
+    $projectID = $this->input->get('project');
+    $from = $this->input->get('from');
+    $to = $this->input->get('to');
+
+    // ✅ Fallback to POST
+    if (!$projectID && $this->input->post()) {
         $projectID = $this->input->post('project');
         $from = $this->input->post('from');
         $to = $this->input->post('to');
+    }
 
+    // ✅ Only continue if all inputs are provided
+    if ($projectID && $from && $to) {
+        // ✅ Check if attendance data exists first
+        if (!$this->WeeklyAttendance_model->attendanceExists($projectID, $from, $to)) {
+            $this->session->set_flashdata('error', '❌ Attendance has not been generated for the selected date range. Please generate first');
+            redirect('WeeklyAttendance/records');
+            return;
+        }
+
+        // ✅ Continue loading attendance data
         $data['project'] = $this->WeeklyAttendance_model->getProjectById($projectID);
-        $data['dates'] = $this->getDateRange($from, $to);
-        $data['attendances'] = $this->WeeklyAttendance_model->getAttendanceRecords($projectID, $from, $to);
-        $data['hours'] = $this->WeeklyAttendance_model->getWorkHours($projectID, $from, $to);
+       // Get all existing attendance dates for that project
+$existingDates = $this->WeeklyAttendance_model->getExistingAttendanceDates($projectID, $from, $to);
 
-        $data['projectID'] = $projectID;
-        $data['from'] = $from;
-        $data['to'] = $to;
+if (empty($existingDates)) {
+    $this->session->set_flashdata('error', '❌ No attendance data exists for this project and selected date range.');
+    redirect('WeeklyAttendance/records');
+    return;
+}
+
+// Notify if partial data
+$requestedDates = $this->getDateRange($from, $to);
+if (count($requestedDates) !== count($existingDates)) {
+    $this->session->set_flashdata('error', '⚠ Some selected dates have no data. Only dates with existing records will be shown.');
+}
+
+$data['project'] = $this->WeeklyAttendance_model->getProjectById($projectID);
+$data['dates'] = $existingDates;
+$data['attendances'] = $this->WeeklyAttendance_model->getAttendanceRecords($projectID, $from, $to, $existingDates);
+$data['hours'] = $this->WeeklyAttendance_model->getWorkHours($projectID, $from, $to);
+$data['projectID'] = $projectID;
+$data['from'] = $from;
+$data['to'] = $to;
+
     }
 
     $this->load->view('weekly_attendance_records', $data);
 }
+
 
 
     private function getDateRange($from, $to) {

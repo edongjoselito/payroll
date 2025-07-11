@@ -75,6 +75,42 @@ public function saveAttendance($data) {
     public function getProjectById($id) {
     return $this->db->where('projectID', $id)->get('project')->row();
 }
+
+public function attendanceExists($projectID, $from, $to) {
+    $settingsID = $this->session->userdata('settingsID');
+
+    $this->db->where('projectID', $projectID);
+    $this->db->where('settingsID', $settingsID);
+    $this->db->where('date >=', $from);
+    $this->db->where('date <=', $to);
+    $query = $this->db->get('attendance');
+
+    return $query->num_rows() > 0;
+}
+
+public function getExistingAttendanceDates($projectID, $from, $to) {
+    $settingsID = $this->session->userdata('settingsID');
+
+    $this->db->select('DISTINCT(date) as date');
+    $this->db->from('attendance');
+    $this->db->where('projectID', $projectID);
+    $this->db->where('settingsID', $settingsID);
+    $this->db->where('date >=', $from);
+    $this->db->where('date <=', $to);
+    $this->db->order_by('date', 'ASC');
+    
+    $query = $this->db->get();
+
+    $dates = [];
+    foreach ($query->result() as $row) {
+        $dates[] = $row->date;
+    }
+
+    return $dates;
+}
+
+
+
 // DISPLAY SAVED ATTENDANCE
 
 public function getAttendanceRecords($projectID, $from, $to) {

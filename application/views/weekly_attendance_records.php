@@ -36,19 +36,25 @@ td {
     z-index: 1;
     box-shadow: 2px 0 5px rgba(0,0,0,0.05); 
   }
-   @media print {
-    .btn, .modal, .modal-backdrop, .navbar, .sidebar, .page-title, .alert, .modal-open body {
-      display: none !important;
-    }
-
-    table {
-      font-size: 12px;
-    }
-
-    th, td {
-      border: 1px solid #000 !important;
-    }
+  @media print {
+  .btn, .modal, .modal-backdrop, .navbar, .sidebar, .page-title, .alert, .modal-open body {
+    display: none !important;
   }
+
+  table {
+    font-size: 11px;
+    border-collapse: collapse !important;
+  }
+
+  th, td {
+    border: 1px solid black !important;
+  }
+
+  body {
+    margin: 20px;
+  }
+}
+
 </style>
 <body>
 <div id="wrapper">
@@ -59,12 +65,19 @@ td {
     <div class="content">
       <div class="container-fluid">
 
-  <div class="mb-3">
-  <h4 class="page-title">View Saved Attendance</h4>
-  <button class="btn btn-primary mt-2" data-toggle="modal" data-target="#filterModal">
-    <i class="mdi mdi-filter-outline"></i> View Saved Attendance
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h3 class="font-weight-bold text-primary">
+      <i class="mdi mdi-calendar-check-outline mr-2"></i> Attendance Records
+    </h3>
+    <p class="text-dark mb-0">Saved logs by project and date range</p>
+  </div>
+  <button class="btn btn-success" data-toggle="modal" data-target="#filterModal">
+    <i class="mdi mdi-filter-outline"></i> View Records
   </button>
 </div>
+
 
 
 
@@ -128,74 +141,72 @@ uasort($attendances, function($a, $b) {
 });
 ?>
 
-              <div class="alert alert-info">
-                <strong><i class="mdi mdi-briefcase-check"></i> Project:</strong> <?= $project->projectTitle ?>
-              </div>
-<div class="mb-3 text-end">
-  <button class="btn btn-outline-secondary btn-sm" onclick="window.print()">
-    <i class="mdi mdi-printer"></i> Print Attendance
-  </button>
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="mb-1">
+      <i class="mdi mdi-office-building text-info mr-1"></i> 
+      <strong><?= $project->projectTitle ?></strong>
+    </h5>
+    <p class="text-dark small mb-0">
+      <?= date('F j, Y', strtotime($from)) ?> to <?= date('F j, Y', strtotime($to)) ?>
+    </p>
+  </div>
 </div>
-<!-- Warning Message -->
-<div class="alert alert-warning">
-  <strong>Note:</strong> Delete Attendance to avoid duplication of hours, wrong date range, avoid generating with the same date range.
+
+  
+  <div class="text-end">
+    <button class="btn btn-outline-secondary btn-sm mr-1" onclick="window.print()">
+      <i class="mdi mdi-printer"></i> Print
+    </button>
+
+    <form action="<?= base_url('WeeklyAttendance/deleteAttendance') ?>" method="post" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete all attendance records for this date range?')">
+      <input type="hidden" name="projectID" value="<?= $projectID ?>">
+      <input type="hidden" name="from" value="<?= $from ?>">
+      <input type="hidden" name="to" value="<?= $to ?>">
+      <button type="submit" class="btn btn-danger btn-sm">
+        <i class="mdi mdi-delete"></i> Delete
+      </button>
+    </form>
+  </div>
 </div>
 
-<!-- Delete Button Form -->
-<form action="<?= base_url('WeeklyAttendance/deleteAttendance') ?>" method="post" onsubmit="return confirm('Are you sure you want to delete all attendance records for this date range?')">
-  <input type="hidden" name="projectID" value="<?= $projectID ?>">
-  <input type="hidden" name="from" value="<?= $from ?>">
-  <input type="hidden" name="to" value="<?= $to ?>">
-
-  <button type="submit" class="btn btn-danger btn-sm mb-3">
-    <i class="mdi mdi-delete"></i> Delete Attendance
-  </button>
-</form>
-
-              <div class="table-responsive">
-                <table class="table table-bordered table-striped nowrap" style="width: 100%;">
-                  <thead class="thead-light">
-                    <tr>
-                      <th>Personnel</th>
-                      <?php foreach ($dates as $d): ?>
-                        <th><?= date('M d', strtotime($d)) ?></th>
-                      <?php endforeach; ?>
-                      <th>Total Hours and Minutes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <?php foreach ($attendances as $pid => $person): ?>
-                      <tr>
-                        <td><?= $person['name'] ?></td>
-                        <?php foreach ($dates as $d): ?>
-                       <?php
-  $status = isset($person['dates'][$d]) ? $person['dates'][$d] : 'Absent';
-  $isAbsent = $status !== 'Present';
-?>
-<td class="text-center">
-  <?php if ($status === 'Present'): ?>
-    <span style="color: green;">
-      Present
-      <?php if (isset($person['hours'][$d])): ?>
-        <br><small>(<?= number_format($person['hours'][$d], 2) ?> hrs)</small>
-      <?php endif; ?>
-    </span>
-  <?php else: ?>
-    <span style="color: red;">Absent</span>
-  <?php endif; ?>
-</td>
 
 
-                        <?php endforeach; ?>
-                 <td><?= isset($hours[$pid]) ? formatHoursAndMinutes($hours[$pid]) : '0 hrs and 0 mins' ?></td>
+             <div class="table-responsive">
+  <table class="table table-hover table-bordered table-sm text-center">
+    <thead class="thead-light">
+      <tr>
+        <th>Personnel</th>
+        <?php foreach ($dates as $d): ?>
+          <th><?= date('M d', strtotime($d)) ?></th>
+        <?php endforeach; ?>
+        <th>Total Hours</th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php foreach ($attendances as $pid => $person): ?>
+        <tr>
+          <td class="text-left font-weight-bold"><?= $person['name'] ?></td>
+          <?php foreach ($dates as $d): ?>
+            <?php
+              $status = $person['dates'][$d] ?? 'Absent';
+              $color = ($status === 'Present') ? 'success' : 'danger';
+            ?>
+            <td class="text-<?= $color ?>">
+              <?= $status ?>
+              <?php if ($status === 'Present' && isset($person['hours'][$d])): ?>
+                <br><small>(<?= number_format($person['hours'][$d], 2) ?> hrs)</small>
+              <?php endif; ?>
+            </td>
+          <?php endforeach; ?>
+          <td><strong><?= formatHoursAndMinutes($hours[$pid] ?? 0) ?></strong></td>
+        </tr>
+      <?php endforeach; ?>
+    </tbody>
+  </table>
+</div>
 
-
-                      </tr>
-                    <?php endforeach; ?>
-                  </tbody>
-                </table>
-               
-              </div>
             <?php elseif (isset($project)): ?>
               <div class="alert alert-warning">
                 <i class="mdi mdi-alert-circle-outline"></i>
@@ -205,6 +216,42 @@ uasort($attendances, function($a, $b) {
 
           </div>
         </div>
+<?php if ($this->session->flashdata('error')): ?>
+<!-- Error Modal -->
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content border-0 shadow-sm">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="errorModalLabel">
+          <i class="mdi mdi-alert-circle-outline mr-2"></i> Error
+        </h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body text-dark">
+        <div class="d-flex align-items-center">
+          <i class="mdi mdi-alert mr-2 text-warning" style="font-size: 24px;"></i>
+          <div>
+            <strong>Some selected dates have no data.</strong><br>
+            Only dates with existing attendance records will be shown.
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          <i class="mdi mdi-close"></i> Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<?php endif; ?>
+
 
       </div>
     </div>
@@ -222,6 +269,14 @@ uasort($attendances, function($a, $b) {
     $('#project').focus();
   });
 </script>
+<script>
+  $(document).ready(function() {
+    <?php if ($this->session->flashdata('error')): ?>
+      $('#errorModal').modal('show');
+    <?php endif; ?>
+  });
+</script>
+
 
 </body>
 </html>
