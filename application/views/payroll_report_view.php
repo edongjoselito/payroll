@@ -397,7 +397,10 @@ if ($raw !== '-' && is_numeric($raw)) {
     $regTotalMinutes += $reg;
     $otTotalMinutes += $ot;
     $totalMinutes += $workMinutes;
-    $totalDays += round($workMinutes / 480, 2);
+   if ($decimalHours > 0) {
+    $totalDays += 1;
+}
+
 
     // ✅ Output correct per-day values
     echo "<td>" . number_format($regHours, 2) . "</td><td>" . number_format($otHours, 2) . "</td>";
@@ -444,11 +447,14 @@ $regFormatted = floor($regTotalMinutes / 60) . '.' . str_pad($regTotalMinutes % 
 $otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60, 2, '0', STR_PAD_LEFT);
 ?>
 
-<td><?= $customDecimal ?></td>
-<td><?= floor($otTotalMinutes / 60) ?></td>
-<td><?= number_format($regAmount, 2) ?></td>
-<td><?= number_format($otAmount, 2) ?></td>
+<td><?= number_format($regTotalMinutes / 60, 2) ?></td>
+<td><?= number_format($otTotalMinutes / 60, 2) ?></td>  
+<td><?= $totalDays ?></td> 
+
+<td><?= number_format($regAmount, 2) ?></td> 
+<td><?= number_format($otAmount, 2) ?></td>  
 <td><?= number_format($salary, 2) ?></td>
+
 <td><?= number_format($cash_advance, 2) ?></td>
 <td><?= number_format($sss, 2) ?></td>
 <td><?= number_format($pagibig, 2) ?></td>
