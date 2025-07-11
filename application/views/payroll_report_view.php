@@ -360,51 +360,56 @@ $endDate = strtotime($end);
 $loopDate = strtotime($start);
 while ($loopDate <= $endDate):
     $curDate = date('Y-m-d', $loopDate);
-    $log = $row->logs[$curDate] ?? null;
+  $raw = $row->reg_hours_per_day[$curDate] ?? '-';
 
-    if ($log && $log->attendance_status === 'Present') {
-        // ✅ Fix: parse decimal hours correctly
-        $raw = trim($log->workDuration);
-        $decimalHours = floatval($raw);
-        $workMinutes = $decimalHours * 60;
+// ✅ Always reset per-day values
+$reg = 0;
+$ot = 0;
+$regHours = 0;
+$otHours = 0;
 
-        $reg = min($workMinutes, 480); // max 8 hours regular
-        $ot = max(0, $workMinutes - 480); // anything beyond 8 hrs
-        $regHours = $reg / 60;
-        $otHours  = $ot / 60;
+if ($raw !== '-' && is_numeric($raw)) {
+    $decimalHours = floatval($raw);
+    $workMinutes = $decimalHours * 60;
 
-        // 💰 Salary computation based on rate type
-        if ($row->rateType === 'Hour') {
-            $regAmount += $regHours * $row->rateAmount;
-            $otAmount += $otHours * ($row->rateAmount * 1.25);
-        } elseif ($row->rateType === 'Day') {
-            $regAmount += ($regHours / 8) * $row->rateAmount;
-            $otAmount += $otHours * ($row->rateAmount / 8) * 1.25;
-        } elseif ($row->rateType === 'Month') {
-            $workingDaysInMonth = getWorkingDaysInMonth($start);
-            $dailyRate = $row->rateAmount / $workingDaysInMonth;
-            $hourlyRate = $dailyRate / 8;
-            $regAmount += ($regHours / 8) * $dailyRate;
-            $otAmount += $otHours * $hourlyRate * 1.25;
-        }
+    // ✅ Per-day REG/OT calculation
+    $reg = min($workMinutes, 480); // max 8 hours regular
+    $ot = max(0, $workMinutes - 480); // overtime beyond 8 hours
+    $regHours = $reg / 60;
+    $otHours  = $ot / 60;
 
-        // ⏱️ Total accumulations
-        $regTotalMinutes += $reg;
-        $otTotalMinutes += $ot;
-        $totalMinutes += $workMinutes;
-        $totalDays += round($workMinutes / 480, 2); // 1 day = 480 minutes
-
-        // 🖨️ Output to table
-        echo "<td>" . number_format($regHours, 2) . "</td><td>" . number_format($otHours, 2) . "</td>";
-
-    } elseif ($log && $log->attendance_status === 'Absent') {
-        echo "<td colspan='2' class='absent'>Absent</td>";
-    } else {
-        echo "<td colspan='2'>-</td>";
+    // 💰 Salary computation based on rate type
+    if ($row->rateType === 'Hour') {
+        $regAmount += $regHours * $row->rateAmount;
+        $otAmount += $otHours * ($row->rateAmount * 1.25);
+    } elseif ($row->rateType === 'Day') {
+        $regAmount += ($regHours / 8) * $row->rateAmount;
+        $otAmount += $otHours * ($row->rateAmount / 8) * 1.25;
+    } elseif ($row->rateType === 'Month') {
+        $workingDaysInMonth = getWorkingDaysInMonth($start);
+        $dailyRate = $row->rateAmount / $workingDaysInMonth;
+        $hourlyRate = $dailyRate / 8;
+        $regAmount += ($regHours / 8) * $dailyRate;
+        $otAmount += $otHours * $hourlyRate * 1.25;
     }
 
-    $loopDate = strtotime('+1 day', $loopDate);
+    // ⏱️ Total accumulations for summary
+    $regTotalMinutes += $reg;
+    $otTotalMinutes += $ot;
+    $totalMinutes += $workMinutes;
+    $totalDays += round($workMinutes / 480, 2);
+
+    // ✅ Output correct per-day values
+    echo "<td>" . number_format($regHours, 2) . "</td><td>" . number_format($otHours, 2) . "</td>";
+
+} else {
+    echo "<td colspan='2' class='absent'>Absent</td>";
+}
+
+$loopDate = strtotime('+1 day', $loopDate);
 endwhile;
+
+
 
 
 // Totals
