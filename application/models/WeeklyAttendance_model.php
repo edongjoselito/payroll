@@ -13,12 +13,16 @@ public function getProjects() {
 
     
     
-public function getEmployeesByProject($projectID) {
-    $settingsID = $this->session->userdata('settingsID');
-
+public function getEmployeesByProject($projectID, $settingsID)
+{
     return $this->db
-        ->where('settingsID', $settingsID)
-        ->get('personnel')
+        ->select('p.personnelID, p.first_name, p.last_name')
+        ->from('project_personnel_assignment a')
+        ->join('personnel p', 'p.personnelID = a.personnelID')
+        ->where('a.projectID', $projectID)
+        ->where('a.settingsID', $settingsID)
+        ->order_by('p.last_name', 'ASC')
+        ->get()
         ->result();
 }
 

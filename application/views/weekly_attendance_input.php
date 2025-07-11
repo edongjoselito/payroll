@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<title>PMS - Weekly Attendance</title>
+<title>PMS - Attendance</title>
 
 <?php include('includes/head.php'); ?>
 <style>
@@ -158,7 +158,7 @@ foreach ($employees as $emp): ?>
                               <br>
                            <input type="number"
     name="attendance[<?= $emp->personnelID ?>][<?= $date ?>][hours]"
-    placeholder="e.g. 8, 7.75"
+    placeholder="   hours"
     step="0.25" min="0" max="24"
     style="width: 70px; margin-top: 3px;">
 
