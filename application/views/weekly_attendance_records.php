@@ -216,8 +216,8 @@ uasort($attendances, function($a, $b) {
 
           </div>
         </div>
-<?php if ($this->session->flashdata('error')): ?>
-<!-- Error Modal -->
+<?php if ($this->session->flashdata('view_error')): ?>
+
 <!-- Bootstrap Modal -->
 <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document">
@@ -258,6 +258,31 @@ uasort($attendances, function($a, $b) {
     <?php include('includes/footer.php'); ?>
   </div>
 </div>
+<!-- ❌ No Attendance Data Modal -->
+<div class="modal fade" id="noAttendanceModal" tabindex="-1" role="dialog" aria-labelledby="noAttendanceModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content border-0 shadow-sm">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="noAttendanceModalLabel">
+          <i class="mdi mdi-alert-circle-outline mr-2"></i> No Attendance Found
+        </h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body text-dark">
+        <p><strong>❌ No attendance has been generated for this project yet.</strong></p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+          <i class="mdi mdi-close-circle-outline"></i> Close
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- Bootstrap + App JS -->
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
@@ -269,13 +294,14 @@ uasort($attendances, function($a, $b) {
     $('#project').focus();
   });
 </script>
+<?php if ($this->session->flashdata('view_error')): ?>
 <script>
   $(document).ready(function() {
-    <?php if ($this->session->flashdata('error')): ?>
-      $('#errorModal').modal('show');
-    <?php endif; ?>
+    $('#errorModal').modal('show');
   });
 </script>
+<?php endif; ?>
+
 
 
 </body>

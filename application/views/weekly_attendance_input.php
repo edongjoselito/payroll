@@ -6,21 +6,51 @@
 <?php $flash = $this->session->flashdata('attendance_exists'); ?>
 
 <style>
-  thead th {
-    position: sticky;
-    top: 0;
-    background-color: #fff;
-    z-index: 2;
-  }
+thead th {
+  position: sticky;
+  top: 0;
+  background-color: #f8f9fa;
+  z-index: 2;
+  text-align: center;
+}
 
-  th:first-child,
-  td:first-child {
-    position: sticky;
-    left: 0;
-    background: #f8f9fa; 
-    z-index: 1;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.05); 
+ th, td {
+  vertical-align: middle !important;
+  text-align: center;
+  font-size: 14px;
+}
+
+td:first-child, th:first-child {
+  text-align: left;
+  background: #f8f9fa;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+}
+  #attendanceTable tbody tr:hover {
+  background-color: whitesmoke;
+}
+ .attendance-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
   }
+input.is-invalid {
+  border-color: #dc3545 !important;
+  background-color: #fff !important;
+  color: #212529 !important;
+}
+.card-body h5 {
+  font-weight: 600;
+}
+
+.card-body p {
+  font-size: 14px;
+}
+
+
 </style>
 
 
@@ -132,15 +162,67 @@
             <?php if (isset($employees)): ?>
 
               <?php if (isset($project)): ?>
-                <div class="alert alert-info mb-3">
-                  <strong><i class="mdi mdi-briefcase-check"></i> Selected Project:</strong> <?= htmlspecialchars($project->projectTitle) ?>
-                </div>
- <small style="color: #000; font-size: 13px; display: block; line-height: 1.5;">
-  ✅ All checkboxes are marked as <strong>Present</strong> by default. 
-  <br>❌ <strong>Uncheck a box</strong> to mark as <strong>Absent</strong>.
-  <br>🕒 <strong>Work duration</strong> in hours is required per date.
-  <br> ✍️ <strong>Hours computation:</strong> 1 = hour , .25 = 15 minutes, .50 = 30 minutes , .75 = 45 minutes
-</small>
+              <?php
+  $fromFormatted = date("F d, Y", strtotime($from));
+  $toFormatted = date("F d, Y", strtotime($to));
+?>
+
+<div class="card shadow-sm mb-3 border-0">
+  <div class="card-body d-flex justify-content-between align-items-center flex-wrap">
+    <div>
+      <h5 class="mb-1">
+        <i class="mdi mdi-briefcase-outline text-primary mr-1"></i>
+        <strong><?= htmlspecialchars($project->projectTitle) ?></strong>
+      </h5>
+      <p class="mb-1 text-muted">
+        <i class="mdi mdi-map-marker text-danger mr-1"></i>
+        <?= htmlspecialchars($project->projectLocation ?? 'N/A') ?>
+      </p>
+      <p class="mb-0 text-muted">
+        <i class="mdi mdi-calendar text-info mr-1"></i>
+        <?= date('F j, Y', strtotime($from)) ?> to <?= date('F j, Y', strtotime($to)) ?>
+      </p>
+    </div>
+
+    <div class="mt-2 mt-sm-0">
+      <button class="btn btn-outline-dark btn-sm" data-toggle="modal" data-target="#notesModal">
+        <i class="mdi mdi-information-outline"></i> View Attendance Notes
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+
+ 
+
+<!-- Modal: Attendance Notes -->
+<div class="modal fade" id="notesModal" tabindex="-1" role="dialog" aria-labelledby="notesModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content shadow-sm">
+      <div class="modal-header bg-info text-white">
+        <h5 class="modal-title" id="notesModalLabel">
+          📝 Attendance Notes
+        </h5>
+        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+          <span>&times;</span>
+        </button>
+      </div>
+      <div class="modal-body text-dark" style="font-size: 14px;">
+        ✅ All checkboxes = <strong>Present</strong><br>
+        ❌ Unchecked = <strong>Absent</strong><br>
+        🕒 Work duration in <strong>hours</strong> is required<br>
+        ✍️ <em>Use decimal format: <strong>0.25 = 15 min, 0.50 = 30 min, 0.75 = 45 min</strong></em><br>
+        ⚠ You cannot save checked entries without specifying hours.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 
               <?php endif; ?>
@@ -161,7 +243,11 @@
                       <tr>
                         <th>Personnel</th>
                         <?php foreach ($dates as $date): ?>
-                          <th class="text-center"><?= date('M d', strtotime($date)) ?><br><small>Status / Hours</small></th>
+                         <th class="text-center align-middle" style="font-size: 13px;">
+  <?= date('M d', strtotime($date)) ?><br>
+  <small>Status / Hours</small>
+</th>
+
                         <?php endforeach; ?>
                       </tr>
                     </thead>
@@ -176,19 +262,25 @@ foreach ($employees as $emp): ?>
                         <tr>
                           <td><?= $emp->last_name . ', ' . $emp->first_name ?></td>
                           <?php foreach ($dates as $date): ?>
-                            <td class="text-center">
-                              <input type="checkbox"
-                                name="attendance[<?= $emp->personnelID ?>][<?= $date ?>][status]"
-                                value="Present" checked>
-                              <br>
-                           <input type="number"
-    name="attendance[<?= $emp->personnelID ?>][<?= $date ?>][hours]"
-    placeholder="   hours"
-    step="0.25" min="0" max="24"
-    style="width: 70px; margin-top: 3px;">
+                          <td class="text-center align-middle">
+  <div class="d-flex justify-content-center align-items-center" style="gap: 6px;">
+    <div class="form-check m-0">
+      <input type="checkbox"
+        name="attendance[<?= $emp->personnelID ?>][<?= $date ?>][status]"
+        value="Present" checked
+        class="form-check-input position-static">
+    </div>
+  <input type="number"
+  name="attendance[<?= $emp->personnelID ?>][<?= $date ?>][hours]"
+  placeholder="hrs"
+  step="0.25" min="0" max="24"
+  class="form-control form-control-sm hours-input"
+  style="width: 60px; border: 1px solid #ced4da; color: #212529; background-color: #fff; padding: 2px 6px; font-size: 13px;">
+
+  </div>
+</td>
 
 
-                            </td>
                           <?php endforeach; ?>
                         </tr>
                       <?php endforeach; ?>
@@ -196,11 +288,12 @@ foreach ($employees as $emp): ?>
                   </table>
                 </div>
 
-                <div class="text-right mt-3">
-                  <button type="submit" class="btn btn-info">
-                    <i class="mdi mdi-content-save"></i> Save Attendance
-                  </button>
-                </div>
+               <div class="d-flex justify-content-end mt-3">
+  <button type="submit" class="btn btn-info shadow-sm px-4">
+    <i class="mdi mdi-content-save"></i> Save Attendance
+  </button>
+</div>
+
               </form>
             <?php endif; ?>
 
@@ -309,6 +402,39 @@ document.addEventListener('DOMContentLoaded', function () {
       $('#existingAttendanceModal').modal('show');
     });
   <?php endif; ?>
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.querySelector('form[action$="WeeklyAttendance/save"]');
+  if (!form) return;
+
+  form.addEventListener('submit', function (e) {
+    let isValid = true;
+    let firstInvalid = null;
+
+    document.querySelectorAll('#attendanceTable tbody tr').forEach(function (row) {
+      const checkboxes = row.querySelectorAll('input[type="checkbox"]');
+      checkboxes.forEach(function (checkbox) {
+        if (checkbox.checked) {
+          const hoursInput = row.querySelector(`input[name="${checkbox.name.replace('[status]', '[hours]')}"]`);
+          if (!hoursInput || hoursInput.value.trim() === '') {
+            isValid = false;
+            hoursInput.classList.add('is-invalid');
+            if (!firstInvalid) firstInvalid = hoursInput;
+          } else {
+            hoursInput.classList.remove('is-invalid');
+          }
+        }
+      });
+    });
+
+    if (!isValid) {
+      e.preventDefault();
+      alert('⚠ Please input hours for all checked personnel.');
+      if (firstInvalid) firstInvalid.focus();
+    }
+  });
+});
 </script>
 
 
