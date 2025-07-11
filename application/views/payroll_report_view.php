@@ -281,7 +281,7 @@ th {
   <th colspan="3">TOTAL TIME</th>
 
     <th colspan="2">AMOUNT</th>
-    <th rowspan="3">TOTAL</th>
+    <th rowspan="3">Gross</th>
        <th rowspan="3">Cash Advance</th>
     <th rowspan="3">SSS (<?= date('F Y', strtotime($start)) ?>)</th>
     <th rowspan="3">Pag-IBIG (<?= date('F Y', strtotime($start)) ?>)</th>
@@ -289,7 +289,7 @@ th {
     <th rowspan="3">Loan</th>
     <th rowspan="3">Other Deduction</th>
 <th rowspan="3">Total Deduction</th>
-    <th rowspan="3">Take Home Pay</th>
+    <th rowspan="3">Take Home</th>
    <?php if (empty($is_summary)): ?>
     <th rowspan="3" colspan="3">Signature</th>
 <?php endif; ?>
@@ -590,11 +590,11 @@ $otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60,
 |--------------------------------------------------------------------------
 | PAYROLL COMPUTATION METHOD
 |--------------------------------------------------------------------------
-| This system supports: Hourly, Daily, and Monthly rates.
-| Salary is based strictly on actual hours or days worked.
+| This system supports: Hourly, Daily, and Monthly rate types.
+| Salary is computed strictly based on actual hours worked (REG + OT).
 |
 | 1. REGULAR TIME PAY:
-| -------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 | • Hourly Rate (e.g. ₱10/hour):
 |     → Reg Pay = Hours worked × ₱10
 |
@@ -602,33 +602,34 @@ $otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60,
 |     → Reg Pay = (Hours worked ÷ 8) × ₱400
 |
 | • Monthly Rate (e.g. ₱10,000/month):
-|     → Total days in month are counted (including Sundays)
-|     → Daily Rate = ₱10,000 ÷ total days in month
+|     → Working Days = getWorkingDaysInMonth($startDate)
+|     → Daily Rate = ₱10,000 ÷ Working Days
 |     → Hourly Rate = Daily Rate ÷ 8
 |     → Reg Pay = Hours worked × Hourly Rate
 |
 | 2. OVERTIME PAY:
-| -------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 | • Overtime is paid at 125% of the hourly rate
 |     → OT Pay = OT hours × Hourly Rate × 1.25
 |
 | 3. GROSS PAY:
-| -------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 | • Gross Pay = Regular Pay + OT Pay
 |
 | 4. DEDUCTIONS:
-| -------------------------------------------------------------------------
-| • Includes SSS, PHIC, Pag-IBIG, Loans, etc.
+|--------------------------------------------------------------------------
+| • Includes SSS, PhilHealth, Pag-IBIG, Loans, Cash Advances, etc.
 | • Total Deductions = sum of all applicable deductions
 |
 | 5. NET PAY:
-| -------------------------------------------------------------------------
+|--------------------------------------------------------------------------
 | • Net Pay = Gross Pay − Total Deductions
 |
-| 6. WORKING DAYS:
-| -------------------------------------------------------------------------
+| 6. WORKING DAYS REFERENCE:
+|--------------------------------------------------------------------------
 | • Uses getWorkingDaysInMonth($startDate)
-| • Counts all days in the month (Sundays included)
+| • Returns the total number of days in the calendar month
+|   (including Sundays and holidays)
 */
 -->
 

@@ -114,7 +114,7 @@
   ✅ All checkboxes are marked as <strong>Present</strong> by default. 
   <br>❌ <strong>Uncheck a box</strong> to mark as <strong>Absent</strong>.
   <br>🕒 <strong>Work duration</strong> in hours is required per date.
-  <br> ✍️ <strong>Hours computation:</strong> 1.2 = 1 hr and 2 mins, 1.20 = 1 hr and 20 mins.
+  <br> ✍️ <strong>Hours computation:</strong> 1 = hour , .25 = 15 minutes, .50 = 30 minutes , .75 = 45 minutes
 </small>
 
 
@@ -226,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function () {
         input.style.pointerEvents = 'none';
         input.style.backgroundColor = '#e9ecef';
         input.style.borderColor = 'red';
-        input.value = ''; // Optional: clear value when unchecked
+        input.value = '';
       }
     }
   });
