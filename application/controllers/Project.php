@@ -4,6 +4,7 @@ class Project extends CI_Controller
     public function __construct() {
         parent::__construct();
         $this->load->model('Project_model');
+        $this->load->model('Audit_model');
     }
 
 public function project_view() {
@@ -89,30 +90,36 @@ public function attendance($settingsID)
 
 public function save_attendance()
 {
-    $settingsID         = $this->input->post('settingsID');
-    $projectID          = $this->input->post('projectID');
-    $attendance_date    = $this->input->post('attendance_date');
-    $attendance_status  = $this->input->post('attendance_status');
-    $work_duration = $this->input->post('work_duration');
-
+    $settingsID        = $this->input->post('settingsID');
+    $projectID         = $this->input->post('projectID');
+    $attendance_date   = $this->input->post('attendance_date');
+    $attendance_status = $this->input->post('attendance_status');
+    $work_duration     = $this->input->post('work_duration');
 
     $batchData = [];
 
-  foreach ($attendance_status as $personnelID => $status) {
-    $duration = isset($work_duration[$personnelID]) ? $work_duration[$personnelID] : null;
+    foreach ($attendance_status as $personnelID => $status) {
+        $duration = isset($work_duration[$personnelID]) ? $work_duration[$personnelID] : null;
 
-    $batchData[] = [
-        'personnelID'       => $personnelID,
-        'settingsID'        => $settingsID,
-        'projectID'         => $projectID,
-        'attendance_date'   => $attendance_date,
-        'attendance_status' => $status,
-        'workDuration'      => $duration
-    ];
-}
-
+        $batchData[] = [
+            'personnelID'       => $personnelID,
+            'settingsID'        => $settingsID,
+            'projectID'         => $projectID,
+            'attendance_date'   => $attendance_date,
+            'attendance_status' => $status,
+            'workDuration'      => $duration
+        ];
+    }
 
     $this->Project_model->save_batch_attendance($attendance_date, $batchData);
+
+    // ✅ Log the attendance save
+   $this->Audit_model->insert_audit_log(
+    $this->session->userdata('IDNumber'), // change this line!
+    'save_attendance',
+    'Saved attendance for date ' . $attendance_date . ' in Project ID: ' . $projectID
+);
+
 
     $this->session->set_flashdata('success', 'Attendance saved successfully.');
     redirect('project/attendance/' . $settingsID . '?pid=' . $projectID);
@@ -156,30 +163,34 @@ public function save_weekly_attendance()
 
     foreach ($attendData as $personnelID => $dates) {
         foreach ($this->generateDateRange($start, $end) as $date) {
-            $status = isset($dates[$date]) ? 'Present' : 'Absent';
-
             $batchData[] = [
                 'settingsID'        => $settingsID,
                 'projectID'         => $projectID,
                 'personnelID'       => $personnelID,
                 'attendance_date'   => $date,
-                'attendance_status' => $status
+                'attendance_status' => isset($dates[$date]) ? 'Present' : 'Absent'
             ];
         }
     }
 
-    // Save individual attendance rows
     $this->Project_model->save_batch_attendance_range($batchData);
 
-    // Save weekly total duration
     foreach ($workHours as $personnelID => $duration) {
         $this->Project_model->save_or_update_weekly_total_duration($settingsID, $projectID, $personnelID, $start, $end, $duration);
     }
 
-    $this->session->set_flashdata('success', 'Weekly attendance saved successfully.');
-  redirect("project/weekly_attendance_report_summary?settingsID={$settingsID}&projectID={$projectID}&start={$start}&end={$end}");
+    // ✅ Add audit log
+   $this->Audit_model->insert_audit_log(
+    $this->session->userdata('IDNumber'), // change this line!
+    'save_attendance',
+    'Saved attendance for date ' . $attendance_date . ' in Project ID: ' . $projectID
+);
 
+
+    $this->session->set_flashdata('success', 'Weekly attendance saved successfully.');
+    redirect("project/weekly_attendance_report_summary?settingsID={$settingsID}&projectID={$projectID}&start={$start}&end={$end}");
 }
+
 
 private function generateDateRange($start, $end) {
     $dates = [];
@@ -477,18 +488,27 @@ $log_data = [
 
 public function delete_attendance_group()
 {
-    $projectID = $this->input->post('projectID');
+    $projectID  = $this->input->post('projectID');
     $settingsID = $this->input->post('settingsID');
-    $date = $this->input->post('date');
+    $date       = $this->input->post('date');
 
+    // Delete attendance logs
     $this->db->where('projectID', $projectID);
     $this->db->where('settingsID', $settingsID);
     $this->db->where('date', $date);
     $this->db->delete('attendance');
 
-    $redirectURL = base_url("project/attendance_list/$settingsID?pid=$projectID");
-    redirect($redirectURL);
+    // ✅ Log the deletion
+    $this->Audit_model->insert_audit_log(
+        $this->session->userdata('user_id'),
+        'delete_attendance',
+        "Deleted attendance for date: {$date} | Project ID: {$projectID}"
+    );
+
+    // Redirect back to attendance list
+    redirect("project/attendance_list/{$settingsID}?pid={$projectID}");
 }
+
 // Project.php
 public function print_attendance()
 {
@@ -505,7 +525,49 @@ public function print_attendance()
     $data['project'] = $this->Project_model->getProjectDetails($settingsID, $projectID);
     $this->load->view('print_attendance_view', $data);
 }
+public function export_attendance_csv($settingsID)
+{
+    $projectID = $this->input->get('pid');
+    $logs = $this->Project_model->getAttendanceLogs($settingsID, $projectID);
 
+    if (empty($logs)) {
+        $this->session->set_flashdata('error', 'No attendance logs found.');
+        redirect('project/attendance_list/' . $settingsID . '?pid=' . $projectID);
+        return;
+    }
+
+    $filename = 'AttendanceLogs_' . date('YmdHis') . '.csv';
+
+    header('Content-Type: text/csv');
+    header("Content-Disposition: attachment; filename=\"$filename\"");
+    header('Pragma: no-cache');
+    header("Expires: 0");
+
+    $output = fopen('php://output', 'w');
+
+    // Column headers
+    fputcsv($output, ['Personnel Name', 'Date', 'Status', 'Work Duration (hrs)', 'Project']);
+
+    foreach ($logs as $log) {
+        fputcsv($output, [
+            ucwords($log->first_name . ' ' . $log->last_name),
+            $log->date,
+            ucfirst($log->status),
+            $log->work_duration,
+            $log->projectTitle ?? ''
+        ]);
+    }
+
+    fclose($output);
+    exit;
+}
+
+public function audit_logs()
+{
+    $this->load->model('Audit_model');
+    $data['logs'] = $this->Audit_model->get_all_attendance_logs();
+    $this->load->view('audit_logs_view', $data);
+}
 
 
 

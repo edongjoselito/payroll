@@ -19,11 +19,20 @@
             <div class="container-fluid">
                 <h4 class="page-title d-flex justify-content-between">
                     Attendance Logs - <?= $project->projectTitle ?? 'Project' ?>
-                    <button class="btn btn-info btn-sm print-btn" data-toggle="modal" data-target="#printModal">
-                        <i class="fa fa-print"></i> Print
-                    </button>
+                    <div class="d-flex justify-content-end mb-3">
+    <button class="btn btn-info btn-sm print-btn mr-2" data-toggle="modal" data-target="#printModal">
+        <i class="fa fa-print"></i> Print
+    </button>
+    <a href="<?= base_url('project/export_attendance_csv/' . $settingsID . '?pid=' . $projectID) ?>"
+       class="btn btn-success btn-sm" target="_blank">
+        <i class="fa fa-file-excel"></i> Export to Excel (CSV)
+    </a>
+</div>
+
+                    
                 </h4>
                 <hr>
+
 
                 <?php if (empty($attendance_logs)): ?>
                     <div class="card">
@@ -31,6 +40,7 @@
                             <p class="text-center">No attendance logs found for this project.</p>
                         </div>
                     </div>
+                    
                 <?php else:
                     $grouped = [];
                     foreach ($attendance_logs as $log) {
@@ -40,6 +50,7 @@
                     krsort($grouped);
                     $groupCount = 1;
                     foreach ($grouped as $date => $logs): ?>
+                    
                         <div class="card mb-3 shadow-sm">
                             <div class="card-header d-flex justify-content-between align-items-center" style="cursor: pointer;" data-toggle="collapse" data-target="#group<?= $groupCount ?>">
                                 <strong><?= date('F d, Y', strtotime($date)) ?></strong>

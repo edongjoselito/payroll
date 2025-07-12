@@ -14,19 +14,16 @@
                         </a>
                     </li>
 
-<!-- <li>
-    <a href="javascript: void(0);" class="waves-effect">
-        <i class="fas fa-calendar-check"></i>
-        <span> Attendance </span>
-        <span class="menu-arrow"></span>
-    </a>
-
-    <ul class="nav-second-level nav" aria-expanded="false">
-        <li><a href="<?= base_url('Monthly/officeAttendance') ?>">Office Attendance</a></li>
-        <li><a href="<?= base_url('Monthly/presentPersonnel') ?>">Present Personnel</a></li>
-        <li><a href="<?= base_url('Monthly') ?>">Monthly Payroll</a></li>
-    </ul>
-</li> -->
+      <li>
+                        <a href="javascript: void(0);" class="waves-effect">
+                            <i class="ion ion-md-cloud-upload"></i>
+                            <span> Projects </span>
+                            <span class="menu-arrow"></span>
+                        </a>
+                        <ul class="nav-second-level" aria-expanded="false">
+                            <li><a href="<?= base_url(); ?>Project/project_view">Project List</a></li>
+                        </ul>
+                    </li>
 
 <li>
     <a href="javascript: void(0);" class="waves-effect">
@@ -42,21 +39,24 @@
     </ul>
 </li>
 
+  
+               
+
+<li>
+    <a href="javascript: void(0);" class="waves-effect">
+        <i class="fas fa-calendar-check"></i>
+        <span>Office Attendance </span>
+        <span class="menu-arrow"></span>
+    </a>
+
+    <ul class="nav-second-level nav" aria-expanded="false">
+        <li><a href="<?= base_url('Monthly/officeAttendance') ?>">Office Attendance</a></li>
+        <li><a href="<?= base_url('Monthly/presentPersonnel') ?>">Present Personnel</a></li>
+        <li><a href="<?= base_url('Monthly') ?>">Monthly Payroll</a></li>
+    </ul>
+</li>
 
 
-
-
-                  
-                     <li>
-                        <a href="javascript: void(0);" class="waves-effect">
-                            <i class="ion ion-md-cloud-upload"></i>
-                            <span> Projects </span>
-                            <span class="menu-arrow"></span>
-                        </a>
-                        <ul class="nav-second-level" aria-expanded="false">
-                            <li><a href="<?= base_url(); ?>Project/project_view">Project List</a></li>
-                        </ul>
-                    </li>
 
                       <li>
                         <a href="javascript: void(0);" class="waves-effect">
@@ -127,6 +127,10 @@
         <span> Reports </span>
         <span class="menu-arrow"></span>
     </a>
+    <ul class="nav-second-level nav" aria-expanded="false">
+       <li><a href="<?= base_url('project/audit_logs') ?>"><i class="fa fa-history"></i> Audit Logs</a></li>
+
+    </ul>
     <ul class="nav-second-level nav" aria-expanded="false">
         <li><a href="<?= base_url(); ?>Report/payroll_logs">Payroll Logs</a></li>
     </ul>
