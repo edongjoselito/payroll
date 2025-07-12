@@ -496,4 +496,21 @@ $this->db->select('p.personnelID, p.first_name, p.last_name');
 }
 
 
+// ----------------------------------NEW FOR GENERATE PAYROLL SIDEBAR-----------
+
+
+public function get_all_projects()
+{
+    return $this->db->get('project')->result();
+}
+public function get_project_by_id($projectID)
+{
+    return $this->db->get_where('project', ['projectID' => $projectID])->row();
+}
+public function get_project_details($projectID)
+{
+    return $this->db->get_where('project', ['projectID' => $projectID])->row();
+}
+
+
 }

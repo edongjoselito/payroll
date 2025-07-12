@@ -292,12 +292,13 @@ public function attendance_range($settingsID)
     $this->load->view('attendance_range_view', $data);
 }
 
-public function payroll_report($settingsID)
+public function payroll_report($settingsID = null)
 {
-    $projectID = $this->input->get('pid');
-    $start     = $this->input->get('start');
-    $end       = $this->input->get('end');
-    $rateType  = $this->input->get('rateType');
+    $settingsID = $settingsID ?? $this->session->userdata('settingsID');
+    $projectID  = $this->input->get('pid');
+    $start      = $this->input->get('start');
+    $end        = $this->input->get('end');
+    $rateType   = $this->input->get('rateType');
 
     $this->load->model('Project_model');
     $this->load->model('SettingsModel');
@@ -311,19 +312,18 @@ public function payroll_report($settingsID)
     }
 
     $data['settingsID'] = $settingsID;
-    $data['projectID'] = $projectID;
-    $data['start'] = $start;
-    $data['end'] = $end;
-    $data['rateType'] = $rateType;
+    $data['projectID']  = $projectID;
+    $data['start']      = $start;
+    $data['end']        = $end;
+    $data['rateType']   = $rateType;
 
     $data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
     $data['project'] = $this->Project_model->getProjectDetails($settingsID, $projectID);
     $payroll = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end, $rateType);
 
-    // Group other deductions by personnel
+    // Group deductions
     $deductions = $this->OtherDeduction_model->get_deductions_by_date_range($start, $end, $settingsID);
     $groupedDeductions = [];
-
     foreach ($deductions as $deduction) {
         $pid = trim($deduction->personnelID);
         if (!isset($groupedDeductions[$pid])) {
@@ -332,21 +332,18 @@ public function payroll_report($settingsID)
         $groupedDeductions[$pid] += $deduction->amount;
     }
 
-    // ✅ Load raw daily logs from attendance
+    // Daily logs
     $this->db->select('personnelID, date, status, work_duration');
     $this->db->from('attendance');
     $this->db->where('projectID', $projectID);
     $this->db->where('date >=', $start);
     $this->db->where('date <=', $end);
     $this->db->where('settingsID', $settingsID);
-
     $query = $this->db->get();
     $daily_logs = $query->result();
 
-    // ✅ Format logs into array [personnelID][date]
     $logs = [];
     $dateList = [];
-
     foreach ($daily_logs as $log) {
         $date = date('Y-m-d', strtotime($log->date));
         $logs[$log->personnelID][$date] = [
@@ -355,38 +352,31 @@ public function payroll_report($settingsID)
         ];
         $dateList[$date] = true;
     }
-
-    ksort($dateList); // Sort by date ascending
+    ksort($dateList);
     $data['dates'] = array_keys($dateList);
     $data['logs'] = $logs;
 
-    // ✅ Final formatting per personnel row
     foreach ($payroll as &$row) {
         $pid = trim($row->personnelID);
-
-        // ✅ Ensure all necessary fields are initialized
         $row->ca_cashadvance = $row->ca_cashadvance ?? 0;
         $row->other_deduction = $groupedDeductions[$pid] ?? 0;
         $row->total_hours = $this->WeeklyAttendance_model->get_total_work_hours($pid, $projectID, $start, $end);
 
-        // Convert to hours and minutes for display
+        // Convert time for display
         $decimal = floatval($row->total_hours);
         $hours = floor($decimal);
         $minutes = round(($decimal - $hours) * 100);
-
         if ($minutes >= 60) {
             $hours += floor($minutes / 60);
             $minutes = $minutes % 60;
         }
-
         $decimal_time = $hours + ($minutes / 100);
         $row->total_hours_display = number_format($decimal_time, 2, '.', '');
 
-        // Initialize daily logs
+        // Daily logs
         $row->reg_hours_per_day = [];
         $row->present_days = 0;
         $row->total_reg_hours = 0;
-
         foreach ($data['dates'] as $date) {
             $day_log = $logs[$pid][$date] ?? null;
             if ($day_log && $day_log['status'] === 'Present') {

@@ -73,13 +73,13 @@
    title="Assign Personnel">
     <i class="fas fa-user-plus"></i>
 </a>
-
+<!-- 
 <a href="<?= base_url('project/attendance/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>"
    class="btn btn-info btn-sm"
    data-toggle="tooltip"
    title="View Attendance">
     <i class="fas fa-calendar-check"></i>
-</a>
+</a> -->
 
 <a href="<?= base_url('project/attendance_list/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>"
    class="btn btn-primary btn-sm"
@@ -88,13 +88,13 @@
     <i class="fas fa-list"></i>
 </a>
 
-<button class="btn btn-dark btn-sm"
+<!-- <button class="btn btn-dark btn-sm"
         data-toggle="modal"
         data-target="#payrollModal<?= $proj->projectID ?>"
         data-toggle="tooltip"
         title="Payroll">
     <i class="fas fa-money-check-alt"></i>
-</button>
+</button> -->
 
 <button class="btn btn-warning btn-sm"
         data-toggle="modal"
@@ -127,7 +127,7 @@
 
                                                 </tr>
 
-                                                <!-- Payroll Modal -->
+                                                Payroll Modal
                                                 <div class="modal fade" id="payrollModal<?= $proj->projectID ?>" tabindex="-1" role="dialog" aria-labelledby="payrollModalLabel<?= $proj->projectID ?>" aria-hidden="true">
                                                   <div class="modal-dialog mt-5" role="document">
 

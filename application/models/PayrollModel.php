@@ -104,4 +104,25 @@ class PayrollModel extends CI_Model
 	return $query->result();
 	}	
 	
+
+public function getPayrollData($projectID, $start, $end, $rateType)
+{
+    $this->db->select('p.*, s.fName, s.lName, s.position, s.rateType, s.rate');
+    $this->db->from('personnel_assignment pa');
+    $this->db->join('staff s', 'pa.staffID = s.IDNumber');
+    $this->db->join('project_attendance p', 'p.staffID = s.IDNumber');
+    $this->db->where('pa.projectID', $projectID);
+    $this->db->where('p.date >=', $start);
+    $this->db->where('p.date <=', $end);
+    $this->db->where('s.rateType', $rateType);
+    $query = $this->db->get();
+
+    return $query->result();
+}
+
+	public function get_personnel_by_project($projectID)
+{
+    return $this->db->get_where('payroll_masterlist', ['projectID' => $projectID])->result();
+}
+
 }
