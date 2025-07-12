@@ -130,6 +130,7 @@ public function getAttendanceRecords($projectID, $from, $to) {
     foreach ($query->result() as $row) {
         $result[$row->personnelID]['name'] = $row->last_name . ', ' . $row->first_name;
         $result[$row->personnelID]['dates'][$row->date] = $row->status;
+        $result[$row->personnelID]['hours'][$row->date] = $row->work_duration;
     }
     return $result;
 }
@@ -171,6 +172,19 @@ public function deleteAttendanceByDateRange($projectID, $from, $to)
     $this->db->where('`to` <=', $to);
     $this->db->delete('work_hours');
 }
+
+
+public function getSavedBatches($settingsID)
+{
+    return $this->db->select('projectID, MIN(date) as start, MAX(date) as end')
+                    ->from('attendance')
+                    ->where('settingsID', $settingsID)
+                    ->group_by(['projectID', 'WEEK(date)'])
+                    ->order_by('start', 'DESC')
+                    ->get()
+                    ->result();
+}
+
 
 
 

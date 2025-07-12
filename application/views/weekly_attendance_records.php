@@ -79,55 +79,60 @@ td {
 </div>
 
 
-
-
-        <!-- Filter Modal -->
-        <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered" role="document">
-            <form method="post">
-              <div class="modal-content">
-                <div class="modal-header">
-
-                  <h5 class="modal-title" id="filterModalLabel"><i class="mdi mdi-calendar-month"></i> Select Attendance Records</h5>
-                  <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-
-                <div class="modal-body">
-                  <div class="form-group">
-                    <label for="project">Project</label>
-                    <select name="project" id="project" class="form-control" required>
-                      <option value="">Select Project</option>
-                      <?php foreach ($projects as $proj): ?>
-                        <option value="<?= $proj->projectID ?>"><?= $proj->projectTitle ?></option>
-                      <?php endforeach; ?>
-                    </select>
-                  </div>
-
-                  <div class="form-row">
-                    <div class="form-group col-md-6">
-                      <label for="from">From</label>
-                      <input type="date" name="from" id="from" class="form-control" required>
-                    </div>
-                    <div class="form-group col-md-6">
-                      <label for="to">To</label>
-                      <input type="date" name="to" id="to" class="form-control" required>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="modal-footer">
-                  <button type="submit" class="btn btn-success">
-                    <i class="mdi mdi-eye"></i> View
-                  </button>
-                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-
-                </div>
-              </div>
-            </form>
-          </div>
+<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <form method="post" action="<?= base_url('WeeklyAttendance/records') ?>">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="filterModalLabel"><i class="mdi mdi-calendar-month"></i> Select Attendance Records</h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="project">Project</label>
+            <select name="project" id="project" class="form-control" required>
+              <option value="">Select Project</option>
+              <?php foreach ($projects as $proj): ?>
+                <option value="<?= $proj->projectID ?>"><?= $proj->projectTitle ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="attendanceBatch">Saved Records</label>
+            <select id="attendanceBatch" class="form-control" required>
+              <option value="" disabled selected>View Records</option>
+              <?php foreach ($attendance_periods as $batch): ?>
+                <option 
+                  value="<?= $batch->projectID ?>-<?= $batch->start ?>-<?= $batch->end ?>"
+                  data-project="<?= $batch->projectID ?>"
+                  data-start="<?= $batch->start ?>"
+                  data-end="<?= $batch->end ?>">
+                  <?= date('F d', strtotime($batch->start)) ?> to <?= date('F d, Y', strtotime($batch->end)) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <input type="hidden" name="from" id="from">
+          <input type="hidden" name="to" id="to">
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">
+            <i class="mdi mdi-eye"></i> View
+          </button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+
+      </div>
+    </form>
+  </div>
+</div>
+
 
         <!-- Display Records -->
         <div class="card">
@@ -154,7 +159,7 @@ uasort($attendances, function($a, $b) {
   </div>
 </div>
 
-  
+
   <div class="text-end">
     <button class="btn btn-outline-secondary btn-sm mr-1" onclick="window.print()">
       <i class="mdi mdi-printer"></i> Print
@@ -301,7 +306,37 @@ uasort($attendances, function($a, $b) {
   });
 </script>
 <?php endif; ?>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const projectSelect = document.getElementById('project');
+    const batchSelect = document.getElementById('attendanceBatch');
 
+    // Filter batches based on selected project
+    projectSelect.addEventListener('change', function () {
+      const selectedProject = this.value;
+      const options = batchSelect.querySelectorAll('option');
+
+      batchSelect.value = "";
+
+      options.forEach(option => {
+        if (option.value === "") {
+          option.style.display = 'block';
+        } else if (option.getAttribute('data-project') === selectedProject) {
+          option.style.display = 'block';
+        } else {
+          option.style.display = 'none';
+        }
+      });
+    });
+
+    // Set hidden input values when a batch is selected
+    batchSelect.addEventListener('change', function () {
+      const selected = this.options[this.selectedIndex];
+      document.getElementById('from').value = selected.getAttribute('data-start');
+      document.getElementById('to').value = selected.getAttribute('data-end');
+    });
+  });
+</script>
 
 
 </body>

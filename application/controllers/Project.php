@@ -7,11 +7,16 @@ class Project extends CI_Controller
         $this->load->model('Audit_model');
     }
 
-public function project_view() {
+public function project_view()
+{
     $settingsID = $this->session->userdata('settingsID');
+
     $data['projects'] = $this->Project_model->getAll($settingsID);
+    $data['attendance_periods'] = $this->Project_model->get_attendance_batches($settingsID); 
+
     $this->load->view('project_view', $data);
 }
+
 
 
 public function store()

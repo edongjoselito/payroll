@@ -526,6 +526,23 @@ public function get_project_details($projectID)
     return $this->db->get_where('project', ['projectID' => $projectID])->row();
 }
 
+public function get_attendance_batches($settingsID)
+{
+    $this->db->select('projectID, MIN(date) as start, MAX(date) as end');
+    $this->db->from('attendance');
+    $this->db->where('settingsID', $settingsID);
+    $this->db->group_by('projectID');
+    $this->db->order_by('start', 'desc');
+    $batches = $this->db->get()->result();
+
+    foreach ($batches as &$batch) {
+        $project = $this->db->get_where('project', ['projectID' => $batch->projectID])->row();
+        $batch->projectTitle = $project->projectTitle ?? 'Untitled Project';
+    }
+
+    return $batches;
+}
+
 
 
 }

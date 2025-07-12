@@ -64,68 +64,79 @@ public function generate() {
 }
 
 
-  public function records()
+ public function records()
 {
+    // Always initialize all required variables to avoid undefined errors
+    $data['attendance_periods'] = $this->WeeklyAttendance_model->getSavedBatches($this->session->userdata('settingsID'));
     $data['projects'] = $this->WeeklyAttendance_model->getProjects($this->session->userdata('settingsID'));
 
-    // Support GET parameters
+    // Default fallback variables
+    $data['attendances'] = [];
+    $data['dates'] = [];
+    $data['hours'] = [];
+    $data['project'] = null;
+    $data['projectID'] = null;
+    $data['from'] = null;
+    $data['to'] = null;
+
+    // Support GET and fallback to POST
     $projectID = $this->input->get('project');
     $from = $this->input->get('from');
     $to = $this->input->get('to');
 
-    // Fallback to POST
     if (!$projectID && $this->input->post()) {
         $projectID = $this->input->post('project');
         $from = $this->input->post('from');
         $to = $this->input->post('to');
     }
 
+    // Set base data for view even if no records found
+    $data['projectID'] = $projectID;
+    $data['from'] = $from;
+    $data['to'] = $to;
+    $data['project'] = $this->WeeklyAttendance_model->getProjectById($projectID);
+
+    // If form submitted
     if ($projectID && $from && $to) {
-        // Check if attendance data exists
+        // Check if attendance was ever generated
         if (!$this->WeeklyAttendance_model->attendanceExists($projectID, $from, $to)) {
-            $this->session->set_flashdata('error', '❌ Attendance has not been generated for the selected date range. Please generate first');
+            $this->session->set_flashdata('error', '❌ Attendance has not been generated for the selected date range. Please generate first.');
             redirect('WeeklyAttendance/records');
             return;
         }
 
-        // Load project and existing dates
+        // Get available dates with records
         $existingDates = $this->WeeklyAttendance_model->getExistingAttendanceDates($projectID, $from, $to);
 
-       if (empty($existingDates)) {
-    // Get the latest available attendance range for this project
-    $latestRange = $this->WeeklyAttendance_model->getLatestAttendanceRange($projectID);
-    
-    if ($latestRange) {
-        // Redirect to latest available range
-        $this->session->set_flashdata('error', '⚠ No attendance data for selected range. Showing most recent available record instead.');
-        redirect('WeeklyAttendance/records?project=' . $projectID . '&from=' . $latestRange['from'] . '&to=' . $latestRange['to']);
-    } else {
-        // No data at all for this project
-       $this->session->set_flashdata('error', '❌ No attendance has been generated for this project yet.');
-redirect('WeeklyAttendance/records?project=' . $projectID . '&from=' . $from . '&to=' . $to);
+        if (empty($existingDates)) {
+            $latestRange = $this->WeeklyAttendance_model->getLatestAttendanceRange($projectID);
 
-    }
-    return;
-}
+            if ($latestRange) {
+                $this->session->set_flashdata('error', '⚠ No attendance data for selected range. Showing most recent available record instead.');
+                redirect('WeeklyAttendance/records?project=' . $projectID . '&from=' . $latestRange['from'] . '&to=' . $latestRange['to']);
+            } else {
+                $this->session->set_flashdata('error', '❌ No attendance has been generated for this project yet.');
+                redirect('WeeklyAttendance/records?project=' . $projectID . '&from=' . $from . '&to=' . $to);
+            }
+            return;
+        }
 
-
-        // 🔔 Notify via modal if partial data
+        // Notify partial data if mismatch
         $requestedDates = $this->getDateRange($from, $to);
         if (count($requestedDates) !== count($existingDates)) {
             $this->session->set_flashdata('view_error', true);
         }
 
-        $data['project'] = $this->WeeklyAttendance_model->getProjectById($projectID);
+        // Set populated values
         $data['dates'] = $existingDates;
         $data['attendances'] = $this->WeeklyAttendance_model->getAttendanceRecords($projectID, $from, $to, $existingDates);
         $data['hours'] = $this->WeeklyAttendance_model->getWorkHours($projectID, $from, $to);
-        $data['projectID'] = $projectID;
-        $data['from'] = $from;
-        $data['to'] = $to;
     }
 
+    // Load the view
     $this->load->view('weekly_attendance_records', $data);
 }
+
 
 
 
