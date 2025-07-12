@@ -24,7 +24,6 @@
           </div>
         </div>
 
-
         <!-- Modal Section -->
         <div class="modal fade" id="generatePayrollModal" tabindex="-1" role="dialog" aria-labelledby="generatePayrollLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-md" role="document">
@@ -40,15 +39,15 @@
                 </div>
 
                 <div class="modal-body">
-                  <div class="form-group">
-                    <label for="pid">Project</label>
-                    <select name="pid" id="pid" class="form-control" required>
-                      <option value="" disabled selected>Select project</option>
-                      <?php foreach ($projects as $proj): ?>
-                        <option value="<?= $proj->projectID ?>"><?= $proj->projectTitle ?></option>
-                      <?php endforeach; ?>
-                    </select>
-                  </div>
+                     <div class="form-group">
+        <label for="projectID">Select Project</label>
+        <select name="projectID" class="form-control" required>
+            <option value="">Select Project</option>
+            <?php foreach ($projects as $project): ?>
+                <option value="<?= $project->projectID ?>"><?= $project->projectTitle ?></option>
+            <?php endforeach; ?>
+        </select>
+    </div>
 
                   <div class="form-row">
                     <div class="form-group col-md-6">
