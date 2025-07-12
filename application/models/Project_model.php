@@ -284,9 +284,9 @@ public function getPayrollData($settingsID, $projectID, $start, $end, $rateType 
     $this->db->where('a.settingsID', $settingsID);
     $this->db->where('a.projectID', $projectID);
 
-    if (!empty($rateType)) {
-        $this->db->where('p.rateType', $rateType);
-    }
+    // if (!empty($rateType)) {
+    //     $this->db->where('p.rateType', $rateType);
+    // }
 
     $this->db->order_by('p.last_name', 'ASC');
     $assignedPersonnel = $this->db->get()->result();

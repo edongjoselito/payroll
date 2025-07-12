@@ -127,7 +127,7 @@
 
                                                 </tr>
 
-                                                Payroll Modal
+                                            
                                                 <div class="modal fade" id="payrollModal<?= $proj->projectID ?>" tabindex="-1" role="dialog" aria-labelledby="payrollModalLabel<?= $proj->projectID ?>" aria-hidden="true">
                                                   <div class="modal-dialog mt-5" role="document">
 

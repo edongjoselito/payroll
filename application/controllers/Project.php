@@ -329,7 +329,8 @@ public function payroll_report($settingsID = null)
 
     $data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
     $data['project'] = $this->Project_model->getProjectDetails($settingsID, $projectID);
-    $payroll = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end, $rateType);
+   $payroll = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end);
+
 
     // Group deductions
     $deductions = $this->OtherDeduction_model->get_deductions_by_date_range($start, $end, $settingsID);
