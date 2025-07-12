@@ -475,6 +475,36 @@ $log_data = [
 
 // -------END----------------
 
+public function delete_attendance_group()
+{
+    $projectID = $this->input->post('projectID');
+    $settingsID = $this->input->post('settingsID');
+    $date = $this->input->post('date');
+
+    $this->db->where('projectID', $projectID);
+    $this->db->where('settingsID', $settingsID);
+    $this->db->where('date', $date);
+    $this->db->delete('attendance');
+
+    $redirectURL = base_url("project/attendance_list/$settingsID?pid=$projectID");
+    redirect($redirectURL);
+}
+// Project.php
+public function print_attendance()
+{
+    $settingsID = $this->input->get('settingsID');
+    $projectID = $this->input->get('projectID');
+    $date = $this->input->get('date');
+
+    if ($date) {
+        $data['attendance_logs'] = $this->Project_model->getAttendanceLogsByDate($settingsID, $projectID, $date);
+    } else {
+        $data['attendance_logs'] = $this->Project_model->getAttendanceLogs($settingsID, $projectID);
+    }
+
+    $data['project'] = $this->Project_model->getProjectDetails($settingsID, $projectID);
+    $this->load->view('print_attendance_view', $data);
+}
 
 
 

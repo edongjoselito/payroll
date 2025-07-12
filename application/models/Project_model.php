@@ -149,12 +149,26 @@ public function check_assignment_exists($settingsID, $projectID, $personnelID)
 
 public function getAttendanceLogs($settingsID, $projectID)
 {
-    $this->db->select('pa.*, p.first_name, p.last_name');
-    $this->db->from('personnelattendance AS pa');
-    $this->db->join('personnel AS p', 'pa.personnelID = p.personnelID');
-    $this->db->where('pa.settingsID', $settingsID);
-    $this->db->where('pa.projectID', $projectID);
-    $this->db->order_by('pa.attendance_date', 'DESC');
+    $this->db->select('a.*, p.first_name, p.last_name');
+    $this->db->from('attendance AS a');
+    $this->db->join('personnel AS p', 'a.personnelID = p.personnelID', 'left');
+    $this->db->where('a.settingsID', $settingsID);
+    $this->db->where('a.projectID', $projectID);
+    $this->db->order_by('a.date', 'DESC');
+    
+    return $this->db->get()->result();
+}
+public function getAttendanceLogsByDate($settingsID, $projectID, $date = null)
+{
+    $this->db->select('a.*, p.first_name, p.last_name');
+    $this->db->from('attendance a');
+    $this->db->join('personnel p', 'a.personnelID = p.personnelID', 'left');
+    $this->db->where('a.settingsID', $settingsID);
+    $this->db->where('a.projectID', $projectID);
+    if ($date) {
+        $this->db->where('a.date', $date);
+    }
+    $this->db->order_by('p.first_name', 'ASC');
     return $this->db->get()->result();
 }
 
