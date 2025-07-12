@@ -6,5 +6,14 @@ class Generatepayroll_model extends CI_Model {
     public function __construct() {
         parent::__construct();
     }
+public function getProjectsBySettingsID($settingsID)
+{
+    return $this->db
+        ->select('projectID, projectTitle')
+        ->from('project')
+        ->where('settingsID', $settingsID)
+        ->get()
+        ->result();
+}
 
 }

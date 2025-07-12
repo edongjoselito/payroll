@@ -9,8 +9,11 @@ class Generatepayroll extends CI_Controller {
         $this->load->model('Project_model');
     }
 
-    public function form() {
-        $data['projects'] = $this->Project_model->get_all_projects();
-        $this->load->view('sidebar_generate_form', $data); // No subfolder
-    }
+   public function form()
+{
+    $settingsID = $this->session->userdata('settingsID');
+    $data['projects'] = $this->Generatepayroll_model->getProjectsBySettingsID($settingsID);
+    $this->load->view('sidebar_generate_form', $data);
+}
+
 }

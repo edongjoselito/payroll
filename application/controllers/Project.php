@@ -180,12 +180,11 @@ public function save_weekly_attendance()
     }
 
     // ✅ Add audit log
-   $this->Audit_model->insert_audit_log(
-    $this->session->userdata('IDNumber'), // change this line!
-    'save_attendance',
-    'Saved attendance for date ' . $attendance_date . ' in Project ID: ' . $projectID
-);
-
+    $this->Audit_model->insert_audit_log(
+        $this->session->userdata('user_id'),
+        'save_weekly_attendance',
+        "Saved weekly attendance for period: {$start} to {$end}, Project ID: {$projectID}"
+    );
 
     $this->session->set_flashdata('success', 'Weekly attendance saved successfully.');
     redirect("project/weekly_attendance_report_summary?settingsID={$settingsID}&projectID={$projectID}&start={$start}&end={$end}");

@@ -24,6 +24,7 @@
           </div>
         </div>
 
+
         <!-- Modal Section -->
         <div class="modal fade" id="generatePayrollModal" tabindex="-1" role="dialog" aria-labelledby="generatePayrollLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-md" role="document">

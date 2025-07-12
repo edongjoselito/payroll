@@ -127,10 +127,10 @@
         <span> Reports </span>
         <span class="menu-arrow"></span>
     </a>
-    <ul class="nav-second-level nav" aria-expanded="false">
+    <!-- <ul class="nav-second-level nav" aria-expanded="false">
        <li><a href="<?= base_url('project/audit_logs') ?>"><i class="fa fa-history"></i> Audit Logs</a></li>
 
-    </ul>
+    </ul> -->
     <ul class="nav-second-level nav" aria-expanded="false">
         <li><a href="<?= base_url(); ?>Report/payroll_logs">Payroll Logs</a></li>
     </ul>

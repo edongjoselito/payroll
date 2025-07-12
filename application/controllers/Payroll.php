@@ -129,7 +129,7 @@ public function generate() {
 {
     // Load your project list (for dropdown selection if needed)
     $this->load->model('Project_model');
-    $data['projects'] = $this->Project_model->get_all_projects(); // Adjust if you have a specific method
+    $data['projects'] = $this->Project_model->get_all_projects();
 
     $this->load->view('payroll/sidebar_generate_form', $data);
 }
