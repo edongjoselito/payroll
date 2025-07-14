@@ -349,7 +349,8 @@ public function payroll_report($settingsID = null)
     }
 
     // Daily logs
-    $this->db->select('personnelID, date, status, work_duration');
+    $this->db->select('personnelID, date, status, work_duration, holiday_hours');
+
     $this->db->from('attendance');
     $this->db->where('projectID', $projectID);
     $this->db->where('date >=', $start);
@@ -360,12 +361,15 @@ public function payroll_report($settingsID = null)
 
     $logs = [];
     $dateList = [];
+    
     foreach ($daily_logs as $log) {
         $date = date('Y-m-d', strtotime($log->date));
-        $logs[$log->personnelID][$date] = [
-            'status' => $log->status,
-            'hours'  => floatval($log->work_duration ?? 0)
-        ];
+       $logs[$log->personnelID][$date] = [
+    'status' => $log->status,
+    'hours'  => floatval($log->work_duration ?? 0),
+    'holiday_hours' => floatval($log->holiday_hours ?? 0)
+];
+
         $dateList[$date] = true;
     }
     ksort($dateList);
@@ -393,22 +397,33 @@ public function payroll_report($settingsID = null)
         $row->reg_hours_per_day = [];
         $row->present_days = 0;
         $row->total_reg_hours = 0;
-        foreach ($data['dates'] as $date) {
-            $day_log = $logs[$pid][$date] ?? null;
-            if ($day_log && $day_log['status'] === 'Present') {
-                $hours = $day_log['hours'];
-                $row->reg_hours_per_day[$date] = $hours;
-                $row->total_reg_hours += $hours;
-                $row->present_days++;
-            } else {
-                $row->reg_hours_per_day[$date] = '-';
-            }
-        }
+      foreach ($data['dates'] as $date) {
+    $day_log = $logs[$pid][$date] ?? null;
+
+ $status = strtolower(trim($day_log['status']));
+
+if ($status === 'present' || $status === 'regular ho') {
+    $row->reg_hours_per_day[$date] = [
+        'hours' => floatval($day_log['hours']),
+        'holiday' => floatval($day_log['holiday_hours'] ?? 0)
+    ];
+} elseif ($status === 'day off') {
+    $row->reg_hours_per_day[$date] = 'Day Off';
+} else {
+    $row->reg_hours_per_day[$date] = '-'; // treat all others as Absent
+}
+
+}
+
     }
 
     $data['attendance_data'] = $payroll;
     $data['personnel_loans'] = $this->Project_model->getPersonnelLoans($settingsID, $projectID);
     $data['show_signatories'] = true;
+$data['holidays'] = [
+    ['date' => '2025-07-14', 'name' => 'Regular Holiday'],
+    ['date' => '2025-07-21', 'name' => 'Special Non-Working Holiday'],
+];
 
     $this->load->view('payroll_report_view', $data);
 }
