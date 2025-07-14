@@ -420,10 +420,6 @@ if ($status === 'present' || $status === 'regular ho') {
     $data['attendance_data'] = $payroll;
     $data['personnel_loans'] = $this->Project_model->getPersonnelLoans($settingsID, $projectID);
     $data['show_signatories'] = true;
-$data['holidays'] = [
-    ['date' => '2025-07-14', 'name' => 'Regular Holiday'],
-    ['date' => '2025-07-21', 'name' => 'Special Non-Working Holiday'],
-];
 
     $this->load->view('payroll_report_view', $data);
 }
