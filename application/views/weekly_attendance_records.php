@@ -420,10 +420,11 @@ if ($status === 'Regular Holiday') {
                                    </select>
                               </div>
 
-                              <div class="form-group">
-                                   <label>Regular Hours</label>
-                                   <input type="number" step="0.01" name="hours" id="editHours" class="form-control">
-                              </div>
+                             <div class="form-group">
+    <label>Regular Hours <small class="text-muted">(Max: 8 hrs)</small></label>
+    <input type="number" step="0.01" max="8" name="hours" id="editHours" class="form-control">
+</div>
+
 
                               <div class="form-group">
                                    <label>Holiday Hours</label>
@@ -468,98 +469,90 @@ if ($status === 'Regular Holiday') {
      <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
      <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
 
-     <!-- Focus field when modal opens -->
-     <script>
-     $('#filterModal').on('shown.bs.modal', function() {
+  <script>
+$(document).ready(function () {
+     // Show toast if available
+     $('.toast').toast({ delay: 2500 }).toast('show');
+
+     // Show error modal if session has flashdata
+     <?php if ($this->session->flashdata('view_error')): ?>
+     $('#errorModal').modal('show');
+     <?php endif; ?>
+
+     // Focus field when filter modal opens
+     $('#filterModal').on('shown.bs.modal', function () {
           $('#project').focus();
      });
-     </script>
-     <?php if ($this->session->flashdata('view_error')): ?>
-     <script>
-     $(document).ready(function() {
-          $('#errorModal').modal('show');
-     });
-     </script>
-     <?php endif; ?>
-     <script>
-     document.addEventListener('DOMContentLoaded', function() {
-          const projectSelect = document.getElementById('project');
-          const batchSelect = document.getElementById('attendanceBatch');
 
-          // Filter batches based on selected project
-          projectSelect.addEventListener('change', function() {
-               const selectedProject = this.value;
-               const options = batchSelect.querySelectorAll('option');
+     // Attendance batch filtering based on project
+     const projectSelect = document.getElementById('project');
+     const batchSelect = document.getElementById('attendanceBatch');
 
-               batchSelect.value = "";
+     projectSelect.addEventListener('change', function () {
+          const selectedProject = this.value;
+          const options = batchSelect.querySelectorAll('option');
+          batchSelect.value = "";
 
-               options.forEach(option => {
-                    if (option.value === "") {
-                         option.style.display = 'block';
-                    } else if (option.getAttribute('data-project') === selectedProject) {
-                         option.style.display = 'block';
-                    } else {
-                         option.style.display = 'none';
-                    }
-               });
-          });
-
-          // Set hidden input values when a batch is selected
-          batchSelect.addEventListener('change', function() {
-               const selected = this.options[this.selectedIndex];
-               document.getElementById('from').value = selected.getAttribute('data-start');
-               document.getElementById('to').value = selected.getAttribute('data-end');
-          });
-     });
-     </script>
-     <script>
-     $(document).ready(function() {
-          function toggleHourFields() {
-               const status = $('#editStatus').val();
-
-               // Show both by default
-               $('#editHours, #editHoliday').prop('readonly', false).closest('.form-group').show();
-
-               if (status === 'Day Off' || status === 'Absent') {
-                    $('#editHours').val('0.00').prop('readonly', true);
-                    $('#editHoliday').val('0.00').prop('readonly', true);
-               } else if (status === 'Present') {
-                    $('#editHoliday').val('0.00').prop('readonly', true).closest('.form-group').hide();
-                    $('#editHours').prop('readonly', false).closest('.form-group').show();
-               } else if (status === 'Regular Holiday') {
-                    // Leave both editable
-                    $('#editHours, #editHoliday').prop('readonly', false).closest('.form-group').show();
-               } else if (status === 'Special Non-Working Holiday') {
-                    $('#editHours').val('0.00').prop('readonly', true).closest('.form-group').show();
-                    $('#editHoliday').prop('readonly', false).closest('.form-group').show();
+          options.forEach(option => {
+               if (option.value === "") {
+                    option.style.display = 'block';
+               } else if (option.getAttribute('data-project') === selectedProject) {
+                    option.style.display = 'block';
+               } else {
+                    option.style.display = 'none';
                }
+          });
+     });
+
+     batchSelect.addEventListener('change', function () {
+          const selected = this.options[this.selectedIndex];
+          document.getElementById('from').value = selected.getAttribute('data-start');
+          document.getElementById('to').value = selected.getAttribute('data-end');
+     });
+
+     // Attendance modal logic
+     function toggleHourFields() {
+          const status = $('#editStatus').val();
+          $('#editHours, #editHoliday').prop('readonly', false).closest('.form-group').show();
+
+          if (status === 'Day Off' || status === 'Absent') {
+               $('#editHours').val('0.00').prop('readonly', true);
+               $('#editHoliday').val('0.00').prop('readonly', true);
+          } else if (status === 'Present') {
+               $('#editHoliday').val('0.00').prop('readonly', true).closest('.form-group').hide();
+               $('#editHours').prop('readonly', false).closest('.form-group').show();
+          } else if (status === 'Regular Holiday') {
+               $('#editHours, #editHoliday').prop('readonly', false).closest('.form-group').show();
+          } else if (status === 'Special Non-Working Holiday') {
+               $('#editHours').val('0.00').prop('readonly', true).closest('.form-group').show();
+               $('#editHoliday').prop('readonly', false).closest('.form-group').show();
           }
+     }
 
-          // Initial modal load
-          $('.edit-attendance').on('click', function() {
-               $('#editPersonnelID').val($(this).data('personnel'));
-               $('#editDate').val($(this).data('date'));
-               $('#editStatus').val($(this).data('status'));
-               $('#editHours').val($(this).data('hours'));
-               $('#editHoliday').val($(this).data('holiday'));
-               $('#editAttendanceModal').modal('show');
-
-               // Trigger update based on current selection
-               toggleHourFields();
-          });
-
-          // React when dropdown is changed
-          $('#editStatus').on('change', toggleHourFields);
+     $('.edit-attendance').on('click', function () {
+          $('#editPersonnelID').val($(this).data('personnel'));
+          $('#editDate').val($(this).data('date'));
+          $('#editStatus').val($(this).data('status'));
+          $('#editHours').val($(this).data('hours'));
+          $('#editHoliday').val($(this).data('holiday'));
+          $('#editAttendanceModal').modal('show');
+          toggleHourFields();
      });
-     </script>
-     <script>
-     $(document).ready(function() {
-          $('.toast').toast({
-               delay: 2500
-          });
-          $('.toast').toast('show');
+
+     $('#editStatus').on('change', toggleHourFields);
+
+     // Enforce max 8 hours on regular hours input
+     $('#editHours').on('input', function () {
+          let val = parseFloat($(this).val());
+          if (val > 8) {
+               $(this).val(8);
+               alert('Regular hours cannot exceed 8.00 hours.');
+          } else if (val < 0 || isNaN(val)) {
+               $(this).val('');
+          }
      });
-     </script>
+});
+</script>
 
 
 </body>
