@@ -58,8 +58,15 @@ public function generate() {
     $post['settingsID'] = $this->session->userdata('settingsID');
 
     $this->WeeklyAttendance_model->saveAttendance($post);
+       $project = $this->db->get_where('project', ['projectID' => $post['projectID']])->row();
 
-    $this->session->set_flashdata('msg', '<div class="alert alert-success">Weekly attendance has been saved successfully. Please go to View Attendance to view it.</div>');
+$this->session->set_flashdata('attendance_success', [
+    'projectID' => $post['projectID'],
+    'projectTitle' => $project->projectTitle ?? 'N/A',
+    'from' => $post['from'],
+    'to' => $post['to']
+]);
+
     redirect('WeeklyAttendance');
 }
 
@@ -129,7 +136,21 @@ public function generate() {
 
         // Set populated values
         $data['dates'] = $existingDates;
-        $data['attendances'] = $this->WeeklyAttendance_model->getAttendanceRecords($projectID, $from, $to, $existingDates);
+      $raw = $this->WeeklyAttendance_model->getAttendanceRecords($projectID, $from, $to, $existingDates);
+$attendances = [];
+
+foreach ($raw as $pid => $personData) {
+    $attendances[$pid]['name'] = $personData['name'];
+    foreach ($personData['dates'] as $date => $status) {
+        $attendances[$pid]['dates'][$date] = $status;
+        $attendances[$pid]['hours'][$date] = $personData['hours'][$date] ?? 0;
+        $attendances[$pid]['holiday'][$date] = $personData['holiday'][$date] ?? 0;
+    }
+}
+
+
+$data['attendances'] = $attendances;
+
         $data['hours'] = $this->WeeklyAttendance_model->getWorkHours($projectID, $from, $to);
     }
 
@@ -181,7 +202,36 @@ public function deleteAttendance()
     $this->WeeklyAttendance_model->deleteAttendanceByDateRange($projectID, $from, $to);
 
     $this->session->set_flashdata('msg', 'Attendance for the selected range has been deleted successfully.');
-    redirect('WeeklyAttendance');
+    redirect('WeeklyAttendance/records');
+}
+
+
+public function updateAttendance()
+{
+    $personnelID = $this->input->post('personnelID');
+    $date = $this->input->post('date');
+    $status = $this->input->post('status');
+    $hours = $this->input->post('hours');
+    $holiday = $this->input->post('holiday');
+
+    // Get current page context
+    $projectID = $this->input->post('project');
+    $from = $this->input->post('from');
+    $to = $this->input->post('to');
+
+    // Update attendance
+    $this->db->where('personnelID', $personnelID);
+    $this->db->where('date', $date);
+    $this->db->update('attendance', [
+        'status' => $status,
+        'work_duration' => $hours,
+        'holiday_hours' => $holiday
+        
+    ]);
+$this->session->set_flashdata('update_success', 'Attendance updated successfully!');
+
+
+    redirect("WeeklyAttendance/records?project=$projectID&from=$from&to=$to");
 }
 
 

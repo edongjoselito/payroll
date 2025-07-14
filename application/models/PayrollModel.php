@@ -107,7 +107,7 @@ class PayrollModel extends CI_Model
 
 public function getPayrollData($projectID, $start, $end, $rateType)
 {
-    $this->db->select('p.*, s.fName, s.lName, s.position, s.rateType, s.rate');
+    $this->db->select('p.*, s.fName, s.lName, s.position, p.status as attendance_status, s.rateType, s.rate');
     $this->db->from('personnel_assignment pa');
     $this->db->join('staff s', 'pa.staffID = s.IDNumber');
     $this->db->join('project_attendance p', 'p.staffID = s.IDNumber');

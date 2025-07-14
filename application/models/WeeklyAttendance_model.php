@@ -35,41 +35,61 @@ public function saveAttendance($data) {
     $projectID = $data['projectID'];
     $from = $data['from'];
     $to = $data['to'];
-    $attendance = $data['attendance'];
     $settingsID = $data['settingsID'];
 
-    foreach ($attendance as $personnelID => $rows) {
-        $totalHours = 0;
+    $statusList = $data['attendance_status'];
+    $hourList = $data['attendance_hours'];
 
-        foreach ($rows as $date => $entry) {
-            $status = isset($entry['status']) ? 'Present' : 'Absent';
+    // Used for summarizing into work_hours table
+    $weeklyTotal = [];
 
-            // ✅ Clean decimal-based conversion
-            $converted = isset($entry['hours']) ? floatval($entry['hours']) : 0.0;
-            $totalHours += $converted;
+    foreach ($statusList as $personnelID => $statusDates) {
+        foreach ($statusDates as $date => $status) {
+            $hours = isset($hourList[$personnelID][$date]) ? floatval($hourList[$personnelID][$date]) : 0.0;
 
-            // ✅ Save per-day attendance with decimal hours
+            $work_duration = 0.0;
+            $holiday_hours = 0.0;
+
+            if ($status == 'Regular Holiday') {
+                if ($hours > 8) {
+                    $work_duration = 8;
+                    $holiday_hours = $hours - 8;
+                } else {
+                    $holiday_hours = $hours;
+                }
+            } else {
+                $work_duration = $hours;
+            }
+
+            // Track weekly totals
+            $weeklyTotal[$personnelID] = ($weeklyTotal[$personnelID] ?? 0) + $work_duration + $holiday_hours;
+
+            // Save attendance per day
             $this->db->replace('attendance', [
                 'personnelID'    => $personnelID,
                 'projectID'      => $projectID,
                 'date'           => $date,
                 'status'         => $status,
-                'work_duration'  => $converted,
+                'work_duration'  => $work_duration,
+                'holiday_hours'  => $holiday_hours,
                 'settingsID'     => $settingsID
             ]);
         }
+    }
 
-        // ✅ Save total weekly hours
+    // Save summarized total to work_hours
+    foreach ($weeklyTotal as $personnelID => $total) {
         $this->db->replace('work_hours', [
-            'personnelID'  => $personnelID,
-            'projectID'    => $projectID,
-            '`from`'       => $from,
-            '`to`'         => $to,
-            'total_hours'  => $totalHours,
-            'settingsID'   => $settingsID
+            'personnelID'   => $personnelID,
+            'projectID'     => $projectID,
+            'from'          => $from,
+            'to'            => $to,
+            'total_hours'   => $total,
+            'settingsID'    => $settingsID
         ]);
     }
 }
+
 
 
     public function getProjectById($id) {
@@ -127,11 +147,14 @@ public function getAttendanceRecords($projectID, $from, $to) {
 
     $query = $this->db->get();
     $result = [];
-    foreach ($query->result() as $row) {
-        $result[$row->personnelID]['name'] = $row->last_name . ', ' . $row->first_name;
-        $result[$row->personnelID]['dates'][$row->date] = $row->status;
-        $result[$row->personnelID]['hours'][$row->date] = $row->work_duration;
-    }
+  foreach ($query->result() as $row) {
+    $result[$row->personnelID]['name'] = $row->last_name . ', ' . $row->first_name;
+    $result[$row->personnelID]['dates'][$row->date] = $row->status;
+   $result[$row->personnelID]['hours'][$row->date] = $row->work_duration;
+$result[$row->personnelID]['holiday'][$row->date] = $row->holiday_hours;
+
+}
+
     return $result;
 }
 
@@ -139,7 +162,9 @@ public function getAttendanceRecords($projectID, $from, $to) {
 public function getWorkHours($projectID, $from, $to) {
     $settingsID = $this->session->userdata('settingsID');
 
-    $this->db->select('a.personnelID, SUM(a.work_duration) as total_hours');
+    $this->db->select('a.personnelID, 
+                       SUM(a.work_duration) as regular_hours, 
+                       SUM(a.holiday_hours) as holiday_hours');
     $this->db->from('attendance a');
     $this->db->join('personnel p', 'p.personnelID = a.personnelID');
     $this->db->where('a.projectID', $projectID);
@@ -150,10 +175,26 @@ public function getWorkHours($projectID, $from, $to) {
 
     $query = $this->db->get();
     $hours = [];
+
     foreach ($query->result() as $row) {
-        $hours[$row->personnelID] = $row->total_hours;
+        $hours[$row->personnelID] = [
+            'regular' => $row->regular_hours,
+            'holiday' => $row->holiday_hours
+        ];
     }
+
     return $hours;
+}
+
+
+public function updateAttendanceRecord($personnelID, $date, $status, $hours, $holiday) {
+    $this->db->where('personnelID', $personnelID);
+    $this->db->where('date', $date);
+    $this->db->update('work_hours', [
+        'attendanceType' => $status,
+        'workDuration' => $hours,
+        'holidayDuration' => $holiday
+    ]);
 }
 
 
