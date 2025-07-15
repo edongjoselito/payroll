@@ -132,7 +132,7 @@
           <div class="form-group">
             <label for="savedProjectSelect" class="font-weight-bold">Project</label>
             <select id="savedProjectSelect" class="form-control select2" required>
-              <option disabled selected>Select Project</option>
+              <option disabled selected>Select project</option>
               <?php foreach ($projects as $proj): ?>
                 <option value="<?= $proj->projectID ?>"><?= $proj->projectTitle ?></option>
               <?php endforeach; ?>
@@ -141,18 +141,19 @@
           </div>
 
           <div class="form-group mt-3">
-            <label for="savedBatchSelect" class="font-weight-bold">Payroll Batch</label>
-            <select name="batch_id" id="savedBatchSelect" class="form-control select2" required>
-              <option disabled selected>Select Batch</option>
-              <?php foreach ($batches as $batch): ?>
-                <option 
-                  value="<?= $batch->projectID . '|' . $batch->start_date . '|' . $batch->end_date ?>"
-                  data-project="<?= $batch->projectID ?>">
-                  <?= $batch->projectTitle ?> (<?= date('M d, Y', strtotime($batch->start_date)) ?> - <?= date('M d, Y', strtotime($batch->end_date)) ?>)
-                </option>
-              <?php endforeach; ?>
-            </select>
-            <div class="invalid-feedback">Please select a batch.</div>
+            <label for="savedBatchSelect" class="font-weight-bold">Saved Payroll</label>
+           <select name="batch_id" id="savedBatchSelect" class="form-control select2" required>
+  <option disabled selected>Choose saved payroll</option>
+  <?php foreach ($batches as $batch): ?>
+    <option 
+      value="<?= $batch->projectID . '|' . $batch->start_date . '|' . $batch->end_date ?>"
+      data-project="<?= $batch->projectID ?>">
+      <?= date('M d, Y', strtotime($batch->start_date)) ?> - <?= date('M d, Y', strtotime($batch->end_date)) ?>
+    </option>
+  <?php endforeach; ?>
+</select>
+
+            <div class="invalid-feedback">Please select.</div>
           </div>
         </div>
 
@@ -180,75 +181,84 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
-
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+  // === GENERATE PAYROLL MODAL ===
   const pidSelect = document.getElementById('pid');
   const batchSelect = document.getElementById('attendanceBatch');
 
-  // Initial hide all options
-  batchSelect.querySelectorAll('option').forEach(opt => {
-    if (opt.value !== '') opt.style.display = 'none';
-  });
-
-  // Show only batches belonging to selected project
-  pidSelect.addEventListener('change', function () {
-    const selectedProjectID = this.value;
-
-    // Reset selection
-    batchSelect.value = "";
-    
-    batchSelect.querySelectorAll('option').forEach(option => {
-      const project = option.getAttribute('data-project');
-      if (!project || project === selectedProjectID) {
-        option.style.display = 'block';
-      } else {
-        option.style.display = 'none';
-      }
+  if (batchSelect) {
+    // Hide all batch options initially
+    batchSelect.querySelectorAll('option').forEach(opt => {
+      if (opt.value !== '') opt.style.display = 'none';
     });
-  });
 
-  // Set hidden start/end fields when a batch is selected
-  batchSelect.addEventListener('change', function () {
-    const selected = this.options[this.selectedIndex];
-    document.getElementById('start').value = selected.getAttribute('data-start');
-    document.getElementById('end').value = selected.getAttribute('data-end');
-  });
-});
+    pidSelect.addEventListener('change', function () {
+      const selectedProjectID = this.value;
+      batchSelect.value = '';
 
-$(document).ready(function () {
-  $('.select2').select2({
-  width: '100%',
-  dropdownParent: $('.modal') // works for both modals
-});
-});
+      batchSelect.querySelectorAll('option').forEach(option => {
+        const project = option.getAttribute('data-project');
+        if (!project || project === selectedProjectID) {
+          option.style.display = 'block';
+        } else {
+          option.style.display = 'none';
+        }
+      });
+    });
 
+    batchSelect.addEventListener('change', function () {
+      const selected = this.options[this.selectedIndex];
+      document.getElementById('start').value = selected.getAttribute('data-start');
+      document.getElementById('end').value = selected.getAttribute('data-end');
+    });
+  }
 
-</script>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
+  // === VIEW SAVED PAYROLL MODAL ===
   const savedProject = document.getElementById('savedProjectSelect');
   const savedBatch = document.getElementById('savedBatchSelect');
+  const submitBtn = document.querySelector('#viewSavedPayrollModal button[type="submit"]');
 
-  savedBatch.querySelectorAll('option').forEach(opt => {
-    if (opt.value !== '') opt.style.display = 'none';
-  });
-
-  savedProject.addEventListener('change', function () {
-    const selectedPID = this.value;
-
-    savedBatch.value = "";
+  if (savedBatch) {
+    // Hide all saved batches initially
     savedBatch.querySelectorAll('option').forEach(opt => {
-      const project = opt.getAttribute('data-project');
-      if (!project || project === selectedPID) {
-        opt.style.display = 'block';
-      } else {
-        opt.style.display = 'none';
-      }
+      if (opt.value !== '') opt.style.display = 'none';
     });
+
+    savedProject.addEventListener('change', function () {
+      const selectedPID = this.value;
+      savedBatch.value = '';
+      submitBtn.disabled = true;
+
+      savedBatch.querySelectorAll('option').forEach(opt => {
+        const project = opt.getAttribute('data-project');
+        if (!project || project === selectedPID) {
+          opt.style.display = 'block';
+        } else {
+          opt.style.display = 'none';
+        }
+      });
+    });
+
+    // Enable View button only when a batch is selected
+    savedBatch.addEventListener('change', function () {
+      submitBtn.disabled = !this.value;
+    });
+
+    // Start with disabled button
+    submitBtn.disabled = true;
+  }
+});
+</script>
+
+<script>
+$(document).ready(function () {
+  $('.select2').select2({
+    width: '100%',
+    dropdownParent: $('.modal') 
   });
 });
-
 </script>
+
 </body>
 </html>
