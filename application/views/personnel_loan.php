@@ -55,7 +55,9 @@
                <tbody>
 <?php foreach ($assigned_loans as $loan): ?>
   <tr>
-    <td><?= htmlspecialchars($loan->first_name . ' ' . $loan->last_name) ?></td>
+<td><?= "{$loan->last_name}, {$loan->first_name} " . ($loan->middle_name ?? '') . " " . ($loan->name_ext ?? '') ?></td>
+
+
     <td><?= htmlspecialchars($loan->position ?? '') ?></td>
     <td><?= htmlspecialchars($loan->loan_description ?? 'N/A') ?></td>
     <td>₱<?= number_format($loan->amount, 2) ?></td>

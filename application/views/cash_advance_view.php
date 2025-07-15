@@ -134,7 +134,11 @@
                             <option value="">Select Personnel</option>
                             <?php foreach($personnel as $p): ?>
                                 <option value="<?= $p->personnelID ?>">
-                                    <?= $p->first_name . ' ' . ($p->middle_name ? substr($p->middle_name, 0, 1) . '. ' : '') . $p->last_name . ($p->name_ext ? ' ' . $p->name_ext : '') ?>
+                                 <?= $p->last_name . ', ' . $p->first_name 
+    . (isset($p->middle_name) && $p->middle_name ? ' ' . substr($p->middle_name, 0, 1) . '.' : '') 
+    . (isset($p->name_ext) && $p->name_ext ? ' ' . $p->name_ext : '') ?>
+
+
                                 </option>
                             <?php endforeach; ?>
                         </select>

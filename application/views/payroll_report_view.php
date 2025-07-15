@@ -342,7 +342,8 @@ $startDate = strtotime($start);
 $endDate = strtotime($end);
 ?>
     <td><?= $ln++ ?></td>
-    <td><?= htmlspecialchars($row->first_name . ' ' . $row->last_name) ?></td>
+   <td><?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></td>
+
     <td><?= htmlspecialchars($row->position) ?></td>
     
     <td colspan="2">
@@ -521,7 +522,8 @@ $otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60,
     <div class="modal-content" id="printablePayslip<?= $ln ?>">
       <div class="modal-header" style="background: #fff; border-bottom: 1px solid #ddd;">
 
-        <h5 class="modal-title">Payslip - <?= htmlspecialchars($row->first_name . ' ' . $row->last_name) ?></h5>
+      <h5 class="modal-title">Payslip - <?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></h5>
+
         <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
       </div>
       <div class="modal-body p-4">

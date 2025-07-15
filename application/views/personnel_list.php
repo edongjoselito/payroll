@@ -60,7 +60,8 @@
                                     <?php else: ?>
                                         <?php foreach($personnel as $p): ?>
                                             <tr>
-                                                <td><?= "$p->first_name $p->middle_name $p->last_name $p->name_ext" ?></td>
+                                             <td><?= "{$p->last_name}, {$p->first_name} {$p->middle_name} {$p->name_ext}" ?></td>
+
                                                 <td><?= $p->address ?></td>
                                                 <td><?= $p->contact_number ?></td>
                                                 <td><?= $p->sss_number ?></td>

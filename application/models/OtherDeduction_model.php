@@ -3,15 +3,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class OtherDeduction_model extends CI_Model {
 
- public function get_other_deductions($settingsID) {
+public function get_other_deductions($settingsID) {
     $this->db->select("
         ca.*, 
         ca.deduct_from,
         ca.deduct_to,
         CONCAT(
-            p.first_name, ' ',
-            LEFT(p.middle_name, 1), '. ',
-            p.last_name,
+            p.last_name, ', ',
+            p.first_name,
+            IF(p.middle_name IS NOT NULL AND p.middle_name != '', CONCAT(' ', LEFT(p.middle_name, 1), '.'), ''),
             IF(p.name_ext IS NOT NULL AND p.name_ext != '', CONCAT(' ', p.name_ext), '')
         ) AS fullname
     ");

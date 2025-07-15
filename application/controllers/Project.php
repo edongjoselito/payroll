@@ -456,7 +456,16 @@ $data['project'] = $this->Project_model->getProjectDetails($projectID);
         $this->db->insert_batch('payroll_summary', $batch);
     }
 
-    $data['attendance_data'] = $payroll;
+usort($payroll, function ($a, $b) {
+    $lastNameCompare = strcmp($a->last_name, $b->last_name);
+    if ($lastNameCompare === 0) {
+        return strcmp($a->first_name, $b->first_name);
+    }
+    return $lastNameCompare;
+});
+
+$data['attendance_data'] = $payroll;
+
     $data['personnel_loans'] = $this->Project_model->getPersonnelLoans($settingsID);
     $data['show_signatories'] = true;
 

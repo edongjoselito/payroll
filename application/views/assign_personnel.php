@@ -43,7 +43,10 @@
                                         <option value="">-- Select Personnel --</option>
                                         <?php foreach ($personnel as $p): ?>
                                             <option value="<?= $p->personnelID ?>">
-                                                <?= $p->first_name . ' ' . $p->middle_name . ' ' . $p->last_name ?>
+                                             <?= $p->last_name . ', ' . $p->first_name . 
+    ($p->middle_name ? ' ' . substr($p->middle_name, 0, 1) . '.' : '') .
+    ($p->name_ext ? ' ' . $p->name_ext : '') ?>
+
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
@@ -69,7 +72,10 @@
                                     <?php else: ?>
                                        <?php foreach ($assignments as $a): ?>
                                             <tr>
-                                                <td><?= $a->first_name . ' ' . $a->middle_name . ' ' . $a->last_name ?></td>
+                                                <td><?= $a->last_name . ', ' . $a->first_name . 
+    ($a->middle_name ? ' ' . substr($a->middle_name, 0, 1) . '.' : '') .
+    ($a->name_ext ? ' ' . $a->name_ext : '') ?>
+</td>
                                                 <td>
                                                     <a href="<?= base_url('project/delete_assignment/' . $a->ppID . '/' . $settingsID . '/' . $projectID) ?>"
                                                     class="btn btn-danger btn-sm"

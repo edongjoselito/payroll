@@ -88,7 +88,8 @@ public function insert_personnel_loan($data)
 
 public function get_assigned_loans($settingsID)
 {
-    $this->db->select('pl.loan_id, pl.personnelID, pl.loan_description, pl.amount, pl.monthly_deduction, pl.date_assigned, p.first_name, p.last_name, p.position, pl.date_assigned, pl.status');
+    $this->db->select('pl.loan_id, pl.personnelID, pl.loan_description, pl.amount, pl.monthly_deduction, pl.date_assigned, pl.status, 
+                      p.first_name, p.middle_name, p.last_name, p.name_ext, p.position');
     $this->db->from('personnelloans pl');
     $this->db->join('personnel p', 'p.personnelID = pl.personnelID');
     $this->db->where('pl.settingsID', $settingsID);
@@ -137,14 +138,23 @@ public function update_personnel_loan($settingsID, $personnelID, $loan_id, $data
         return $this->db->delete('cashadvance', ['id' => $id]);
     }
 
-    public function get_cash_advance_within_range($personnelID, $start, $end)
-    {
-        return $this->db->select_sum('amount')
-                        ->where('personnelID', $personnelID)
-                        ->where('date >=', $start)
-                        ->where('date <=', $end)
-                        ->get('cashadvance')
-                        ->row()
-                        ->amount ?? 0;
-    }
+ public function get_cash_advance_data($settingsID)
+{
+    return $this->db
+        ->select("ca.*, 
+            CONCAT(
+                p.last_name, ', ', 
+                p.first_name, 
+                IF(p.middle_name != '', CONCAT(' ', LEFT(p.middle_name, 1), '.'), ''), 
+                IF(p.name_ext != '', CONCAT(' ', p.name_ext), '')
+            ) AS fullname")
+        ->from('cashadvance ca')
+        ->join('personnel p', 'ca.personnelID = p.personnelID')
+        ->where('ca.settingsID', $settingsID)
+        ->order_by('p.last_name ASC')
+        ->get()
+        ->result();
+}
+
+
 }
