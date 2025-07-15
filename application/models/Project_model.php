@@ -57,14 +57,61 @@ foreach ($query->result() as $row) {
 
 
 
-public function getProjectDetails($settingsID, $projectID)
+// public function getProjectDetails($settingsID, $projectID)
+// {
+//     return $this->db
+//         ->where('settingsID', $settingsID)
+//         ->where('projectID', $projectID)
+//         ->get('project')
+//         ->row();  // single result
+// }
+// Get basic project info
+public function getProjectDetails($projectID)
+{
+    return $this->db->get_where('project', ['projectID' => $projectID])->row();
+}
+
+// Get saved payroll summary
+public function getSavedPayrollData($projectID, $start, $end, $settingsID)
 {
     return $this->db
-        ->where('settingsID', $settingsID)
-        ->where('projectID', $projectID)
-        ->get('project')
-        ->row();  // single result
+        ->select('
+            payroll_summary.*, 
+            payroll_summary.ca_deduction AS ca_cashadvance,
+            payroll_summary.sss_deduction AS sss,
+            payroll_summary.pagibig_deduction AS pagibig,
+            payroll_summary.philhealth_deduction AS philhealth,
+            payroll_summary.loan_deduction AS loan,
+            personnel.first_name, 
+            personnel.last_name, 
+            personnel.position, 
+            personnel.rateType, 
+            personnel.rateAmount
+        ')
+        ->from('payroll_summary')
+        ->join('personnel', 'payroll_summary.personnelID = personnel.personnelID', 'left')
+        ->where('payroll_summary.projectID', $projectID)
+        ->where('payroll_summary.start_date', $start)
+        ->where('payroll_summary.end_date', $end)
+        ->where('payroll_summary.settingsID', $settingsID)
+        ->get()
+        ->result();
 }
+
+
+
+public function getDailyHours($personnelID, $projectID, $start, $end)
+{
+    $this->db->select('date, work_duration, holiday_hours, status');
+    $this->db->from('attendance');
+    $this->db->where('personnelID', $personnelID);
+    $this->db->where('projectID', $projectID);
+    $this->db->where('date >=', $start);
+    $this->db->where('date <=', $end);
+    $query = $this->db->get();
+    return $query->result();
+}
+
 
 
 public function save_batch_attendance($date, $data)
@@ -283,28 +330,22 @@ public function getPayrollData($settingsID, $projectID, $start, $end, $rateType 
     $this->db->join('personnel p', 'p.personnelID = a.personnelID');
     $this->db->where('a.settingsID', $settingsID);
     $this->db->where('a.projectID', $projectID);
-
-    // if (!empty($rateType)) {
-    //     $this->db->where('p.rateType', $rateType);
-    // }
-
     $this->db->order_by('p.last_name', 'ASC');
     $assignedPersonnel = $this->db->get()->result();
 
-    // Step 2: Get attendance logs
-  $this->db->select('a.personnelID, a.date AS attendance_date, a.status AS attendance_status, 
-                  COALESCE(w.total_hours, 0) AS workDuration');
-$this->db->from('attendance a');
-$this->db->join('work_hours w', 
-    'a.personnelID = w.personnelID 
-     AND a.projectID = w.projectID 
-     AND a.date BETWEEN w.from AND w.to', 
-     'left');
-$this->db->where('a.settingsID', $settingsID);
-$this->db->where('a.projectID', $projectID);
-$this->db->where('a.date >=', $start);
-$this->db->where('a.date <=', $end);
-
+    // Step 2: Get attendance logs with work hours
+    $this->db->select('a.personnelID, a.date AS attendance_date, a.status AS attendance_status, 
+                       COALESCE(w.total_hours, 0) AS workDuration');
+    $this->db->from('attendance a');
+    $this->db->join('work_hours w', 
+        'a.personnelID = w.personnelID 
+         AND a.projectID = w.projectID 
+         AND a.date BETWEEN w.from AND w.to', 
+         'left');
+    $this->db->where('a.settingsID', $settingsID);
+    $this->db->where('a.projectID', $projectID);
+    $this->db->where('a.date >=', $start);
+    $this->db->where('a.date <=', $end);
     $logs = $this->db->get()->result();
 
     $logMap = [];
@@ -312,21 +353,19 @@ $this->db->where('a.date <=', $end);
         $logMap[$log->personnelID][$log->attendance_date] = $log;
     }
 
-    // Step 3-A: Cash Advance only (description contains 'Cash Advance')
+    // Step 3-A: Cash Advances (description contains 'Cash Advance')
     $this->db->select('personnelID, SUM(amount) as total_ca');
     $this->db->from('cashadvance');
     $this->db->where('settingsID', $settingsID);
     $this->db->where('date >=', $start);
     $this->db->where('date <=', $end);
-    $this->db->where("LOWER(description) LIKE '%cash advance%'");
-
+    $this->db->like('description', 'Cash Advance', 'both');
     $this->db->group_by('personnelID');
     $cashAdvances = $this->db->get()->result();
 
     $caMap = [];
     foreach ($cashAdvances as $ca) {
-       $caMap[trim($ca->personnelID)] = $ca->total_ca;
-
+        $caMap[trim($ca->personnelID)] = $ca->total_ca;
     }
 
     // Step 3-B: Other Deductions (excluding 'Cash Advance')
@@ -344,11 +383,11 @@ $this->db->where('a.date <=', $end);
         $otherMap[$other->personnelID] = $other->total_other;
     }
 
-    // Step 4: Get loan deductions (monthly)
+    // Step 4: Loans
     $this->db->select('personnelID, SUM(monthly_deduction) as total_loan');
     $this->db->from('personnelloans');
     $this->db->where('settingsID', $settingsID);
-    $this->db->where('status', 1); // only active
+    $this->db->where('status', 1); // active only
     $this->db->group_by('personnelID');
     $loanRows = $this->db->get()->result();
 
@@ -357,21 +396,29 @@ $this->db->where('a.date <=', $end);
         $loanMap[$loan->personnelID] = $loan->total_loan;
     }
 
-    // Step 5: Merge all data to personnel
+    // Step 5: Combine all data into each personnel object
     foreach ($assignedPersonnel as &$p) {
-        $p->logs = $logMap[$p->personnelID] ?? [];
-       $pid = trim($p->personnelID);
-$p->ca_cashadvance = $caMap[$pid] ?? 0;
+        $pid = trim($p->personnelID);
+        $p->logs = $logMap[$pid] ?? [];
 
-        $p->other_deduction = $otherMap[$p->personnelID] ?? 0;
-        $p->loan = $loanMap[$p->personnelID] ?? 0;
-        $p->sss = $p->sss_deduct ?? 0;
-        $p->pagibig = $p->pagibig_deduct ?? 0;
-        $p->philhealth = $p->philhealth_deduct ?? 0;
+        // Deductions
+        $p->ca_cashadvance    = floatval($caMap[$pid] ?? 0);
+        $p->other_deduction   = floatval($otherMap[$pid] ?? 0);
+        $p->loan              = floatval($loanMap[$pid] ?? 0);
+        $p->sss               = floatval($p->sss_deduct ?? 0);
+        $p->pagibig           = floatval($p->pagibig_deduct ?? 0);
+        $p->philhealth        = floatval($p->philhealth_deduct ?? 0);
+
+        // Compute total deduction and store it
+        $p->total_deduction = $p->ca_cashadvance + $p->other_deduction + $p->loan + $p->sss + $p->pagibig + $p->philhealth;
+
+        // Placeholder — compute net_pay in controller after adding gross pay
+        $p->net_pay = 0;
     }
 
     return $assignedPersonnel;
 }
+
 
 
 // Pa display sa personnel loan in payroll_report

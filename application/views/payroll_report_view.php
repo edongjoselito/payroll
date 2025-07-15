@@ -328,8 +328,10 @@ th {
   <?php $totalPayroll = 0; ?>
 
 <?php $ln = 1; foreach ($attendance_data as $row): ?>
+
 <tr>
 <?php
+
 $regAmount = 0;
 $otAmount = 0;
 $regTotalMinutes = 0;

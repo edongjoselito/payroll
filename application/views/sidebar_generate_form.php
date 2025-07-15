@@ -19,6 +19,16 @@
       padding: 10px;
       font-size: 14px;
     }
+    .select2-selection--single {
+  height: 38px !important;
+  padding: 6px 12px !important;
+  font-size: 14px;
+  border: 1px solid #ced4da !important;
+  border-radius: 0.25rem !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
   </style>
 </head>
 <body>
@@ -37,6 +47,10 @@
             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#generatePayrollModal">
               <i class="mdi mdi-calculator-variant-outline"></i> Generate Payroll
             </button>
+    
+<button type="button" class="btn btn-info" data-toggle="modal" data-target="#viewSavedPayrollModal">
+  View Saved Payroll
+</button>
           </div>
         </div>
 
@@ -100,6 +114,62 @@
           </div>
         </div>
         <!-- End Modal Section -->
+<!-- View Saved Payroll Modal -->
+<div class="modal fade" id="viewSavedPayrollModal" tabindex="-1" role="dialog" aria-labelledby="viewSavedPayrollModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+    <form action="<?= base_url('project/view_payroll_batch') ?>" method="get">
+      <div class="modal-content border-0 shadow-sm">
+        <div class="modal-header bg-info text-white">
+          <h5 class="modal-title" id="viewSavedPayrollModalLabel">
+            <i class="mdi mdi-clipboard-text"></i> View Saved Payroll Batch
+          </h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="savedProjectSelect" class="font-weight-bold">Project</label>
+            <select id="savedProjectSelect" class="form-control select2" required>
+              <option disabled selected>Select Project</option>
+              <?php foreach ($projects as $proj): ?>
+                <option value="<?= $proj->projectID ?>"><?= $proj->projectTitle ?></option>
+              <?php endforeach; ?>
+            </select>
+            <div class="invalid-feedback">Please select a project.</div>
+          </div>
+
+          <div class="form-group mt-3">
+            <label for="savedBatchSelect" class="font-weight-bold">Payroll Batch</label>
+            <select name="batch_id" id="savedBatchSelect" class="form-control select2" required>
+              <option disabled selected>Select Batch</option>
+              <?php foreach ($batches as $batch): ?>
+                <option 
+                  value="<?= $batch->projectID . '|' . $batch->start_date . '|' . $batch->end_date ?>"
+                  data-project="<?= $batch->projectID ?>">
+                  <?= $batch->projectTitle ?> (<?= date('M d, Y', strtotime($batch->start_date)) ?> - <?= date('M d, Y', strtotime($batch->end_date)) ?>)
+                </option>
+              <?php endforeach; ?>
+            </select>
+            <div class="invalid-feedback">Please select a batch.</div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-info">
+            <i class="mdi mdi-eye"></i> View Payroll
+          </button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+
 
       </div>
     </div>
@@ -116,15 +186,21 @@ document.addEventListener('DOMContentLoaded', function () {
   const pidSelect = document.getElementById('pid');
   const batchSelect = document.getElementById('attendanceBatch');
 
+  // Initial hide all options
+  batchSelect.querySelectorAll('option').forEach(opt => {
+    if (opt.value !== '') opt.style.display = 'none';
+  });
+
+  // Show only batches belonging to selected project
   pidSelect.addEventListener('change', function () {
     const selectedProjectID = this.value;
-    const options = batchSelect.querySelectorAll('option');
 
+    // Reset selection
     batchSelect.value = "";
-    options.forEach(option => {
-      if (option.value === "") {
-        option.style.display = 'block';
-      } else if (option.getAttribute('data-project') === selectedProjectID) {
+    
+    batchSelect.querySelectorAll('option').forEach(option => {
+      const project = option.getAttribute('data-project');
+      if (!project || project === selectedProjectID) {
         option.style.display = 'block';
       } else {
         option.style.display = 'none';
@@ -132,6 +208,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // Set hidden start/end fields when a batch is selected
   batchSelect.addEventListener('change', function () {
     const selected = this.options[this.selectedIndex];
     document.getElementById('start').value = selected.getAttribute('data-start');
@@ -141,11 +218,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
 $(document).ready(function () {
   $('.select2').select2({
-    width: '100%',
-    dropdownParent: $('#generatePayrollModal')
+  width: '100%',
+  dropdownParent: $('.modal') // works for both modals
+});
+});
+
+
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+  const savedProject = document.getElementById('savedProjectSelect');
+  const savedBatch = document.getElementById('savedBatchSelect');
+
+  savedBatch.querySelectorAll('option').forEach(opt => {
+    if (opt.value !== '') opt.style.display = 'none';
+  });
+
+  savedProject.addEventListener('change', function () {
+    const selectedPID = this.value;
+
+    savedBatch.value = "";
+    savedBatch.querySelectorAll('option').forEach(opt => {
+      const project = opt.getAttribute('data-project');
+      if (!project || project === selectedPID) {
+        opt.style.display = 'block';
+      } else {
+        opt.style.display = 'none';
+      }
+    });
   });
 });
-</script>
 
+</script>
 </body>
 </html>

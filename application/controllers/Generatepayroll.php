@@ -9,13 +9,16 @@ class Generatepayroll extends CI_Controller {
         $this->load->model('Project_model');
     }
 
-   public function form()
+public function form()
 {
     $settingsID = $this->session->userdata('settingsID');
-   $data['projects'] = $this->Generatepayroll_model->getProjectsBySettingsID($settingsID);
-$data['attendance_periods'] = $this->Project_model->get_attendance_batches($settingsID); 
-$this->load->view('sidebar_generate_form', $data);
-
+    
+    $data['projects'] = $this->Generatepayroll_model->getProjectsBySettingsID($settingsID);
+    $data['attendance_periods'] = $this->Project_model->get_attendance_batches($settingsID); 
+    $data['batches'] = $this->Generatepayroll_model->get_saved_payroll_batches($settingsID); // ✅ add this line
+    
+    $this->load->view('sidebar_generate_form', $data);
 }
+
 
 }
