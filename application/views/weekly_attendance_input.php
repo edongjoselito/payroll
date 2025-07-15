@@ -111,6 +111,11 @@ input.is-invalid {
                                    data-target="#generateModal">
                                    <i class="mdi mdi-calendar-search"></i> Generate Attendance
                               </button>
+<button class="btn btn-primary mt-2 shadow-sm" data-toggle="modal" data-target="#overtimeModal">
+    <i class="mdi mdi-clock-plus-outline"></i> Add Overtime
+</button>
+
+
                          </div>
 
                          <?php if ($this->session->flashdata('msg')): ?>
@@ -261,6 +266,7 @@ input.is-invalid {
 
 
                                    <?php endif; ?>
+                                 
 
                                    <form method="post" action="<?= base_url('WeeklyAttendance/save') ?>"
                                         onsubmit="return validateAttendanceForm()">
@@ -344,6 +350,7 @@ foreach ($employees as $emp): ?>
                     </div>
                </div>
                <?php if ($flash): ?>
+                    
                <!-- Modal -->
                <div class="modal fade" id="existingAttendanceModal" tabindex="-1" role="dialog"
                     aria-labelledby="existingAttendanceLabel" aria-hidden="true">
@@ -429,6 +436,46 @@ foreach ($employees as $emp): ?>
   </div>
 </div>
 <?php endif; ?>
+<!-- Overtime Modal -->
+<div class="modal fade" id="overtimeModal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <form method="post" action="<?= base_url('Overtime/show_overtime_form') ?>">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Select Project & Date Range</h5>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Project</label>
+            <select class="form-control" name="projectID" required>
+              <option value="">Select Project</option>
+              <?php foreach ($projects as $proj): ?>
+                <option value="<?= $proj->projectID ?>"><?= $proj->projectTitle ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="col">
+              <label>From</label>
+              <input type="date" name="from" class="form-control" required>
+            </div>
+            <div class="col">
+              <label>To</label>
+              <input type="date" name="to" class="form-control" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Proceed</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
 
                <?php include('includes/footer.php'); ?>
           </div>
