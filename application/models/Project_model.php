@@ -164,12 +164,14 @@ public function get_all_personnel($settingsID, $projectID)
 public function get_assignments_by_project($projectID)
 {
     $this->db->select('ppa.ppID, ppa.projectID, ppa.settingsID, ppa.personnelID, 
-                       p.first_name, p.middle_name, p.last_name');
+                       p.first_name, p.middle_name, p.last_name, p.name_ext');
     $this->db->from('project_personnel_assignment AS ppa');
     $this->db->join('personnel AS p', 'ppa.personnelID = p.personnelID');
     $this->db->where('ppa.projectID', $projectID);
+    $this->db->order_by('p.last_name, p.first_name, p.middle_name'); // ✅ sort alphabetically
     return $this->db->get()->result();
 }
+
 
 
 
