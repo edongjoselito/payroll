@@ -199,7 +199,14 @@ public function updateAttendance()
 $this->session->set_flashdata('update_success', 'Attendance updated successfully!');
 
 
-redirect("WeeklyAttendance/records?project=$projectID&from=$from&to=$to#batch-$projectID-$from-$to");
+$projectID = $this->input->post('projectID');
+$from = $this->input->post('from');
+$to = $this->input->post('to');
+
+redirect("WeeklyAttendance/records?projectID={$projectID}&from={$from}&to={$to}");
+
+
+
 
 
 }

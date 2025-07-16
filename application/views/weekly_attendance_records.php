@@ -1,6 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-
+<?php
+function formatHoursAndMinutes($decimal) {
+    $hours = floor($decimal);
+    $minutes = round(($decimal - $hours) * 60);
+    return "{$hours} hr" . ($hours != 1 ? "s" : "") . " and {$minutes} mins";
+}
+?>
 
 <title>PMS - Attendance Records</title>
 <?php include('includes/head.php'); ?>
@@ -72,21 +78,6 @@ td:first-child {
 }
 </style>
 
-<!DOCTYPE html>
-<html lang="en">
-<?php
-function formatHoursAndMinutes($decimal) {
-    $hours = floor($decimal);
-    $minutes = round(($decimal - $hours) * 60);
-    return "{$hours} hr" . ($hours != 1 ? "s" : "") . " and {$minutes} mins";
-}
-?>
-
-<title>PMS - Attendance Records</title>
-<?php include('includes/head.php'); ?>
-<style>
-/* ... (styles remain unchanged) ... */
-</style>
 
 <body>
      <div id="wrapper">
@@ -103,16 +94,18 @@ function formatHoursAndMinutes($decimal) {
 <!-- 🔘 Filter Button -->
 <div class="mb-3">
     <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#filterModal">
-        <i class="mdi mdi-filter-variant"></i> Filter Attendance
+        <i class="mdi mdi-filter-variant"></i>View Attendance
     </button>
 </div>
 <!-- 🧾 Filter Attendance Modal -->
 <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
-    <form method="post" action="<?= base_url('WeeklyAttendance/records') ?>">
+<form method="get" action="<?= base_url('WeeklyAttendance/records') ?>">
+
+
       <div class="modal-content">
         <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title" id="filterModalLabel">Filter Attendance Records</h5>
+          <h5 class="modal-title" id="filterModalLabel">Attendance Records</h5>
           <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
         </div>
         <div class="modal-body">
@@ -120,7 +113,7 @@ function formatHoursAndMinutes($decimal) {
           <div class="form-group">
             <label for="project">Select Project</label>
             <select name="projectID" id="project" class="form-control" required>
-              <option value="">-- Select Project --</option>
+              <option value="">Select Project</option>
               <?php foreach ($projects as $proj): ?>
                 <option value="<?= $proj->projectID ?>"><?= $proj->projectTitle ?></option>
               <?php endforeach; ?>
@@ -128,9 +121,10 @@ function formatHoursAndMinutes($decimal) {
           </div>
 
           <div class="form-group">
-            <label for="attendanceBatch">Select Batch</label>
-            <select id="attendanceBatch" class="form-control" required>
-              <option value="">-- Select Batch --</option>
+            <label for="attendanceBatch">View Saved Attendance</label>
+           <select name="batchRange" id="attendanceBatch" class="form-control" required>
+
+              <option value="">Select Attendance</option>
               <?php foreach ($attendance_periods as $batch): ?>
                 <option data-project="<?= $batch->projectID ?>"
                         data-start="<?= $batch->start ?>"
@@ -155,10 +149,15 @@ function formatHoursAndMinutes($decimal) {
 </div>
 
 <?php
-$selectedProjectID = $this->input->post('projectID');
-$selectedFrom = $this->input->post('from');
-$selectedTo = $this->input->post('to');
+$selectedProjectID = $this->input->get('projectID');
+$selectedFrom = $this->input->get('from');
+$selectedTo = $this->input->get('to');
+
+$projectID = $selectedProjectID ?? '';
+$from = $selectedFrom ?? '';
+$to = $selectedTo ?? '';
 ?>
+
 
 <?php if (!empty($batches) && $selectedProjectID && $selectedFrom && $selectedTo): ?>
     <?php foreach ($batches as $batch): ?>
@@ -304,7 +303,6 @@ $selectedTo = $this->input->post('to');
     <?php endforeach; ?>
 <?php endif; ?>
 
-<!-- (The rest of the file stays the same) -->
 
 <?php if (isset($project) && empty($attendances)): ?>
 
@@ -385,6 +383,10 @@ $selectedTo = $this->input->post('to');
           aria-hidden="true">
           <div class="modal-dialog" role="document">
                <form method="post" action="<?= base_url('WeeklyAttendance/updateAttendance') ?>">
+                    <input type="hidden" name="projectID" value="<?= $projectID ?>">
+<input type="hidden" name="from" value="<?= $from ?>">
+<input type="hidden" name="to" value="<?= $to ?>">
+
                     <div class="modal-content">
                          <div class="modal-header bg-primary text-white">
                               <h5 class="modal-title" id="editModalLabel">Edit Attendance</h5>
@@ -394,7 +396,8 @@ $selectedTo = $this->input->post('to');
                          <div class="modal-body">
                               <input type="hidden" name="personnelID" id="editPersonnelID">
                               <input type="hidden" name="date" id="editDate">
-                              <input type="hidden" name="project" value="<?= $projectID ?>">
+                            <input type="hidden" name="projectID" value="<?= $projectID ?>">
+
                               <input type="hidden" name="from" value="<?= $from ?>">
                               <input type="hidden" name="to" value="<?= $to ?>">
                               <div class="form-group">
@@ -479,7 +482,7 @@ $(document).ready(function () {
 
      // Attendance batch filtering based on project
      const projectSelect = document.getElementById('project');
-     const batchSelect = document.getElementById('attendanceBatch');
+    const batchSelect = document.getElementById('attendanceBatch');
 
      projectSelect.addEventListener('change', function () {
           const selectedProject = this.value;
@@ -497,10 +500,10 @@ $(document).ready(function () {
           });
      });
 
-     batchSelect.addEventListener('change', function () {
-          const selected = this.options[this.selectedIndex];
-          document.getElementById('from').value = selected.getAttribute('data-start');
-          document.getElementById('to').value = selected.getAttribute('data-end');
+    batchSelect.addEventListener('change', function () {
+    const selected = this.options[this.selectedIndex];
+    document.getElementById('from').value = selected.getAttribute('data-start');
+    document.getElementById('to').value = selected.getAttribute('data-end');
      });
 
      // Attendance modal logic
