@@ -97,21 +97,23 @@ td:first-child {
         <i class="mdi mdi-filter-variant"></i>View Attendance
     </button>
 </div>
-<!-- 🧾 Filter Attendance Modal -->
+<!-- Modal: View Attendance Records -->
 <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-<form method="get" action="<?= base_url('WeeklyAttendance/records') ?>">
-
-
-      <div class="modal-content">
+  <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+    <form method="get" action="<?= base_url('WeeklyAttendance/records') ?>">
+      <div class="modal-content shadow-sm border-0">
         <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title" id="filterModalLabel">Attendance Records</h5>
-          <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+          <h5 class="modal-title" id="filterModalLabel">
+            <i class="mdi mdi-calendar-search mr-2"></i> View Attendance Records
+          </h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <span>&times;</span>
+          </button>
         </div>
-        <div class="modal-body">
 
+        <div class="modal-body text-dark">
           <div class="form-group">
-            <label for="project">Select Project</label>
+            <label for="project" class="font-weight-bold">Project</label>
             <select name="projectID" id="project" class="form-control" required>
               <option value="">Select Project</option>
               <?php foreach ($projects as $proj): ?>
@@ -121,15 +123,14 @@ td:first-child {
           </div>
 
           <div class="form-group">
-            <label for="attendanceBatch">View Saved Attendance</label>
-           <select name="batchRange" id="attendanceBatch" class="form-control" required>
-
-              <option value="">Select Attendance</option>
+            <label for="attendanceBatch" class="font-weight-bold">Attendance Batch</label>
+            <select name="batchRange" id="attendanceBatch" class="form-control" required>
+              <option value="">Select Batch</option>
               <?php foreach ($attendance_periods as $batch): ?>
                 <option data-project="<?= $batch->projectID ?>"
                         data-start="<?= $batch->start ?>"
                         data-end="<?= $batch->end ?>">
-                  <?= date('F j, Y', strtotime($batch->start)) . ' - ' . date('F j, Y', strtotime($batch->end)) ?>
+                  <?= date('F j, Y', strtotime($batch->start)) ?> - <?= date('F j, Y', strtotime($batch->end)) ?>
                 </option>
               <?php endforeach; ?>
             </select>
@@ -137,16 +138,21 @@ td:first-child {
 
           <input type="hidden" name="from" id="from">
           <input type="hidden" name="to" id="to">
-
         </div>
+
         <div class="modal-footer">
-          <button type="submit" class="btn btn-success">View Records</button>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-success">
+            <i class="mdi mdi-check"></i> View Records
+          </button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">
+            <i class="mdi mdi-close-circle-outline"></i> Cancel
+          </button>
         </div>
       </div>
     </form>
   </div>
 </div>
+
 
 <?php
 $selectedProjectID = $this->input->get('projectID');
@@ -379,6 +385,7 @@ $to = $selectedTo ?? '';
                </div>
           </div>
      </div>
+     
      <div class="modal fade" id="editAttendanceModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel"
           aria-hidden="true">
           <div class="modal-dialog" role="document">
