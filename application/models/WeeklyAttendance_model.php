@@ -30,70 +30,72 @@ public function getEmployeesByProject($projectID, $settingsID)
 
 
 
-public function saveAttendance($data) {
-    $dates = $data['dates'];
+public function saveAttendance($data)
+{
+    $settingsID = $this->session->userdata('settingsID');
     $projectID = $data['projectID'];
     $from = $data['from'];
     $to = $data['to'];
-    $settingsID = $data['settingsID'];
+    $dates = $data['dates'] ?? [];
 
-    $statusList = $data['attendance_status'];
-    $hourList = $data['attendance_hours'];
+    $group_number = date('Ymd', strtotime($from)) . '-' . date('Ymd', strtotime($to));
 
-    // Used for summarizing into work_hours table
-    $weeklyTotal = [];
+    $statuses = $data['attendance_status'] ?? [];
+    $hours = $data['attendance_hours'] ?? [];
 
-    foreach ($statusList as $personnelID => $statusDates) {
+    foreach ($statuses as $personnelID => $statusDates) {
         foreach ($statusDates as $date => $status) {
-            $hours = isset($hourList[$personnelID][$date]) ? floatval($hourList[$personnelID][$date]) : 0.0;
+            $log = [
+                'personnelID' => $personnelID,
+                'projectID' => $projectID,
+                'settingsID' => $settingsID,
+                'date' => $date,
+                'status' => $status,
+                'work_duration' => $hours[$personnelID][$date] ?? 0,
+                'holiday_hours' => 0, // You can change this later if holiday input exists
+                'group_number' => $group_number,
+            ];
 
-            $work_duration = 0.0;
-            $holiday_hours = 0.0;
-
-            if ($status == 'Regular Holiday') {
-                if ($hours > 8) {
-                    $work_duration = 8;
-                    $holiday_hours = $hours - 8;
-                } else {
-                    $holiday_hours = $hours;
-                }
-            } else {
-                $work_duration = $hours;
-            }
-
-            // Track weekly totals
-            $weeklyTotal[$personnelID] = ($weeklyTotal[$personnelID] ?? 0) + $work_duration + $holiday_hours;
-
-            // Save attendance per day
-            $this->db->replace('attendance', [
-                'personnelID'    => $personnelID,
-                'projectID'      => $projectID,
-                'date'           => $date,
-                'status'         => $status,
-                'work_duration'  => $work_duration,
-                'holiday_hours'  => $holiday_hours,
-                'settingsID'     => $settingsID
+            // Check if existing entry
+            $this->db->where([
+                'personnelID' => $personnelID,
+                'projectID' => $projectID,
+                'date' => $date,
+                'settingsID' => $settingsID
             ]);
+            $existing = $this->db->get('attendance')->row();
+
+            if ($existing) {
+                $this->db->where('id', $existing->id)->update('attendance', $log);
+            } else {
+                $this->db->insert('attendance', $log);
+            }
         }
     }
 
-    // Save summarized total to work_hours
-    foreach ($weeklyTotal as $personnelID => $total) {
-        $this->db->replace('work_hours', [
-            'personnelID'   => $personnelID,
-            'projectID'     => $projectID,
-            'from'          => $from,
-            'to'            => $to,
-            'total_hours'   => $total,
-            'settingsID'    => $settingsID
-        ]);
-    }
+    return true;
 }
 
+private function getDateRange($from, $to)
+{
+    $start = new DateTime($from);
+    $end = new DateTime($to);
+    $dates = [];
 
+    while ($start <= $end) {
+        $dates[] = $start->format('Y-m-d');
+        $start->modify('+1 day');
+    }
 
-    public function getProjectById($id) {
-    return $this->db->where('projectID', $id)->get('project')->row();
+    return $dates;
+}
+
+public function getProjectById($projectID)
+{
+    return $this->db
+        ->where('projectID', $projectID)
+        ->get('project')
+        ->row();
 }
 
 public function attendanceExists($projectID, $from, $to) {
@@ -108,55 +110,72 @@ public function attendanceExists($projectID, $from, $to) {
     return $query->num_rows() > 0;
 }
 
-public function getExistingAttendanceDates($projectID, $from, $to) {
-    $settingsID = $this->session->userdata('settingsID');
-
-    $this->db->select('DISTINCT(date) as date');
+public function getExistingAttendanceDates($projectID, $from, $to, $group_number)
+{
+    $this->db->select('date');
     $this->db->from('attendance');
     $this->db->where('projectID', $projectID);
-    $this->db->where('settingsID', $settingsID);
+    $this->db->where('group_number', $group_number); // ✅ filter by group_number
     $this->db->where('date >=', $from);
     $this->db->where('date <=', $to);
+    $this->db->group_by('date');
     $this->db->order_by('date', 'ASC');
-    
     $query = $this->db->get();
-
-    $dates = [];
-    foreach ($query->result() as $row) {
-        $dates[] = $row->date;
-    }
-
-    return $dates;
+    return array_column($query->result_array(), 'date');
 }
 
 
 
 // DISPLAY SAVED ATTENDANCE
 
-public function getAttendanceRecords($projectID, $from, $to) {
-    $settingsID = $this->session->userdata('settingsID');
+public function getAttendanceRecords($projectID, $from, $to, $dates, $group_number)
+{
+    if (empty($dates)) return [];
 
-    $this->db->select('a.*, p.first_name, p.last_name');
-    $this->db->from('attendance a');
-    $this->db->join('personnel p', 'p.personnelID = a.personnelID');
-    $this->db->where('a.projectID', $projectID);
-    $this->db->where('a.date >=', $from);
-    $this->db->where('a.date <=', $to);
-       $this->db->where('p.settingsID', $this->session->userdata('settingsID'));
-
-
+    // Step 1: Fetch all attendance rows for given project, group, and dates
+    $this->db->select('*');
+    $this->db->from('attendance');
+    $this->db->where('projectID', $projectID);
+    $this->db->where('group_number', $group_number);
+    $this->db->where_in('date', $dates);
     $query = $this->db->get();
-    $result = [];
-  foreach ($query->result() as $row) {
-    $result[$row->personnelID]['name'] = $row->last_name . ', ' . $row->first_name;
-    $result[$row->personnelID]['dates'][$row->date] = $row->status;
-   $result[$row->personnelID]['hours'][$row->date] = $row->work_duration;
-$result[$row->personnelID]['holiday'][$row->date] = $row->holiday_hours;
 
+    $results = $query->result();
+    $data = [];
+
+    if (empty($results)) return [];
+
+    // Step 2: Collect all unique personnel IDs to fetch names in bulk
+    $personnelIDs = array_unique(array_column($results, 'personnelID'));
+
+    // Step 3: Fetch names for all personnel in one query
+    $this->db->select('personnelID, first_name, last_name');
+    $this->db->from('personnel');
+    $this->db->where_in('personnelID', $personnelIDs);
+    $personnelQuery = $this->db->get();
+    $personnelMap = [];
+
+    foreach ($personnelQuery->result() as $p) {
+        $personnelMap[$p->personnelID] = $p->last_name . ', ' . $p->first_name;
+    }
+
+    // Step 4: Map attendance records into structured array
+    foreach ($results as $row) {
+        $pid = $row->personnelID;
+
+        if (!isset($data[$pid]['name'])) {
+            $data[$pid]['name'] = $personnelMap[$pid] ?? 'Unknown';
+        }
+
+        $data[$pid]['dates'][$row->date] = $row->status;
+        $data[$pid]['hours'][$row->date] = $row->work_duration;
+        $data[$pid]['holiday'][$row->date] = $row->holiday_hours;
+    }
+
+    return $data;
 }
 
-    return $result;
-}
+
 
 
 public function getWorkHours($projectID, $from, $to) {
@@ -217,13 +236,13 @@ public function deleteAttendanceByDateRange($projectID, $from, $to)
 
 public function getSavedBatches($settingsID)
 {
-    return $this->db->select('projectID, MIN(date) as start, MAX(date) as end')
-                    ->from('attendance')
-                    ->where('settingsID', $settingsID)
-                    ->group_by(['projectID', 'WEEK(date)'])
-                    ->order_by('start', 'DESC')
-                    ->get()
-                    ->result();
+    return $this->db->select('projectID, MIN(date) as start, MAX(date) as end, group_number')
+        ->from('attendance')
+        ->where('settingsID', $settingsID)
+        ->group_by(['projectID', 'group_number'])
+        ->order_by('start', 'DESC')
+        ->get()
+        ->result();
 }
 
 
@@ -249,5 +268,13 @@ public function get_total_work_hours($personnelID, $projectID, $from, $to)
 
 
 // ----------------------------------------END---------------------------------------------
+public function getAttendancePeriods()
+{
+    $this->db->select('projectID, MIN(date) as start, MAX(date) as end, group_number');
+    $this->db->from('attendance');
+    $this->db->group_by(['projectID', 'group_number']);
+    $this->db->order_by('start', 'DESC');
+    return $this->db->get()->result();
+}
 
 }

@@ -1,12 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<?php
-function formatHoursAndMinutes($decimal) {
-    $hours = floor($decimal);
-    $minutes = round(($decimal - $hours) * 60);
-    return "{$hours} hr" . ($hours != 1 ? "s" : "") . " and {$minutes} mins";
-}
-?>
+
 
 <title>PMS - Attendance Records</title>
 <?php include('includes/head.php'); ?>
@@ -78,6 +72,22 @@ td:first-child {
 }
 </style>
 
+<!DOCTYPE html>
+<html lang="en">
+<?php
+function formatHoursAndMinutes($decimal) {
+    $hours = floor($decimal);
+    $minutes = round(($decimal - $hours) * 60);
+    return "{$hours} hr" . ($hours != 1 ? "s" : "") . " and {$minutes} mins";
+}
+?>
+
+<title>PMS - Attendance Records</title>
+<?php include('includes/head.php'); ?>
+<style>
+/* ... (styles remain unchanged) ... */
+</style>
+
 <body>
      <div id="wrapper">
           <?php include('includes/top-nav-bar.php'); ?>
@@ -86,280 +96,258 @@ td:first-child {
           <div class="content-page">
                <div class="content">
                     <div class="container-fluid">
+                         <!-- Modal and Header remain unchanged -->
 
-
-                         <div class="d-flex justify-content-between align-items-center mb-3">
-                              <div>
-                                   <h3 class="font-weight-bold text-primary">
-                                        <i class="mdi mdi-calendar-check-outline mr-2"></i> Attendance Records
-                                   </h3>
-                                   <p class="text-dark mb-0">Saved logs by project and date range</p>
-                              </div>
-                              <button class="btn btn-success" data-toggle="modal" data-target="#filterModal">
-                                   <i class="mdi mdi-filter-outline"></i> View Records
-                              </button>
-                         </div>
-
-
-                         <div class="modal fade" id="filterModal" tabindex="-1" role="dialog"
-                              aria-labelledby="filterModalLabel" aria-hidden="true">
-                              <div class="modal-dialog modal-dialog-centered" role="document">
-                                   <form method="post" action="<?= base_url('WeeklyAttendance/records') ?>">
-                                        <div class="modal-content">
-                                             <div class="modal-header bg-primary text-white">
-                                                  <h5 class="modal-title" id="filterModalLabel"><i
-                                                            class="mdi mdi-calendar-month"></i> Select Attendance
-                                                       Records</h5>
-                                                  <button type="button" class="close text-white" data-dismiss="modal"
-                                                       aria-label="Close">
-                                                       <span aria-hidden="true">&times;</span>
-                                                  </button>
-                                             </div>
-
-                                             <div class="modal-body">
-                                                  <div class="form-group">
-                                                       <label for="project">Project</label>
-                                                       <select name="project" id="project" class="form-control"
-                                                            required>
-                                                            <option value="">Select Project</option>
-                                                            <?php foreach ($projects as $proj): ?>
-                                                            <option value="<?= $proj->projectID ?>">
-                                                                 <?= $proj->projectTitle ?></option>
-                                                            <?php endforeach; ?>
-                                                       </select>
-                                                  </div>
-
-                                                  <div class="form-group">
-                                                       <label for="attendanceBatch">Saved Records</label>
-                                                       <select id="attendanceBatch" class="form-control" required>
-                                                            <option value="" disabled selected>View Records</option>
-                                                            <?php foreach ($attendance_periods as $batch): ?>
-                                                            <option
-                                                                 value="<?= $batch->projectID ?>-<?= $batch->start ?>-<?= $batch->end ?>"
-                                                                 data-project="<?= $batch->projectID ?>"
-                                                                 data-start="<?= $batch->start ?>"
-                                                                 data-end="<?= $batch->end ?>">
-                                                                 <?= date('F d', strtotime($batch->start)) ?> to
-                                                                 <?= date('F d, Y', strtotime($batch->end)) ?>
-                                                            </option>
-                                                            <?php endforeach; ?>
-                                                       </select>
-                                                  </div>
-
-                                                  <input type="hidden" name="from" id="from">
-                                                  <input type="hidden" name="to" id="to">
-                                             </div>
-
-                                             <div class="modal-footer">
-                                                  <button type="submit" class="btn btn-success">
-                                                       <i class="mdi mdi-eye"></i> View
-                                                  </button>
-                                                  <button type="button" class="btn btn-secondary"
-                                                       data-dismiss="modal">Cancel</button>
-                                             </div>
-
-                                        </div>
-                                   </form>
-                              </div>
-                         </div>
-
-
-                         <!-- Display Records -->
                          <div class="card">
                               <div class="card-body">
+<!-- 🔘 Filter Button -->
+<div class="mb-3">
+    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#filterModal">
+        <i class="mdi mdi-filter-variant"></i> Filter Attendance
+    </button>
+</div>
+<!-- 🧾 Filter Attendance Modal -->
+<div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <form method="post" action="<?= base_url('WeeklyAttendance/records') ?>">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title" id="filterModalLabel">Filter Attendance Records</h5>
+          <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
 
-                                   <?php if (!empty($attendances)): ?>
-                                   <?php
-// Sort attendances array by name alphabetically
-uasort($attendances, function($a, $b) {
-    return strcmp($a['name'], $b['name']);
-});
+          <div class="form-group">
+            <label for="project">Select Project</label>
+            <select name="projectID" id="project" class="form-control" required>
+              <option value="">-- Select Project --</option>
+              <?php foreach ($projects as $proj): ?>
+                <option value="<?= $proj->projectID ?>"><?= $proj->projectTitle ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="attendanceBatch">Select Batch</label>
+            <select id="attendanceBatch" class="form-control" required>
+              <option value="">-- Select Batch --</option>
+              <?php foreach ($attendance_periods as $batch): ?>
+                <option data-project="<?= $batch->projectID ?>"
+                        data-start="<?= $batch->start ?>"
+                        data-end="<?= $batch->end ?>">
+                  <?= date('F j, Y', strtotime($batch->start)) . ' - ' . date('F j, Y', strtotime($batch->end)) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <input type="hidden" name="from" id="from">
+          <input type="hidden" name="to" id="to">
+
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">View Records</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<?php
+$selectedProjectID = $this->input->post('projectID');
+$selectedFrom = $this->input->post('from');
+$selectedTo = $this->input->post('to');
 ?>
 
-                                   <div class="d-flex justify-content-between align-items-center mb-3">
-                                        <div class="card shadow-sm mb-4">
-                                             <div class="card-body">
-                                                  <h5 class="mb-1">
-                                                       <i class="mdi mdi-office-building text-info mr-1"></i>
-                                                       <strong><?= $project->projectTitle ?></strong>
-                                                  </h5>
-                                                  <p class="text-dark small mb-0">
-                                                       <?= date('F j, Y', strtotime($from)) ?> to
-                                                       <?= date('F j, Y', strtotime($to)) ?>
-                                                  </p>
-                                             </div>
-                                        </div>
+<?php if (!empty($batches) && $selectedProjectID && $selectedFrom && $selectedTo): ?>
+    <?php foreach ($batches as $batch): ?>
+        <?php
+            if (
+                $batch['projectID'] != $selectedProjectID ||
+                $batch['from'] != $selectedFrom ||
+                $batch['to'] != $selectedTo
+            ) {
+                continue;
+            }
+
+            $project = $batch['project'];
+            $projectID = $batch['projectID'];
+            $from = $batch['from'];
+            $to = $batch['to'];
+            $dates = $batch['dates'];
+            $attendances = $batch['attendances'];
+        ?>
+
+        <?php
+            $project = $batch['project'];
+            $projectID = $batch['projectID'];
+            $from = $batch['from'];
+            $to = $batch['to'];
+            $dates = $batch['dates'];
+            $attendances = $batch['attendances'];
+        ?>
+<a id="batch-<?= $projectID ?>-<?= $from ?>-<?= $to ?>"></a>
+
+        <h4 class="mt-4 mb-3 text-primary">
+            🗂 Batch (<?= date('F j', strtotime($from)) ?> - <?= date('F j, Y', strtotime($to)) ?>)
+        </h4>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="mb-1">
+                        <i class="mdi mdi-office-building text-info mr-1"></i>
+                        <strong><?= $project->projectTitle ?></strong>
+                    </h5>
+                    <p class="text-dark small mb-0">
+                        <?= date('F j, Y', strtotime($from)) ?> to
+                        <?= date('F j, Y', strtotime($to)) ?>
+                    </p>
+                </div>
+            </div>
+
+            <div class="text-end">
+                <button class="btn btn-outline-secondary btn-sm mr-1" onclick="window.print()">
+                    <i class="mdi mdi-printer"></i> Print
+                </button>
+
+                <form action="<?= base_url('WeeklyAttendance/deleteAttendance') ?>" method="post" style="display: inline;"
+                      onsubmit="return confirm('Are you sure you want to delete all attendance records for this date range?')">
+                    <input type="hidden" name="projectID" value="<?= $projectID ?>">
+                    <input type="hidden" name="from" value="<?= $from ?>">
+                    <input type="hidden" name="to" value="<?= $to ?>">
+                    <button type="submit" class="btn btn-danger btn-sm">
+                        <i class="mdi mdi-delete"></i> Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered table-sm text-center">
+                <thead class="thead-light">
+                <tr>
+                    <th>Personnel</th>
+                    <?php foreach ($dates as $d): ?>
+                        <th><?= date('M d', strtotime($d)) ?></th>
+                    <?php endforeach; ?>
+                    <th>Total Hours</th>
+                </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($attendances as $pid => $person): ?>
+                    <tr>
+                        <td class="text-left font-weight-bold"><?= $person['name'] ?></td>
+                        <?php foreach ($dates as $d): ?>
+                            <?php
+                            $status = $person['dates'][$d] ?? 'Absent';
+                            $workHrs = $person['hours'][$d] ?? 0;
+                            $holidayHrs = $person['holiday'][$d] ?? 0;
+
+                            $color = 'secondary';
+                            if ($status === 'Present') $color = 'success';
+                            elseif ($status === 'Absent') $color = 'danger';
+                            elseif ($status === 'Day Off') $color = 'info';
+                            elseif ($status === 'Regular Holiday') $color = 'warning';
+                            elseif ($status === 'Special Non-Working Holiday') $color = 'dark';
+
+                            $statusLabel = $status;
+                            if ($status === 'Regular Holiday') $statusLabel = 'R. Holiday';
+                            elseif ($status === 'Special Non-Working Holiday') $statusLabel = 'S. Holiday';
+                            ?>
+                            <td class="text-<?= $color ?> edit-attendance"
+                                data-personnel="<?= $pid ?>" data-date="<?= $d ?>"
+                                data-status="<?= $status ?>" data-hours="<?= $workHrs ?>"
+                                data-holiday="<?= $holidayHrs ?>"
+                                style="cursor:pointer; min-width: 130px;">
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="mdi mdi-pencil text-muted mr-1" style="font-size:12px;"></i>
+                                    <div class="text-wrap text-center" style="white-space: normal;">
+                                        <?= $statusLabel ?>
+                                        <?php
+                                        if (stripos($status, 'Present') !== false || stripos($status, 'Regular') !== false) {
+                                            if ($workHrs > 0 || $holidayHrs > 0) {
+                                                echo "<br><small>";
+                                                if ($workHrs > 0) echo number_format($workHrs, 2) . ' hr' . ($workHrs != 1 ? 's' : '');
+                                                if ($holidayHrs > 0) {
+                                                    if ($workHrs > 0) echo ' + ';
+                                                    echo number_format($holidayHrs, 2) . ' hr' . ($holidayHrs != 1 ? 's' : '') . ' (holiday)';
+                                                }
+                                                echo "</small>";
+                                            }
+                                        }
+                                        ?>
+                                    </div>
+                                </div>
+                            </td>
+                        <?php endforeach; ?>
+                        <?php
+                        $reg = array_sum(array_column($person['hours'], null));
+                        $hol = array_sum(array_column($person['holiday'], null));
+                        ?>
+                        <td class="text-center">
+                            <?php if ($reg > 0 || $hol > 0): ?>
+                                <span class="text-dark">
+                                    <?php if ($reg > 0): ?><span class="text-primary">Regular: <?= formatHoursAndMinutes($reg); ?></span><br><?php endif; ?>
+                                    <?php if ($hol > 0): ?><span class="text-info">Holiday: <?= formatHoursAndMinutes($hol); ?></span><?php endif; ?>
+                                </span>
+                            <?php else: ?>
+                                <span class="text-muted">—</span>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endforeach; ?>
+<?php endif; ?>
+
+<!-- (The rest of the file stays the same) -->
+
+<?php if (isset($project) && empty($attendances)): ?>
+
+<div class="alert alert-warning">
+     <i class="mdi mdi-alert-circle-outline"></i>
+     No attendance records found for this project and date range.
+</div>
+<?php endif; ?>
 
 
-                                        <div class="text-end">
-                                             <button class="btn btn-outline-secondary btn-sm mr-1"
-                                                  onclick="window.print()">
-                                                  <i class="mdi mdi-printer"></i> Print
-                                             </button>
-
-                                             <form action="<?= base_url('WeeklyAttendance/deleteAttendance') ?>"
-                                                  method="post" style="display: inline;"
-                                                  onsubmit="return confirm('Are you sure you want to delete all attendance records for this date range?')">
-                                                  <input type="hidden" name="projectID" value="<?= $projectID ?>">
-                                                  <input type="hidden" name="from" value="<?= $from ?>">
-                                                  <input type="hidden" name="to" value="<?= $to ?>">
-                                                  <button type="submit" class="btn btn-danger btn-sm">
-                                                       <i class="mdi mdi-delete"></i> Delete
-                                                  </button>
-                                             </form>
-                                        </div>
-                                   </div>
-
-
-
-                                   <div class="table-responsive">
-                                        <table class="table table-hover table-bordered table-sm text-center">
-                                             <thead class="thead-light">
-                                                  <tr>
-                                                       <th>Personnel</th>
-                                                       <?php foreach ($dates as $d): ?>
-                                                       <th><?= date('M d', strtotime($d)) ?></th>
-                                                       <?php endforeach; ?>
-                                                       <th>Total Hours</th>
-                                                  </tr>
-                                             </thead>
-                                             <tbody>
-                                                  <?php foreach ($attendances as $pid => $person): ?>
-                                                  <tr>
-                                                       <td class="text-left font-weight-bold"><?= $person['name'] ?>
-                                                       </td>
-                                                       <?php foreach ($dates as $d): ?>
-                                                       <?php
-        $status = $person['dates'][$d] ?? 'Absent';
-        $workHrs = $person['hours'][$d] ?? 0;
-        $holidayHrs = $person['holiday'][$d] ?? 0;
-
-        $color = 'secondary';
-        if ($status === 'Present') $color = 'success';
-        elseif ($status === 'Absent') $color = 'danger';
-        elseif ($status === 'Day Off') $color = 'info';
-        elseif ($status === 'Regular Holiday') $color = 'warning';
-        elseif ($status === 'Special Non-Working Holiday') $color = 'dark';
-      ?><?php
-$statusLabel = $status;
-if ($status === 'Regular Holiday') {
-    $statusLabel = 'R. Holiday';
-} elseif ($status === 'Special Non-Working Holiday') {
-    $statusLabel = 'S. Holiday';
-}
-?>
-
-                                                       <td class="text-<?= $color ?> edit-attendance"
-                                                            data-personnel="<?= $pid ?>" data-date="<?= $d ?>"
-                                                            data-status="<?= $status ?>" data-hours="<?= $workHrs ?>"
-                                                            data-holiday="<?= $holidayHrs ?>"
-                                                            style="cursor:pointer; min-width: 130px;">
-
-                                                            <div
-                                                                 class="d-flex align-items-center justify-content-center">
-                                                                 <i class="mdi mdi-pencil text-muted mr-1"
-                                                                      style="font-size:12px;"></i>
-                                                                 <div class="text-wrap text-center"
-                                                                      style="white-space: normal;">
-                                                                      <?= $statusLabel ?>
-                                                                      <?php
-                if (stripos($status, 'Present') !== false || stripos($status, 'Regular') !== false) {
-                    if ($workHrs > 0 || $holidayHrs > 0) {
-                        echo "<br><small>";
-                        if ($workHrs > 0) {
-                            echo number_format($workHrs, 2) . ' hr' . ($workHrs != 1 ? 's' : '');
-                        }
-                        if ($holidayHrs > 0) {
-                            if ($workHrs > 0) echo ' + ';
-                            echo number_format($holidayHrs, 2) . ' hr' . ($holidayHrs != 1 ? 's' : '') . ' (holiday)';
-                        }
-                        echo "</small>";
-                    }
-                }
-            ?>
-                                                                 </div>
-                                                            </div>
-                                                       </td>
-
-
-
-                                                       <?php endforeach; ?>
-                                                       <?php
-    $reg = isset($hours[$pid]['regular']) ? $hours[$pid]['regular'] : 0;
-    $hol = isset($hours[$pid]['holiday']) ? $hours[$pid]['holiday'] : 0;
-?><td class="text-center">
-                                                            <?php if ($reg > 0 || $hol > 0): ?>
-                                                            <span class="text-dark">
-                                                                 <?php if ($reg > 0): ?>
-                                                                 <span class="text-primary">Regular:
-                                                                      <?= formatHoursAndMinutes($reg); ?></span><br>
-                                                                 <?php endif; ?>
-                                                                 <?php if ($hol > 0): ?>
-                                                                 <span class="text-info">Holiday:
-                                                                      <?= formatHoursAndMinutes($hol); ?></span>
-                                                                 <?php endif; ?>
-                                                            </span>
-                                                            <?php else: ?>
-                                                            <span class="text-muted">—</span>
-                                                            <?php endif; ?>
-                                                       </td>
-
-
-                                                       </td>
-                                                  </tr>
-                                                  <?php endforeach; ?>
-
-                                             </tbody>
-                                        </table>
-                                   </div>
-
-                                   <?php elseif (isset($project)): ?>
-                                   <div class="alert alert-warning">
-                                        <i class="mdi mdi-alert-circle-outline"></i>
-                                        No attendance records found for this project and date range.
-                                   </div>
-                                   <?php endif; ?>
-
-                              </div>
-                         </div>
                          <?php if ($this->session->flashdata('view_error')): ?>
-
-                         <!-- Bootstrap Modal -->
-                         <div class="modal fade" id="errorModal" tabindex="-1" role="dialog"
-                              aria-labelledby="errorModalLabel" aria-hidden="true">
-                              <div class="modal-dialog modal-dialog-centered" role="document">
-                                   <div class="modal-content border-0 shadow-sm">
-                                        <div class="modal-header bg-danger text-white">
-                                             <h5 class="modal-title" id="errorModalLabel">
-                                                  <i class="mdi mdi-alert-circle-outline mr-2"></i> Error
-                                             </h5>
-                                             <button type="button" class="close text-white" data-dismiss="modal"
-                                                  aria-label="Close">
-                                                  <span aria-hidden="true">&times;</span>
-                                             </button>
-                                        </div>
-
-                                        <div class="modal-body text-dark">
-                                             <div class="d-flex align-items-center">
-                                                  <i class="mdi mdi-alert mr-2 text-warning"
-                                                       style="font-size: 24px;"></i>
-                                                  <div>
-                                                       <strong>Some selected dates have no data.</strong><br>
-                                                       Only dates with existing attendance records will be shown.
-                                                  </div>
-                                             </div>
-                                        </div>
-
-                                        <div class="modal-footer">
-                                             <button type="button" class="btn btn-secondary" data-dismiss="modal">
-                                                  <i class="mdi mdi-close"></i> Close
-                                             </button>
-                                        </div>
-                                   </div>
-                              </div>
+<!-- Bootstrap Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog"
+     aria-labelledby="errorModalLabel" aria-hidden="true">
+     <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content border-0 shadow-sm">
+               <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="errorModalLabel">
+                         <i class="mdi mdi-alert-circle-outline mr-2"></i> Error
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                         <span aria-hidden="true">&times;</span>
+                    </button>
+               </div>
+               <div class="modal-body text-dark">
+                    <div class="d-flex align-items-center">
+                         <i class="mdi mdi-alert mr-2 text-warning" style="font-size: 24px;"></i>
+                         <div>
+                              <strong>Some selected dates have no data.</strong><br>
+                              Only dates with existing attendance records will be shown.
                          </div>
+                    </div>
+               </div>
+               <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                         <i class="mdi mdi-close"></i> Close
+                    </button>
+               </div>
+          </div>
+     </div>
+</div>
+<?php endif; ?>
 
-                         <?php endif; ?>
 
 
                     </div>
@@ -434,14 +422,17 @@ if ($status === 'Regular Holiday') {
                          </div>
 
                          <div class="modal-footer">
-                              <button type="submit" class="btn btn-success">Update</button>
-                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                             <?php if (!empty($batches) && $selectedProjectID && $selectedFrom && $selectedTo): ?>
+    <button type="submit" class="btn btn-primary">Update</button>
+    <button type="reset" class="btn btn-secondary">Cancel</button>
+<?php endif; ?>
+
                          </div>
                     </div>
                </form>
           </div>
      </div>
-     <?php if ($this->session->flashdata('update_success')): ?>
+   <?php if ($this->session->flashdata('update_success')): ?>
      <div aria-live="polite" aria-atomic="true" style="
      position: fixed;
      top: 70px;
@@ -463,7 +454,9 @@ if ($status === 'Regular Holiday') {
                </div>
           </div>
      </div>
-     <?php endif; ?>
+<?php endif; ?>
+
+
 
      <!-- Bootstrap + App JS -->
      <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>

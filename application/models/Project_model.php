@@ -577,21 +577,50 @@ public function get_project_details($projectID)
 
 public function get_attendance_batches($settingsID)
 {
-    $this->db->select('projectID, MIN(date) as start, MAX(date) as end');
-    $this->db->from('attendance');
-    $this->db->where('settingsID', $settingsID);
-    $this->db->group_by('projectID');
-    $this->db->order_by('start', 'desc');
-    $batches = $this->db->get()->result();
-
-    foreach ($batches as &$batch) {
-        $project = $this->db->get_where('project', ['projectID' => $batch->projectID])->row();
-        $batch->projectTitle = $project->projectTitle ?? 'Untitled Project';
-    }
-
-    return $batches;
+    return $this->db
+        ->select('projectID, MIN(date) as start, MAX(date) as end, group_number')
+        ->from('attendance')
+        ->where('settingsID', $settingsID)
+        ->group_by(['projectID', 'group_number'])
+        ->order_by('MIN(date)', 'DESC')
+        ->get()
+        ->result();
 }
 
+
+public function get_consecutive_attendance_batches($settingsID, $projectID)
+{
+    $this->db->select('DISTINCT(date)');
+    $this->db->from('attendance');
+    $this->db->where('settingsID', $settingsID);
+    $this->db->where('projectID', $projectID);
+    $this->db->order_by('date', 'ASC');
+    $dates = $this->db->get()->result();
+
+    $grouped = [];
+    $group = [];
+
+    foreach ($dates as $i => $row) {
+        $curr = date('Y-m-d', strtotime($row->date));
+        $prev = isset($dates[$i - 1]) ? date('Y-m-d', strtotime($dates[$i - 1]->date)) : null;
+
+        if ($prev && date('Y-m-d', strtotime($prev . ' +1 day')) !== $curr) {
+            $grouped[] = $group;
+            $group = [];
+        }
+
+        $group[] = $curr;
+    }
+
+    if (!empty($group)) $grouped[] = $group;
+
+    $ranges = [];
+    foreach ($grouped as $g) {
+        $ranges[] = ['start' => $g[0], 'end' => end($g)];
+    }
+
+    return $ranges;
+}
 
 
 }

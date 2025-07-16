@@ -71,95 +71,63 @@ $this->session->set_flashdata('attendance_success', [
 }
 
 
- public function records()
+public function records()
 {
-    // Always initialize all required variables to avoid undefined errors
-    $data['attendance_periods'] = $this->WeeklyAttendance_model->getSavedBatches($this->session->userdata('settingsID'));
-    $data['projects'] = $this->WeeklyAttendance_model->getProjects($this->session->userdata('settingsID'));
+    $settingsID = $this->session->userdata('settingsID');
 
-    // Default fallback variables
-    $data['attendances'] = [];
-    $data['dates'] = [];
-    $data['hours'] = [];
-    $data['project'] = null;
-    $data['projectID'] = null;
-    $data['from'] = null;
-    $data['to'] = null;
+    $projectFilter = $this->input->get('project');
+    $fromFilter = $this->input->get('from');
+    $toFilter = $this->input->get('to');
 
-    // Support GET and fallback to POST
-    $projectID = $this->input->get('project');
-    $from = $this->input->get('from');
-    $to = $this->input->get('to');
+    $data['attendance_periods'] = $this->WeeklyAttendance_model->getSavedBatches($settingsID);
+    $data['projects'] = $this->WeeklyAttendance_model->getProjects($settingsID);
+    $data['batches'] = [];
 
-    if (!$projectID && $this->input->post()) {
-        $projectID = $this->input->post('project');
-        $from = $this->input->post('from');
-        $to = $this->input->post('to');
-    }
+    foreach ($data['attendance_periods'] as $batch) {
+        $projectID = $batch->projectID;
+        $from = $batch->start;
+        $to = $batch->end;
+        $group_number = $batch->group_number;
 
-    // Set base data for view even if no records found
-    $data['projectID'] = $projectID;
-    $data['from'] = $from;
-    $data['to'] = $to;
-    $data['project'] = $this->WeeklyAttendance_model->getProjectById($projectID);
-
-    // If form submitted
-    if ($projectID && $from && $to) {
-        // Check if attendance was ever generated
-        if (!$this->WeeklyAttendance_model->attendanceExists($projectID, $from, $to)) {
-            $this->session->set_flashdata('error', '❌ Attendance has not been generated for the selected date range. Please generate first.');
-            redirect('WeeklyAttendance/records');
-            return;
-        }
-
-        // Get available dates with records
-        $existingDates = $this->WeeklyAttendance_model->getExistingAttendanceDates($projectID, $from, $to);
-
-        if (empty($existingDates)) {
-            $latestRange = $this->WeeklyAttendance_model->getLatestAttendanceRange($projectID);
-
-            if ($latestRange) {
-                $this->session->set_flashdata('error', '⚠ No attendance data for selected range. Showing most recent available record instead.');
-                redirect('WeeklyAttendance/records?project=' . $projectID . '&from=' . $latestRange['from'] . '&to=' . $latestRange['to']);
-            } else {
-                $this->session->set_flashdata('error', '❌ No attendance has been generated for this project yet.');
-                redirect('WeeklyAttendance/records?project=' . $projectID . '&from=' . $from . '&to=' . $to);
+        // Only include the filtered batch if filter is applied
+        if ($projectFilter && $fromFilter && $toFilter) {
+            if (
+                $projectID != $projectFilter ||
+                $from != $fromFilter ||
+                $to != $toFilter
+            ) {
+                continue;
             }
-            return;
         }
 
-        // Notify partial data if mismatch
-        $requestedDates = $this->getDateRange($from, $to);
-        if (count($requestedDates) !== count($existingDates)) {
-            $this->session->set_flashdata('view_error', true);
+        $existingDates = $this->WeeklyAttendance_model->getExistingAttendanceDates($projectID, $from, $to, $group_number);
+        // if (empty($existingDates)) continue;
+
+        $raw = $this->WeeklyAttendance_model->getAttendanceRecords($projectID, $from, $to, $existingDates, $group_number);
+
+        $attendances = [];
+        foreach ($raw as $pid => $personData) {
+            $attendances[$pid]['name'] = $personData['name'];
+            foreach ($personData['dates'] as $date => $status) {
+                $attendances[$pid]['dates'][$date] = $status;
+                $attendances[$pid]['hours'][$date] = $personData['hours'][$date] ?? 0;
+                $attendances[$pid]['holiday'][$date] = $personData['holiday'][$date] ?? 0;
+            }
         }
 
-        // Set populated values
-        $data['dates'] = $existingDates;
-      $raw = $this->WeeklyAttendance_model->getAttendanceRecords($projectID, $from, $to, $existingDates);
-$attendances = [];
-
-foreach ($raw as $pid => $personData) {
-    $attendances[$pid]['name'] = $personData['name'];
-    foreach ($personData['dates'] as $date => $status) {
-        $attendances[$pid]['dates'][$date] = $status;
-        $attendances[$pid]['hours'][$date] = $personData['hours'][$date] ?? 0;
-        $attendances[$pid]['holiday'][$date] = $personData['holiday'][$date] ?? 0;
-    }
-}
-
-
-$data['attendances'] = $attendances;
-
-        $data['hours'] = $this->WeeklyAttendance_model->getWorkHours($projectID, $from, $to);
+        $data['batches'][] = [
+            'projectID'     => $projectID,
+            'group_number'  => $group_number,
+            'from'          => $from,
+            'to'            => $to,
+            'dates'         => $existingDates,
+            'attendances'   => $attendances,
+            'project'       => $this->WeeklyAttendance_model->getProjectById($projectID)
+        ];
     }
 
-    // Load the view
     $this->load->view('weekly_attendance_records', $data);
 }
-
-
-
 
     private function getDateRange($from, $to) {
         $start = new DateTime($from);
@@ -231,7 +199,9 @@ public function updateAttendance()
 $this->session->set_flashdata('update_success', 'Attendance updated successfully!');
 
 
-    redirect("WeeklyAttendance/records?project=$projectID&from=$from&to=$to");
+redirect("WeeklyAttendance/records?project=$projectID&from=$from&to=$to#batch-$projectID-$from-$to");
+
+
 }
 
 
