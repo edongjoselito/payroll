@@ -425,9 +425,10 @@ foreach ($employees as $emp): ?>
         <small>You may now view or delete the saved attendance.</small>
       </div>
       <div class="modal-footer">
-        <a href="<?= base_url('WeeklyAttendance/records?project=' . urlencode($success['projectID']) . '&from=' . $success['from'] . '&to=' . $success['to']) ?>" class="btn btn-info">
-          <i class="mdi mdi-eye"></i> View Attendance
-        </a>
+       <a href="<?= base_url('WeeklyAttendance/records?projectID=' . urlencode($success['projectID']) . '&from=' . $success['from'] . '&to=' . $success['to']) ?>" class="btn btn-info">
+    <i class="mdi mdi-eye"></i> View Attendance
+</a>
+
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
