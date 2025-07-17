@@ -136,7 +136,7 @@
     </div>
 </div>
 
-<div class="card mb-3">
+<!-- <div class="card mb-3">
     <div class="card-header bg-light"><strong>Deductions</strong></div>
     <div class="card-body">
         <div class="form-row">
@@ -154,4 +154,4 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
