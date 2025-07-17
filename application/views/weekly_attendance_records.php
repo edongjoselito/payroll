@@ -434,7 +434,7 @@ $to = $selectedTo ?? '';
                          <div class="modal-footer">
                              <?php if (!empty($batches) && $selectedProjectID && $selectedFrom && $selectedTo): ?>
     <button type="submit" class="btn btn-primary">Update</button>
-    <button type="reset" class="btn btn-secondary">Cancel</button>
+   
 <?php endif; ?>
 
                          </div>

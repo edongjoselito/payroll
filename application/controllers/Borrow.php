@@ -20,7 +20,12 @@ class Borrow extends CI_Controller {
        $settingsID = $this->session->userdata('settingsID');
 $data['cash_advances'] = $this->Borrow_model->get_cash_advances_by_settings($settingsID);
 
-        $data['personnel'] = $this->Borrow_model->get_personnel($settingsID);
+       $data['personnel'] = $this->Borrow_model->get_personnel($settingsID);
+
+usort($data['personnel'], function($a, $b) {
+    return strcmp($a->last_name, $b->last_name);
+});
+
         $this->load->view('cash_advance_view', $data);
     }
 
@@ -48,16 +53,6 @@ public function save_cash_advance()
     redirect('Borrow/cash_advance');
 
 }
-
-
-// public function save_cash_advance() {
-//     $data = $this->input->post();
-//     $this->Borrow_model->insert_cash_advance($data);
-//     $this->session->set_flashdata('success', 'Cash Advance Saved Successfully!');
-//     redirect('Borrow/cash_advance');
-// }
-
-
 
 
 public function update_cash_advance($id)
@@ -90,9 +85,13 @@ public function update_cash_advance($id)
   public function materials_loan() {
     $settingsID = $this->session->userdata('settingsID');
     
-    // ✅ Assign returned result to the correct variable
     $data['material_loans'] = $this->OtherDeduction_model->get_other_deductions($settingsID);
-    $data['personnel_list'] = $this->OtherDeduction_model->get_personnel($settingsID);
+   $data['personnel_list'] = $this->OtherDeduction_model->get_personnel($settingsID);
+
+usort($data['personnel_list'], function ($a, $b) {
+    return strcmp($a->last_name, $b->last_name);
+});
+
     
     $this->load->view('materials_loan_view', $data);
 }
@@ -123,7 +122,9 @@ public function govt_deductions()
 
     $data['deductions'] = $this->Borrow_model->get_govt_deductions($settingsID); 
     $data['personnel'] = $this->Borrow_model->get_personnel($settingsID);
-
+usort($data['personnel'], function($a, $b) {
+    return strcmp($a->last_name, $b->last_name);
+});
     $this->load->view('govt_deductions_view', $data);
 }
 
