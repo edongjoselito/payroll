@@ -12,9 +12,13 @@
             vertical-align: middle !important;
             font-size: 14px;
         }
-        td:first-child, th:first-child {
-            text-align: left;
-        }
+        th, td {
+    text-align: center !important;
+    vertical-align: middle !important;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
         td {
             text-align: center;
             white-space: nowrap;
