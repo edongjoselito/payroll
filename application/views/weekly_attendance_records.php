@@ -20,6 +20,7 @@ thead th {
 
 td,
 th {
+     
      vertical-align: middle !important;
      text-align: center;
 }
@@ -87,10 +88,11 @@ td:first-child {
           <div class="content-page">
                <div class="content">
                     <div class="container-fluid">
-                         <!-- Modal and Header remain unchanged -->
+
 
                          <div class="card">
                               <div class="card-body">
+                                   <h4 class="text-dark font-weight-bold">Attendance Records</h4>
 <!-- 🔘 Filter Button -->
 <div class="mb-3">
     <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#filterModal">
@@ -166,7 +168,14 @@ $to = $selectedTo ?? '';
 
 
 <?php if (!empty($batches) && $selectedProjectID && $selectedFrom && $selectedTo): ?>
-    <?php foreach ($batches as $batch): ?>
+<div class="row justify-content-center">
+  <div class="col-md-12">
+ <div class="card shadow mb-4">
+
+      <div class="card-body">
+
+<?php foreach ($batches as $batch): ?>
+
         <?php
             if (
                 $batch['projectID'] != $selectedProjectID ||
@@ -193,10 +202,10 @@ $to = $selectedTo ?? '';
             $attendances = $batch['attendances'];
         ?>
 <a id="batch-<?= $projectID ?>-<?= $from ?>-<?= $to ?>"></a>
+<h5 class="text-dark font-weight-bold mb-3">
+  🗂 Attendance Batch: <?= date('F j', strtotime($from)) ?> - <?= date('F j, Y', strtotime($to)) ?>
+</h5>
 
-        <h4 class="mt-4 mb-3 text-primary">
-            🗂 Batch (<?= date('F j', strtotime($from)) ?> - <?= date('F j, Y', strtotime($to)) ?>)
-        </h4>
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="card shadow-sm mb-4">
@@ -212,25 +221,26 @@ $to = $selectedTo ?? '';
                 </div>
             </div>
 
-            <div class="text-end">
-                <button class="btn btn-outline-secondary btn-sm mr-1" onclick="window.print()">
-                    <i class="mdi mdi-printer"></i> Print
-                </button>
+          <div class="d-flex justify-content-end mb-3">
+  <button class="btn btn-outline-primary btn-sm mr-2" onclick="window.print()">
+    <i class="mdi mdi-printer"></i> Print
+  </button>
 
-                <form action="<?= base_url('WeeklyAttendance/deleteAttendance') ?>" method="post" style="display: inline;"
-                      onsubmit="return confirm('Are you sure you want to delete all attendance records for this date range?')">
-                    <input type="hidden" name="projectID" value="<?= $projectID ?>">
-                    <input type="hidden" name="from" value="<?= $from ?>">
-                    <input type="hidden" name="to" value="<?= $to ?>">
-                    <button type="submit" class="btn btn-danger btn-sm">
-                        <i class="mdi mdi-delete"></i> Delete
-                    </button>
-                </form>
-            </div>
+  <form action="<?= base_url('WeeklyAttendance/deleteAttendance') ?>" method="post" onsubmit="return confirm('Are you sure you want to delete...?')" style="display: inline;">
+    <input type="hidden" name="projectID" value="<?= $projectID ?>">
+    <input type="hidden" name="from" value="<?= $from ?>">
+    <input type="hidden" name="to" value="<?= $to ?>">
+    <button type="submit" class="btn btn-danger btn-sm">
+      <i class="mdi mdi-delete"></i> Delete
+    </button>
+  </form>
+</div>
+
         </div>
 
         <div class="table-responsive">
-            <table class="table table-hover table-bordered table-sm text-center">
+          <table class="table table-bordered table-striped table-hover">
+
                 <thead class="thead-light">
                 <tr>
                     <th>Personnel</th>
@@ -307,16 +317,24 @@ $to = $selectedTo ?? '';
             </table>
         </div>
     <?php endforeach; ?>
+     </div>
+    </div>
+  </div>
+</div>
 <?php endif; ?>
 
 
 <?php if (isset($project) && empty($attendances)): ?>
-
-<div class="alert alert-warning">
-     <i class="mdi mdi-alert-circle-outline"></i>
-     No attendance records found for this project and date range.
+<div class="row justify-content-center">
+  <div class="col-md-12">
+    <div class="alert alert-warning text-center">
+      <i class="mdi mdi-alert-circle-outline"></i>
+      No attendance records found for this project and date range.
+    </div>
+  </div>
 </div>
 <?php endif; ?>
+
 
 
                          <?php if ($this->session->flashdata('view_error')): ?>
@@ -324,7 +342,8 @@ $to = $selectedTo ?? '';
 <div class="modal fade" id="errorModal" tabindex="-1" role="dialog"
      aria-labelledby="errorModalLabel" aria-hidden="true">
      <div class="modal-dialog modal-dialog-centered" role="document">
-          <div class="modal-content border-0 shadow-sm">
+        <div class="modal-content shadow border-0">
+
                <div class="modal-header bg-danger text-white">
                     <h5 class="modal-title" id="errorModalLabel">
                          <i class="mdi mdi-alert-circle-outline mr-2"></i> Error
