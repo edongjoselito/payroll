@@ -92,6 +92,7 @@
     <ul class="nav-second-level nav" aria-expanded="false">
         <li><a href="<?= base_url(); ?>Borrow/cash_advance">Cash Advance</a></li>
         <li><a href="<?= base_url(); ?>Borrow/materials_loan">Other Deductions</a></li>
+        <li><a href="<?= base_url(); ?>Borrow/govt_deductions">Gov't Deductions</a></li>
     </ul>
 </li>
 

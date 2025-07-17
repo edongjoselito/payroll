@@ -4,9 +4,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Borrow_model extends CI_Model {
 
-    public function get_personnel() {
-        return $this->db->get('personnel')->result();
-    }
+    public function get_personnel($settingsID)
+{
+    $this->db->where('settingsID', $settingsID);
+    return $this->db->get('personnel')->result();
+}
+
 
    public function get_cash_advances() {
     $this->db->select("
@@ -160,6 +163,38 @@ public function get_max_borrowable_amount($personnelID, $date)
     return max(0, round($borrowable, 2));
 }
 
+public function get_govt_deductions($settingsID)
+{
+    $this->db->select('gd.*, CONCAT(p.last_name, ", ", p.first_name, " ", LEFT(p.middle_name,1), ". ", p.name_ext) AS fullname');
+    $this->db->from('government_deductions gd');
+    $this->db->join('personnel p', 'p.personnelID = gd.personnelID');
+    $this->db->where('p.settingsID', $settingsID);
+    return $this->db->get()->result();
+}
+
+public function get_personnel_by_settings($settingsID)
+{
+    $this->db->select('personnelID, last_name, first_name, middle_name, name_ext');
+    $this->db->from('personnel');
+    $this->db->where('settingsID', $settingsID);
+    return $this->db->get()->result();
+}
+public function insert_govt_deduction($data)
+{
+    $this->db->insert('government_deductions', $data);
+}
+
+public function update_govt_deduction($id, $data)
+{
+    $this->db->where('id', $id);
+    $this->db->update('government_deductions', $data);
+}
+
+public function delete_govt_deduction($id)
+{
+    $this->db->where('id', $id);
+    $this->db->delete('government_deductions');
+}
 
 
 

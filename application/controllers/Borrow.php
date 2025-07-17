@@ -7,6 +7,7 @@ class Borrow extends CI_Controller {
         parent::__construct();
         $this->load->model('Borrow_model');      // For Cash Advance
         $this->load->model('OtherDeduction_model');
+        
 
         $this->load->helper('url');
         $this->load->library('session');
@@ -114,7 +115,61 @@ public function save_material() {
         $this->session->set_flashdata('success', 'Other Deduction Deleted Successfully!');
         redirect('Borrow/materials_loan');
     }
+public function govt_deductions()
+{
+    $this->load->model('Borrow_model'); // Ensure model is loaded
 
+    $settingsID = $this->session->userdata('settingsID');
+
+    $data['deductions'] = $this->Borrow_model->get_govt_deductions($settingsID); 
+    $data['personnel'] = $this->Borrow_model->get_personnel($settingsID);
+
+    $this->load->view('govt_deductions_view', $data);
+}
+
+public function save_govt_deduction()
+{
+    $data = [
+        'personnelID'  => $this->input->post('personnelID'),
+        'description'  => $this->input->post('description'),
+        'amount'       => $this->input->post('amount'),
+        'date'         => $this->input->post('date'),
+        'deduct_from'  => $this->input->post('deduct_from'),
+        'deduct_to'    => $this->input->post('deduct_to')
+    ];
+
+    $this->load->model('Borrow_model');
+    $this->Borrow_model->insert_govt_deduction($data);
+
+    $this->session->set_flashdata('success', 'Deduction saved successfully!');
+    redirect('Borrow/govt_deductions');
+}
+
+public function update_govt_deduction($id)
+{
+    $data = [
+        'description'  => $this->input->post('description'),
+        'amount'       => $this->input->post('amount'),
+        'date'         => $this->input->post('date'),
+        'deduct_from'  => $this->input->post('deduct_from'),
+        'deduct_to'    => $this->input->post('deduct_to')
+    ];
+
+    $this->load->model('Borrow_model');
+    $this->Borrow_model->update_govt_deduction($id, $data);
+
+    $this->session->set_flashdata('success', 'Deduction updated successfully!');
+    redirect('Borrow/govt_deductions');
+}
+
+public function delete_govt_deduction($id)
+{
+    $this->load->model('Borrow_model');
+    $this->Borrow_model->delete_govt_deduction($id);
+
+    $this->session->set_flashdata('success', 'Deduction deleted.');
+    redirect('Borrow/govt_deductions');
+}
 
 
 
