@@ -43,12 +43,20 @@ public function get_by_id($id)
 }
 
 public function getNameByID($personnelID) {
-    $this->db->select('first_name, last_name');
+    $this->db->select('last_name, first_name');
     $this->db->from('personnel');
     $this->db->where('personnelID', $personnelID);
     $row = $this->db->get()->row();
     return $row ? $row->last_name . ', ' . $row->first_name : '';
 }
+
+public function getActiveWithDateEmployed()
+{
+    $this->db->where('date_employed IS NOT NULL');
+    $this->db->where('(date_terminated IS NULL OR date_terminated = "" OR date_terminated = "0000-00-00")');
+    return $this->db->get('personnel')->result();
+}
+
 
 
 }

@@ -63,5 +63,17 @@ public function edit($id)
 
 
 // END-----------------------
+public function service_years()
+{
+    $settingsID = $this->session->userdata('settingsID');
+    $this->db->where('settingsID', $settingsID);
+    $query = $this->db->get('personnel'); 
+    $data['personnel'] = $query->result();
+
+    $this->load->view('personnel/service_years', $data);
+}
+
+
+
 
 }

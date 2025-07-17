@@ -62,6 +62,20 @@
         <textarea class="form-control" name="address" rows="2"><?= $personnel->address ?? '' ?></textarea>
     </div>
 </div>
+<div class="form-row">
+    <div class="form-group col-md-6">
+        <label>Date Employed</label>
+        <input type="date" name="date_employed" class="form-control"
+               value="<?= $personnel->date_employed ?? '' ?>">
+    </div>
+
+    <div class="form-group col-md-6">
+        <label>Date Terminated</label>
+        <input type="date" name="date_terminated" class="form-control"
+               value="<?= $personnel->date_terminated ?? '' ?>">
+        <small class="text-muted">Leave blank while employee is still active.</small>
+    </div>
+</div>
 
 
 </div>
