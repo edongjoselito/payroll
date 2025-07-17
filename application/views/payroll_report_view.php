@@ -283,9 +283,10 @@ th {
     <th colspan="2">AMOUNT</th>
     <th rowspan="3">Gross</th>
        <th rowspan="3">Cash Advance</th>
-    <th rowspan="3">SSS (<?= date('F Y', strtotime($start)) ?>)</th>
-    <th rowspan="3">Pag-IBIG (<?= date('F Y', strtotime($start)) ?>)</th>
-    <th rowspan="3">PHIC</th>
+   <th rowspan="3">SSS (Gov’t)</th>
+<th rowspan="3">Pag-IBIG (Gov’t)</th>
+<th rowspan="3">PHIC (Gov’t)</th>
+
     <th rowspan="3">Loan</th>
     <th rowspan="3">Other Deduction</th>
 <th rowspan="3">Total Deduction</th>
@@ -460,9 +461,9 @@ endwhile;
 $salary = $regAmount + $otAmount;
 $cash_advance = $row->ca_cashadvance ?? 0;
 $other_deduction = $row->other_deduction ?? 0;
-$sss = $row->sss ?? 0;
-$pagibig = $row->pagibig ?? 0;
-$philhealth = $row->philhealth ?? 0;
+$sss = $row->gov_sss ?? 0;
+$pagibig = $row->gov_pagibig ?? 0;
+$philhealth = $row->gov_philhealth ?? 0;
 $loan = $row->loan ?? 0;
 $total_deduction = $cash_advance + $sss + $pagibig + $philhealth + $loan + $other_deduction;
 $netPay = $salary - $total_deduction;
@@ -567,9 +568,10 @@ $otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60,
             <h6>Deductions</h6>
             <ul class="list-unstyled">
               <li>Cash Advance: <?= number_format($cash_advance, 2) ?></li>
-              <li>SSS: <?= number_format($sss, 2) ?></li>
-              <li>PHIC: <?= number_format($philhealth, 2) ?></li>
-              <li>Pag-IBIG: <?= number_format($pagibig, 2) ?></li>
+            <li>SSS (Gov’t): <?= number_format($sss, 2) ?></li>
+<li>Pag-IBIG (Gov’t): <?= number_format($pagibig, 2) ?></li>
+<li>PHIC (Gov’t): <?= number_format($philhealth, 2) ?></li>
+
               <li>Loan: <?= number_format($loan, 2) ?></li>
               <li>Other Deduction: <?= number_format($other_deduction, 2) ?></li>
 

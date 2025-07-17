@@ -129,13 +129,16 @@ public function govt_deductions()
 
 public function save_govt_deduction()
 {
+    $settingsID = $this->session->userdata('settingsID'); // 👍 Load it here
+
     $data = [
         'personnelID'  => $this->input->post('personnelID'),
         'description'  => $this->input->post('description'),
         'amount'       => $this->input->post('amount'),
         'date'         => $this->input->post('date'),
         'deduct_from'  => $this->input->post('deduct_from'),
-        'deduct_to'    => $this->input->post('deduct_to')
+        'deduct_to'    => $this->input->post('deduct_to'),
+        'settingsID'   => $settingsID
     ];
 
     $this->load->model('Borrow_model');
@@ -144,15 +147,17 @@ public function save_govt_deduction()
     $this->session->set_flashdata('success', 'Deduction saved successfully!');
     redirect('Borrow/govt_deductions');
 }
-
 public function update_govt_deduction($id)
 {
+    $settingsID = $this->session->userdata('settingsID');
+
     $data = [
         'description'  => $this->input->post('description'),
         'amount'       => $this->input->post('amount'),
         'date'         => $this->input->post('date'),
         'deduct_from'  => $this->input->post('deduct_from'),
-        'deduct_to'    => $this->input->post('deduct_to')
+        'deduct_to'    => $this->input->post('deduct_to'),
+        'settingsID'   => $settingsID
     ];
 
     $this->load->model('Borrow_model');
@@ -161,6 +166,7 @@ public function update_govt_deduction($id)
     $this->session->set_flashdata('success', 'Deduction updated successfully!');
     redirect('Borrow/govt_deductions');
 }
+
 
 public function delete_govt_deduction($id)
 {

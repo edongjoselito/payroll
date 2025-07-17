@@ -125,4 +125,41 @@ public function getPayrollData($projectID, $start, $end, $rateType)
     return $this->db->get_where('payroll_masterlist', ['projectID' => $projectID])->result();
 }
 
+public function getGovDeduction($personnelID, $start, $end, $settingsID)
+{
+    $this->db->select('description, SUM(amount) AS total');
+    $this->db->from('government_deductions');
+    $this->db->where('personnelID', $personnelID);
+    $this->db->where('deduct_from <=', $end);
+    $this->db->where('deduct_to >=', $start);
+
+    $this->db->where('settingsID', $settingsID);
+    $this->db->group_by('description');
+
+    $query = $this->db->get();
+
+    $deductions = [
+        'SSS' => 0,
+        'PAGIBIG' => 0,
+        'PHILHEALTH' => 0
+    ];
+
+    foreach ($query->result() as $row) {
+        $desc = strtoupper(str_replace(['-', ' '], '', $row->description));
+        if ($desc === 'SSS') {
+            $deductions['SSS'] = $row->total;
+        } elseif ($desc === 'PAGIBIG') {
+            $deductions['PAGIBIG'] = $row->total;
+        } elseif (in_array($desc, ['PHILHEALTH', 'PHIC'])) {
+            $deductions['PHILHEALTH'] = $row->total;
+        }
+    }
+
+    return $deductions;
+}
+
+
+
+
+
 }

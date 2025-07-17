@@ -3,6 +3,7 @@ class Project extends CI_Controller
 {
     public function __construct() {
         parent::__construct();
+         $this->load->model('PayrollModel');
         $this->load->model('Project_model');
         $this->load->model('Audit_model');
     }
@@ -374,6 +375,14 @@ $data['project'] = $this->Project_model->getProjectDetails($projectID);
 
    foreach ($payroll as &$row) {
     $pid = (int)trim($row->personnelID); // ✅ cast again
+      $govDeduction = $this->PayrollModel->getGovDeduction($row->personnelID, $start, $end, $settingsID);
+
+
+$row->gov_sss = $govDeduction['SSS'] ?? 0;
+$row->gov_pagibig = $govDeduction['PAGIBIG'] ?? 0;
+$row->gov_philhealth = $govDeduction['PHILHEALTH'] ?? 0;
+
+
 
         $row->reg_hours_per_day = [];
         $row->present_days = 0;
@@ -416,6 +425,14 @@ $data['project'] = $this->Project_model->getProjectDetails($projectID);
 
         $gross = round($gross, 2);
         $row->gross = $gross;
+        $row->total_deduction =
+    floatval($row->sss) +
+    floatval($row->philhealth) +
+    floatval($row->pagibig) +
+    floatval($row->ca_cashadvance) +
+    floatval($row->loan) +
+    floatval($row->other_deduction);
+
         $row->take_home = $gross - $row->total_deduction;
 
         // Save to payroll_summary (skip if duplicate exists)
@@ -518,6 +535,12 @@ $data['show_signatories'] = true;
     foreach ($data['attendance_data'] as &$row) {
         $pid = (int)$row->personnelID;
         $row->reg_hours_per_day = [];
+    // Get gov deductions for saved data (optional, only if not stored already)
+    $govDeduction = $this->PayrollModel->getGovDeduction($pid, $start, $end, $settingsID);
+
+    $row->gov_sss = $govDeduction['SSS'] ?? 0;
+    $row->gov_pagibig = $govDeduction['PAGIBIG'] ?? 0;
+    $row->gov_philhealth = $govDeduction['PHILHEALTH'] ?? 0;
 
         foreach ($data['dates'] as $d) {
             if (isset($logs[$pid][$d])) {
