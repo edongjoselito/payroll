@@ -33,6 +33,8 @@ class Overtime extends CI_Controller {
 
     public function save_overtime() {
         $this->Overtime_model->save_overtime($this->input->post());
+        $this->session->set_flashdata('success', 'Overtime saved successfully.');
+        $this->session->set_flashdata('open_modal', 'viewModal');
         redirect('Overtime');
     }
 

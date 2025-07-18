@@ -74,6 +74,13 @@ $dates = getDateRange($start, $end);
                         </tr>
                     </thead>
                     <tbody>
+                        <?php
+usort($personnel, function($a, $b) {
+    $cmp = strcmp($a->last_name, $b->last_name);
+    return $cmp === 0 ? strcmp($a->first_name, $b->first_name) : $cmp;
+});
+?>
+
                         <?php foreach ($personnel as $p): ?>
                             <tr>
                                 <td><?= $p->last_name . ', ' . $p->first_name ?></td>
@@ -85,7 +92,7 @@ $dates = getDateRange($start, $end);
                                             step="0.25"
                                             min="0"
                                             max="24"
-                                            placeholder="—">
+                                            placeholder="Leave as empty if no OT">
                                     </td>
                                 <?php endforeach; ?>
                             </tr>

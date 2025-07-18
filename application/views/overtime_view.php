@@ -9,13 +9,14 @@
     <?php include('includes/top-nav-bar.php'); ?>
     <?php include('includes/sidebar.php'); ?>
 
+
     <div class="content-page">
         <div class="content">
+          
             <div class="container-fluid">
 
                 <h4 class="page-title">Overtime Management</h4>
 
-                <!-- Buttons -->
                 <button class="btn btn-primary mb-2 shadow-sm" data-toggle="modal" data-target="#generateModal">
                     <i class="mdi mdi-calendar-plus"></i> Add Overtime
                 </button>
@@ -23,14 +24,22 @@
                 <button class="btn btn-success mb-2 shadow-sm" data-toggle="modal" data-target="#viewModal">
                     <i class="mdi mdi-eye"></i> View Saved Overtime
                 </button>
-<!-- Persist reload values here -->
 <input type="hidden" id="reload_projectID">
 <input type="hidden" id="reload_start">
 <input type="hidden" id="reload_end">
 
-                <!-- Result Areas -->
                 <div id="generatedResult" class="mt-3"></div>
-                <div id="savedResult" class="mt-3"></div>
+              <?php if ($this->session->flashdata('success')): ?>
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <?= $this->session->flashdata('success'); ?>
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+<?php endif; ?>
+
+<div id="savedResult" class="mt-3"></div>
+
 
                 <!-- Generate Modal -->
                 <div class="modal fade" id="generateModal">
@@ -42,6 +51,13 @@
                                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                                 </div>
                                 <div class="modal-body">
+                                   <?php if ($this->session->flashdata('success')): ?>
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <?= $this->session->flashdata('success'); ?>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+  </div>
+<?php endif; ?>
+
                                     <select name="projectID" class="form-control mb-2" required>
                                         <option value="">Select Project</option>
                                         <?php foreach ($projects as $p): ?>
@@ -70,7 +86,6 @@
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body">
-                    <!-- ✅ Correct opening tag -->
                     <select name="projectID" class="form-control mb-2" required>
                         <option value="">Select Project</option>
                         <?php foreach ($projects as $p): ?>
@@ -92,15 +107,22 @@
 </div>
 
 
-            </div> <!-- container-fluid -->
-        </div> <!-- content -->
+            </div> 
+        </div> 
         <?php include('includes/footer.php'); ?>
-    </div> <!-- content-page -->
+    </div> 
 </div> <!-- wrapper -->
 
 <!-- JS Scripts -->
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
+<?php if ($this->session->flashdata('open_modal') == 'viewModal'): ?>
+<script>
+  $(document).ready(function(){
+    $('#viewModal').modal('show');
+  });
+</script>
+<?php endif; ?>
 
 <script>
 $(document).ready(function() {
@@ -115,7 +137,6 @@ $(document).ready(function() {
         });
     });
 
-    // Listen for project change inside the View Saved Overtime modal
     $('#viewModal select[name="projectID"]').change(function() {
         var projectID = $(this).val();
 

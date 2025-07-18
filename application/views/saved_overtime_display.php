@@ -6,9 +6,11 @@ $dates = [];
 foreach ($records as $r) {
     $pid = $r->personnelID;
     $date = $r->date;
-    $name = $r->first_name . ' ' . $r->last_name;
+    $name = $r->last_name . ' ' . $r->first_name;
 
     $grouped[$pid]['name'] = $name;
+    $grouped[$pid]['last_name'] = $r->last_name;
+    $grouped[$pid]['first_name'] = $r->first_name;
     $grouped[$pid]['dates'][$date] = $r->hours;
     $grouped[$pid]['ids'][] = $r->id;
 
@@ -16,6 +18,15 @@ foreach ($records as $r) {
 }
 
 sort($dates);
+
+// 🔠 Sort personnel by last_name then first_name
+uasort($grouped, function ($a, $b) {
+    $cmp = strcmp($a['last_name'], $b['last_name']);
+    if ($cmp === 0) {
+        return strcmp($a['first_name'], $b['first_name']);
+    }
+    return $cmp;
+});
 ?>
 
 <form id="viewForm">
