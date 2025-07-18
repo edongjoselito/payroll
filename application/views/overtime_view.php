@@ -23,6 +23,10 @@
                 <button class="btn btn-success mb-2 shadow-sm" data-toggle="modal" data-target="#viewModal">
                     <i class="mdi mdi-eye"></i> View Saved Overtime
                 </button>
+<!-- Persist reload values here -->
+<input type="hidden" id="reload_projectID">
+<input type="hidden" id="reload_start">
+<input type="hidden" id="reload_end">
 
                 <!-- Result Areas -->
                 <div id="generatedResult" class="mt-3"></div>
@@ -126,16 +130,29 @@ $(document).ready(function() {
         }
     });
 
-    // Handle form submission for viewing saved overtime
-    $('#viewForm').submit(function(e){
-        e.preventDefault();
-        $.post("<?= base_url('Overtime/view_saved_overtime') ?>", $(this).serialize(), function(res){
-            $('#savedResult').html(res);
-            $('#viewModal').modal('hide');
-        }).fail(function(xhr){
-            alert('❌ Failed to fetch saved overtime. ' + xhr.responseText);
-        });
+   $('#viewForm').submit(function(e){
+    e.preventDefault();
+    var [start, end] = $('#viewDate').val().split('|');
+    const projectID = $('#viewForm select[name="projectID"]').val();
+
+    // 🔒 Save values globally
+    $('#reload_projectID').val(projectID);
+    $('#reload_start').val(start);
+    $('#reload_end').val(end);
+
+    $.post("<?= base_url('Overtime/view_saved_overtime') ?>", {
+        projectID: projectID,
+        start: start,
+        end: end
+    }, function(res){
+        $('#savedResult').html(res);
+        $('#viewModal').modal('hide');
+    }).fail(function(xhr){
+        alert('❌ Failed to fetch saved overtime. ' + xhr.responseText);
     });
+});
+
+
 });
 </script>
 

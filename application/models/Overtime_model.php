@@ -53,5 +53,31 @@ public function get_saved_overtime($projectID, $date)
     return $this->db->get()->result();
 }
 
+public function get_saved_overtime_batch($projectID, $start, $end)
+{
+    $this->db->select('o.*, p.first_name, p.last_name');
+    $this->db->from('overtime o');
+    $this->db->join('personnel p', 'p.personnelID = o.personnelID');
+    $this->db->where('o.projectID', $projectID);
+    $this->db->where('o.date >=', $start);
+    $this->db->where('o.date <=', $end);
+    $this->db->order_by('o.date', 'ASC');
+    return $this->db->get()->result();
+}
+public function getSavedOvertime($projectID, $start, $end)
+{
+    return $this->db->select('o.*, p.first_name, p.last_name')
+        ->from('overtime o')
+        ->join('personnel p', 'p.personnelID = o.personnelID', 'left')
+        ->where('o.projectID', $projectID)
+        ->where('o.date >=', $start)
+        ->where('o.date <=', $end)
+        ->order_by('o.personnelID, o.date')
+        ->get()
+        ->result();
+}
+
+
+
 
 }

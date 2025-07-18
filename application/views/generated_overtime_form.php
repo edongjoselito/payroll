@@ -13,50 +13,105 @@ function getDateRange($start, $end) {
 $dates = getDateRange($start, $end);
 ?>
 
-<form action="<?= base_url('Overtime/save_overtime') ?>" method="post">
-    <input type="hidden" name="projectID" value="<?= $project->projectID ?>">
-    <input type="hidden" name="start" value="<?= $start ?>">
-    <input type="hidden" name="end" value="<?= $end ?>">
+<div class="mb-3 d-flex justify-content-between align-items-center">
+    <h4 class="page-title">Overtime Entry</h4>
+    <button class="btn btn-outline-dark btn-sm" data-toggle="modal" data-target="#overtimeNotesModal">
+        <i class="mdi mdi-information-outline"></i> Notes
+    </button>
+</div>
 
-    <div class="mb-3">
+<!-- Notes Modal -->
+<div class="modal fade" id="overtimeNotesModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content shadow-sm">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">Overtime Entry Notes</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body text-dark" style="font-size: 14px;">
+                🕒 Overtime must be entered in <strong>decimal format</strong><br>
+                📌 <em>0.25 = 15 min, 0.50 = 30 min, 0.75 = 45 min</em><br>
+                ⚠️ Blank fields will be ignored during save.
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body">
         <h5>
-            <i class="mdi mdi-calendar"></i>
-            Date Range:
-            <strong><?= date('F d, Y', strtotime($start)) ?> to <?= date('F d, Y', strtotime($end)) ?></strong>
+            <i class="mdi mdi-briefcase-outline text-primary"></i>
+            <strong><?= $project->projectTitle ?></strong>
         </h5>
-    </div>
+        <p class="mb-2 text-muted">
+            📍 <?= $project->projectLocation ?> <br>
+            📅 <?= date('F d, Y', strtotime($start)) ?> to <?= date('F d, Y', strtotime($end)) ?>
+        </p>
 
-    <div class="table-responsive">
-        <table class="table table-bordered">
-            <thead class="thead-light">
-                <tr>
-                    <th>Personnel</th>
-                    <?php foreach ($dates as $d): ?>
-                        <th><?= date('M d', strtotime($d)) ?></th>
-                    <?php endforeach; ?>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($personnel as $p): ?>
-                    <tr>
-                        <td><?= $p->last_name . ', ' . $p->first_name ?></td>
-                        <?php foreach ($dates as $d): ?>
-                            <td>
-                                <input type="number"
-                                       name="hours[<?= $p->personnelID ?>][<?= $d ?>]"
-                                       class="form-control input-hours"
-                                       min="0" step="0.25" placeholder="Hrs">
-                            </td>
+        <form action="<?= base_url('Overtime/save_overtime') ?>" method="post">
+            <input type="hidden" name="projectID" value="<?= $project->projectID ?>">
+            <input type="hidden" name="start" value="<?= $start ?>">
+            <input type="hidden" name="end" value="<?= $end ?>">
+
+            <div class="table-responsive mt-4">
+                <table class="table table-bordered table-hover table-striped nowrap" id="overtimeTable">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Personnel</th>
+                            <?php
+                                $period = new DatePeriod(
+                                    new DateTime($start),
+                                    new DateInterval('P1D'),
+                                    (new DateTime($end))->modify('+1 day')
+                                );
+                                foreach ($period as $date) {
+                                    echo '<th>' . $date->format('M d') . '</th>';
+                                }
+                            ?>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($personnel as $p): ?>
+                            <tr>
+                                <td><?= $p->last_name . ', ' . $p->first_name ?></td>
+                                <?php foreach ($period as $date): ?>
+                                    <td>
+                                        <input type="number"
+                                            name="hours[<?= $p->personnelID ?>][<?= $date->format('Y-m-d') ?>]"
+                                            class="form-control input-hours"
+                                            step="0.25"
+                                            min="0"
+                                            max="24"
+                                            placeholder="—">
+                                    </td>
+                                <?php endforeach; ?>
+                            </tr>
                         <?php endforeach; ?>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
+                    </tbody>
+                </table>
+            </div>
 
-    <div class="text-right mt-3">
-        <button type="submit" class="btn btn-info shadow-sm">
-            <i class="mdi mdi-content-save"></i> Save Overtime
-        </button>
+            <div class="d-flex justify-content-end mt-3">
+                <button type="submit" class="btn btn-info shadow-sm px-4">
+                    <i class="mdi mdi-content-save"></i> Save Overtime
+                </button>
+            </div>
+        </form>
     </div>
-</form>
+</div>
+
+<!-- DataTables init -->
+<script>
+    $(document).ready(function () {
+        $('#overtimeTable').DataTable({
+            paging: false,
+            ordering: false,
+            info: false,
+            searching: false,
+            scrollX: true
+        });
+    });
+</script>
