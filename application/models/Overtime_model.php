@@ -16,12 +16,15 @@ class Overtime_model extends CI_Model {
     $end = $post['end'];
     $hours = $post['hours'];
 
+    $batch_id = uniqid("batch_");
+
     foreach ($hours as $personnelID => $dailyHours) {
         foreach ($dailyHours as $date => $value) {
             if ($value !== null && $value !== '') {
                 $this->db->insert('overtime', [
                     'personnelID' => $personnelID,
                     'projectID' => $projectID,
+                    'batch_id' => $batch_id,
                     'date' => $date,
                     'hours' => $value
                 ]);
@@ -29,6 +32,24 @@ class Overtime_model extends CI_Model {
         }
     }
 }
+// public function get_overtime_by_batch($batch_id) {
+//     return $this->db->select('o.*, p.first_name, p.last_name')
+//         ->from('overtime o')
+//         ->join('personnel p', 'p.personnelID = o.personnelID', 'left')
+//         ->where('o.batch_id', $batch_id)
+//         ->order_by('o.date', 'ASC')
+//         ->get()
+//         ->result();
+// }
+// public function get_all_batches() {
+//     return $this->db->select('batch_id, MIN(date) as start_date, MAX(date) as end_date')
+//         ->from('overtime')
+//         ->group_by('batch_id')
+//         ->order_by('start_date', 'DESC')
+//         ->get()
+//         ->result();
+// }
+
 public function get_saved_dates($projectID)
 {
     $this->db->select('date');
@@ -43,27 +64,31 @@ public function get_saved_dates($projectID)
 
 
 
-public function get_saved_overtime($projectID, $date)
+public function get_saved_overtime($projectID, $start, $end)
 {
-    $this->db->select('o.*, p.first_name, p.last_name');
-    $this->db->from('overtime o');
-    $this->db->join('personnel p', 'p.personnelID = o.personnelID');
-    $this->db->where('o.projectID', $projectID);
-    $this->db->where('o.date', $date);
-    return $this->db->get()->result();
+    return $this->db->select('o.*, p.first_name, p.last_name')
+        ->from('overtime o')
+        ->join('personnel p', 'p.personnelID = o.personnelID', 'left')
+        ->where('o.projectID', $projectID)
+        ->where('o.date >=', $start)
+        ->where('o.date <=', $end)
+        ->order_by('o.personnelID, o.date')
+        ->get()
+        ->result();
 }
 
-public function get_saved_overtime_batch($projectID, $start, $end)
-{
-    $this->db->select('o.*, p.first_name, p.last_name');
-    $this->db->from('overtime o');
-    $this->db->join('personnel p', 'p.personnelID = o.personnelID');
-    $this->db->where('o.projectID', $projectID);
-    $this->db->where('o.date >=', $start);
-    $this->db->where('o.date <=', $end);
-    $this->db->order_by('o.date', 'ASC');
-    return $this->db->get()->result();
-}
+
+// public function get_saved_overtime_batch($projectID, $start, $end)
+// {
+//     $this->db->select('o.*, p.first_name, p.last_name');
+//     $this->db->from('overtime o');
+//     $this->db->join('personnel p', 'p.personnelID = o.personnelID');
+//     $this->db->where('o.projectID', $projectID);
+//     $this->db->where('o.date >=', $start);
+//     $this->db->where('o.date <=', $end);
+//     $this->db->order_by('o.date', 'ASC');
+//     return $this->db->get()->result();
+// }
 public function getSavedOvertime($projectID, $start, $end)
 {
     return $this->db->select('o.*, p.first_name, p.last_name')

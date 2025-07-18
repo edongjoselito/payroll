@@ -28,11 +28,16 @@ uasort($grouped, function ($a, $b) {
     return $cmp;
 });
 ?>
+<?php
+$start = isset($start) ? $start : '';
+$end = isset($end) ? $end : '';
+?>
 
 <form id="viewForm">
-<input type="hidden" name="projectID" value="<?= $this->input->post('projectID') ?>">
-<input type="hidden" name="start" value="<?= $start ?>">
-<input type="hidden" name="end" value="<?= $end ?>">
+<input type="hidden" id="reload_projectID" name="projectID" value="<?= $this->input->post('projectID') ?>">
+<input type="hidden" id="reload_start" name="start" value="<?= $start ?>">
+<input type="hidden" id="reload_end" name="end" value="<?= $end ?>">
+
 
 
 
@@ -96,12 +101,16 @@ uasort($grouped, function ($a, $b) {
         </div>
     </div>
 </div>
+<!-- ✅ Required for DataTables -->
+<link rel="stylesheet" href="<?= base_url('assets/datatables/dataTables.bootstrap4.min.css') ?>">
+<script src="<?= base_url('assets/datatables/jquery.dataTables.min.js') ?>"></script>
+<script src="<?= base_url('assets/datatables/dataTables.bootstrap4.min.js') ?>"></script>
+
 <script>
 $(document).on('click', '.delete-row', function () {
     const ids = $(this).data('ids');
     if (!confirm("Are you sure you want to delete all overtime entries for this personnel?")) return;
 
-    // Optional: add loading spinner
     $('#savedResult').html('<div class="text-center p-4 text-muted">⏳ Deleting...</div>');
 
     $.post("<?= base_url('Overtime/delete_overtime') ?>", { id: ids }, function (res) {
@@ -125,11 +134,15 @@ const end = $('#reload_end').val();
         return;
     }
 
-    $('#savedResult').load("<?= base_url('Overtime/loadSavedOvertimeView') ?>", {
-        projectID: projectID,
-        start: start,
-        end: end
-    });
+  $('#savedResult').load("<?= base_url('Overtime/loadSavedOvertimeView') ?>", {
+    projectID: projectID,
+    start: start,
+    end: end
+}, function() {
+    // ✅ After content is loaded, reinitialize DataTable
+    $('.table').DataTable(); // or $('#yourTableID').DataTable();
+});
+
 }, 1000);
 
 

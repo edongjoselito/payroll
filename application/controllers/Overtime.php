@@ -38,18 +38,23 @@ class Overtime extends CI_Controller {
         redirect('Overtime');
     }
 
-   public function view_saved_overtime() {
+public function view_saved_overtime()
+{
     $projectID = $this->input->post('projectID');
     $start = $this->input->post('start');
     $end = $this->input->post('end');
 
+    if (!$projectID || !$start || !$end) {
+        show_error("Missing required POST data.", 500);
+        return;
+    }
+
     $data['start'] = $start;
     $data['end'] = $end;
-    $data['records'] = $this->Overtime_model->get_saved_overtime_batch($projectID, $start, $end);
+    $data['records'] = $this->Overtime_model->getSavedOvertime($projectID, $start, $end);
 
     $this->load->view('saved_overtime_display', $data);
 }
-
 public function loadSavedOvertimeView()
 {
     $projectID = $this->input->post('projectID');
@@ -61,15 +66,13 @@ public function loadSavedOvertimeView()
         return;
     }
 
-    // 🔍 DEBUG
-    log_message('debug', "🔁 loadSavedOvertimeView: projectID=$projectID, start=$start, end=$end");
-
     $data['start'] = $start;
     $data['end'] = $end;
     $data['records'] = $this->Overtime_model->getSavedOvertime($projectID, $start, $end);
 
     $this->load->view('saved_overtime_display', $data);
 }
+
 
 
  

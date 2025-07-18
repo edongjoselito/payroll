@@ -58,15 +58,19 @@
   </div>
 <?php endif; ?>
 
-                                    <select name="projectID" class="form-control mb-2" required>
-                                        <option value="">Select Project</option>
-                                        <?php foreach ($projects as $p): ?>
-                                            <option value="<?= $p->projectID ?>"><?= $p->projectName ?? $p->projectTitle ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
+                            <div class="modal-body">
+    <select name="projectID" class="form-control mb-2" required>
+        <option value="">Select Project</option>
+        <?php foreach ($projects as $p): ?>
+            <option value="<?= $p->projectID ?>"><?= $p->projectTitle ?></option>
+        <?php endforeach; ?>
+    </select>
 
-                                    <input type="date" name="start" class="form-control mb-2" required>
-                                    <input type="date" name="end" class="form-control" required>
+    <input type="date" name="start" class="form-control mb-2" required>
+    <input type="date" name="end" class="form-control" required>
+</div>
+
+
                                 </div>
                                 <div class="modal-footer">
                                     <button type="submit" class="btn btn-primary">Generate</button>
@@ -112,10 +116,10 @@
         <?php include('includes/footer.php'); ?>
     </div> 
 </div> <!-- wrapper -->
-
 <!-- JS Scripts -->
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
+
 <?php if ($this->session->flashdata('open_modal') == 'viewModal'): ?>
 <script>
   $(document).ready(function(){
@@ -126,7 +130,7 @@
 
 <script>
 $(document).ready(function() {
-    // Handle generate overtime submission
+    // ✅ Handle generate overtime submission
     $('#generateForm').submit(function(e){
         e.preventDefault();
         $.post("<?= base_url('Overtime/generate_personnel') ?>", $(this).serialize(), function(res){
@@ -136,27 +140,35 @@ $(document).ready(function() {
             alert('❌ Failed to generate overtime. ' + xhr.responseText);
         });
     });
+// 🔄 Dynamically populate date dropdown based on project
+$('#viewModal select[name="projectID"]').change(function() {
+    var projectID = $(this).val();
 
-    $('#viewModal select[name="projectID"]').change(function() {
-        var projectID = $(this).val();
+    if (projectID !== "") {
+        $.post("<?= base_url('Overtime/get_dates_by_project') ?>", { projectID: projectID }, function(response) {
+            $('#viewModal select[name="date"]').html(response);
+        }).fail(function(xhr) {
+            alert('Failed to fetch dates: ' + xhr.responseText);
+        });
+    } else {
+        $('#viewModal select[name="date"]').html('<option value="">Select Project First</option>');
+    }
+});
 
-        if (projectID !== "") {
-            $.post("<?= base_url('Overtime/get_dates_by_project') ?>", { projectID: projectID }, function(response) {
-                $('#viewModal select[name="date"]').html(response);
-            }).fail(function(xhr) {
-                alert('Failed to fetch dates: ' + xhr.responseText);
-            });
-        } else {
-            $('#viewModal select[name="date"]').html('<option value="">Select Project First</option>');
-        }
-    });
-
-   $('#viewForm').submit(function(e){
+  // ✅ Corrected View Saved Overtime Handler
+$('#viewForm').submit(function(e){
     e.preventDefault();
-    var [start, end] = $('#viewDate').val().split('|');
-    const projectID = $('#viewForm select[name="projectID"]').val();
 
-    // 🔒 Save values globally
+    const projectID = $('#viewForm select[name="projectID"]').val();
+    const dateValue = $('#viewForm select[name="date"]').val();
+
+    if (!projectID || !dateValue) {
+        alert("Please select both project and date.");
+        return;
+    }
+
+    const [start, end] = dateValue.split('|'); // example: "2025-07-01|2025-07-07"
+
     $('#reload_projectID').val(projectID);
     $('#reload_start').val(start);
     $('#reload_end').val(end);
@@ -173,9 +185,7 @@ $(document).ready(function() {
     });
 });
 
-
 });
 </script>
-
 </body>
 </html>
