@@ -11,17 +11,13 @@
         th, td {
             vertical-align: middle !important;
             font-size: 14px;
+            white-space: nowrap;
         }
-        th, td {
-    text-align: center !important;
-    vertical-align: middle !important;
-    font-size: 14px;
-    white-space: nowrap;
-}
-
         td {
             text-align: center;
-            white-space: nowrap;
+        }
+        td.text-start {
+            text-align: left !important;
         }
     </style>
 </head>
@@ -44,17 +40,30 @@
                     <div class="card-body">
                         <div class="table-responsive">
                             <table id="datatable" class="table table-bordered table-hover dt-responsive nowrap" style="width:100%">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>Name</th>
-                                        <th>Date Employed</th>
-                                        <th>Years of Service</th>
-                                    </tr>
-                                </thead>
+                              <thead class="thead-light">
+    <tr>
+        <th class="text-start">Name</th>
+        <th class="text-center">Date Employed</th>
+        <th class="text-center">Length of Service</th>
+        <th style="display:none;">Months</th>
+    </tr>
+</thead>
+
                                 <tbody>
                                     <?php foreach ($personnel as $p): ?>
+                                        <?php
+                                            $months = -1;
+                                            $formatted = '<span style="color: #888;">—</span>';
+                                            if (!empty($p->date_employed) && $p->date_employed != '0000-00-00') {
+                                                $start = new DateTime($p->date_employed);
+                                                $end = (!empty($p->date_terminated) && $p->date_terminated != '0000-00-00') ? new DateTime($p->date_terminated) : new DateTime();
+                                                $interval = $start->diff($end);
+                                                $months = $interval->y * 12 + $interval->m;
+                                                $formatted = "{$interval->y} year(s), {$interval->m} month(s)";
+                                            }
+                                        ?>
                                         <tr>
-                                            <td><?= "{$p->last_name}, {$p->first_name}" ?></td>
+                                            <td class="text-start"><?= "{$p->last_name}, {$p->first_name}" ?></td>
                                             <td>
                                                 <?php
                                                     if (!empty($p->date_employed) && $p->date_employed != '0000-00-00') {
@@ -64,31 +73,21 @@
                                                     }
                                                 ?>
                                             </td>
-                                            <td>
-                                                <?php
-                                                    if (!empty($p->date_employed) && $p->date_employed != '0000-00-00') {
-                                                        $start = new DateTime($p->date_employed);
-                                                        $end = (!empty($p->date_terminated) && $p->date_terminated != '0000-00-00') ? new DateTime($p->date_terminated) : new DateTime();
-                                                        $interval = $start->diff($end);
-                                                        echo "{$interval->y} year(s), {$interval->m} month(s)";
-                                                    } else {
-                                                        echo '<span style="color: #888;">—</span>';
-                                                    }
-                                                ?>
-                                            </td>
+                                            <td><?= $formatted ?></td>
+                                            <td style="display:none;"><?= $months ?></td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
-                        </div> <!-- /.table-responsive -->
-                    </div> <!-- /.card-body -->
-                </div> <!-- /.card -->
+                        </div> 
+                    </div> 
+                </div> 
 
-            </div> <!-- /.container-fluid -->
-        </div> <!-- /.content -->
+            </div> 
+        </div> 
         <?php include(APPPATH . 'views/includes/footer.php'); ?>
-    </div> <!-- /.content-page -->
-</div> <!-- /#wrapper -->
+    </div> 
+</div>
 
 <!-- JS scripts -->
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
@@ -96,8 +95,19 @@
 <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.responsive.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.js"></script>
-<script src="<?= base_url(); ?>assets/js/pages/datatables.init.js"></script>
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
 
+<script>
+    $('#datatable').DataTable({
+        order: [[3, 'desc']], // sort by hidden column
+        columnDefs: [
+            {
+                targets: [3],
+                visible: false,
+                searchable: false
+            }
+        ]
+    });
+</script>
 </body>
 </html>
