@@ -10,13 +10,14 @@ class Overtime_model extends CI_Model {
 }
 
 
-   public function save_overtime($post) {
+ public function save_overtime($post) {
     $projectID = $post['projectID'];
     $start = $post['start'];
     $end = $post['end'];
     $hours = $post['hours'];
 
-    $batch_id = uniqid("batch_");
+    // ✅ Batch ID based on date range
+    $batch_id = $start . '_' . $end;
 
     foreach ($hours as $personnelID => $dailyHours) {
         foreach ($dailyHours as $date => $value) {
@@ -32,6 +33,8 @@ class Overtime_model extends CI_Model {
         }
     }
 }
+
+
 // public function get_overtime_by_batch($batch_id) {
 //     return $this->db->select('o.*, p.first_name, p.last_name')
 //         ->from('overtime o')
@@ -49,17 +52,14 @@ class Overtime_model extends CI_Model {
 //         ->get()
 //         ->result();
 // }
-
-public function get_saved_dates($projectID)
-{
-    $this->db->select('date');
+public function get_saved_dates($projectID) {
+    $this->db->select('DISTINCT(batch_id)');
     $this->db->from('overtime');
     $this->db->where('projectID', $projectID);
-    $this->db->group_by('date');
-    $this->db->order_by('date', 'DESC');
     $query = $this->db->get();
-    return $query->result(); 
+    return $query->result();
 }
+
 
 
 
@@ -76,6 +76,15 @@ public function get_saved_overtime($projectID, $start, $end)
         ->get()
         ->result();
 }
+public function isBatchAlreadyGenerated($projectID, $batch_id)
+{
+    $this->db->where('projectID', $projectID);
+    $this->db->where('batch_id', $batch_id);
+    $query = $this->db->get('overtime'); // Make sure this table is correct
+
+    return $query->num_rows() > 0;
+}
+
 
 
 // public function get_saved_overtime_batch($projectID, $start, $end)
@@ -103,6 +112,13 @@ public function getSavedOvertime($projectID, $start, $end)
 }
 
 
+public function get_distinct_batches($projectID)
+{
+    $this->db->select('DISTINCT(batch_id)');
+    $this->db->where('projectID', $projectID);
+    $this->db->order_by('batch_id', 'DESC');
+    return $this->db->get('overtime')->result();
+}
 
 
 }

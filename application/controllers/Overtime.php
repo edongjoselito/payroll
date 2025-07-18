@@ -31,12 +31,25 @@ class Overtime extends CI_Controller {
         $this->load->view('generated_overtime_form', $data);
     }
 
-    public function save_overtime() {
-        $this->Overtime_model->save_overtime($this->input->post());
-        $this->session->set_flashdata('success', 'Overtime saved successfully.');
-        $this->session->set_flashdata('open_modal', 'viewModal');
+   public function save_overtime() {
+    $post = $this->input->post();
+    $projectID = $post['projectID'];
+    $batch_id = $post['batch_id']; // Make sure this exists in your form data
+
+    // 🛑 Prevent duplicate batch save
+    if ($this->Overtime_model->isBatchAlreadyGenerated($projectID, $batch_id)) {
+        $this->session->set_flashdata('error', '❌ This batch has already been generated for the selected project.');
         redirect('Overtime');
+        return;
     }
+
+    // ✅ Proceed if unique
+    $this->Overtime_model->save_overtime($post);
+    $this->session->set_flashdata('success', 'Overtime saved successfully.');
+    $this->session->set_flashdata('open_modal', 'viewModal');
+    redirect('Overtime');
+}
+
 
 public function view_saved_overtime()
 {
@@ -80,24 +93,23 @@ public function loadSavedOvertimeView()
 public function get_dates_by_project()
 {
     $projectID = $this->input->post('projectID');
-    $dates = $this->Overtime_model->get_saved_dates($projectID);
+    $batches = $this->Overtime_model->get_saved_dates($projectID);
 
-    // Group dates into weekly ranges (e.g. 2025-07-01 to 2025-07-05)
-    $grouped = [];
-    $currentBatch = [];
-
-    foreach ($dates as $i => $d) {
-        $currentBatch[] = $d->date;
-
-        // Every 5 days or end of list
-        if (count($currentBatch) == 5 || $i == count($dates) - 1) {
-            $start = min($currentBatch);
-            $end = max($currentBatch);
-            echo '<option value="' . $start . '|' . $end . '">' . date('F d', strtotime($start)) . ' - ' . date('d, Y', strtotime($end)) . '</option>';
-            $currentBatch = [];
+    foreach ($batches as $batch) {
+        // ✅ Check if batch_id is formatted as start_end
+        if (!empty($batch->batch_id) && strpos($batch->batch_id, '_') !== false) {
+            list($start, $end) = explode('_', $batch->batch_id);
+            
+            // ✅ Format dates safely
+            if (strtotime($start) && strtotime($end)) {
+                echo '<option value="' . $start . '|' . $end . '">' .
+                     date('F d', strtotime($start)) . ' - ' . date('d, Y', strtotime($end)) .
+                     '</option>';
+            }
         }
     }
 }
+
 public function delete_overtime()
 {
     $ids = explode(',', $this->input->post('id'));

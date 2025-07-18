@@ -55,6 +55,10 @@ $dates = getDateRange($start, $end);
             <input type="hidden" name="projectID" value="<?= $project->projectID ?>">
             <input type="hidden" name="start" value="<?= $start ?>">
             <input type="hidden" name="end" value="<?= $end ?>">
+<?php
+    $batch_id = $start . '_' . $end;
+?>
+<input type="hidden" name="batch_id" value="<?= $batch_id ?>">
 
             <div class="table-responsive mt-4">
                 <table class="table table-bordered table-hover table-striped nowrap" id="overtimeTable">
