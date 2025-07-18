@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<title>PMS - Overtime</title>
+
+<?php include('includes/head.php'); ?>
+
+<body>
+<div id="wrapper">
+    <?php include('includes/top-nav-bar.php'); ?>
+    <?php include('includes/sidebar.php'); ?>
+
+    <div class="content-page">
+        <div class="content">
+            <div class="container-fluid">
+
+                <h4 class="page-title">Overtime Management</h4>
+
+                <!-- Buttons -->
+                <button class="btn btn-primary mb-2 shadow-sm" data-toggle="modal" data-target="#generateModal">
+                    <i class="mdi mdi-calendar-plus"></i> Add Overtime
+                </button>
+
+                <button class="btn btn-success mb-2 shadow-sm" data-toggle="modal" data-target="#viewModal">
+                    <i class="mdi mdi-eye"></i> View Saved Overtime
+                </button>
+
+                <!-- Result Areas -->
+                <div id="generatedResult" class="mt-3"></div>
+                <div id="savedResult" class="mt-3"></div>
+
+                <!-- Generate Modal -->
+                <div class="modal fade" id="generateModal">
+                    <div class="modal-dialog modal-md modal-dialog-centered">
+                        <form id="generateForm">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Select Project & Date Range</h5>
+                                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                </div>
+                                <div class="modal-body">
+                                    <select name="projectID" class="form-control mb-2" required>
+                                        <option value="">Select Project</option>
+                                        <?php foreach ($projects as $p): ?>
+                                            <option value="<?= $p->projectID ?>"><?= $p->projectName ?? $p->projectTitle ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+
+                                    <input type="date" name="start" class="form-control mb-2" required>
+                                    <input type="date" name="end" class="form-control" required>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="submit" class="btn btn-primary">Generate</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+          <!-- View Modal -->
+<div class="modal fade" id="viewModal">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <form id="viewForm">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">View Saved Overtime</h5>
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <!-- ✅ Correct opening tag -->
+                    <select name="projectID" class="form-control mb-2" required>
+                        <option value="">Select Project</option>
+                        <?php foreach ($projects as $p): ?>
+                           <option value="<?= $p->projectID ?>"><?= $p->projectTitle ?></option>
+
+                        <?php endforeach; ?>
+                    </select>
+
+                    <select name="date" id="viewDate" class="form-control" required>
+                        <option value="">Select Date</option>
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-success" type="submit">View</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+            </div> <!-- container-fluid -->
+        </div> <!-- content -->
+        <?php include('includes/footer.php'); ?>
+    </div> <!-- content-page -->
+</div> <!-- wrapper -->
+
+<!-- JS Scripts -->
+<script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
+<script src="<?= base_url(); ?>assets/js/app.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    // Handle generate overtime submission
+    $('#generateForm').submit(function(e){
+        e.preventDefault();
+        $.post("<?= base_url('Overtime/generate_personnel') ?>", $(this).serialize(), function(res){
+            $('#generatedResult').html(res);
+            $('#generateModal').modal('hide');
+        }).fail(function(xhr){
+            alert('❌ Failed to generate overtime. ' + xhr.responseText);
+        });
+    });
+
+    // Listen for project change inside the View Saved Overtime modal
+    $('#viewModal select[name="projectID"]').change(function() {
+        var projectID = $(this).val();
+
+        if (projectID !== "") {
+            $.post("<?= base_url('Overtime/get_dates_by_project') ?>", { projectID: projectID }, function(response) {
+                $('#viewModal select[name="date"]').html(response);
+            }).fail(function(xhr) {
+                alert('Failed to fetch dates: ' + xhr.responseText);
+            });
+        } else {
+            $('#viewModal select[name="date"]').html('<option value="">Select Project First</option>');
+        }
+    });
+
+    // Handle form submission for viewing saved overtime
+    $('#viewForm').submit(function(e){
+        e.preventDefault();
+        $.post("<?= base_url('Overtime/view_saved_overtime') ?>", $(this).serialize(), function(res){
+            $('#savedResult').html(res);
+            $('#viewModal').modal('hide');
+        }).fail(function(xhr){
+            alert('❌ Failed to fetch saved overtime. ' + xhr.responseText);
+        });
+    });
+});
+</script>
+
+</body>
+</html>
