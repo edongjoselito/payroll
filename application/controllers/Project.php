@@ -321,6 +321,8 @@ public function payroll_report($settingsID = null)
     $this->load->model('SettingsModel');
     $this->load->model('OtherDeduction_model');
     $this->load->model('WeeklyAttendance_model');
+    $this->load->model('Overtime_model');
+
 
     if (empty($start) || empty($end)) {
         $this->session->set_flashdata('error', 'Start and end dates are required.');
@@ -364,6 +366,14 @@ $data['project'] = $this->Project_model->getProjectDetails($projectID);
     ];
     $dateList[$date] = true;
 }
+// ✅ Get manually inputted overtime
+$overtime_logs = $this->Overtime_model->getSavedOvertime($projectID, $start, $end);
+$overtimeMap = [];
+foreach ($overtime_logs as $ot) {
+    $pid = (int)$ot->personnelID;
+    $date = $ot->date;
+    $overtimeMap[$pid][$date] = floatval($ot->hours);
+}
 
     
     ksort($dateList);
@@ -395,7 +405,7 @@ $row->gov_philhealth = $govDeduction['PHILHEALTH'] ?? 0;
 
             if ($status === 'present' || $status === 'regular ho') {
                 $reg = floatval($day_log['hours']);
-                $ot  = floatval($day_log['holiday_hours'] ?? 0);
+                $ot  = $overtimeMap[$pid][$date] ?? floatval($day_log['holiday_hours'] ?? 0);
                 $row->reg_hours_per_day[$date] = ['hours' => $reg, 'holiday' => $ot];
                 $row->total_reg_hours += $reg;
                 $row->total_ot_hours  += $ot;

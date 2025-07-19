@@ -372,38 +372,33 @@ while ($loopDate <= $endDate):
 
     // ✅ CASE 1: Array with Regular and Holiday hours
     if (is_array($raw)) {
-        $regHours = floatval($raw['hours'] ?? 0);    // Regular hours
-        $holidayHours = floatval($raw['holiday'] ?? 0); // Holiday hours
-        $totalHours = $regHours + $holidayHours;
+     $regHours = floatval($raw['hours'] ?? 0);       // Regular
+$otHours  = floatval($raw['holiday'] ?? 0);     // Overtime
 
-        $workMinutes = $totalHours * 60;
-        $reg = min($workMinutes, 480); // up to 8 hours regular
-        $ot = max(0, $workMinutes - 480); // rest is OT
-        $regHours = $reg / 60;
-        $otHours  = $ot / 60;
 
-        // 💰 Compute pay
-        if ($row->rateType === 'Hour') {
-            $regAmount += $regHours * $row->rateAmount;
-            $otAmount  += $otHours  * $row->rateAmount * 1.25;
-        } elseif ($row->rateType === 'Day') {
-            $base = $row->rateAmount / 8;
-            $regAmount += $regHours * $base;
-            $otAmount  += $otHours * $base * 1.25;
-        } elseif ($row->rateType === 'Month') {
-            $workingDaysInMonth = getWorkingDaysInMonth($start);
-            $base = ($row->rateAmount / $workingDaysInMonth) / 8;
-            $regAmount += $regHours * $base;
-            $otAmount  += $otHours * $base * 1.25;
-        }
+     if ($row->rateType === 'Hour') {
+    $regAmount += $regHours * $row->rateAmount;
+    $otAmount  += $otHours  * $row->rateAmount;
 
-        $regTotalMinutes += $reg;
-        $otTotalMinutes  += $ot;
-        $totalMinutes    += $workMinutes;
+} elseif ($row->rateType === 'Day') {
+    $base = $row->rateAmount / 8;
+    $regAmount += $regHours * $base;
+    $otAmount  += $otHours * $base;
 
-        if ($totalHours > 0) {
-            $totalDays += 1;
-        }
+} elseif ($row->rateType === 'Month') {
+    $base = ($row->rateAmount / 30) / 8;
+    $regAmount += $regHours * $base;
+    $otAmount  += $otHours * $base;
+}
+
+
+     $regTotalMinutes += $regHours * 60;
+$otTotalMinutes  += $otHours * 60;
+
+        $totalMinutes += ($regHours + $otHours) * 60;
+if (($regHours + $otHours) > 0) {
+    $totalDays += 1;
+}
 
         echo "<td>" . number_format($regHours, 2) . "</td><td>" . number_format($otHours, 2) . "</td>";
     }
@@ -424,7 +419,8 @@ while ($loopDate <= $endDate):
 
         if ($row->rateType === 'Hour') {
             $regAmount += $regHours * $row->rateAmount;
-            $otAmount  += $otHours  * $row->rateAmount * 1.25;
+            $otAmount  += $otHours  * $row->rateAmount;
+
         } elseif ($row->rateType === 'Day') {
             $base = $row->rateAmount / 8;
             $regAmount += $regHours * $base;
@@ -542,7 +538,7 @@ $otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60,
     <p><strong>Rate:</strong> ₱<?= number_format($row->rateAmount, 2) ?> / Month</p>
     <p><strong>Daily Rate:</strong> ₱<?= number_format($dailyRate, 2) ?></p>
     <p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p>
-    <p><strong>Overtime Rate (125%):</strong> ₱<?= number_format($otRate, 2) ?></p>
+   <p><strong>Overtime Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p>
 <?php else: ?>
     <p><strong>Rate:</strong> ₱<?= number_format($row->rateAmount, 2) ?> / <?= $row->rateType ?></p>
 <?php endif; ?>
