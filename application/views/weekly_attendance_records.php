@@ -259,6 +259,8 @@ $to = $selectedTo ?? '';
                             $status = $person['dates'][$d] ?? 'Absent';
                             $workHrs = $person['hours'][$d] ?? 0;
                             $holidayHrs = $person['holiday'][$d] ?? 0;
+                            $overtimeHrs = $person['overtime'][$d] ?? 0;
+
 
                             $color = 'secondary';
                             if ($status === 'Present') $color = 'success';
@@ -282,15 +284,20 @@ $to = $selectedTo ?? '';
                                         <?= $statusLabel ?>
                                         <?php
                                         if (stripos($status, 'Present') !== false || stripos($status, 'Regular') !== false) {
-                                            if ($workHrs > 0 || $holidayHrs > 0) {
-                                                echo "<br><small>";
-                                                if ($workHrs > 0) echo number_format($workHrs, 2) . ' hr' . ($workHrs != 1 ? 's' : '');
-                                                if ($holidayHrs > 0) {
-                                                    if ($workHrs > 0) echo ' + ';
-                                                    echo number_format($holidayHrs, 2) . ' hr' . ($holidayHrs != 1 ? 's' : '') . ' (holiday)';
-                                                }
-                                                echo "</small>";
-                                            }
+                                           if ($workHrs > 0 || $holidayHrs > 0 || $overtimeHrs > 0) {
+    echo "<br><small>";
+    if ($workHrs > 0) echo number_format($workHrs, 2) . ' hr' . ($workHrs != 1 ? 's' : '');
+    if ($holidayHrs > 0) {
+        if ($workHrs > 0) echo ' + ';
+        echo number_format($holidayHrs, 2) . ' hr' . ($holidayHrs != 1 ? 's' : '') . ' (holiday)';
+    }
+    if ($overtimeHrs > 0) {
+        if ($workHrs > 0 || $holidayHrs > 0) echo ' + ';
+        echo number_format($overtimeHrs, 2) . ' hr' . ($overtimeHrs != 1 ? 's' : '') . ' (OT)';
+    }
+    echo "</small>";
+}
+
                                         }
                                         ?>
                                     </div>
@@ -300,12 +307,17 @@ $to = $selectedTo ?? '';
                         <?php
                         $reg = array_sum(array_column($person['hours'], null));
                         $hol = array_sum(array_column($person['holiday'], null));
+                        $ot = array_sum(array_column($person['overtime'] ?? [], null));
+
                         ?>
                         <td class="text-center">
-                            <?php if ($reg > 0 || $hol > 0): ?>
+                          <?php if ($reg > 0 || $hol > 0 || $ot > 0): ?>
+
                                 <span class="text-dark">
-                                    <?php if ($reg > 0): ?><span class="text-primary">Regular: <?= formatHoursAndMinutes($reg); ?></span><br><?php endif; ?>
-                                    <?php if ($hol > 0): ?><span class="text-info">Holiday: <?= formatHoursAndMinutes($hol); ?></span><?php endif; ?>
+                                   <?php if ($reg > 0): ?><span class="text-primary">Regular: <?= formatHoursAndMinutes($reg); ?></span><br><?php endif; ?>
+<?php if ($hol > 0): ?><span class="text-info">Holiday: <?= formatHoursAndMinutes($hol); ?></span><br><?php endif; ?>
+<?php if ($ot > 0): ?><span class="text-danger">Overtime: <?= formatHoursAndMinutes($ot); ?></span><?php endif; ?>
+
                                 </span>
                             <?php else: ?>
                                 <span class="text-muted">—</span>

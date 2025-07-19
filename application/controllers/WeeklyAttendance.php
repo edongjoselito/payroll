@@ -112,6 +112,8 @@ public function records()
                 $attendances[$pid]['dates'][$date] = $status;
                 $attendances[$pid]['hours'][$date] = $personData['hours'][$date] ?? 0;
                 $attendances[$pid]['holiday'][$date] = $personData['holiday'][$date] ?? 0;
+                $attendances[$pid]['overtime'][$date] = $personData['overtime'][$date] ?? 0;
+
             }
         }
 

@@ -41,27 +41,33 @@ public function saveAttendance($data)
     $group_number = date('Ymd', strtotime($from)) . '-' . date('Ymd', strtotime($to));
 
     $statuses = $data['attendance_status'] ?? [];
-    $hours = $data['attendance_hours'] ?? [];
+    $regularHours = $data['regular_hours'] ?? [];
+    $overtimeHours = $data['overtime_hours'] ?? [];
 
+    // -------- Save individual attendance entries --------
     foreach ($statuses as $personnelID => $statusDates) {
         foreach ($statusDates as $date => $status) {
+            $reg = $regularHours[$personnelID][$date] ?? 0;
+            $ot = $overtimeHours[$personnelID][$date] ?? 0;
+
             $log = [
-                'personnelID' => $personnelID,
-                'projectID' => $projectID,
-                'settingsID' => $settingsID,
-                'date' => $date,
-                'status' => $status,
-                'work_duration' => $hours[$personnelID][$date] ?? 0,
-                'holiday_hours' => 0, // You can change this later if holiday input exists
-                'group_number' => $group_number,
+                'personnelID'     => $personnelID,
+                'projectID'       => $projectID,
+                'settingsID'      => $settingsID,
+                'date'            => $date,
+                'status'          => $status,
+                'work_duration'   => is_numeric($reg) ? $reg : 0,
+                'overtime_hours'  => is_numeric($ot) ? $ot : 0,
+                'holiday_hours'   => 0,
+                'group_number'    => $group_number,
             ];
 
-            // Check if existing entry
+            // Check if existing attendance entry
             $this->db->where([
                 'personnelID' => $personnelID,
-                'projectID' => $projectID,
-                'date' => $date,
-                'settingsID' => $settingsID
+                'projectID'   => $projectID,
+                'settingsID'  => $settingsID,
+                'date'        => $date
             ]);
             $existing = $this->db->get('attendance')->row();
 
@@ -70,6 +76,48 @@ public function saveAttendance($data)
             } else {
                 $this->db->insert('attendance', $log);
             }
+        }
+    }
+
+    // -------- Summarize weekly total hours and save to work_hours --------
+    $totals = [];
+
+    foreach ($regularHours as $personnelID => $dayHours) {
+        foreach ($dayHours as $date => $reg) {
+            $reg = is_numeric($reg) ? $reg : 0;
+            $ot  = isset($overtimeHours[$personnelID][$date]) ? $overtimeHours[$personnelID][$date] : 0;
+            $ot  = is_numeric($ot) ? $ot : 0;
+
+            if (!isset($totals[$personnelID])) {
+                $totals[$personnelID] = 0;
+            }
+
+            $totals[$personnelID] += $reg + $ot;
+        }
+    }
+
+    foreach ($totals as $personnelID => $totalHours) {
+        $summary = [
+            'personnelID' => $personnelID,
+            'projectID'   => $projectID,
+            'from'        => $from,
+            'to'          => $to,
+            'total_hours' => $totalHours,
+            'settingsID'  => $settingsID
+        ];
+
+        $existingWH = $this->db->get_where('work_hours', [
+            'personnelID' => $personnelID,
+            'projectID'   => $projectID,
+            'from'        => $from,
+            'to'          => $to,
+            'settingsID'  => $settingsID
+        ])->row();
+
+        if ($existingWH) {
+            $this->db->where('id', $existingWH->id)->update('work_hours', $summary);
+        } else {
+            $this->db->insert('work_hours', $summary);
         }
     }
 
@@ -169,7 +217,10 @@ public function getAttendanceRecords($projectID, $from, $to, $dates, $group_numb
 
         $data[$pid]['dates'][$row->date] = $row->status;
         $data[$pid]['hours'][$row->date] = $row->work_duration;
-        $data[$pid]['holiday'][$row->date] = $row->holiday_hours;
+      $data[$pid]['holiday'][$row->date] = $row->holiday_hours ?? 0;
+$data[$pid]['overtime'][$row->date] = $row->overtime_hours ?? 0;
+       
+
     }
 
     return $data;
@@ -183,6 +234,7 @@ public function getWorkHours($projectID, $from, $to) {
 
     $this->db->select('a.personnelID, 
                        SUM(a.work_duration) as regular_hours, 
+                       SUM(a.overtime_hours) as overtime_hours, 
                        SUM(a.holiday_hours) as holiday_hours');
     $this->db->from('attendance a');
     $this->db->join('personnel p', 'p.personnelID = a.personnelID');
@@ -198,6 +250,7 @@ public function getWorkHours($projectID, $from, $to) {
     foreach ($query->result() as $row) {
         $hours[$row->personnelID] = [
             'regular' => $row->regular_hours,
+            'overtime' => $row->overtime_hours,
             'holiday' => $row->holiday_hours
         ];
     }

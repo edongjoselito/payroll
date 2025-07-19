@@ -318,10 +318,16 @@ foreach ($employees as $emp): ?>
                                                                            <option value="Special Non-Working Holiday">
                                                                                 Special Non-Working Holiday</option>
                                                                       </select>
-                                                                      <input type="number"
-                                                                           name="attendance_hours[<?= $emp->personnelID ?>][<?= $date ?>]"
-                                                                           class="form-control hours-input" min="0"
-                                                                           max="8" step="0.25" placeholder="    Hours ">
+                                                                     <input type="number"
+    name="regular_hours[<?= $emp->personnelID ?>][<?= $date ?>]"
+    class="form-control hours-input" min="0"
+    max="8" step="0.25" placeholder="Reg Hrs">
+
+<input type="number"
+    name="overtime_hours[<?= $emp->personnelID ?>][<?= $date ?>]"
+    class="form-control hours-input mt-1" min="0"
+    max="8" step="0.25" placeholder="OT Hrs">
+
                                                                  </div>
                                                             </td>
                                                             <?php endforeach; ?>
@@ -556,7 +562,9 @@ function validateAttendanceForm() {
     let isValid = true;
     document.querySelectorAll('.attendance-box').forEach(box => {
         const select = box.querySelector('.attendance-select');
-        const hours = box.querySelector('.hours-input');
+       const regularHoursInput = box.querySelector('input[name^="regular_hours"]');
+const overtimeHoursInput = box.querySelector('input[name^="overtime_hours"]');
+
 
         if (!hours.disabled && parseFloat(hours.value || 0) > parseFloat(hours.max)) {
             alert(`Exceeds max hours for ${select.value}. Max allowed: ${hours.max}`);

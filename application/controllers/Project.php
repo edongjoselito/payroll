@@ -321,7 +321,6 @@ public function payroll_report($settingsID = null)
     $this->load->model('SettingsModel');
     $this->load->model('OtherDeduction_model');
     $this->load->model('WeeklyAttendance_model');
-    $this->load->model('Overtime_model');
 
 
     if (empty($start) || empty($end)) {
@@ -344,7 +343,8 @@ $data['project'] = $this->Project_model->getProjectDetails($projectID);
     $payroll = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end);
 
     // Group attendance logs (AM/PM/holidays)
-    $this->db->select('personnelID, date, status, work_duration, holiday_hours');
+$this->db->select('personnelID, date, status, work_duration, overtime_hours');
+
     $this->db->from('attendance');
     $this->db->where('projectID', $projectID);
     $this->db->where('date >=', $start);
@@ -352,6 +352,7 @@ $data['project'] = $this->Project_model->getProjectDetails($projectID);
     $this->db->where('settingsID', $settingsID);
     $query = $this->db->get();
     $daily_logs = $query->result();
+
 
     $logs = [];
     $dateList = [];
@@ -362,20 +363,12 @@ $data['project'] = $this->Project_model->getProjectDetails($projectID);
     $logs[$pid][$date] = [
         'status' => $log->status,
         'hours' => floatval($log->work_duration ?? 0),
-        'holiday_hours' => floatval($log->holiday_hours ?? 0)
+        'overtime_hours' => floatval($log->overtime_hours ?? 0)
+
     ];
+    
     $dateList[$date] = true;
 }
-// ✅ Get manually inputted overtime
-$overtime_logs = $this->Overtime_model->getSavedOvertime($projectID, $start, $end);
-$overtimeMap = [];
-foreach ($overtime_logs as $ot) {
-    $pid = (int)$ot->personnelID;
-    $date = $ot->date;
-    $overtimeMap[$pid][$date] = floatval($ot->hours);
-}
-
-    
     ksort($dateList);
     $data['dates'] = array_keys($dateList);
     $data['logs'] = $logs;
@@ -385,6 +378,7 @@ foreach ($overtime_logs as $ot) {
 
    foreach ($payroll as &$row) {
     $pid = (int)trim($row->personnelID); // ✅ cast again
+    
       $govDeduction = $this->PayrollModel->getGovDeduction($row->personnelID, $start, $end, $settingsID);
 
 
@@ -402,19 +396,24 @@ $row->gov_philhealth = $govDeduction['PHILHEALTH'] ?? 0;
        foreach ($data['dates'] as $date) {
         $day_log = $logs[$pid][$date] ?? null;
             $status = strtolower(trim($day_log['status'] ?? ''));
+            
 
             if ($status === 'present' || $status === 'regular ho') {
                 $reg = floatval($day_log['hours']);
-                $ot  = $overtimeMap[$pid][$date] ?? floatval($day_log['holiday_hours'] ?? 0);
+             $ot  = floatval($day_log['overtime_hours'] ?? 0);
+
                 $row->reg_hours_per_day[$date] = ['hours' => $reg, 'holiday' => $ot];
                 $row->total_reg_hours += $reg;
                 $row->total_ot_hours  += $ot;
+                
                 $row->present_days++;
             } elseif ($status === 'day off') {
                 $row->reg_hours_per_day[$date] = 'Day Off';
             } else {
                 $row->reg_hours_per_day[$date] = '-';
+                
             }
+            
         }
 
         // Compute gross pay
@@ -516,11 +515,13 @@ $data['show_signatories'] = true;
     $data['attendance_data'] = $this->Project_model->getSavedPayrollData($projectID, $start, $end, $settingsID);
 
     // ✅ Get attendance logs per personnel/date
-    $this->db->select('personnelID, date, status, work_duration, holiday_hours');
+    $this->db->select('personnelID, date, status, work_duration, overtime_hours');
+
     $this->db->from('attendance');
     $this->db->where('projectID', $projectID);
-    $this->db->where('date >=', $start);
-    $this->db->where('date <=', $end);
+  $this->db->where('DATE(date) >=', $start);
+$this->db->where('DATE(date) <=', $end);
+
     $this->db->where('settingsID', $settingsID);
     $logs_result = $this->db->get()->result();
 
@@ -530,11 +531,13 @@ $data['show_signatories'] = true;
     foreach ($logs_result as $log) {
         $pid = (int)$log->personnelID;
         $date = $log->date;
-        $logs[$pid][$date] = [
-            'status' => strtolower($log->status),
-            'hours' => floatval($log->work_duration),
-            'holiday' => floatval($log->holiday_hours)
-        ];
+$logs[$pid][$date] = [
+    'status' => $log->status,
+    'hours' => floatval($log->work_duration ?? 0),
+    'overtime_hours' => floatval($log->overtime_hours ?? 0) // <- 🔧 FIXED!
+];
+
+
         $dates[$date] = true;
     }
 
