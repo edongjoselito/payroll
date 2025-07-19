@@ -17,19 +17,35 @@ class Overtime extends CI_Controller {
 }
 
 
-    public function generate_personnel() {
-        $projectID = $this->input->post('projectID');
-        $start = $this->input->post('start');
-        $end = $this->input->post('end');
+   public function generate_personnel() {
+    $projectID = $this->input->post('projectID');
+    $start = $this->input->post('start');
+    $end = $this->input->post('end');
 
-       $data['project'] = $this->Project_model->get_project_by_id($projectID);
+    // 🛑 Check for existing batch before loading the form
+    $batch_id = $start . '_' . $end;
 
-        $data['personnel'] = $this->Overtime_model->get_personnel_by_project($projectID);
-        $data['start'] = $start;
-        $data['end'] = $end;
+  $project = $this->Project_model->get_project_by_id($projectID);
+if ($this->Overtime_model->isBatchAlreadyGenerated($projectID, $batch_id)) {
+    echo json_encode([
+        'status' => 'duplicate',
+        'message' => 'Overtime already exists for this project and date range.',
+        'projectID' => $projectID,
+        'projectTitle' => $project->projectTitle ?? 'N/A',
+        'start' => $start,
+        'end' => $end
+    ]);
+    return;
+}
 
-        $this->load->view('generated_overtime_form', $data);
-    }
+
+    $data['project'] = $this->Project_model->get_project_by_id($projectID);
+    $data['personnel'] = $this->Overtime_model->get_personnel_by_project($projectID);
+    $data['start'] = $start;
+    $data['end'] = $end;
+
+    $this->load->view('generated_overtime_form', $data);
+}
 
    public function save_overtime() {
     $post = $this->input->post();
@@ -64,10 +80,24 @@ public function view_saved_overtime()
 
     $data['start'] = $start;
     $data['end'] = $end;
+    $data['projectID'] = $projectID; // used to repopulate dropdowns if needed
     $data['records'] = $this->Overtime_model->getSavedOvertime($projectID, $start, $end);
 
-    $this->load->view('saved_overtime_display', $data);
+    if ($this->input->is_ajax_request()) {
+        $this->load->view('saved_overtime_display', $data); // ✅ AJAX view only
+    } else {
+        // ✅ Full layout request → preload projects + flash content
+        $settingsID = $this->session->userdata('settingsID'); 
+        $data['projects'] = $this->Project_model->getAll($settingsID);
+
+        // Store preload flag and content to session
+        $this->session->set_flashdata('saved_overtime_block', $this->load->view('saved_overtime_display', $data, true));
+        $this->session->set_flashdata('open_modal', 'viewModal');
+
+        redirect('Overtime');
+    }
 }
+
 public function loadSavedOvertimeView()
 {
     $projectID = $this->input->post('projectID');

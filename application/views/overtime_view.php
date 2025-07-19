@@ -38,7 +38,12 @@
   </div>
 <?php endif; ?>
 
-<div id="savedResult" class="mt-3"></div>
+<div id="savedResult" class="mt-3">
+    <?php if ($this->session->flashdata('saved_overtime_block')): ?>
+        <?= $this->session->flashdata('saved_overtime_block'); ?>
+    <?php endif; ?>
+</div>
+
 
 
                 <!-- Generate Modal -->
@@ -130,62 +135,111 @@
 
 <script>
 $(document).ready(function() {
-    // ✅ Handle generate overtime submission
+    // ✅ Handle generate overtime submission with duplicate check
     $('#generateForm').submit(function(e){
         e.preventDefault();
         $.post("<?= base_url('Overtime/generate_personnel') ?>", $(this).serialize(), function(res){
-            $('#generatedResult').html(res);
-            $('#generateModal').modal('hide');
+            try {
+                const json = typeof res === 'string' ? JSON.parse(res) : res;
+
+                if (json.status === 'duplicate') {
+                    const html = `
+                    <div class="modal fade show" id="duplicateModal" tabindex="-1" style="display:block; background: rgba(0,0,0,0.5);">
+                      <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content border-warning">
+                          <div class="modal-header bg-warning text-dark">
+                            <h5 class="modal-title">Duplicate Batch Found</h5>
+                            <button type="button" class="close" onclick="location.reload()">&times;</button>
+                          </div>
+                          <div class="modal-body">
+                            <p>${json.message}</p>
+                           <p><strong>Project:</strong> ${json.projectTitle}</p>
+
+                            <p><strong>Period:</strong> ${json.start} to ${json.end}</p>
+                          </div>
+                          <div class="modal-footer">
+                            <form method="post" action="<?= base_url('Overtime/view_saved_overtime') ?>">
+                              <input type="hidden" name="projectID" value="${json.projectID}">
+                              <input type="hidden" name="start" value="${json.start}">
+                              <input type="hidden" name="end" value="${json.end}">
+                              <button type="submit" class="btn btn-primary">View Existing</button>
+                              <button type="button" class="btn btn-secondary" onclick="location.reload()">Cancel</button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>`;
+                    $('#generatedResult').html(html);
+                    $('#generateModal').modal('hide');
+                } else {
+                    // If not JSON, assume it's the HTML form
+                    $('#generatedResult').html(res);
+                    $('#generateModal').modal('hide');
+                }
+            } catch (err) {
+                // If it's not JSON (no duplicate), treat as normal view
+                $('#generatedResult').html(res);
+                $('#generateModal').modal('hide');
+            }
         }).fail(function(xhr){
             alert('❌ Failed to generate overtime. ' + xhr.responseText);
         });
     });
-// 🔄 Dynamically populate date dropdown based on project
-$('#viewModal select[name="projectID"]').change(function() {
-    var projectID = $(this).val();
 
-    if (projectID !== "") {
-        $.post("<?= base_url('Overtime/get_dates_by_project') ?>", { projectID: projectID }, function(response) {
-            $('#viewModal select[name="date"]').html(response);
-        }).fail(function(xhr) {
-            alert('Failed to fetch dates: ' + xhr.responseText);
+    // 🔄 Dynamically populate date dropdown based on selected project
+    $('#viewModal select[name="projectID"]').change(function() {
+        const projectID = $(this).val();
+
+        if (projectID !== "") {
+            $.post("<?= base_url('Overtime/get_dates_by_project') ?>", { projectID: projectID }, function(response) {
+                $('#viewModal select[name="date"]').html(response);
+            }).fail(function(xhr) {
+                alert('Failed to fetch dates: ' + xhr.responseText);
+            });
+        } else {
+            $('#viewModal select[name="date"]').html('<option value="">Select Project First</option>');
+        }
+    });
+
+    // ✅ View Saved Overtime Handler
+    $('#viewForm').submit(function(e){
+        e.preventDefault();
+
+        const projectID = $('#viewForm select[name="projectID"]').val();
+        const dateValue = $('#viewForm select[name="date"]').val();
+
+        if (!projectID || !dateValue) {
+            alert("Please select both project and date.");
+            return;
+        }
+
+        const [start, end] = dateValue.split('|');
+
+        $('#reload_projectID').val(projectID);
+        $('#reload_start').val(start);
+        $('#reload_end').val(end);
+
+        $.post("<?= base_url('Overtime/view_saved_overtime') ?>", {
+            projectID: projectID,
+            start: start,
+            end: end
+        }, function(res){
+            $('#savedResult').html(res);
+            $('#viewModal').modal('hide');
+        }).fail(function(xhr){
+            alert('❌ Failed to fetch saved overtime. ' + xhr.responseText);
         });
-    } else {
-        $('#viewModal select[name="date"]').html('<option value="">Select Project First</option>');
-    }
-});
-
-  // ✅ Corrected View Saved Overtime Handler
-$('#viewForm').submit(function(e){
-    e.preventDefault();
-
-    const projectID = $('#viewForm select[name="projectID"]').val();
-    const dateValue = $('#viewForm select[name="date"]').val();
-
-    if (!projectID || !dateValue) {
-        alert("Please select both project and date.");
-        return;
-    }
-
-    const [start, end] = dateValue.split('|'); // example: "2025-07-01|2025-07-07"
-
-    $('#reload_projectID').val(projectID);
-    $('#reload_start').val(start);
-    $('#reload_end').val(end);
-
-    $.post("<?= base_url('Overtime/view_saved_overtime') ?>", {
-        projectID: projectID,
-        start: start,
-        end: end
-    }, function(res){
-        $('#savedResult').html(res);
-        $('#viewModal').modal('hide');
-    }).fail(function(xhr){
-        alert('❌ Failed to fetch saved overtime. ' + xhr.responseText);
     });
 });
-
-});
 </script>
+
+<?php if ($this->session->flashdata('open_modal') == 'duplicateModal'): ?>
+<script>
+  $(document).ready(function() {
+    $('#duplicateModal').modal('show');
+  });
+</script>
+<?php endif; ?>
+
 </body>
 </html>

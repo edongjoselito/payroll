@@ -47,7 +47,8 @@ $end = isset($end) ? $end : '';
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-bordered text-center align-middle m-0 table-hover">
+               <table class="table table-bordered align-middle m-0 table-hover">
+
                     <thead class="bg-light">
                         <tr>
                             <th class="text-start">Personnel</th>
@@ -108,10 +109,16 @@ $end = isset($end) ? $end : '';
 
 <script>
 $(document).on('click', '.delete-row', function () {
-    const ids = $(this).data('ids');
+    const btn = $(this);
+    const ids = btn.data('ids');
+
     if (!confirm("Are you sure you want to delete all overtime entries for this personnel?")) return;
 
-    $('#savedResult').html('<div class="text-center p-4 text-muted">⏳ Deleting...</div>');
+    // Disable button to prevent double clicking
+    btn.prop('disabled', true).html('<i class="mdi mdi-refresh mdi-spin"></i> Deleting...');
+
+    // Optional: Show deleting indicator
+    $('#savedResult').prepend('<div class="text-center text-muted">⏳ Deleting, please wait...</div>');
 
     $.post("<?= base_url('Overtime/delete_overtime') ?>", { id: ids }, function (res) {
         try {
@@ -119,40 +126,37 @@ $(document).on('click', '.delete-row', function () {
             if (result.status === 'success') {
                 $('#deleteToast').toast('show');
 
+                // Reload table quickly
+                const projectID = $('#reload_projectID').val();
+                const start = $('#reload_start').val();
+                const end = $('#reload_end').val();
+
+                if (!projectID || !start || !end) {
+                    $('#savedResult').html('<div class="text-danger text-center p-3">Reload failed: Missing data.</div>');
+                    return;
+                }
+
                 // Load new table
-         setTimeout(() => {
- const projectID = $('#reload_projectID').val();
-const start = $('#reload_start').val();
-const end = $('#reload_end').val();
-
-
-    console.log("🔁 Reloading with:", { projectID, start, end });
-
-    if (!projectID || !start || !end) {
-        console.error("❌ Missing reload data!");
-        $('#savedResult').html('<div class="text-danger text-center p-3">Reload failed: Missing data.</div>');
-        return;
-    }
-
-  $('#savedResult').load("<?= base_url('Overtime/loadSavedOvertimeView') ?>", {
-    projectID: projectID,
-    start: start,
-    end: end
-}, function() {
-    // ✅ After content is loaded, reinitialize DataTable
-    $('.table').DataTable(); // or $('#yourTableID').DataTable();
-});
-
-}, 1000);
-
+                $('#savedResult').load("<?= base_url('Overtime/loadSavedOvertimeView') ?>", {
+                    projectID: projectID,
+                    start: start,
+                    end: end
+                }, function () {
+                    $('.table').DataTable(); // reinitialize DataTable
+                });
 
             } else {
                 alert('❌ Failed to delete.');
+                btn.prop('disabled', false).html('<i class="mdi mdi-delete"></i> Delete');
             }
         } catch {
             alert('❌ Unexpected response.');
+            btn.prop('disabled', false).html('<i class="mdi mdi-delete"></i> Delete');
         }
-    }).fail(() => alert('❌ Server error.'));
+    }).fail(() => {
+        alert('❌ Server error.');
+        btn.prop('disabled', false).html('<i class="mdi mdi-delete"></i> Delete');
+    });
 });
 </script>
 
