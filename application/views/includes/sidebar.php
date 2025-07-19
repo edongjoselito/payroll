@@ -34,7 +34,7 @@
 
     <ul class="nav-second-level nav" aria-expanded="false">
         <li><a href="<?= base_url(); ?>WeeklyAttendance">Attendance</a></li>
-         <li><a href="<?= base_url('Overtime'); ?>">Overtime</a></li>
+         <!-- <li><a href="<?= base_url('Overtime'); ?>">Overtime</a></li> -->
         <li><a href="<?= base_url(); ?>WeeklyAttendance/records">View Attendance</a></li>
         <li><a href="<?= base_url('Generatepayroll/form'); ?>">Generate Payroll</a></li>
 
