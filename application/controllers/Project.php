@@ -358,7 +358,8 @@ $this->db->select('personnelID, date, status, work_duration, overtime_hours');
     $dateList = [];
 
    foreach ($daily_logs as $log) {
-    $pid = (int)$log->personnelID; // ✅ force to int
+   $pid = (string)$log->personnelID;
+// ✅ force to int
     $date = date('Y-m-d', strtotime($log->date));
     $logs[$pid][$date] = [
         'status' => $log->status,
@@ -513,6 +514,11 @@ $data['show_signatories'] = true;
 
     // ✅ Get saved payroll summary
     $data['attendance_data'] = $this->Project_model->getSavedPayrollData($projectID, $start, $end, $settingsID);
+usort($data['attendance_data'], function ($a, $b) {
+    $nameA = strtolower($a->last_name . ', ' . $a->first_name);
+    $nameB = strtolower($b->last_name . ', ' . $b->first_name);
+    return strcmp($nameA, $nameB);
+});
 
     // ✅ Get attendance logs per personnel/date
     $this->db->select('personnelID, date, status, work_duration, overtime_hours');
@@ -546,9 +552,9 @@ $logs[$pid][$date] = [
 
     // ✅ Pre-prepare reg_hours_per_day to work with the same view
     foreach ($data['attendance_data'] as &$row) {
-        $pid = (int)$row->personnelID;
+       $pid = (string)$row->personnelID;
+
         $row->reg_hours_per_day = [];
-    // Get gov deductions for saved data (optional, only if not stored already)
     $govDeduction = $this->PayrollModel->getGovDeduction($pid, $start, $end, $settingsID);
 
     $row->gov_sss = $govDeduction['SSS'] ?? 0;
@@ -559,11 +565,11 @@ $logs[$pid][$date] = [
             if (isset($logs[$pid][$d])) {
                 $status = $logs[$pid][$d]['status'];
 
-                if ($status === 'present' || $status === 'regular ho') {
-                    $row->reg_hours_per_day[$d] = [
-                        'hours' => $logs[$pid][$d]['hours'],
-                        'holiday' => $logs[$pid][$d]['holiday']
-                    ];
+              if (strtolower($status) === 'present' || strtolower($status) === 'regular ho') {
+    $row->reg_hours_per_day[$d] = [
+        'hours' => $logs[$pid][$d]['hours'],
+        'overtime_hours' => $logs[$pid][$d]['overtime_hours']
+    ];
                 } elseif ($status === 'day off') {
                     $row->reg_hours_per_day[$d] = 'Day Off';
                 } else {

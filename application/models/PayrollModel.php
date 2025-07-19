@@ -158,6 +158,64 @@ public function getGovDeduction($personnelID, $start, $end, $settingsID)
     return $deductions;
 }
 
+public function generate_payroll($startDate, $endDate, $cutoff)
+{
+    $settingsID = $this->session->userdata('settingsID');
+
+    // Fetch assigned personnel for the cutoff
+    $personnel = $this->db
+        ->select('ppa.personnelID, p.first_name, p.last_name, p.position, p.rateType, p.rateAmount, p.projectID')
+        ->from('project_personnel_assignment AS ppa')
+        ->join('personnel AS p', 'ppa.personnelID = p.personnelID')
+        ->where('ppa.settingsID', $settingsID)
+        ->get()
+        ->result();
+
+    $payroll = [];
+
+    foreach ($personnel as $person) {
+        // Fetch attendance from `attendance` table (with regular and overtime hours)
+        $attendance = $this->db
+            ->select('date, work_duration, holiday_hours')
+            ->from('attendance')
+            ->where('personnelID', $person->personnelID)
+            ->where('projectID', $person->projectID)
+            ->where('date >=', $startDate)
+            ->where('date <=', $endDate)
+            ->get()
+            ->result();
+
+        $totalReg = 0;
+        $totalOT = 0;
+        foreach ($attendance as $day) {
+            $totalReg += (float) $day->work_duration;
+            $totalOT += (float) $day->holiday_hours;
+        }
+
+        $rate = (float) $person->rateAmount;
+        $rateType = strtolower($person->rateType); // e.g., 'daily' or 'hourly'
+
+        if ($rateType == 'daily') {
+            $gross = $rate * ($totalReg / 8); // assuming 8 hours a day
+        } else {
+            $gross = $rate * $totalReg;
+        }
+
+        $payroll[] = (object) [
+            'personnelID' => $person->personnelID,
+            'first_name' => $person->first_name,
+            'last_name' => $person->last_name,
+            'position' => $person->position,
+            'rateType' => $person->rateType,
+            'rateAmount' => $person->rateAmount,
+            'total_reg_hours' => $totalReg,
+            'total_ot_hours' => $totalOT,
+            'gross' => round($gross, 2)
+        ];
+    }
+
+    return $payroll;
+}
 
 
 

@@ -373,7 +373,8 @@ while ($loopDate <= $endDate):
     // ✅ CASE 1: Array with Regular and Holiday hours
     if (is_array($raw)) {
      $regHours = floatval($raw['hours'] ?? 0);       // Regular
-$otHours  = floatval($raw['holiday'] ?? 0);     // Overtime
+$otHours = floatval($raw['overtime_hours'] ?? ($raw['holiday'] ?? 0));
+
 
 
      if ($row->rateType === 'Hour') {
