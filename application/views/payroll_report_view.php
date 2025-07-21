@@ -377,7 +377,6 @@ $loopDate = strtotime($start);
 while ($loopDate <= $endDate):
     $curDate = date('Y-m-d', $loopDate);
     $raw = $row->reg_hours_per_day[$curDate] ?? '-';
-echo "<!-- DEBUG: " . print_r($raw, true) . " -->";
 
     $regHours = 0;
     $otHours = 0;
@@ -385,14 +384,14 @@ echo "<!-- DEBUG: " . print_r($raw, true) . " -->";
     $showHoliday = false;
     $holidayLabel = '';
 
-    // ✅ CASE 1: Array with status
+    // CASE 1: Array format with status and values
     if (is_array($raw)) {
         $status = strtolower(preg_replace('/\s+/', '', trim($raw['status'] ?? '')));
         $regHours = floatval($raw['hours'] ?? 0);
         $otHours = floatval($raw['overtime_hours'] ?? 0);
         $holidayHours = floatval($raw['holiday'] ?? 0);
 
-        // ✅ Detect holiday keywords
+        // Holiday Detection
         if (preg_match('/holiday|regularho|legal|special/i', $status)) {
             if ($holidayHours <= 0 && $regHours > 0) {
                 $holidayHours = $regHours;
@@ -402,7 +401,7 @@ echo "<!-- DEBUG: " . print_r($raw, true) . " -->";
             $holidayLabel = ucfirst($status ?: 'Holiday');
         }
 
-        // Compute base rate
+        // Rate base
         if ($row->rateType === 'Hour') {
             $base = $row->rateAmount;
         } elseif ($row->rateType === 'Day') {
@@ -411,20 +410,21 @@ echo "<!-- DEBUG: " . print_r($raw, true) . " -->";
             $base = ($row->rateAmount / 30) / 8;
         }
 
-        // Compute pay
-        $regAmount += $regHours * $base;
-        $otAmount  += $otHours * $base;
+        // Pay Calculation
         if ($showHoliday) {
             $regAmount += $holidayHours * $base * 2;
-            $otAmount  += $otHours * $base; // ✅ OT pay on holidays
+            $otAmount  += $otHours * $base;
+        } else {
+            $regAmount += $regHours * $base;
+            $otAmount  += $otHours * $base;
         }
 
+        // Totals
         if ($showHoliday) {
             $regTotalMinutes += $holidayHours * 60;
             $otTotalMinutes += $otHours * 60;
             $totalMinutes += ($holidayHours + $otHours) * 60;
             $totalDays += 1;
-
             echo "<td colspan='2' style='background-color: #ffe5e5; color: red; font-weight: bold; text-align: center;'>
                 {$holidayLabel}<br>(" . number_format($holidayHours, 2) . " hrs";
             if ($otHours > 0) echo " + " . number_format($otHours, 2) . " OT";
@@ -435,14 +435,22 @@ echo "<!-- DEBUG: " . print_r($raw, true) . " -->";
             $totalMinutes += ($regHours + $otHours) * 60;
             if (($regHours + $otHours) > 0) $totalDays += 1;
 
-            echo "<td>" . number_format($regHours, 2) . "</td><td>" . number_format($otHours, 2) . "</td>";
+            if ($regHours <= 0 && $otHours > 0 && in_array($status, ['absent', 'absentee'])) {
+                echo "<td class='text-danger text-center font-weight-bold'>A</td>";
+                echo "<td>" . number_format($otHours, 2) . "</td>";
+            } elseif ($regHours <= 0 && $otHours <= 0 && in_array($status, ['absent', 'absentee'])) {
+                echo "<td colspan='2' class='absent text-center' style='background-color: #f8d7da; color: red;'>Absent</td>";
+            } else {
+                echo "<td>" . number_format($regHours, 2) . "</td>";
+                echo "<td>" . number_format($otHours, 2) . "</td>";
+            }
         }
 
-    // ✅ CASE 2: Day Off
+    // CASE 2: Day Off
     } elseif (strtolower(trim($raw)) === 'day off') {
         echo "<td colspan='2' class='text-info font-bold text-center'>Day Off</td>";
 
-    // ✅ CASE 3: Numeric value
+    // CASE 3: Numeric hours (e.g. just '8')
     } elseif (is_numeric($raw)) {
         $decimalHours = floatval($raw);
         $reg = min($decimalHours * 60, 480);
@@ -455,8 +463,7 @@ echo "<!-- DEBUG: " . print_r($raw, true) . " -->";
         } elseif ($row->rateType === 'Day') {
             $base = $row->rateAmount / 8;
         } elseif ($row->rateType === 'Month') {
-            $workingDaysInMonth = getWorkingDaysInMonth($start);
-            $base = ($row->rateAmount / $workingDaysInMonth) / 8;
+            $base = ($row->rateAmount / 30) / 8;
         }
 
         $regAmount += $regHours * $base;
@@ -467,15 +474,17 @@ echo "<!-- DEBUG: " . print_r($raw, true) . " -->";
         $totalMinutes += ($reg + $ot);
         if ($decimalHours > 0) $totalDays += 1;
 
-        echo "<td>" . number_format($regHours, 2) . "</td><td>" . number_format($otHours, 2) . "</td>";
+        echo "<td>" . number_format($regHours, 2) . "</td>";
+        echo "<td>" . number_format($otHours, 2) . "</td>";
 
-    // ❌ CASE 4: Invalid or Absent
+    // CASE 4: Fully absent (invalid, missing, or 0 hours)
     } else {
         echo "<td colspan='2' class='absent text-center' style='background-color: #f8d7da; color: red;'>Absent</td>";
     }
 
     $loopDate = strtotime('+1 day', $loopDate);
 endwhile;
+
 
 
 

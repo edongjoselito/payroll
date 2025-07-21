@@ -414,12 +414,26 @@ if ($status === 'present' || $status === 'regular ho') {
                 $row->total_ot_hours  += $ot;
                 
                 $row->present_days++;
-            } elseif ($status === 'day off') {
-                $row->reg_hours_per_day[$date] = 'Day Off';
-            } else {
-                $row->reg_hours_per_day[$date] = '-';
-                
-            }
+         } elseif ($status === 'day off') {
+    $row->reg_hours_per_day[$date] = 'Day Off';
+} else {
+    // ✅ Always capture hours and overtime even for Absent
+    $reg = floatval($day_log['hours'] ?? 0); // Usually 0
+    $ot  = floatval($day_log['overtime_hours'] ?? 0); // Might be > 0
+
+    $row->reg_hours_per_day[$date] = [
+        'hours' => $reg,
+        'overtime_hours' => $ot,
+        'status' => $day_log['status'] ?? ''
+    ];
+
+    // ⛔ DO NOT increment present_days or reg_total
+    // ✅ But allow OT hours to accumulate
+    if ($ot > 0) {
+        $row->total_ot_hours += $ot;
+    }
+}
+
             
         }
 
