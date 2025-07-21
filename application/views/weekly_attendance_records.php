@@ -578,10 +578,33 @@ $(document).ready(function () {
                 }
             });
 
-        } else if (status === 'Regular Holiday' || status === 'Special Non-Working Holiday') {
-            // Show only Holiday Hours
+        } else if (status === 'Regular Holiday') {
+            // ✅ Show BOTH Regular and Holiday Hours
+            const regularField = `
+                <div class="form-group" id="regularHoursWrapper">
+                    <label>Regular Hours <small class="text-muted">(Max: 8 hrs)</small></label>
+                    <input type="number" step="0.01" max="8" name="hours" id="editHours" class="form-control">
+                </div>
+            `;
+            $holidayGroup.before(regularField);
             $holidayGroup.show();
             $('#editHoliday').prop('readonly', false);
+
+            $('#editHours').on('input', function () {
+                let val = parseFloat($(this).val());
+                if (val > 8) {
+                    $(this).val(8);
+                    alert('Regular hours cannot exceed 8.00 hours.');
+                } else if (val < 0 || isNaN(val)) {
+                    $(this).val('');
+                }
+            });
+
+        } else if (status === 'Special Non-Working Holiday') {
+            // Show only Holiday Hours (editable)
+            $holidayGroup.show();
+            $('#editHoliday').prop('readonly', false);
+
         } else if (status === 'Day Off' || status === 'Absent') {
             $holidayGroup.show();
             $('#editHoliday').val('0.00').prop('readonly', true);
@@ -598,7 +621,7 @@ $(document).ready(function () {
         // Remove and optionally recreate regular hours
         $('#regularHoursWrapper').remove();
 
-        if ($(this).data('status') === 'Present') {
+        if ($(this).data('status') === 'Present' || $(this).data('status') === 'Regular Holiday') {
             const regularField = `
                 <div class="form-group" id="regularHoursWrapper">
                     <label>Regular Hours <small class="text-muted">(Max: 8 hrs)</small></label>
@@ -626,6 +649,7 @@ $(document).ready(function () {
     $('#editStatus').on('change', toggleHourFields);
 });
 </script>
+
 
 </body>
 
