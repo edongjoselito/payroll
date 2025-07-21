@@ -448,8 +448,7 @@ $to = $selectedTo ?? '';
                                         <option value="Special Non-Working Holiday">Special Non-Working Holiday</option>
                                    </select>
                               </div>
-
-                             <div class="form-group">
+<div class="form-group" id="regularHoursWrapper">
     <label>Regular Hours <small class="text-muted">(Max: 8 hrs)</small></label>
     <input type="number" step="0.01" max="8" name="hours" id="editHours" class="form-control">
 </div>
@@ -505,89 +504,125 @@ $to = $selectedTo ?? '';
 
   <script>
 $(document).ready(function () {
-     // Show toast if available
-     $('.toast').toast({ delay: 2500 }).toast('show');
+    // Show toast if available
+    $('.toast').toast({ delay: 2500 }).toast('show');
 
-     // Show error modal if session has flashdata
-     <?php if ($this->session->flashdata('view_error')): ?>
-     $('#errorModal').modal('show');
-     <?php endif; ?>
+    // Show error modal if session has flashdata
+    <?php if ($this->session->flashdata('view_error')): ?>
+    $('#errorModal').modal('show');
+    <?php endif; ?>
 
-     // Focus field when filter modal opens
-     $('#filterModal').on('shown.bs.modal', function () {
-          $('#project').focus();
-     });
+    // Focus field when filter modal opens
+    $('#filterModal').on('shown.bs.modal', function () {
+        $('#project').focus();
+    });
 
-     // Attendance batch filtering based on project
-     const projectSelect = document.getElementById('project');
+    // Attendance batch filtering based on project
+    const projectSelect = document.getElementById('project');
     const batchSelect = document.getElementById('attendanceBatch');
 
-     projectSelect.addEventListener('change', function () {
-          const selectedProject = this.value;
-          const options = batchSelect.querySelectorAll('option');
-          batchSelect.value = "";
+    projectSelect.addEventListener('change', function () {
+        const selectedProject = this.value;
+        const options = batchSelect.querySelectorAll('option');
+        batchSelect.value = "";
 
-          options.forEach(option => {
-               if (option.value === "") {
-                    option.style.display = 'block';
-               } else if (option.getAttribute('data-project') === selectedProject) {
-                    option.style.display = 'block';
-               } else {
-                    option.style.display = 'none';
-               }
-          });
-     });
+        options.forEach(option => {
+            if (option.value === "") {
+                option.style.display = 'block';
+            } else if (option.getAttribute('data-project') === selectedProject) {
+                option.style.display = 'block';
+            } else {
+                option.style.display = 'none';
+            }
+        });
+    });
 
     batchSelect.addEventListener('change', function () {
-    const selected = this.options[this.selectedIndex];
-    document.getElementById('from').value = selected.getAttribute('data-start');
-    document.getElementById('to').value = selected.getAttribute('data-end');
-     });
+        const selected = this.options[this.selectedIndex];
+        document.getElementById('from').value = selected.getAttribute('data-start');
+        document.getElementById('to').value = selected.getAttribute('data-end');
+    });
 
-     // Attendance modal logic
-     function toggleHourFields() {
-          const status = $('#editStatus').val();
-          $('#editHours, #editHoliday').prop('readonly', false).closest('.form-group').show();
+    // ✅ Dynamic field logic
+    function toggleHourFields() {
+        const status = $('#editStatus').val();
+        const $holidayGroup = $('#editHoliday').closest('.form-group');
 
-          if (status === 'Day Off' || status === 'Absent') {
-               $('#editHours').val('0.00').prop('readonly', true);
-               $('#editHoliday').val('0.00').prop('readonly', true);
-          } else if (status === 'Present') {
-               $('#editHoliday').val('0.00').prop('readonly', true).closest('.form-group').hide();
-               $('#editHours').prop('readonly', false).closest('.form-group').show();
-          } else if (status === 'Regular Holiday') {
-               $('#editHours, #editHoliday').prop('readonly', false).closest('.form-group').show();
-          } else if (status === 'Special Non-Working Holiday') {
-               $('#editHours').val('0.00').prop('readonly', true).closest('.form-group').show();
-               $('#editHoliday').prop('readonly', false).closest('.form-group').show();
-          }
-     }
+        // Remove any existing Regular Hours
+        $('#regularHoursWrapper').remove();
 
-     $('.edit-attendance').on('click', function () {
-          $('#editPersonnelID').val($(this).data('personnel'));
-          $('#editDate').val($(this).data('date'));
-          $('#editStatus').val($(this).data('status'));
-          $('#editHours').val($(this).data('hours'));
-          $('#editHoliday').val($(this).data('holiday'));
-          $('#editAttendanceModal').modal('show');
-          toggleHourFields();
-     });
+        // Default: hide holiday hours
+        $holidayGroup.hide();
+        $('#editHoliday').val('0.00').prop('readonly', true);
 
-     $('#editStatus').on('change', toggleHourFields);
+        if (status === 'Present') {
+            // Show Regular Hours only
+            const regularField = `
+                <div class="form-group" id="regularHoursWrapper">
+                    <label>Regular Hours <small class="text-muted">(Max: 8 hrs)</small></label>
+                    <input type="number" step="0.01" max="8" name="hours" id="editHours" class="form-control">
+                </div>
+            `;
+            $holidayGroup.before(regularField);
 
-     // Enforce max 8 hours on regular hours input
-     $('#editHours').on('input', function () {
-          let val = parseFloat($(this).val());
-          if (val > 8) {
-               $(this).val(8);
-               alert('Regular hours cannot exceed 8.00 hours.');
-          } else if (val < 0 || isNaN(val)) {
-               $(this).val('');
-          }
-     });
+            $('#editHours').on('input', function () {
+                let val = parseFloat($(this).val());
+                if (val > 8) {
+                    $(this).val(8);
+                    alert('Regular hours cannot exceed 8.00 hours.');
+                } else if (val < 0 || isNaN(val)) {
+                    $(this).val('');
+                }
+            });
+
+        } else if (status === 'Regular Holiday' || status === 'Special Non-Working Holiday') {
+            // Show only Holiday Hours
+            $holidayGroup.show();
+            $('#editHoliday').prop('readonly', false);
+        } else if (status === 'Day Off' || status === 'Absent') {
+            $holidayGroup.show();
+            $('#editHoliday').val('0.00').prop('readonly', true);
+        }
+    }
+
+    // Edit modal trigger
+    $('.edit-attendance').on('click', function () {
+        $('#editPersonnelID').val($(this).data('personnel'));
+        $('#editDate').val($(this).data('date'));
+        $('#editStatus').val($(this).data('status'));
+        $('#editHoliday').val($(this).data('holiday'));
+
+        // Remove and optionally recreate regular hours
+        $('#regularHoursWrapper').remove();
+
+        if ($(this).data('status') === 'Present') {
+            const regularField = `
+                <div class="form-group" id="regularHoursWrapper">
+                    <label>Regular Hours <small class="text-muted">(Max: 8 hrs)</small></label>
+                    <input type="number" step="0.01" max="8" name="hours" id="editHours" class="form-control">
+                </div>
+            `;
+            $('#editHoliday').closest('.form-group').before(regularField);
+            $('#editHours').val($(this).data('hours'));
+
+            $('#editHours').on('input', function () {
+                let val = parseFloat($(this).val());
+                if (val > 8) {
+                    $(this).val(8);
+                    alert('Regular hours cannot exceed 8.00 hours.');
+                } else if (val < 0 || isNaN(val)) {
+                    $(this).val('');
+                }
+            });
+        }
+
+        $('#editAttendanceModal').modal('show');
+        toggleHourFields();
+    });
+
+    $('#editStatus').on('change', toggleHourFields);
 });
 </script>
-
 
 </body>
 
