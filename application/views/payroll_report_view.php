@@ -377,6 +377,7 @@ $loopDate = strtotime($start);
 while ($loopDate <= $endDate):
     $curDate = date('Y-m-d', $loopDate);
     $raw = $row->reg_hours_per_day[$curDate] ?? '-';
+echo "<!-- DEBUG: " . print_r($raw, true) . " -->";
 
     $regHours = 0;
     $otHours = 0;
@@ -386,49 +387,48 @@ while ($loopDate <= $endDate):
 
     // ✅ CASE 1: Array with status
     if (is_array($raw)) {
-        $status = strtolower(trim($raw['status'] ?? ''));
+        $status = strtolower(preg_replace('/\s+/', '', trim($raw['status'] ?? '')));
         $regHours = floatval($raw['hours'] ?? 0);
         $otHours = floatval($raw['overtime_hours'] ?? 0);
         $holidayHours = floatval($raw['holiday'] ?? 0);
 
-        // ✅ Detect holiday keywords (e.g. Regular Ho, Legal Holiday, etc.)
-        if (preg_match('/holiday|regular ho|legal|special/i', $status)) {
+        // ✅ Detect holiday keywords
+        if (preg_match('/holiday|regularho|legal|special/i', $status)) {
             if ($holidayHours <= 0 && $regHours > 0) {
                 $holidayHours = $regHours;
                 $regHours = 0;
             }
-
             $showHoliday = true;
             $holidayLabel = ucfirst($status ?: 'Holiday');
-            $regHours = 0;
-            $otHours = 0;
+        }
+
+        // Compute base rate
+        if ($row->rateType === 'Hour') {
+            $base = $row->rateAmount;
+        } elseif ($row->rateType === 'Day') {
+            $base = $row->rateAmount / 8;
+        } elseif ($row->rateType === 'Month') {
+            $base = ($row->rateAmount / 30) / 8;
         }
 
         // Compute pay
-        if ($row->rateType === 'Hour') {
-            $regAmount += $regHours * $row->rateAmount;
-            $otAmount  += $otHours * $row->rateAmount;
-            if ($showHoliday) $regAmount += $holidayHours * $row->rateAmount;
-        } elseif ($row->rateType === 'Day') {
-            $base = $row->rateAmount / 8;
-            $regAmount += $regHours * $base;
-            $otAmount  += $otHours * $base;
-            if ($showHoliday) $regAmount += $holidayHours * $base;
-        } elseif ($row->rateType === 'Month') {
-            $base = ($row->rateAmount / 30) / 8;
-            $regAmount += $regHours * $base;
-            $otAmount  += $otHours * $base;
-            if ($showHoliday) $regAmount += $holidayHours * $base;
+        $regAmount += $regHours * $base;
+        $otAmount  += $otHours * $base;
+        if ($showHoliday) {
+            $regAmount += $holidayHours * $base * 2;
+            $otAmount  += $otHours * $base; // ✅ OT pay on holidays
         }
 
         if ($showHoliday) {
             $regTotalMinutes += $holidayHours * 60;
-            $totalMinutes += $holidayHours * 60;
+            $otTotalMinutes += $otHours * 60;
+            $totalMinutes += ($holidayHours + $otHours) * 60;
             $totalDays += 1;
 
             echo "<td colspan='2' style='background-color: #ffe5e5; color: red; font-weight: bold; text-align: center;'>
-                {$holidayLabel}<br>(" . number_format($holidayHours, 2) . " hrs)
-            </td>";
+                {$holidayLabel}<br>(" . number_format($holidayHours, 2) . " hrs";
+            if ($otHours > 0) echo " + " . number_format($otHours, 2) . " OT";
+            echo ")</td>";
         } else {
             $regTotalMinutes += $regHours * 60;
             $otTotalMinutes += $otHours * 60;
@@ -451,18 +451,16 @@ while ($loopDate <= $endDate):
         $otHours = $ot / 60;
 
         if ($row->rateType === 'Hour') {
-            $regAmount += $regHours * $row->rateAmount;
-            $otAmount += $otHours * $row->rateAmount;
+            $base = $row->rateAmount;
         } elseif ($row->rateType === 'Day') {
             $base = $row->rateAmount / 8;
-            $regAmount += $regHours * $base;
-            $otAmount += $otHours * $base * 1.25;
         } elseif ($row->rateType === 'Month') {
             $workingDaysInMonth = getWorkingDaysInMonth($start);
             $base = ($row->rateAmount / $workingDaysInMonth) / 8;
-            $regAmount += $regHours * $base;
-            $otAmount += $otHours * $base * 1.25;
         }
+
+        $regAmount += $regHours * $base;
+        $otAmount  += $otHours * $base;
 
         $regTotalMinutes += $reg;
         $otTotalMinutes += $ot;
@@ -478,6 +476,8 @@ while ($loopDate <= $endDate):
 
     $loopDate = strtotime('+1 day', $loopDate);
 endwhile;
+
+
 
 
 

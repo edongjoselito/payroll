@@ -402,11 +402,12 @@ if ($status === 'present' || $status === 'regular ho') {
     $reg = floatval($day_log['hours']);
     $ot  = floatval($day_log['overtime_hours'] ?? 0);
 
-    $row->reg_hours_per_day[$date] = [
-        'hours' => $reg,
-        'holiday' => $ot,
-        'status' => $day_log['status'] ?? ''
-    ];
+   $row->reg_hours_per_day[$date] = [
+    'hours' => $reg,
+    'overtime_hours' => $ot, // ✅ Corrected
+    'status' => $day_log['status'] ?? ''
+];
+
 
 
                 $row->total_reg_hours += $reg;
@@ -571,10 +572,11 @@ $logs[$pid][$date] = [
                 $status = $logs[$pid][$d]['status'];
 
               if (strtolower($status) === 'present' || strtolower($status) === 'regular ho') {
-    $row->reg_hours_per_day[$d] = [
-        'hours' => $logs[$pid][$d]['hours'],
-        'overtime_hours' => $logs[$pid][$d]['overtime_hours']
-    ];
+  $row->reg_hours_per_day[$d] = [
+    'hours' => $logs[$pid][$d]['hours'],
+    'overtime_hours' => $logs[$pid][$d]['overtime_hours'] // ✅ make sure it's `overtime_hours`
+];
+
                 } elseif ($status === 'day off') {
                     $row->reg_hours_per_day[$d] = 'Day Off';
                 } else {
