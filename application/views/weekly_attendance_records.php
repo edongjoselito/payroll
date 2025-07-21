@@ -283,23 +283,26 @@ $to = $selectedTo ?? '';
                                     <div class="text-wrap text-center" style="white-space: normal;">
                                         <?= $statusLabel ?>
                                         <?php
-                                        if (stripos($status, 'Present') !== false || stripos($status, 'Regular') !== false) {
-                                           if ($workHrs > 0 || $holidayHrs > 0 || $overtimeHrs > 0) {
-    echo "<br><small>";
-    if ($workHrs > 0) echo number_format($workHrs, 2) . ' hr' . ($workHrs != 1 ? 's' : '');
-    if ($holidayHrs > 0) {
-        if ($workHrs > 0) echo ' + ';
-        echo number_format($holidayHrs, 2) . ' hr' . ($holidayHrs != 1 ? 's' : '') . ' (holiday)';
+                                      if (
+    stripos($status, 'Present') !== false || 
+    stripos($status, 'Regular') !== false || 
+    stripos($status, 'Absent') !== false
+) {
+    if ($workHrs > 0 || $holidayHrs > 0 || $overtimeHrs > 0) {
+        echo "<br><small>";
+        if ($workHrs > 0) echo number_format($workHrs, 2) . ' hr' . ($workHrs != 1 ? 's' : '');
+        if ($holidayHrs > 0) {
+            if ($workHrs > 0) echo ' + ';
+            echo number_format($holidayHrs, 2) . ' hr' . ($holidayHrs != 1 ? 's' : '') . ' (holiday)';
+        }
+        if ($overtimeHrs > 0) {
+            if ($workHrs > 0 || $holidayHrs > 0) echo ' + ';
+            echo number_format($overtimeHrs, 2) . ' hr' . ($overtimeHrs != 1 ? 's' : '') . ' (OT)';
+        }
+        echo "</small>";
     }
-    if ($overtimeHrs > 0) {
-        if ($workHrs > 0 || $holidayHrs > 0) echo ' + ';
-        echo number_format($overtimeHrs, 2) . ' hr' . ($overtimeHrs != 1 ? 's' : '') . ' (OT)';
-    }
-    echo "</small>";
 }
-
-                                        }
-                                        ?>
+                                       ?>
                                     </div>
                                 </div>
                             </td>
