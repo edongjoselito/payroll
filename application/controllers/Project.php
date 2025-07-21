@@ -398,12 +398,17 @@ $row->gov_philhealth = $govDeduction['PHILHEALTH'] ?? 0;
         $day_log = $logs[$pid][$date] ?? null;
             $status = strtolower(trim($day_log['status'] ?? ''));
             
+if ($status === 'present' || $status === 'regular ho') {
+    $reg = floatval($day_log['hours']);
+    $ot  = floatval($day_log['overtime_hours'] ?? 0);
 
-            if ($status === 'present' || $status === 'regular ho') {
-                $reg = floatval($day_log['hours']);
-             $ot  = floatval($day_log['overtime_hours'] ?? 0);
+    $row->reg_hours_per_day[$date] = [
+        'hours' => $reg,
+        'holiday' => $ot,
+        'status' => $day_log['status'] ?? ''
+    ];
 
-                $row->reg_hours_per_day[$date] = ['hours' => $reg, 'holiday' => $ot];
+
                 $row->total_reg_hours += $reg;
                 $row->total_ot_hours  += $ot;
                 

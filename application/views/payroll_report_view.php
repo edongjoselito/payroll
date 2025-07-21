@@ -83,6 +83,12 @@ tbody td:nth-child(2) {
 .signature strong {
   font-size: 13px;
 }
+.holiday-cell {
+  background-color: #ffe5e5 !important;
+  color: red !important;
+  font-weight: bold !important;
+  text-align: center !important;
+}
 
 tbody td:nth-last-child(-n+10) {
   font-size: 10.5px;
@@ -245,6 +251,8 @@ th {
     padding: 20px;
     box-sizing: border-box;
   }
+
+
 }
 </style>
 
@@ -365,7 +373,6 @@ $endDate = strtotime($end);
     </td>
 
 <?php
-
 $loopDate = strtotime($start);
 while ($loopDate <= $endDate):
     $curDate = date('Y-m-d', $loopDate);
@@ -375,26 +382,32 @@ while ($loopDate <= $endDate):
     $otHours = 0;
     $holidayHours = 0;
     $showHoliday = false;
+    $holidayLabel = '';
 
-    // ✅ CASE 1: Array with Regular and Holiday hours
+    // ✅ CASE 1: Array with status
     if (is_array($raw)) {
         $status = strtolower(trim($raw['status'] ?? ''));
         $regHours = floatval($raw['hours'] ?? 0);
         $otHours = floatval($raw['overtime_hours'] ?? 0);
         $holidayHours = floatval($raw['holiday'] ?? 0);
 
-        if (stripos($status, 'holiday') !== false && $holidayHours > 0) {
-            // Detected holiday status, ignore reg and ot
+        // ✅ Detect holiday keywords (e.g. Regular Ho, Legal Holiday, etc.)
+        if (preg_match('/holiday|regular ho|legal|special/i', $status)) {
+            if ($holidayHours <= 0 && $regHours > 0) {
+                $holidayHours = $regHours;
+                $regHours = 0;
+            }
+
+            $showHoliday = true;
+            $holidayLabel = ucfirst($status ?: 'Holiday');
             $regHours = 0;
             $otHours = 0;
-            $showHoliday = true;
-            $holidayLabel = ucfirst($status);
         }
 
         // Compute pay
         if ($row->rateType === 'Hour') {
             $regAmount += $regHours * $row->rateAmount;
-            $otAmount  += $otHours  * $row->rateAmount;
+            $otAmount  += $otHours * $row->rateAmount;
             if ($showHoliday) $regAmount += $holidayHours * $row->rateAmount;
         } elseif ($row->rateType === 'Day') {
             $base = $row->rateAmount / 8;
@@ -412,7 +425,10 @@ while ($loopDate <= $endDate):
             $regTotalMinutes += $holidayHours * 60;
             $totalMinutes += $holidayHours * 60;
             $totalDays += 1;
-            echo "<td colspan='2' style='text-align:center; color:red; font-weight:bold;'>$holidayLabel<br>(" . number_format($holidayHours, 2) . " hrs)</td>";
+
+            echo "<td colspan='2' style='background-color: #ffe5e5; color: red; font-weight: bold; text-align: center;'>
+                {$holidayLabel}<br>(" . number_format($holidayHours, 2) . " hrs)
+            </td>";
         } else {
             $regTotalMinutes += $regHours * 60;
             $otTotalMinutes += $otHours * 60;
@@ -421,50 +437,50 @@ while ($loopDate <= $endDate):
 
             echo "<td>" . number_format($regHours, 2) . "</td><td>" . number_format($otHours, 2) . "</td>";
         }
-    }
 
     // ✅ CASE 2: Day Off
-    elseif (strtolower(trim($raw)) === 'day off') {
+    } elseif (strtolower(trim($raw)) === 'day off') {
         echo "<td colspan='2' class='text-info font-bold text-center'>Day Off</td>";
-    }
 
-    // ✅ CASE 3: Numeric hours (not an array)
-    elseif (is_numeric($raw)) {
+    // ✅ CASE 3: Numeric value
+    } elseif (is_numeric($raw)) {
         $decimalHours = floatval($raw);
         $reg = min($decimalHours * 60, 480);
         $ot = max(0, ($decimalHours * 60) - 480);
         $regHours = $reg / 60;
-        $otHours  = $ot / 60;
+        $otHours = $ot / 60;
 
         if ($row->rateType === 'Hour') {
             $regAmount += $regHours * $row->rateAmount;
-            $otAmount  += $otHours  * $row->rateAmount;
+            $otAmount += $otHours * $row->rateAmount;
         } elseif ($row->rateType === 'Day') {
             $base = $row->rateAmount / 8;
             $regAmount += $regHours * $base;
-            $otAmount  += $otHours * $base * 1.25;
+            $otAmount += $otHours * $base * 1.25;
         } elseif ($row->rateType === 'Month') {
             $workingDaysInMonth = getWorkingDaysInMonth($start);
             $base = ($row->rateAmount / $workingDaysInMonth) / 8;
             $regAmount += $regHours * $base;
-            $otAmount  += $otHours * $base * 1.25;
+            $otAmount += $otHours * $base * 1.25;
         }
 
         $regTotalMinutes += $reg;
-        $otTotalMinutes  += $ot;
-        $totalMinutes    += ($reg + $ot);
+        $otTotalMinutes += $ot;
+        $totalMinutes += ($reg + $ot);
         if ($decimalHours > 0) $totalDays += 1;
 
         echo "<td>" . number_format($regHours, 2) . "</td><td>" . number_format($otHours, 2) . "</td>";
-    }
 
-    // ❌ CASE 4: Unknown or Absent
-    else {
+    // ❌ CASE 4: Invalid or Absent
+    } else {
         echo "<td colspan='2' class='absent text-center' style='background-color: #f8d7da; color: red;'>Absent</td>";
     }
 
     $loopDate = strtotime('+1 day', $loopDate);
 endwhile;
+
+
+
 
 
 
@@ -498,8 +514,8 @@ $regFormatted = floor($regTotalMinutes / 60) . '.' . str_pad($regTotalMinutes % 
 $otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60, 2, '0', STR_PAD_LEFT);
 
 
-$regFormatted = floor($regTotalMinutes / 60) . '.' . str_pad($regTotalMinutes % 60, 2, '0', STR_PAD_LEFT);
-$otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60, 2, '0', STR_PAD_LEFT);
+
+
 ?>
 
 <td><?= number_format($regTotalMinutes / 60, 2) ?></td>
