@@ -2,10 +2,14 @@
 function getWorkingDaysInMonth($anyDateInMonth) {
     $year = date('Y', strtotime($anyDateInMonth));
     $month = date('m', strtotime($anyDateInMonth));
-    
     return cal_days_in_month(CAL_GREGORIAN, $month, $year);
 }
+
+function displayAmount($value) {
+    return ($value == 0 || $value === 0.00) ? '––' : number_format($value, 2);
+}
 ?>
+
 
 
 <!DOCTYPE html>
@@ -527,10 +531,19 @@ if ($showHoliday) {
 
 // Add to totals
 if ($showHoliday) {
-    $regTotalMinutes += $holidayHours * 60;
-    $otTotalMinutes += $otHours * 60;
-    $totalMinutes += ($holidayHours + $otHours) * 60;
+    // $regTotalMinutes += $holidayHours * 60;
+    // $otTotalMinutes += $otHours * 60;
+    // $totalMinutes += ($holidayHours + $otHours) * 60;-------------------BALIK UG DI GANAHAN SI CLINET :)
+    // $totalDays += 1;
+    // Do NOT count holiday hours in Reg.
+// Only OT gets added
+$otTotalMinutes += $otHours * 60;//-------------remove this if balik
+$totalMinutes += $otHours * 60;
+
+if (($holidayHours + $otHours) > 0) {
     $totalDays += 1;
+}
+
 
     echo "<td colspan='2' style='background-color: #ffe5e5; color: red; font-weight: bold; text-align: center;'>";
     echo "{$holidayLabel}<br>(";
@@ -637,16 +650,16 @@ $netPay = $salary - $total_deduction;
 <td><?= number_format($otTotalMinutes / 60, 2) ?></td>  
 <td><?= $totalDays ?></td> 
 
-<td><?= number_format($regAmount, 2) ?></td> 
-<td><?= number_format($otAmount, 2) ?></td>  
+<td><?= displayAmount($regAmount) ?></td> 
+<td><?= displayAmount($otAmount) ?></td>  
 <?php if ($hasRegularHoliday): ?>
-    <td><?= number_format($amountRegularHoliday, 2) ?></td>
+    <td><?= displayAmount($amountRegularHoliday) ?></td>
 <?php elseif (!$hasRegularHoliday && $hasSpecialHoliday): ?>
     <td></td> <!-- must still render a cell -->
 <?php endif; ?>
 
 <?php if ($hasSpecialHoliday): ?>
-    <td><?= number_format($amountSpecialHoliday, 2) ?></td>
+    <td><?= displayAmount($amountSpecialHoliday) ?></td>
 <?php elseif (!$hasSpecialHoliday && $hasRegularHoliday): ?>
     <td></td>
 <?php endif; ?>
@@ -656,13 +669,13 @@ $netPay = $salary - $total_deduction;
 <td><?= number_format($regAmount + $otAmount + $amountRegularHoliday + $amountSpecialHoliday, 2) ?></td>
 
 
-<td><?= number_format($cash_advance, 2) ?></td>
-<td><?= number_format($sss, 2) ?></td>
-<td><?= number_format($pagibig, 2) ?></td>
-<td><?= number_format($philhealth, 2) ?></td>
-<td><?= number_format($loan, 2) ?></td>
-<td><?= number_format($other_deduction, 2) ?></td>
-<td><?= number_format($total_deduction, 2) ?></td>
+<td><?= displayAmount($cash_advance) ?></td>
+<td><?= displayAmount($sss) ?></td>
+<td><?= displayAmount($pagibig) ?></td>
+<td><?= displayAmount($philhealth) ?></td>
+<td><?= displayAmount($loan) ?></td>
+<td><?= displayAmount($other_deduction) ?></td>
+<td><?= displayAmount($total_deduction) ?></td>
 <td>
   <span class="d-print-block d-none"><?= number_format($netPay, 2) ?></span>
   <a href="#" class="btn btn-link btn-sm d-print-none" data-toggle="modal" data-target="#payslipModal<?= $ln ?>">
