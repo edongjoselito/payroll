@@ -293,24 +293,23 @@ th {
         $startDate = strtotime('+1 day', $startDate);
     endwhile;
     ?>
-  <th colspan="3">TOTAL TIME</th>
+    <th colspan="3">TOTAL TIME</th>
 
-    <th colspan="2">AMOUNT</th>
+    <th colspan="4" class="text-center">AMOUNT</th> <!-- Changed from 2 to 4 -->
     <th rowspan="3">Gross</th>
-       <th rowspan="3">Cash Advance</th>
-   <th rowspan="3">SSS (Gov’t)</th>
-<th rowspan="3">Pag-IBIG (Gov’t)</th>
-<th rowspan="3">PHIC (Gov’t)</th>
-
+    <th rowspan="3">Cash Advance</th>
+    <th rowspan="3">SSS (Gov’t)</th>
+    <th rowspan="3">Pag-IBIG (Gov’t)</th>
+    <th rowspan="3">PHIC (Gov’t)</th>
     <th rowspan="3">Loan</th>
     <th rowspan="3">Other Deduction</th>
-<th rowspan="3">Total Deduction</th>
+    <th rowspan="3">Total Deduction</th>
     <th rowspan="3">Take Home</th>
-   <?php if (empty($is_summary)): ?>
-    <th rowspan="3" colspan="3">Signature</th>
-<?php endif; ?>
-
+    <?php if (empty($is_summary)): ?>
+        <th rowspan="3" colspan="3">Signature</th>
+    <?php endif; ?>
 </tr>
+
 <tr>
     <?php
     $startDate = strtotime($start);
@@ -326,7 +325,10 @@ th {
 
     <th rowspan="2">Reg.</th>
     <th rowspan="2">O.T</th>
+    <th rowspan="2">Regular Holiday</th> <!-- New -->
+    <th rowspan="2">Special Holiday</th> <!-- New -->
 </tr>
+
 <tr>
     <?php
     $startDate = strtotime($start);
@@ -340,8 +342,41 @@ th {
 </thead>
 
 
+
 <tbody>
-  <?php $totalPayroll = 0; ?>
+  <?php
+$totalPayroll = 0;
+$hasRegularHoliday = false;
+$hasSpecialHoliday = false;
+
+// Scan attendance to detect holiday presence
+foreach ($attendance_data as $row) {
+    $startDate = strtotime($start);
+    $endDate = strtotime($end);
+    while ($startDate <= $endDate) {
+        $curDate = date('Y-m-d', $startDate);
+        $raw = $row->reg_hours_per_day[$curDate] ?? null;
+
+        if (is_array($raw)) {
+            $status = strtolower(preg_replace('/\s+/', '', trim($raw['status'] ?? '')));
+            $holidayHours = floatval($raw['holiday_hours'] ?? 0);
+
+            if (strpos($status, 'regularho') !== false || strpos($status, 'legal') !== false) {
+                $hasRegularHoliday = true;
+            }
+
+            if (strpos($status, 'special') !== false) {
+                $hasSpecialHoliday = true;
+            }
+
+            if ($hasRegularHoliday && $hasSpecialHoliday) break 2;
+        }
+
+        $startDate = strtotime('+1 day', $startDate);
+    }
+}
+?>
+
 
 <?php $ln = 1; foreach ($attendance_data as $row): ?>
 
@@ -354,6 +389,9 @@ $regTotalMinutes = 0;
 $otTotalMinutes = 0;
 $totalMinutes = 0;
 $totalDays = 0;
+$amountRegularHoliday = 0;
+$amountSpecialHoliday = 0;
+
 $startDate = strtotime($start);
 $endDate = strtotime($end);
 ?>
@@ -418,52 +456,65 @@ if (preg_match('/holiday|regularho|legal|special/i', $status) || $holidayHours >
     $holidayLabel = ucfirst($status ?: 'Holiday');
 }
 
+// Pay computation
+if ($showHoliday) {
+    $holidayPay = $holidayHours * $base * 2;
+    $otPay = $otHours * $base;
 
-    // Pay computation
-    if ($showHoliday) {
-        $regAmount += $holidayHours * $base * 2;
-        $otAmount += $otHours * $base;
+    // Categorize holiday type
+    if (strpos(strtolower($status), 'regularho') !== false || strpos(strtolower($status), 'legal') !== false) {
+        $amountRegularHoliday += $holidayPay;
+        $holidayLabel = 'R.Holiday'; // Regular Holiday
     } else {
-        $regAmount += $regHours * $base;
-        $otAmount += $otHours * $base;
+        $amountSpecialHoliday += $holidayPay;
+        $holidayLabel = 'S.Holiday'; // Special Non-Working Holiday
     }
 
-    // Add to totals
-    if ($showHoliday) {
-        $regTotalMinutes += $holidayHours * 60;
-        $otTotalMinutes += $otHours * 60;
-        $totalMinutes += ($holidayHours + $otHours) * 60;
-        $totalDays += 1;
+    // Only add OT to regular OT amount
+    $otAmount += $otPay;
 
-        echo "<td colspan='2' style='background-color: #ffe5e5; color: red; font-weight: bold; text-align: center;'>";
-        echo "{$holidayLabel}<br>(";
+} else {
+    // Normal workday
+    $regAmount += $regHours * $base;
+    $otAmount += $otHours * $base;
+}
 
-        // 👇 Show complete breakdown
-        $parts = [];
-     if ($holidayHours > 0) $parts[] = number_format($holidayHours, 2) . " H";
-if ($regHours > 0) $parts[] = number_format($regHours, 2) . " R";
-if ($otHours > 0) $parts[] = number_format($otHours, 2) . " OT";
+// Add to totals
+if ($showHoliday) {
+    $regTotalMinutes += $holidayHours * 60;
+    $otTotalMinutes += $otHours * 60;
+    $totalMinutes += ($holidayHours + $otHours) * 60;
+    $totalDays += 1;
 
-        echo implode(" + ", $parts);
-        echo ")</td>";
+    echo "<td colspan='2' style='background-color: #ffe5e5; color: red; font-weight: bold; text-align: center;'>";
+    echo "{$holidayLabel}<br>(";
 
+    // 👇 Show complete breakdown
+    $parts = [];
+    if ($holidayHours > 0) $parts[] = number_format($holidayHours, 2) . "";
+    if ($regHours > 0)     $parts[] = number_format($regHours, 2) . " R";
+    if ($otHours > 0)      $parts[] = number_format($otHours, 2) . " OT";
+
+    echo implode(" + ", $parts);
+    echo ")</td>";
+
+} else {
+    // Not a holiday
+    if ($regHours <= 0 && $otHours > 0 && in_array($status, ['absent', 'absentee'])) {
+        echo "<td class='text-danger text-center font-weight-bold'>A</td>";
+        echo "<td>" . number_format($otHours, 2) . "</td>";
+    } elseif ($regHours <= 0 && $otHours <= 0 && in_array($status, ['absent', 'absentee'])) {
+        echo "<td colspan='2' class='absent text-center' style='background-color: #f8d7da; color: red;'>Absent</td>";
     } else {
-        // Show 'A' if absent with OT
-        if ($regHours <= 0 && $otHours > 0 && in_array($status, ['absent', 'absentee'])) {
-            echo "<td class='text-danger text-center font-weight-bold'>A</td>";
-            echo "<td>" . number_format($otHours, 2) . "</td>";
-        } elseif ($regHours <= 0 && $otHours <= 0 && in_array($status, ['absent', 'absentee'])) {
-            echo "<td colspan='2' class='absent text-center' style='background-color: #f8d7da; color: red;'>Absent</td>";
-        } else {
-            echo "<td>" . number_format($regHours, 2) . "</td>";
-            echo "<td>" . number_format($otHours, 2) . "</td>";
-        }
-
-        $regTotalMinutes += $regHours * 60;
-        $otTotalMinutes += $otHours * 60;
-        $totalMinutes += ($regHours + $otHours) * 60;
-        if (($regHours + $otHours) > 0) $totalDays += 1;
+        echo "<td>" . number_format($regHours, 2) . "</td>";
+        echo "<td>" . number_format($otHours, 2) . "</td>";
     }
+
+    $regTotalMinutes += $regHours * 60;
+    $otTotalMinutes += $otHours * 60;
+    $totalMinutes += ($regHours + $otHours) * 60;
+    if (($regHours + $otHours) > 0) $totalDays += 1;
+}
 
 } elseif (strtolower(trim($raw)) === 'day off') {
     echo "<td colspan='2' class='text-info font-bold text-center'>Day Off</td>";
@@ -498,8 +549,8 @@ if ($otHours > 0) $parts[] = number_format($otHours, 2) . " OT";
 }
 
 $loopDate = strtotime('+1 day', $loopDate);
-
 endwhile;
+
 // Totals
 $salary = $regAmount + $otAmount;
 $cash_advance = $row->ca_cashadvance ?? 0;
@@ -528,6 +579,10 @@ $regFormatted = floor($regTotalMinutes / 60) . '.' . str_pad($regTotalMinutes % 
 $otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60, 2, '0', STR_PAD_LEFT);
 
 
+// FINAL AMOUNT COMPUTATION BEFORE DISPLAY
+$salary = $regAmount + $otAmount + $amountRegularHoliday + $amountSpecialHoliday;
+$total_deduction = $cash_advance + $sss + $pagibig + $philhealth + $loan + $other_deduction;
+$netPay = $salary - $total_deduction;
 
 
 ?>
@@ -538,7 +593,11 @@ $otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60,
 
 <td><?= number_format($regAmount, 2) ?></td> 
 <td><?= number_format($otAmount, 2) ?></td>  
-<td><?= number_format($salary, 2) ?></td>
+<td><?= number_format($amountRegularHoliday, 2) ?></td>
+<td><?= number_format($amountSpecialHoliday, 2) ?></td>
+
+<td><?= number_format($regAmount + $otAmount + $amountRegularHoliday + $amountSpecialHoliday, 2) ?></td>
+
 
 <td><?= number_format($cash_advance, 2) ?></td>
 <td><?= number_format($sss, 2) ?></td>
