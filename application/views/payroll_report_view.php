@@ -552,7 +552,7 @@ if (($holidayHours + $otHours) > 0) {
     $parts = [];
     if ($holidayHours > 0) $parts[] = number_format($holidayHours, 2) . "";
     if ($regHours > 0)     $parts[] = number_format($regHours, 2) . " R";
-    if ($otHours > 0)      $parts[] = number_format($otHours, 2) . " OT";
+    if ($otHours > 0)      $parts[] = displayAmount($otHours) . " OT";
 
     echo implode(" + ", $parts);
     echo ")</td>";
@@ -565,8 +565,8 @@ if (($holidayHours + $otHours) > 0) {
     } elseif ($regHours <= 0 && $otHours <= 0 && in_array($status, ['absent', 'absentee'])) {
         echo "<td colspan='2' class='absent text-center' style='background-color: #f8d7da; color: red;'>Absent</td>";
     } else {
-        echo "<td>" . number_format($regHours, 2) . "</td>";
-        echo "<td>" . number_format($otHours, 2) . "</td>";
+        echo "<td>" . displayAmount($regHours) . "</td>";
+        echo "<td>" .displayAmount($otHours) . "</td>";
     }
 
     $regTotalMinutes += $regHours * 60;
@@ -600,8 +600,8 @@ if (($holidayHours + $otHours) > 0) {
     $totalMinutes += ($reg + $ot);
     if ($decimalHours > 0) $totalDays += 1;
 
-    echo "<td>" . number_format($regHours, 2) . "</td>";
-    echo "<td>" . number_format($otHours, 2) . "</td>";
+    echo "<td>" . displayAmount($regHours) . "</td>";
+    echo "<td>" . displayAmount($otHours) . "</td>";
 
 } else {
     echo "<td colspan='2' class='absent text-center' style='background-color: #f8d7da; color: red;'>Absent</td>";
