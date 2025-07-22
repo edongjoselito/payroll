@@ -105,17 +105,24 @@ public function records()
 
         $raw = $this->WeeklyAttendance_model->getAttendanceRecords($projectID, $from, $to, $existingDates, $group_number);
 
-        $attendances = [];
-        foreach ($raw as $pid => $personData) {
-            $attendances[$pid]['name'] = $personData['name'];
-            foreach ($personData['dates'] as $date => $status) {
-                $attendances[$pid]['dates'][$date] = $status;
-                $attendances[$pid]['hours'][$date] = $personData['hours'][$date] ?? 0;
-                $attendances[$pid]['holiday'][$date] = $personData['holiday'][$date] ?? 0;
-                $attendances[$pid]['overtime'][$date] = $personData['overtime'][$date] ?? 0;
+      $attendances = [];
+foreach ($raw as $pid => $personData) {
+    $attendances[$pid]['personnelID'] = $pid;
+    $attendances[$pid]['name'] = $personData['name'];
+    foreach ($personData['dates'] as $date => $status) {
+        $attendances[$pid]['dates'][$date] = $status;
+        $attendances[$pid]['hours'][$date] = $personData['hours'][$date] ?? 0;
+        $attendances[$pid]['holiday'][$date] = $personData['holiday'][$date] ?? 0;
+        $attendances[$pid]['overtime'][$date] = $personData['overtime'][$date] ?? 0;
+    }
+}
 
-            }
-        }
+// ✅ Convert to indexed array and sort by name
+$attendances = array_values($attendances);
+usort($attendances, function ($a, $b) {
+    return strcmp($a['name'], $b['name']);
+});
+
 
         $data['batches'][] = [
             'projectID'     => $projectID,

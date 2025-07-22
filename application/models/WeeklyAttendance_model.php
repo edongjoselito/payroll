@@ -175,6 +175,7 @@ public function getExistingAttendanceDates($projectID, $from, $to, $group_number
 
 
 // DISPLAY SAVED ATTENDANCE
+
 public function getAttendanceRecords($projectID, $from, $to, $dates, $group_number)
 {
     if (empty($dates)) return [];
@@ -200,44 +201,27 @@ public function getAttendanceRecords($projectID, $from, $to, $dates, $group_numb
     $this->db->from('personnel');
     $this->db->where_in('personnelID', $personnelIDs);
     $personnelQuery = $this->db->get();
-
     $personnelMap = [];
+
     foreach ($personnelQuery->result() as $p) {
-        $personnelMap[$p->personnelID] = [
-            'full' => $p->last_name . ', ' . $p->first_name,
-            'last' => $p->last_name,
-            'first' => $p->first_name
-        ];
+        $personnelMap[$p->personnelID] = $p->last_name . ', ' . $p->first_name;
     }
 
     // Step 4: Map attendance records into structured array
     foreach ($results as $row) {
         $pid = $row->personnelID;
 
-        if (!isset($data[$pid])) {
-            $data[$pid] = [
-                'personnelID' => $pid,
-                'name'        => $personnelMap[$pid]['full'] ?? 'Unknown',
-                'last_name'   => $personnelMap[$pid]['last'] ?? '',
-                'first_name'  => $personnelMap[$pid]['first'] ?? '',
-                'dates'       => [],
-                'hours'       => [],
-                'holiday'     => [],
-                'overtime'    => [],
-            ];
+        if (!isset($data[$pid]['name'])) {
+            $data[$pid]['name'] = $personnelMap[$pid] ?? 'Unknown';
         }
 
         $data[$pid]['dates'][$row->date] = $row->status;
         $data[$pid]['hours'][$row->date] = $row->work_duration;
-        $data[$pid]['holiday'][$row->date] = $row->holiday_hours ?? 0;
-        $data[$pid]['overtime'][$row->date] = $row->overtime_hours ?? 0;
-    }
+      $data[$pid]['holiday'][$row->date] = $row->holiday_hours ?? 0;
+$data[$pid]['overtime'][$row->date] = $row->overtime_hours ?? 0;
+       
 
-    // Step 5: Sort by last name then first name
-    $data = array_values($data); // Re-index to numeric keys for sorting
-    usort($data, function ($a, $b) {
-        return strcmp(strtolower($a['last_name'] . $a['first_name']), strtolower($b['last_name'] . $b['first_name']));
-    });
+    }
 
     return $data;
 }
