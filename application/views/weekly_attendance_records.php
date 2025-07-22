@@ -252,7 +252,6 @@ $to = $selectedTo ?? '';
                 </thead>
                 <tbody>
                 <?php foreach ($attendances as $pid => $person): ?>
-                  
                     <tr>
                         <td class="text-left font-weight-bold"><?= $person['name'] ?></td>
                         <?php foreach ($dates as $d): ?>
@@ -279,35 +278,35 @@ $to = $selectedTo ?? '';
                                 data-status="<?= $status ?>" data-hours="<?= $workHrs ?>"
                                 data-holiday="<?= $holidayHrs ?>"
                                 style="cursor:pointer; min-width: 130px;">
-                               <div class="d-flex align-items-center justify-content-center">
-    <i class="mdi mdi-pencil text-muted mr-1" style="font-size:12px;"></i>
-    <div class="text-wrap text-center" style="white-space: normal;">
-        <?= $statusLabel ?>
-        <?php
-        if (
-            stripos($status, 'Present') !== false || 
-            stripos($status, 'Regular') !== false || 
-            stripos($status, 'Special') !== false || 
-            stripos($status, 'Absent') !== false
-        ) {
-            if ($workHrs > 0 || $holidayHrs > 0 || $overtimeHrs > 0) {
-                echo "<br><small>";
-                if ($workHrs > 0) echo number_format($workHrs, 2) . ' hr' . ($workHrs != 1 ? 's' : '');
-                if ($holidayHrs > 0) {
-                    if ($workHrs > 0) echo ' + ';
-                    echo number_format($holidayHrs, 2) . ' hr' . ($holidayHrs != 1 ? 's' : '') . ' (holiday)';
-                }
-                if ($overtimeHrs > 0) {
-                    if ($workHrs > 0 || $holidayHrs > 0) echo ' + ';
-                    echo number_format($overtimeHrs, 2) . ' hr' . ($overtimeHrs != 1 ? 's' : '') . ' (OT)';
-                }
-                echo "</small>";
-            }
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <i class="mdi mdi-pencil text-muted mr-1" style="font-size:12px;"></i>
+                                    <div class="text-wrap text-center" style="white-space: normal;">
+                                        <?= $statusLabel ?>
+                                        <?php
+  if (
+    stripos($status, 'Present') !== false || 
+    stripos($status, 'Regular') !== false || 
+    stripos($status, 'Absent') !== false || 
+    stripos($status, 'Special') !== false
+)
+ {
+    if ($workHrs > 0 || $holidayHrs > 0 || $overtimeHrs > 0) {
+        echo "<br><small>";
+        if ($workHrs > 0) echo number_format($workHrs, 2) . ' hr' . ($workHrs != 1 ? 's' : '');
+        if ($holidayHrs > 0) {
+            if ($workHrs > 0) echo ' + ';
+            echo number_format($holidayHrs, 2) . ' hr' . ($holidayHrs != 1 ? 's' : '') . ' (holiday)';
         }
-        ?>
-    </div>
-</div>
-
+        if ($overtimeHrs > 0) {
+            if ($workHrs > 0 || $holidayHrs > 0) echo ' + ';
+            echo number_format($overtimeHrs, 2) . ' hr' . ($overtimeHrs != 1 ? 's' : '') . ' (OT)';
+        }
+        echo "</small>";
+    }
+}
+                                       ?>
+                                    </div>
+                                </div>
                             </td>
                         <?php endforeach; ?>
                         <?php
@@ -508,18 +507,22 @@ $to = $selectedTo ?? '';
      <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
      <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
 
- <script>
+  <script>
 $(document).ready(function () {
+    // Show toast if available
     $('.toast').toast({ delay: 2500 }).toast('show');
 
+    // Show error modal if session has flashdata
     <?php if ($this->session->flashdata('view_error')): ?>
     $('#errorModal').modal('show');
     <?php endif; ?>
 
+    // Focus field when filter modal opens
     $('#filterModal').on('shown.bs.modal', function () {
         $('#project').focus();
     });
 
+    // Attendance batch filtering based on project
     const projectSelect = document.getElementById('project');
     const batchSelect = document.getElementById('attendanceBatch');
 
@@ -545,37 +548,27 @@ $(document).ready(function () {
         document.getElementById('to').value = selected.getAttribute('data-end');
     });
 
-    // ✅ Function to toggle fields based on attendance type
+    // ✅ Dynamic field logic
     function toggleHourFields() {
         const status = $('#editStatus').val();
         const $holidayGroup = $('#editHoliday').closest('.form-group');
 
+        // Remove any existing Regular Hours
         $('#regularHoursWrapper').remove();
-        $('#overtimeHoursWrapper').remove();
+
+        // Default: hide holiday hours
         $holidayGroup.hide();
         $('#editHoliday').val('0.00').prop('readonly', true);
 
-        if (status === 'Present' || status === 'Regular Holiday' || status === 'Special Non-Working Holiday') {
+        if (status === 'Present') {
+            // Show Regular Hours only
             const regularField = `
                 <div class="form-group" id="regularHoursWrapper">
                     <label>Regular Hours <small class="text-muted">(Max: 8 hrs)</small></label>
                     <input type="number" step="0.01" max="8" name="hours" id="editHours" class="form-control">
                 </div>
             `;
-            const overtimeField = `
-                <div class="form-group" id="overtimeHoursWrapper">
-                    <label>Overtime Hours</label>
-                    <input type="number" step="0.01" name="overtime" id="editOvertime" class="form-control">
-                </div>
-            `;
-
-            $holidayGroup.before(regularField + overtimeField);
-
-            // Enable holiday hours if it's a holiday
-            if (status !== 'Present') {
-                $holidayGroup.show();
-                $('#editHoliday').prop('readonly', false);
-            }
+            $holidayGroup.before(regularField);
 
             $('#editHours').on('input', function () {
                 let val = parseFloat($(this).val());
@@ -586,43 +579,59 @@ $(document).ready(function () {
                     $(this).val('');
                 }
             });
-        }
 
-        else if (status === 'Day Off' || status === 'Absent') {
-            $holidayGroup.show();
-            $('#editHoliday').val('0.00').prop('readonly', true);
-        }
-    }
-
-    // ✅ Edit Modal: Prefill values on click
-    $('.edit-attendance').on('click', function () {
-        $('#editPersonnelID').val($(this).data('personnel'));
-        $('#editDate').val($(this).data('date'));
-        $('#editStatus').val($(this).data('status'));
-        $('#editHoliday').val($(this).data('holiday'));
-
-        // Remove old dynamic fields if any
-        $('#regularHoursWrapper').remove();
-        $('#overtimeHoursWrapper').remove();
-
-        // Add if applicable
-        const status = $(this).data('status');
-        if (status === 'Present' || status === 'Regular Holiday' || status === 'Special Non-Working Holiday') {
+        } else if (status === 'Regular Holiday') {
+            // ✅ Show BOTH Regular and Holiday Hours
             const regularField = `
                 <div class="form-group" id="regularHoursWrapper">
                     <label>Regular Hours <small class="text-muted">(Max: 8 hrs)</small></label>
                     <input type="number" step="0.01" max="8" name="hours" id="editHours" class="form-control">
                 </div>
             `;
-            const overtimeField = `
-                <div class="form-group" id="overtimeHoursWrapper">
-                    <label>Overtime Hours</label>
-                    <input type="number" step="0.01" name="overtime" id="editOvertime" class="form-control">
+            $holidayGroup.before(regularField);
+            $holidayGroup.show();
+            $('#editHoliday').prop('readonly', false);
+
+            $('#editHours').on('input', function () {
+                let val = parseFloat($(this).val());
+                if (val > 8) {
+                    $(this).val(8);
+                    alert('Regular hours cannot exceed 8.00 hours.');
+                } else if (val < 0 || isNaN(val)) {
+                    $(this).val('');
+                }
+            });
+
+        } else if (status === 'Special Non-Working Holiday') {
+            // Show only Holiday Hours (editable)
+            $holidayGroup.show();
+            $('#editHoliday').prop('readonly', false);
+
+        } else if (status === 'Day Off' || status === 'Absent') {
+            $holidayGroup.show();
+            $('#editHoliday').val('0.00').prop('readonly', true);
+        }
+    }
+
+    // Edit modal trigger
+    $('.edit-attendance').on('click', function () {
+        $('#editPersonnelID').val($(this).data('personnel'));
+        $('#editDate').val($(this).data('date'));
+        $('#editStatus').val($(this).data('status'));
+        $('#editHoliday').val($(this).data('holiday'));
+
+        // Remove and optionally recreate regular hours
+        $('#regularHoursWrapper').remove();
+
+        if ($(this).data('status') === 'Present' || $(this).data('status') === 'Regular Holiday') {
+            const regularField = `
+                <div class="form-group" id="regularHoursWrapper">
+                    <label>Regular Hours <small class="text-muted">(Max: 8 hrs)</small></label>
+                    <input type="number" step="0.01" max="8" name="hours" id="editHours" class="form-control">
                 </div>
             `;
-            $('#editHoliday').closest('.form-group').before(regularField + overtimeField);
+            $('#editHoliday').closest('.form-group').before(regularField);
             $('#editHours').val($(this).data('hours'));
-            $('#editOvertime').val($(this).data('overtime') || 0);
 
             $('#editHours').on('input', function () {
                 let val = parseFloat($(this).val());
