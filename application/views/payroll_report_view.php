@@ -377,6 +377,7 @@ $loopDate = strtotime($start);
 while ($loopDate <= $endDate):
     $curDate = date('Y-m-d', $loopDate);
     $raw = $row->reg_hours_per_day[$curDate] ?? '-';
+    
 $regHours = 0;
 $otHours = 0;
 $holidayHours = 0;
@@ -389,7 +390,8 @@ if (is_array($raw)) {
     $status = strtolower(preg_replace('/\s+/', '', trim($raw['status'] ?? '')));
     $regHours = floatval($raw['hours'] ?? 0);
     $otHours = floatval($raw['overtime_hours'] ?? 0);
-    $holidayHours = floatval($raw['holiday'] ?? 0);
+   $holidayHours = floatval($raw['holiday_hours'] ?? 0);
+
 
     // Rate per hour
     if ($row->rateType === 'Hour') {
@@ -401,14 +403,21 @@ if (is_array($raw)) {
     }
 
     // Is it a holiday?
-    if (preg_match('/holiday|regularho|legal|special/i', $status)) {
-        $showHoliday = true;
-        if ($holidayHours <= 0 && $regHours > 0) {
-            $holidayHours = $regHours;
-            $regHours = 0;
-        }
-        $holidayLabel = ucfirst($status ?: 'Holiday');
-    }
+if (preg_match('/holiday|regularho|legal|special/i', $status) || $holidayHours > 0) {
+
+    $showHoliday = true;
+
+    // If 'holiday' field is empty, use hours instead
+    if ($holidayHours <= 0 && $regHours > 0) {
+        $holidayHours = $regHours;
+        $regHours = 0;
+    } elseif ($holidayHours <= 0 && floatval($raw['holiday_hours'] ?? 0) > 0) {
+    $holidayHours = floatval($raw['holiday_hours']);
+}
+
+    $holidayLabel = ucfirst($status ?: 'Holiday');
+}
+
 
     // Pay computation
     if ($showHoliday) {
@@ -431,9 +440,9 @@ if (is_array($raw)) {
 
         // 👇 Show complete breakdown
         $parts = [];
-        if ($holidayHours > 0) $parts[] = number_format($holidayHours, 2);
-        if ($regHours > 0) $parts[] = number_format($regHours, 2) . " (reg)";
-        if ($otHours > 0) $parts[] = number_format($otHours, 2) . " OT";
+     if ($holidayHours > 0) $parts[] = number_format($holidayHours, 2) . " H";
+if ($regHours > 0) $parts[] = number_format($regHours, 2) . " R";
+if ($otHours > 0) $parts[] = number_format($otHours, 2) . " OT";
 
         echo implode(" + ", $parts);
         echo ")</td>";
@@ -491,18 +500,6 @@ if (is_array($raw)) {
 $loopDate = strtotime('+1 day', $loopDate);
 
 endwhile;
-
-
-
-
-
-
-
-
-
-
-
-
 // Totals
 $salary = $regAmount + $otAmount;
 $cash_advance = $row->ca_cashadvance ?? 0;
@@ -634,7 +631,8 @@ $otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60,
     </div>
   </div>
 </div>
-<?php $ln++; endforeach; ?>
+<?php endforeach; ?>
+
 </tbody>
 
 </table>
