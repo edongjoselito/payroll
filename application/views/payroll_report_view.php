@@ -83,6 +83,9 @@ tbody td:nth-child(2) {
 .signature strong {
   font-size: 13px;
 }
+.hidden-col {
+  display: none;
+}
 .holiday-cell {
   background-color: #ffe5e5 !important;
   color: red !important;
@@ -277,6 +280,38 @@ th {
 </div>
 
 <div class="scrollable-wrapper">
+  <?php
+$hasRegularHoliday = false;
+$hasSpecialHoliday = false;
+
+// Scan attendance to detect holiday presence
+foreach ($attendance_data as $row) {
+    $startDate = strtotime($start);
+    $endDate = strtotime($end);
+    while ($startDate <= $endDate) {
+        $curDate = date('Y-m-d', $startDate);
+        $raw = $row->reg_hours_per_day[$curDate] ?? null;
+
+        if (is_array($raw)) {
+            $status = strtolower(preg_replace('/\s+/', '', trim($raw['status'] ?? '')));
+            $holidayHours = floatval($raw['holiday_hours'] ?? 0);
+
+            if (strpos($status, 'regularho') !== false || strpos($status, 'legal') !== false) {
+                $hasRegularHoliday = true;
+            }
+
+            if (strpos($status, 'special') !== false) {
+                $hasSpecialHoliday = true;
+            }
+
+            if ($hasRegularHoliday && $hasSpecialHoliday) break 2;
+        }
+
+        $startDate = strtotime('+1 day', $startDate);
+    }
+}
+?>
+
 <table class="payroll-table">
 <thead>
 <tr>
@@ -325,8 +360,19 @@ th {
 
     <th rowspan="2">Reg.</th>
     <th rowspan="2">O.T</th>
-    <th rowspan="2">Regular Holiday</th> <!-- New -->
-    <th rowspan="2">Special Holiday</th> <!-- New -->
+ <?php if ($hasRegularHoliday): ?>
+    <th rowspan="2" class="<?= !$hasRegularHoliday ? 'hidden-col' : '' ?>">Regular Holiday</th>
+<?php else: ?>
+    <th rowspan="2" style="display:none;"></th>
+<?php endif; ?>
+
+<?php if ($hasSpecialHoliday): ?>
+    <th rowspan="2" class="<?= !$hasSpecialHoliday ? 'hidden-col' : '' ?>">Special Holiday</th>
+<?php else: ?>
+    <th rowspan="2" style="display:none;"></th>
+<?php endif; ?>
+
+
 </tr>
 
 <tr>
@@ -344,7 +390,7 @@ th {
 
 
 <tbody>
-  <?php
+  <!-- <?php
 $totalPayroll = 0;
 $hasRegularHoliday = false;
 $hasSpecialHoliday = false;
@@ -375,7 +421,7 @@ foreach ($attendance_data as $row) {
         $startDate = strtotime('+1 day', $startDate);
     }
 }
-?>
+?> -->
 
 
 <?php $ln = 1; foreach ($attendance_data as $row): ?>
@@ -552,7 +598,7 @@ $loopDate = strtotime('+1 day', $loopDate);
 endwhile;
 
 // Totals
-$salary = $regAmount + $otAmount;
+$salary = $regAmount + $otAmount + $amountRegularHoliday + $amountSpecialHoliday;
 $cash_advance = $row->ca_cashadvance ?? 0;
 $other_deduction = $row->other_deduction ?? 0;
 $sss = $row->gov_sss ?? 0;
@@ -593,8 +639,19 @@ $netPay = $salary - $total_deduction;
 
 <td><?= number_format($regAmount, 2) ?></td> 
 <td><?= number_format($otAmount, 2) ?></td>  
-<td><?= number_format($amountRegularHoliday, 2) ?></td>
-<td><?= number_format($amountSpecialHoliday, 2) ?></td>
+<?php if ($hasRegularHoliday): ?>
+    <td><?= number_format($amountRegularHoliday, 2) ?></td>
+<?php elseif (!$hasRegularHoliday && $hasSpecialHoliday): ?>
+    <td></td> <!-- must still render a cell -->
+<?php endif; ?>
+
+<?php if ($hasSpecialHoliday): ?>
+    <td><?= number_format($amountSpecialHoliday, 2) ?></td>
+<?php elseif (!$hasSpecialHoliday && $hasRegularHoliday): ?>
+    <td></td>
+<?php endif; ?>
+
+
 
 <td><?= number_format($regAmount + $otAmount + $amountRegularHoliday + $amountSpecialHoliday, 2) ?></td>
 
