@@ -179,39 +179,33 @@ public function deleteAttendance()
 public function updateAttendance()
 {
     $personnelID = $this->input->post('personnelID');
-    $date = $this->input->post('date');
-    $status = $this->input->post('status');
-    $hours = $this->input->post('hours');
-    $holiday = $this->input->post('holiday');
+    $date        = $this->input->post('date');
+    $status      = $this->input->post('status');
+    $hours       = $this->input->post('hours');
+    $holiday     = $this->input->post('holiday');
+    $overtime    = $this->input->post('overtime'); // ✅ Get overtime input
 
     // Get current page context
-    $projectID = $this->input->post('project');
-    $from = $this->input->post('from');
-    $to = $this->input->post('to');
+    $projectID = $this->input->post('projectID');
+    $from      = $this->input->post('from');
+    $to        = $this->input->post('to');
 
     // Update attendance
     $this->db->where('personnelID', $personnelID);
     $this->db->where('date', $date);
     $this->db->update('attendance', [
-        'status' => $status,
-        'work_duration' => $hours,
-        'holiday_hours' => $holiday
-        
+        'status'        => $status,
+        'work_duration' => $hours ?: 0,
+        'holiday_hours' => $holiday ?: 0,
+        'overtime_hours' => $overtime ?: 0
+
     ]);
-$this->session->set_flashdata('update_success', 'Attendance updated successfully!');
 
+    $this->session->set_flashdata('update_success', 'Attendance updated successfully!');
 
-$projectID = $this->input->post('projectID');
-$from = $this->input->post('from');
-$to = $this->input->post('to');
-
-redirect("WeeklyAttendance/records?projectID={$projectID}&from={$from}&to={$to}");
-
-
-
-
-
+    redirect("WeeklyAttendance/records?projectID={$projectID}&from={$from}&to={$to}");
 }
+
 
 
 

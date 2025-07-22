@@ -464,6 +464,11 @@ $to = $selectedTo ?? '';
                                    <input type="number" step="0.01" name="holiday" id="editHoliday"
                                         class="form-control">
                               </div>
+                              <div class="form-group" id="overtimeHoursWrapper">
+    <label>Overtime Hours</label>
+    <input type="number" step="0.01" name="overtime" id="editOvertime" class="form-control">
+</div>
+
                          </div>
 
                          <div class="modal-footer">
@@ -552,16 +557,18 @@ $(document).ready(function () {
     function toggleHourFields() {
         const status = $('#editStatus').val();
         const $holidayGroup = $('#editHoliday').closest('.form-group');
+        const $overtimeGroup = $('#editOvertime').closest('.form-group');
 
-        // Remove any existing Regular Hours
-        $('#regularHoursWrapper').remove();
-
-        // Default: hide holiday hours
+        // Hide both by default
         $holidayGroup.hide();
+        $overtimeGroup.hide();
+
         $('#editHoliday').val('0.00').prop('readonly', true);
 
+        // Remove and reset regular hours input
+        $('#regularHoursWrapper').remove();
+
         if (status === 'Present') {
-            // Show Regular Hours only
             const regularField = `
                 <div class="form-group" id="regularHoursWrapper">
                     <label>Regular Hours <small class="text-muted">(Max: 8 hrs)</small></label>
@@ -569,6 +576,7 @@ $(document).ready(function () {
                 </div>
             `;
             $holidayGroup.before(regularField);
+            $overtimeGroup.show();
 
             $('#editHours').on('input', function () {
                 let val = parseFloat($(this).val());
@@ -581,7 +589,6 @@ $(document).ready(function () {
             });
 
         } else if (status === 'Regular Holiday') {
-            // ✅ Show BOTH Regular and Holiday Hours
             const regularField = `
                 <div class="form-group" id="regularHoursWrapper">
                     <label>Regular Hours <small class="text-muted">(Max: 8 hrs)</small></label>
@@ -590,6 +597,7 @@ $(document).ready(function () {
             `;
             $holidayGroup.before(regularField);
             $holidayGroup.show();
+            $overtimeGroup.show();
             $('#editHoliday').prop('readonly', false);
 
             $('#editHours').on('input', function () {
@@ -603,14 +611,16 @@ $(document).ready(function () {
             });
 
         } else if (status === 'Special Non-Working Holiday') {
-            // Show only Holiday Hours (editable)
             $holidayGroup.show();
+            $overtimeGroup.show();
             $('#editHoliday').prop('readonly', false);
 
-        } else if (status === 'Day Off' || status === 'Absent') {
-            $holidayGroup.show();
-            $('#editHoliday').val('0.00').prop('readonly', true);
-        }
+      } else if (status === 'Day Off' || status === 'Absent') {
+    $holidayGroup.show();
+    $('#editHoliday').val('0.00').prop('readonly', true);
+    $overtimeGroup.show(); // ✅ allow overtime editing
+}
+
     }
 
     // Edit modal trigger
@@ -619,8 +629,8 @@ $(document).ready(function () {
         $('#editDate').val($(this).data('date'));
         $('#editStatus').val($(this).data('status'));
         $('#editHoliday').val($(this).data('holiday'));
+        $('#editOvertime').val($(this).data('overtime'));
 
-        // Remove and optionally recreate regular hours
         $('#regularHoursWrapper').remove();
 
         if ($(this).data('status') === 'Present' || $(this).data('status') === 'Regular Holiday') {
@@ -651,6 +661,7 @@ $(document).ready(function () {
     $('#editStatus').on('change', toggleHourFields);
 });
 </script>
+
 
 
 </body>
