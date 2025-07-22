@@ -283,11 +283,13 @@ $to = $selectedTo ?? '';
                                     <div class="text-wrap text-center" style="white-space: normal;">
                                         <?= $statusLabel ?>
                                         <?php
-                                      if (
+                                     if (
     stripos($status, 'Present') !== false || 
     stripos($status, 'Regular') !== false || 
+    stripos($status, 'Special') !== false || 
     stripos($status, 'Absent') !== false
-) {
+)
+ {
     if ($workHrs > 0 || $holidayHrs > 0 || $overtimeHrs > 0) {
         echo "<br><small>";
         if ($workHrs > 0) echo number_format($workHrs, 2) . ' hr' . ($workHrs != 1 ? 's' : '');
