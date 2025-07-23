@@ -189,41 +189,46 @@ public function getAttendanceRecords($projectID, $from, $to, $dates, $group_numb
     $query = $this->db->get();
 
     $results = $query->result();
-    $data = [];
-
     if (empty($results)) return [];
 
-    // Step 2: Collect all unique personnel IDs to fetch names in bulk
+    // Step 2: Collect all unique personnel IDs
     $personnelIDs = array_unique(array_column($results, 'personnelID'));
 
-    // Step 3: Fetch names for all personnel in one query
+    // Step 3: Fetch names and sort by last_name, first_name
     $this->db->select('personnelID, first_name, last_name');
     $this->db->from('personnel');
     $this->db->where_in('personnelID', $personnelIDs);
+    $this->db->order_by('last_name', 'ASC');
+    $this->db->order_by('first_name', 'ASC');
     $personnelQuery = $this->db->get();
+    $personnelRows = $personnelQuery->result();
+
+    $sortedPersonnelIDs = [];
     $personnelMap = [];
 
-    foreach ($personnelQuery->result() as $p) {
-        $personnelMap[$p->personnelID] = $p->last_name . ', ' . $p->first_name;
+    foreach ($personnelRows as $p) {
+        $fullName = $p->last_name . ', ' . $p->first_name;
+        $personnelMap[$p->personnelID] = $fullName;
+        $sortedPersonnelIDs[] = $p->personnelID;
     }
 
-    // Step 4: Map attendance records into structured array
+    // Step 4: Group attendance by sorted personnel ID
+    $attendanceGrouped = [];
+
+    foreach ($sortedPersonnelIDs as $pid) {
+        $attendanceGrouped[$pid]['name'] = $personnelMap[$pid];
+    }
+
     foreach ($results as $row) {
         $pid = $row->personnelID;
 
-        if (!isset($data[$pid]['name'])) {
-            $data[$pid]['name'] = $personnelMap[$pid] ?? 'Unknown';
-        }
-
-        $data[$pid]['dates'][$row->date] = $row->status;
-        $data[$pid]['hours'][$row->date] = $row->work_duration;
-      $data[$pid]['holiday'][$row->date] = $row->holiday_hours ?? 0;
-$data[$pid]['overtime'][$row->date] = $row->overtime_hours ?? 0;
-       
-
+        $attendanceGrouped[$pid]['dates'][$row->date] = $row->status;
+        $attendanceGrouped[$pid]['hours'][$row->date] = $row->work_duration;
+        $attendanceGrouped[$pid]['holiday'][$row->date] = $row->holiday_hours ?? 0;
+        $attendanceGrouped[$pid]['overtime'][$row->date] = $row->overtime_hours ?? 0;
     }
 
-    return $data;
+    return $attendanceGrouped;
 }
 
 
@@ -259,13 +264,24 @@ public function getWorkHours($projectID, $from, $to) {
 }
 
 
-public function updateAttendanceRecord($personnelID, $date, $status, $hours, $holiday) {
+// public function updateAttendanceRecord($personnelID, $date, $status, $hours, $holiday) {
+//     $this->db->where('personnelID', $personnelID);
+//     $this->db->where('date', $date);
+//     $this->db->update('work_hours', [
+//         'attendanceType' => $status,
+//         'workDuration' => $hours,
+//         'holidayDuration' => $holiday
+//     ]);
+// }
+public function updateAttendanceRecord($personnelID, $date, $status, $hours, $holiday, $overtime)
+{
     $this->db->where('personnelID', $personnelID);
     $this->db->where('date', $date);
-    $this->db->update('work_hours', [
-        'attendanceType' => $status,
-        'workDuration' => $hours,
-        'holidayDuration' => $holiday
+    $this->db->update('attendance', [
+        'status'         => $status,
+        'work_duration'  => $hours,
+        'holiday_hours'  => $holiday,
+        'overtime_hours' => $overtime
     ]);
 }
 

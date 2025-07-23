@@ -183,6 +183,7 @@ public function updateAttendance()
     $status = $this->input->post('status');
     $hours = $this->input->post('hours');
     $holiday = $this->input->post('holiday');
+    $overtime = $this->input->post('overtime');
 
     // Get current page context
     $projectID = $this->input->post('project');
@@ -195,7 +196,8 @@ public function updateAttendance()
     $this->db->update('attendance', [
         'status' => $status,
         'work_duration' => $hours,
-        'holiday_hours' => $holiday
+        'holiday_hours' => $holiday,
+        'overtime_hours' => $overtime
         
     ]);
 $this->session->set_flashdata('update_success', 'Attendance updated successfully!');
@@ -206,10 +208,6 @@ $from = $this->input->post('from');
 $to = $this->input->post('to');
 
 redirect("WeeklyAttendance/records?projectID={$projectID}&from={$from}&to={$to}");
-
-
-
-
 
 }
 
