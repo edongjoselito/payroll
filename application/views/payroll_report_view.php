@@ -538,26 +538,42 @@ if (preg_match('/holiday|regularho|legal|special/i', $status) || $holidayHours >
 
 // Pay computation
 if ($showHoliday) {
-    $holidayPay = $holidayHours * $base * 2;
-    $otPay = $otHours * $base;
-
-    // Categorize holiday type
+    // Rate type: Regular or Special Holiday
     if (strpos(strtolower($status), 'regularho') !== false || strpos(strtolower($status), 'legal') !== false) {
+        // ✅ REGULAR HOLIDAY: 
+        // - Holiday hours × 200%
+        // - OT hours × 100% (no extra)
+
+        $holidayPay = $holidayHours * $base * 2;
         $amountRegularHoliday += $holidayPay;
-        $holidayLabel = 'R.Holiday'; // Regular Holiday
+
+        $otPay = $otHours * $base; // No extra pay
+        $otAmount += $otPay;
+
+        $holidayLabel = 'R.Holiday';
+
     } else {
+        // ✅ SPECIAL HOLIDAY:
+        // - Holiday hours × 30% bonus only
+        // - All hours (holiday + OT) paid base rate
+        // - OT hours separately listed but no bonus
+
+        $holidayPay = $holidayHours * $base * 0.30;
         $amountSpecialHoliday += $holidayPay;
-        $holidayLabel = 'S.Holiday'; // Special Non-Working Holiday
+
+        // Base pay for holiday + OT
+        $regAmount += $holidayHours * $base;
+        $otAmount += $otHours * $base;
+
+        $holidayLabel = 'S.Holiday';
     }
-
-    // Only add OT to regular OT amount
-    $otAmount += $otPay;
-
 } else {
-    // Normal workday
+    // ✅ Normal workday
     $regAmount += $regHours * $base;
     $otAmount += $otHours * $base;
 }
+
+
 
 // Add to totals
 if ($showHoliday) {
