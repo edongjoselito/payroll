@@ -725,6 +725,72 @@ public function audit_logs()
     $this->load->view('audit_logs_view', $data);
 }
 
+// =======================
+// PAYROLL SUMMARY CONTROLLER
+// =======================
+
+public function view_payroll_summary_batches()
+{
+    $this->load->model('Project_model');
+
+    $settingsID = $this->session->userdata('settingsID');
+    $projectID = $this->input->get('project_id');
+
+    // Get either all summary batches or specific project
+    if ($projectID) {
+        $batches = $this->Project_model->get_summary_batches_by_project($projectID, $settingsID);
+    } else {
+        $batches = $this->Project_model->get_all_summary_batches($settingsID);
+    }
+
+    $summary = [];
+    $grandTotal = 0;
+
+    foreach ($batches as $batch) {
+        // ✅ Use gross_pay as actual total payroll
+        $total = $this->Project_model->get_total_grosspay_for_summary(
+            $batch->projectID,
+            $batch->start_date,
+            $batch->end_date,
+            $settingsID
+        );
+
+        $summary[] = [
+            'projectID' => $batch->projectID,
+            'projectTitle' => $batch->projectTitle,
+            'projectLocation' => $batch->projectLocation,
+            'start_date' => $batch->start_date,
+            'end_date' => $batch->end_date,
+            'total_payroll' => $total
+        ];
+
+        $grandTotal += $total;
+    }
+
+    $data['batch_summaries'] = $summary;
+    $data['grand_total'] = $grandTotal;
+
+    $this->load->view('payroll_summary_batches', $data);
+}
+
+public function delete_summary_batch()
+{
+    $projectID = $this->input->post('projectID');
+    $start = $this->input->post('start_date');
+    $end = $this->input->post('end_date');
+    $settingsID = $this->session->userdata('settingsID');
+
+    if ($projectID && $start && $end) {
+        $this->load->model('Project_model');
+        $this->Project_model->delete_summary_batch($projectID, $start, $end, $settingsID);
+        $this->session->set_flashdata('success', 'Payroll summary deleted successfully.');
+    } else {
+        $this->session->set_flashdata('error', 'Invalid batch data.');
+    }
+
+    redirect('view_payroll_summary_batches');
+}
+
 
 
 }

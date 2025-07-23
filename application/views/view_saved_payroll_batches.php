@@ -15,7 +15,7 @@
 <div class="container">
   <h3>Select a Saved Payroll Batch</h3>
   
- <form action="<?= base_url('project/view_payroll_batch') ?>" method="get">
+ <form action="<?= base_url('view_payroll_batch') ?>" method="get">
 
     <label for="batch_id">Payroll Batch:</label>
     <select id="batch_id" name="batch_id" class="form-control select2" required>

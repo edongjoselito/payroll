@@ -623,4 +623,83 @@ public function get_consecutive_attendance_batches($settingsID, $projectID)
 }
 
 
+
+
+
+// =========================
+// PAYROLL SUMMARY FUNCTIONS
+// =========================
+
+public function get_all_summary_batches($settingsID)
+{
+    $this->db->select('s.projectID, s.start_date, s.end_date, p.projectTitle, p.projectLocation');
+    $this->db->from('payroll_summary s');
+    $this->db->join('project p', 'p.projectID = s.projectID');
+    $this->db->where('p.settingsID', $settingsID); // 🔐 filter by company
+    $this->db->group_by(['s.projectID', 's.start_date', 's.end_date']);
+    $this->db->order_by('s.start_date', 'ASC');
+    return $this->db->get()->result();
+}
+
+public function get_summary_batches_by_project($projectID, $settingsID)
+{
+    $this->db->select('s.projectID, s.start_date, s.end_date, p.projectTitle, p.projectLocation');
+    $this->db->from('payroll_summary s');
+    $this->db->join('project p', 'p.projectID = s.projectID');
+    $this->db->where('s.projectID', $projectID);
+    $this->db->where('p.settingsID', $settingsID); // 🔐 filter by company
+    $this->db->group_by(['s.projectID', 's.start_date', 's.end_date']);
+    $this->db->order_by('s.start_date', 'ASC');
+    return $this->db->get()->result();
+}
+
+public function get_total_grosspay_for_summary($projectID, $start_date, $end_date, $settingsID)
+{
+    $this->db->select_sum('gross_pay');
+    $this->db->from('payroll_summary');
+    $this->db->where('projectID', $projectID);
+    $this->db->where('start_date', $start_date);
+    $this->db->where('end_date', $end_date);
+    $this->db->where('settingsID', $settingsID);
+    $query = $this->db->get();
+    return $query->row()->gross_pay ?? 0;
+}
+
+public function get_total_netpay_for_summary($projectID, $start_date, $end_date, $settingsID)
+{
+    $this->db->select('gross_pay, total_deduction');
+    $this->db->from('payroll_summary');
+    $this->db->where('projectID', $projectID);
+    $this->db->where('start_date', $start_date);
+    $this->db->where('end_date', $end_date);
+    $this->db->where('settingsID', $settingsID);
+    $query = $this->db->get();
+
+    $total = 0;
+
+    foreach ($query->result() as $row) {
+        $gross = floatval($row->gross_pay);
+        $deduct = floatval($row->total_deduction);
+        $take_home = $gross - $deduct;
+        $total += $take_home;
+
+        // Optional debug (disable in production)
+        // echo "<div style='color:#555; margin-left:20px'>
+        //     Gross: ₱{$gross}, Deductions: ₱{$deduct}, Take-home: ₱{$take_home}
+        // </div>";
+    }
+
+    return $total;
+}
+
+public function delete_summary_batch($projectID, $start_date, $end_date, $settingsID)
+{
+    $this->db->where('projectID', $projectID);
+    $this->db->where('start_date', $start_date);
+    $this->db->where('end_date', $end_date);
+    $this->db->where('settingsID', $settingsID); // 🔐 Secure delete per company
+    $this->db->delete('payroll_summary');
+}
+
+
 }

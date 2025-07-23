@@ -51,6 +51,11 @@
 <button type="button" class="btn btn-info" data-toggle="modal" data-target="#viewSavedPayrollModal">
   View Saved Payroll
 </button>
+<button type="button" class="btn btn-success" data-toggle="modal" data-target="#payrollSummaryModal">
+  <i class="mdi mdi-chart-bar"></i> Payroll Summary
+</button>
+
+
           </div>
         </div>
 
@@ -164,6 +169,42 @@
           <button type="button" class="btn btn-secondary" data-dismiss="modal">
             Cancel
           </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- Payroll Summary Modal -->
+<div class="modal fade" id="payrollSummaryModal" tabindex="-1" role="dialog" aria-labelledby="payrollSummaryModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+    <form action="<?= base_url('project/view_payroll_summary_batches') ?>" method="get">
+      <div class="modal-content border-0 shadow-sm">
+        <div class="modal-header bg-success text-white">
+          <h5 class="modal-title" id="payrollSummaryModalLabel">
+            <i class="mdi mdi-chart-bar"></i> Select Project for Payroll Summary
+          </h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="summary_project_id" class="font-weight-bold">Project</label>
+            <select name="project_id" id="summary_project_id" class="form-control select2" required>
+              <option disabled selected>Select Project</option>
+              <?php foreach ($projects as $proj): ?>
+                <option value="<?= $proj->projectID ?>"><?= $proj->projectTitle ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">
+            <i class="mdi mdi-eye"></i> View Summary
+          </button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
         </div>
       </div>
     </form>
