@@ -105,24 +105,17 @@ public function records()
 
         $raw = $this->WeeklyAttendance_model->getAttendanceRecords($projectID, $from, $to, $existingDates, $group_number);
 
-      $attendances = [];
-foreach ($raw as $pid => $personData) {
-    $attendances[$pid]['personnelID'] = $pid;
-    $attendances[$pid]['name'] = $personData['name'];
-    foreach ($personData['dates'] as $date => $status) {
-        $attendances[$pid]['dates'][$date] = $status;
-        $attendances[$pid]['hours'][$date] = $personData['hours'][$date] ?? 0;
-        $attendances[$pid]['holiday'][$date] = $personData['holiday'][$date] ?? 0;
-        $attendances[$pid]['overtime'][$date] = $personData['overtime'][$date] ?? 0;
-    }
-}
+        $attendances = [];
+        foreach ($raw as $pid => $personData) {
+            $attendances[$pid]['name'] = $personData['name'];
+            foreach ($personData['dates'] as $date => $status) {
+                $attendances[$pid]['dates'][$date] = $status;
+                $attendances[$pid]['hours'][$date] = $personData['hours'][$date] ?? 0;
+                $attendances[$pid]['holiday'][$date] = $personData['holiday'][$date] ?? 0;
+                $attendances[$pid]['overtime'][$date] = $personData['overtime'][$date] ?? 0;
 
-// ✅ Convert to indexed array and sort by name
-$attendances = array_values($attendances);
-usort($attendances, function ($a, $b) {
-    return strcmp($a['name'], $b['name']);
-});
-
+            }
+        }
 
         $data['batches'][] = [
             'projectID'     => $projectID,
@@ -186,33 +179,39 @@ public function deleteAttendance()
 public function updateAttendance()
 {
     $personnelID = $this->input->post('personnelID');
-    $date        = $this->input->post('date');
-    $status      = $this->input->post('status');
-    $hours       = $this->input->post('hours');
-    $holiday     = $this->input->post('holiday');
-    $overtime    = $this->input->post('overtime'); // ✅ Get overtime input
+    $date = $this->input->post('date');
+    $status = $this->input->post('status');
+    $hours = $this->input->post('hours');
+    $holiday = $this->input->post('holiday');
 
     // Get current page context
-    $projectID = $this->input->post('projectID');
-    $from      = $this->input->post('from');
-    $to        = $this->input->post('to');
+    $projectID = $this->input->post('project');
+    $from = $this->input->post('from');
+    $to = $this->input->post('to');
 
     // Update attendance
     $this->db->where('personnelID', $personnelID);
     $this->db->where('date', $date);
     $this->db->update('attendance', [
-        'status'        => $status,
-        'work_duration' => $hours ?: 0,
-        'holiday_hours' => $holiday ?: 0,
-        'overtime_hours' => $overtime ?: 0
-
+        'status' => $status,
+        'work_duration' => $hours,
+        'holiday_hours' => $holiday
+        
     ]);
+$this->session->set_flashdata('update_success', 'Attendance updated successfully!');
 
-    $this->session->set_flashdata('update_success', 'Attendance updated successfully!');
 
-    redirect("WeeklyAttendance/records?projectID={$projectID}&from={$from}&to={$to}");
+$projectID = $this->input->post('projectID');
+$from = $this->input->post('from');
+$to = $this->input->post('to');
+
+redirect("WeeklyAttendance/records?projectID={$projectID}&from={$from}&to={$to}");
+
+
+
+
+
 }
-
 
 
 

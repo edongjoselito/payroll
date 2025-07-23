@@ -276,18 +276,20 @@ $to = $selectedTo ?? '';
                             <td class="text-<?= $color ?> edit-attendance"
                                 data-personnel="<?= $pid ?>" data-date="<?= $d ?>"
                                 data-status="<?= $status ?>" data-hours="<?= $workHrs ?>"
+                                data-overtime="<?= $overtimeHrs ?>"
                                 data-holiday="<?= $holidayHrs ?>"
                                 style="cursor:pointer; min-width: 130px;">
                                 <div class="d-flex align-items-center justify-content-center">
                                     <i class="mdi mdi-pencil text-muted mr-1" style="font-size:12px;"></i>
                                     <div class="text-wrap text-center" style="white-space: normal;">
                                         <?= $statusLabel ?>
-                                        <?php
-  if (
-    stripos($status, 'Present') !== false || 
-    stripos($status, 'Regular') !== false || 
-    stripos($status, 'Absent') !== false || 
-    stripos($status, 'Special') !== false
+                                     <?php
+if (
+    stripos($status, 'Present') !== false ||
+    stripos($status, 'Regular') !== false ||
+    stripos($status, 'Special') !== false ||
+    stripos($status, 'Absent') !== false ||
+    stripos($status, 'Day Off') !== false
 )
  {
     if ($workHrs > 0 || $holidayHrs > 0 || $overtimeHrs > 0) {
@@ -304,7 +306,8 @@ $to = $selectedTo ?? '';
         echo "</small>";
     }
 }
-                                       ?>
+?>
+
                                     </div>
                                 </div>
                             </td>
@@ -464,6 +467,10 @@ $to = $selectedTo ?? '';
                                    <input type="number" step="0.01" name="holiday" id="editHoliday"
                                         class="form-control">
                               </div>
+                              <div class="form-group" id="overtimeWrapper">
+    <label>Overtime Hours</label>
+    <input type="number" step="0.01" name="overtime" id="editOvertime" class="form-control">
+</div>
                          </div>
 
                          <div class="modal-footer">
@@ -548,68 +555,22 @@ $(document).ready(function () {
         document.getElementById('to').value = selected.getAttribute('data-end');
     });
 
-    // ✅ Dynamic field logic
+    // ✅ Dynamic field logic based on status
     function toggleHourFields() {
         const status = $('#editStatus').val();
-        const $holidayGroup = $('#editHoliday').closest('.form-group');
 
-        // Remove any existing Regular Hours
-        $('#regularHoursWrapper').remove();
+        // Always show regular + overtime, hide holiday
+        $('#regularHoursWrapper').show();
+        $('#overtimeWrapper').show();
+        $('#editHoliday').closest('.form-group').hide(); // always hide holiday hours
 
-        // Default: hide holiday hours
-        $holidayGroup.hide();
-        $('#editHoliday').val('0.00').prop('readonly', true);
+        // Set editable states
+        $('#editHours').prop('readonly', false);
+        $('#editOvertime').prop('readonly', false);
 
-        if (status === 'Present') {
-            // Show Regular Hours only
-            const regularField = `
-                <div class="form-group" id="regularHoursWrapper">
-                    <label>Regular Hours <small class="text-muted">(Max: 8 hrs)</small></label>
-                    <input type="number" step="0.01" max="8" name="hours" id="editHours" class="form-control">
-                </div>
-            `;
-            $holidayGroup.before(regularField);
-
-            $('#editHours').on('input', function () {
-                let val = parseFloat($(this).val());
-                if (val > 8) {
-                    $(this).val(8);
-                    alert('Regular hours cannot exceed 8.00 hours.');
-                } else if (val < 0 || isNaN(val)) {
-                    $(this).val('');
-                }
-            });
-
-        } else if (status === 'Regular Holiday') {
-            // ✅ Show BOTH Regular and Holiday Hours
-            const regularField = `
-                <div class="form-group" id="regularHoursWrapper">
-                    <label>Regular Hours <small class="text-muted">(Max: 8 hrs)</small></label>
-                    <input type="number" step="0.01" max="8" name="hours" id="editHours" class="form-control">
-                </div>
-            `;
-            $holidayGroup.before(regularField);
-            $holidayGroup.show();
-            $('#editHoliday').prop('readonly', false);
-
-            $('#editHours').on('input', function () {
-                let val = parseFloat($(this).val());
-                if (val > 8) {
-                    $(this).val(8);
-                    alert('Regular hours cannot exceed 8.00 hours.');
-                } else if (val < 0 || isNaN(val)) {
-                    $(this).val('');
-                }
-            });
-
-        } else if (status === 'Special Non-Working Holiday') {
-            // Show only Holiday Hours (editable)
-            $holidayGroup.show();
-            $('#editHoliday').prop('readonly', false);
-
-        } else if (status === 'Day Off' || status === 'Absent') {
-            $holidayGroup.show();
-            $('#editHoliday').val('0.00').prop('readonly', true);
+        if (status === 'Absent' || status === 'Day Off') {
+            // Regular = readonly, Holiday = hidden, Overtime = editable
+            $('#editHours').prop('readonly', true);
         }
     }
 
@@ -619,30 +580,19 @@ $(document).ready(function () {
         $('#editDate').val($(this).data('date'));
         $('#editStatus').val($(this).data('status'));
         $('#editHoliday').val($(this).data('holiday'));
+        $('#editHours').val($(this).data('hours'));
+        $('#editOvertime').val($(this).data('overtime'));
 
-        // Remove and optionally recreate regular hours
-        $('#regularHoursWrapper').remove();
-
-        if ($(this).data('status') === 'Present' || $(this).data('status') === 'Regular Holiday') {
-            const regularField = `
-                <div class="form-group" id="regularHoursWrapper">
-                    <label>Regular Hours <small class="text-muted">(Max: 8 hrs)</small></label>
-                    <input type="number" step="0.01" max="8" name="hours" id="editHours" class="form-control">
-                </div>
-            `;
-            $('#editHoliday').closest('.form-group').before(regularField);
-            $('#editHours').val($(this).data('hours'));
-
-            $('#editHours').on('input', function () {
-                let val = parseFloat($(this).val());
-                if (val > 8) {
-                    $(this).val(8);
-                    alert('Regular hours cannot exceed 8.00 hours.');
-                } else if (val < 0 || isNaN(val)) {
-                    $(this).val('');
-                }
-            });
-        }
+        // Add validation for Regular Hours
+        $('#editHours').off('input').on('input', function () {
+            let val = parseFloat($(this).val());
+            if (val > 8) {
+                $(this).val(8);
+                alert('Regular hours cannot exceed 8.00 hours.');
+            } else if (val < 0 || isNaN(val)) {
+                $(this).val('');
+            }
+        });
 
         $('#editAttendanceModal').modal('show');
         toggleHourFields();
@@ -651,6 +601,7 @@ $(document).ready(function () {
     $('#editStatus').on('change', toggleHourFields);
 });
 </script>
+
 
 
 </body>
