@@ -529,25 +529,23 @@ public function view_payroll_batch()
     $data['project'] = $this->Project_model->getProjectDetails($projectID);
     $data['start'] = $start;
     $data['end'] = $end;
-$data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
-$data['show_signatories'] = true;
+    $data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
+    $data['show_signatories'] = true;
 
     // ✅ Get saved payroll summary
     $data['attendance_data'] = $this->Project_model->getSavedPayrollData($projectID, $start, $end, $settingsID);
-usort($data['attendance_data'], function ($a, $b) {
-    $nameA = strtolower($a->last_name . ', ' . $a->first_name);
-    $nameB = strtolower($b->last_name . ', ' . $b->first_name);
-    return strcmp($nameA, $nameB);
-});
+    usort($data['attendance_data'], function ($a, $b) {
+        $nameA = strtolower($a->last_name . ', ' . $a->first_name);
+        $nameB = strtolower($b->last_name . ', ' . $b->first_name);
+        return strcmp($nameA, $nameB);
+    });
 
     // ✅ Get attendance logs per personnel/date
     $this->db->select('personnelID, date, status, work_duration, overtime_hours');
-
     $this->db->from('attendance');
     $this->db->where('projectID', $projectID);
-  $this->db->where('DATE(date) >=', $start);
-$this->db->where('DATE(date) <=', $end);
-
+    $this->db->where('DATE(date) >=', $start);
+    $this->db->where('DATE(date) <=', $end);
     $this->db->where('settingsID', $settingsID);
     $logs_result = $this->db->get()->result();
 
@@ -557,41 +555,72 @@ $this->db->where('DATE(date) <=', $end);
     foreach ($logs_result as $log) {
         $pid = (int)$log->personnelID;
         $date = $log->date;
-$logs[$pid][$date] = [
-    'status' => $log->status,
-    'hours' => floatval($log->work_duration ?? 0),
-    'overtime_hours' => floatval($log->overtime_hours ?? 0) // <- 🔧 FIXED!
-];
-
-
+        $logs[$pid][$date] = [
+            'status' => $log->status,
+            'hours' => floatval($log->work_duration ?? 0),
+            'overtime_hours' => floatval($log->overtime_hours ?? 0)
+        ];
         $dates[$date] = true;
     }
 
     ksort($dates);
     $data['dates'] = array_keys($dates);
 
-    // ✅ Pre-prepare reg_hours_per_day to work with the same view
+    // ✅ Prepare data per person per date
     foreach ($data['attendance_data'] as &$row) {
-       $pid = (string)$row->personnelID;
+        $pid = (string)$row->personnelID;
 
         $row->reg_hours_per_day = [];
-    $govDeduction = $this->PayrollModel->getGovDeduction($pid, $start, $end, $settingsID);
 
-    $row->gov_sss = $govDeduction['SSS'] ?? 0;
-    $row->gov_pagibig = $govDeduction['PAGIBIG'] ?? 0;
-    $row->gov_philhealth = $govDeduction['PHILHEALTH'] ?? 0;
+        // ✅ Inject holiday totals (if already saved in summary)
+        $row->holiday_hours = floatval($row->holiday_hours ?? 0);
+        $row->holiday_pay = floatval($row->holiday_pay ?? 0);
+
+        // ✅ Government deductions
+        $govDeduction = $this->PayrollModel->getGovDeduction($pid, $start, $end, $settingsID);
+        $row->gov_sss = $govDeduction['SSS'] ?? 0;
+        $row->gov_pagibig = $govDeduction['PAGIBIG'] ?? 0;
+        $row->gov_philhealth = $govDeduction['PHILHEALTH'] ?? 0;
+
+        // ✅ Accepted statuses including holidays
+        $validStatuses = [
+            'present',
+            'regularho',
+            'regularholiday',
+            'legalholiday',
+            'specialholiday',
+            'specialnonworkingholiday',
+            'specialnon',
+            'holiday'
+        ];
 
         foreach ($data['dates'] as $d) {
             if (isset($logs[$pid][$d])) {
-                $status = $logs[$pid][$d]['status'];
+              $status = strtolower(trim($logs[$pid][$d]['status']));
+$normalizedStatus = preg_replace('/[^a-z]/', '', $status); // remove spaces, dashes, etc.
 
-              if (strtolower($status) === 'present' || strtolower($status) === 'regular ho') {
-  $row->reg_hours_per_day[$d] = [
-    'hours' => $logs[$pid][$d]['hours'],
-    'overtime_hours' => $logs[$pid][$d]['overtime_hours'] // ✅ make sure it's `overtime_hours`
+// ✅ Handle all expected valid attendance types
+$validStatuses = [
+    'present',
+    'regularho',
+    'regularholiday',
+    'legalholiday',
+    'specialholiday',
+    'specialnonworkingholiday',
+    'specialnonworking',
+    'specialnon',
+    'specialno',
+    'holiday'
 ];
 
-                } elseif ($status === 'day off') {
+if (in_array($normalizedStatus, $validStatuses)) {
+
+                    $row->reg_hours_per_day[$d] = [
+                        'hours' => $logs[$pid][$d]['hours'],
+                        'overtime_hours' => $logs[$pid][$d]['overtime_hours'],
+                        'status' => $status
+                    ];
+                } elseif ($normalizedStatus === 'dayoff') {
                     $row->reg_hours_per_day[$d] = 'Day Off';
                 } else {
                     $row->reg_hours_per_day[$d] = '-';
@@ -602,10 +631,9 @@ $logs[$pid][$date] = [
         }
     }
 
-    // ✅ Done: now load the same report view
+    // ✅ Load payroll view (already working)
     $this->load->view('payroll_report_view', $data);
 }
-
 
 
 
