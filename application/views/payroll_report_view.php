@@ -87,9 +87,17 @@ tbody td:nth-child(2) {
 .signature strong {
   font-size: 13px;
 }
-.hidden-col {
-  display: none;
+.hide-col {
+  visibility: visible !important;
 }
+td.unused-holiday {
+  background-color: #f9f9f9;
+  color: #aaa;
+  font-style: italic;
+}
+
+
+
 .holiday-cell {
   background-color: #ffe5e5 !important;
   color: red !important;
@@ -364,17 +372,10 @@ foreach ($attendance_data as $row) {
 
     <th rowspan="2">Reg.</th>
     <th rowspan="2">O.T</th>
- <?php if ($hasRegularHoliday): ?>
-    <th rowspan="2" class="<?= !$hasRegularHoliday ? 'hidden-col' : '' ?>">Regular Holiday</th>
-<?php else: ?>
-    <th rowspan="2" style="display:none;"></th>
-<?php endif; ?>
+<th rowspan="2">Regular Holiday</th>
+<th rowspan="2">Special Holiday</th>
 
-<?php if ($hasSpecialHoliday): ?>
-    <th rowspan="2" class="<?= !$hasSpecialHoliday ? 'hidden-col' : '' ?>">Special Holiday</th>
-<?php else: ?>
-    <th rowspan="2" style="display:none;"></th>
-<?php endif; ?>
+
 
 
 </tr>
@@ -650,19 +651,14 @@ $netPay = $salary - $total_deduction;
 <td><?= number_format($otTotalMinutes / 60, 2) ?></td>  
 <td><?= $totalDays ?></td> 
 
-<td><?= displayAmount($regAmount) ?></td> 
-<td><?= displayAmount($otAmount) ?></td>  
-<?php if ($hasRegularHoliday): ?>
-    <td><?= displayAmount($amountRegularHoliday) ?></td>
-<?php elseif (!$hasRegularHoliday && $hasSpecialHoliday): ?>
-    <td></td> <!-- must still render a cell -->
-<?php endif; ?>
+<td><?= displayAmount($regAmount) ?></td>
+<td><?= displayAmount($otAmount) ?></td>
+<td class="<?= $amountRegularHoliday == 0 ? 'unused-holiday' : '' ?>"><?= displayAmount($amountRegularHoliday) ?></td>
+<td class="<?= $amountSpecialHoliday == 0 ? 'unused-holiday' : '' ?>"><?= displayAmount($amountSpecialHoliday) ?></td>
 
-<?php if ($hasSpecialHoliday): ?>
-    <td><?= displayAmount($amountSpecialHoliday) ?></td>
-<?php elseif (!$hasSpecialHoliday && $hasRegularHoliday): ?>
-    <td></td>
-<?php endif; ?>
+
+
+
 
 
 
