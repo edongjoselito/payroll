@@ -8,10 +8,35 @@ function getWorkingDaysInMonth($anyDateInMonth) {
 function displayAmount($value) {
     return ($value == 0 || $value === 0.00) ? '––' : number_format($value, 2);
 }
+
+$hasRegularHoliday = false;
+$hasSpecialHoliday = false;
+
+foreach ($attendance_data as $row) {
+    foreach ($row->reg_hours_per_day as $day) {
+        if (isset($day['status'])) {
+            $status = strtolower($day['status']);
+
+            if (!$hasRegularHoliday && (strpos($status, 'regular') !== false || strpos($status, 'legal') !== false)) {
+                $hasRegularHoliday = true;
+            }
+
+            if (!$hasSpecialHoliday && strpos($status, 'special') !== false) {
+                $hasSpecialHoliday = true;
+            }
+
+            if ($hasRegularHoliday && $hasSpecialHoliday) {
+                break 2; // stop both loops
+            }
+        }
+    }
+}
+
+
+$amountColspan = 2;
+if ($hasRegularHoliday) $amountColspan++;
+if ($hasSpecialHoliday) $amountColspan++;
 ?>
-
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -342,7 +367,7 @@ foreach ($attendance_data as $row) {
     ?>
     <th colspan="3">TOTAL TIME</th>
 
-    <th colspan="4" class="text-center">AMOUNT</th> <!-- Changed from 2 to 4 -->
+  <th colspan="<?= $amountColspan ?>" class="text-center">AMOUNT</th>
     <th rowspan="3">Gross</th>
     <th rowspan="3">Cash Advance</th>
     <th rowspan="3">SSS (Gov’t)</th>
@@ -372,8 +397,12 @@ foreach ($attendance_data as $row) {
 
     <th rowspan="2">Reg.</th>
     <th rowspan="2">O.T</th>
-<th rowspan="2">Regular Holiday</th>
-<th rowspan="2">Special Holiday</th>
+<?php if ($hasRegularHoliday): ?>
+    <th>Regular Holiday</th>
+<?php endif; ?>
+<?php if ($hasSpecialHoliday): ?>
+    <th>Special Holiday</th>
+<?php endif; ?>
 
 
 
@@ -653,13 +682,12 @@ $netPay = $salary - $total_deduction;
 
 <td><?= displayAmount($regAmount) ?></td>
 <td><?= displayAmount($otAmount) ?></td>
-<td class="<?= $amountRegularHoliday == 0 ? 'unused-holiday' : '' ?>"><?= displayAmount($amountRegularHoliday) ?></td>
-<td class="<?= $amountSpecialHoliday == 0 ? 'unused-holiday' : '' ?>"><?= displayAmount($amountSpecialHoliday) ?></td>
-
-
-
-
-
+<?php if ($hasRegularHoliday): ?>
+  <td><?= displayAmount($amountRegularHoliday) ?></td>
+<?php endif; ?>
+<?php if ($hasSpecialHoliday): ?>
+  <td><?= displayAmount($amountSpecialHoliday) ?></td>
+<?php endif; ?>
 
 
 <td><?= number_format($regAmount + $otAmount + $amountRegularHoliday + $amountSpecialHoliday, 2) ?></td>
