@@ -58,17 +58,17 @@ foreach ($personnel as $p) {
         <th>Name</th>
         <th>Address</th>
         <th>Contact</th>
-        <th>Date Employed</th>
-      <?php if ($hasTerminated): ?>
-    <th>Date Terminated</th>
+       <th>SSS</th>
+<th>PhilHealth</th>
+<th>Pag-IBIG</th>
+<th>TIN</th>
+<th>Date Employed</th>
+<?php if ($hasTerminated): ?>
+<th>Date Terminated</th>
 <?php endif; ?>
+<th>Status</th>
+<th>Duration</th>
 
-        <th>Status</th>
-        <th>Duration</th>
-        <th>SSS</th>
-        <th>PhilHealth</th>
-        <th>Pag-IBIG</th>
-        <th>TIN</th>
         <th>Actions</th>
     </tr>
 </thead>
@@ -98,22 +98,21 @@ foreach ($personnel as $p) {
         <td><?= "{$p->last_name}, {$p->first_name} {$p->middle_name} {$p->name_ext}" ?></td>
         <td><?= $p->address ?></td>
         <td><?= $p->contact_number ?></td>
-        <td><?= $hasStart ? date('M d, Y', strtotime($p->date_employed)) : '—'; ?></td>
+      <td><?= $p->sss_number ?></td>
+<td><?= $p->philhealth_number ?></td>
+<td><?= $p->pagibig_number ?></td>
+<td><?= $p->tin_number ?></td>
+<td><?= $hasStart ? date('M d, Y', strtotime($p->date_employed)) : '—'; ?></td>
+<?php if ($hasTerminated): ?>
+<td><?= $hasEnd ? date('M d, Y', strtotime($p->date_terminated)) : '—'; ?></td>
+<?php endif; ?>
+<td>
+    <span class="badge badge-<?= $status === 'Active' ? 'success' : 'danger' ?>">
+        <?= $status ?>
+    </span>
+</td>
+<td><?= $duration ?></td>
 
-        <?php if ($hasTerminated): ?>
-        <td><?= $hasEnd ? date('M d, Y', strtotime($p->date_terminated)) : '—'; ?></td>
-        <?php endif; ?>
-
-        <td>
-            <span class="badge badge-<?= $status === 'Active' ? 'success' : 'danger' ?>">
-                <?= $status ?>
-            </span>
-        </td>
-        <td><?= $duration ?></td>
-        <td><?= $p->sss_number ?></td>
-        <td><?= $p->philhealth_number ?></td>
-        <td><?= $p->pagibig_number ?></td>
-        <td><?= $p->tin_number ?></td>
         <td>
             <a href="<?= base_url('personnel/edit/'.$p->personnelID) ?>" class="btn btn-info btn-sm">Edit</a>
             <a href="<?= base_url('personnel/delete/'.$p->personnelID) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this record?')">Delete</a>
