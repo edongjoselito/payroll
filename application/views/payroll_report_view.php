@@ -202,6 +202,52 @@ th {
   padding-bottom: 4px;
   margin-bottom: 10px;
 }
+.header-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  border-radius: 10px;
+  background-color: #fefefe;
+  padding: 12px 20px;
+  margin: 10px 0 20px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.header-box .box-content {
+  flex: 1 1 auto;
+  min-width: 300px;
+}
+
+.header-box .info-row {
+  display: flex;
+  align-items: center;
+  margin: 3px 0;
+  font-size: 15px;
+}
+
+.header-box .info-row i {
+  font-size: 13px;
+  color: #666;
+  width: 18px;
+  margin-right: 8px;
+  text-align: center;
+}
+
+.header-box strong {
+  display: inline-block;
+  min-width: 125px;
+  font-weight: 600;
+}
+
+.header-box span {
+  flex: 1;
+  text-align: left;
+}
+
+.print-button {
+  margin-top: 4px;
+}
 
 /* === PRINT FIXES === */
 @media print {
@@ -299,22 +345,39 @@ th {
 </head>
 <body>
   
-<div class="header text-left mb-3" style="margin-left: 10px; font-size: 13px; line-height: 1.6;">
-    <p><strong>PROJECT</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?= $project->projectTitle ?? 'N/A' ?></p>
-    <p><strong>LOCATION</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?= $project->projectLocation ?? 'Unknown' ?></p>
-    <p><strong>PERIOD</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?= date('F d, Y', strtotime($start)) ?> - <?= date('F d, Y', strtotime($end)) ?></p>
-    <p><strong>WORKING DAYS</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: <?= getWorkingDaysInMonth($start) ?> days</p>
-
+<div class="header-box">
+  <div class="box-content">
+    <div class="info-row">
+      <i class="fas fa-project-diagram"></i>
+      <strong>PROJECT</strong><span>: <?= $project->projectTitle ?? 'N/A' ?></span>
+    </div>
+    <div class="info-row">
+      <i class="fas fa-map-marker-alt"></i>
+      <strong>LOCATION</strong><span>: <?= $project->projectLocation ?? 'Unknown' ?></span>
+    </div>
+    <div class="info-row">
+      <i class="far fa-calendar-alt"></i>
+      <strong>PERIOD</strong><span>: <?= date('F d, Y', strtotime($start)) ?> - <?= date('F d, Y', strtotime($end)) ?></span>
+    </div>
+    <div class="info-row">
+      <i class="fas fa-clock"></i>
+      <strong>WORKING DAYS</strong><span>: <?= getWorkingDaysInMonth($start) ?> days</span>
+    </div>
     <?php if (!empty($_GET['rateType'])): ?>
-    <p><strong>SALARY TYPE</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;: Per <?= htmlspecialchars($_GET['rateType']) ?></p>
+      <div class="info-row">
+        <i class="fas fa-wallet"></i>
+        <strong>SALARY TYPE</strong><span>: Per <?= htmlspecialchars($_GET['rateType']) ?></span>
+      </div>
     <?php endif; ?>
+  </div>
+
+  <div class="print-button no-print">
+    <button onclick="window.print()" class="btn btn-primary btn-sm">
+      <i class="fas fa-print"></i> Print Payroll Summary
+    </button>
+  </div>
 </div>
 
-<div class="text-right no-print mb-3">
-    <button onclick="window.print()" class="btn btn-primary">
-        <i class="fas fa-print"></i> Print Payroll Summary
-    </button>
-</div>
 
 <div class="scrollable-wrapper">
   <?php
@@ -597,7 +660,7 @@ if (($holidayHours + $otHours) > 0) {
     // 👇 Show complete breakdown
     $parts = [];
     if ($holidayHours > 0) $parts[] = number_format($holidayHours, 2) . "";
-    if ($regHours > 0)     $parts[] = number_format($regHours, 2) . " R";
+    if ($regHours > 0)     $parts[] = displayAmount($regHours) . " R";
     if ($otHours > 0)      $parts[] = displayAmount($otHours) . " OT";
 
     echo implode(" + ", $parts);
@@ -692,7 +755,7 @@ $netPay = $salary - $total_deduction;
 
 ?>
 
-<td><?= number_format($regTotalMinutes / 60, 2) ?></td>
+<td><?= displayAmount($regTotalMinutes / 60) ?></td>
 <td><?= number_format($otTotalMinutes / 60, 2) ?></td>  
 <td><?= $totalDays ?></td> 
 
