@@ -602,16 +602,13 @@ if (preg_match('/holiday|regularho|legal|special/i', $status) || $holidayHours >
 // Pay computation
 if ($showHoliday) {
     // Rate type: Regular or Special Holiday
-    if (strpos(strtolower($status), 'regularho') !== false || strpos(strtolower($status), 'legal') !== false) {
-        // ✅ REGULAR HOLIDAY: 
-        // - Holiday hours × 200%
-        // - OT hours × 100% (no extra)
+   if (strpos(strtolower($status), 'regularho') !== false || strpos(strtolower($status), 'legal') !== false) {
+    // ✅ REGULAR HOLIDAY:
+    // Regular pay + 100% premium
+    $regAmount += $holidayHours * $base;               // ← Goes to AMOUNT Reg.
+    $amountRegularHoliday += $holidayHours * $base;    // ← Goes to Holiday (100% premium only)
 
-        $holidayPay = $holidayHours * $base * 2;
-        $amountRegularHoliday += $holidayPay;
-
-        $otPay = $otHours * $base; // No extra pay
-        $otAmount += $otPay;
+    $otAmount += $otHours * $base;
 
         $holidayLabel = 'R.Holiday';
 
@@ -646,12 +643,16 @@ if ($showHoliday) {
     // $totalDays += 1;
     // Do NOT count holiday hours in Reg.
 // Only OT gets added
-$otTotalMinutes += $otHours * 60;//-------------remove this if balik
-$totalMinutes += $otHours * 60;
+// ✅ Count holiday hours in Reg. time
+$regTotalMinutes += $holidayHours * 60;
+$otTotalMinutes += $otHours * 60;
+$totalMinutes += ($holidayHours + $otHours) * 60;
 
 if (($holidayHours + $otHours) > 0) {
     $totalDays += 1;
 }
+
+
 
 
     echo "<td colspan='2' style='background-color: #ffe5e5; color: red; font-weight: bold; text-align: center;'>";
