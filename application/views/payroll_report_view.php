@@ -617,13 +617,20 @@ while ($loopDate <= $endDate):
                 $holidayLabel = 'R.Holiday';
                 if (($holidayHours + $otHours) > 0) $totalDays += 1;
             } else {
-                // ✅ SPECIAL HOLIDAY
-                if ($holidayHours > 0) {
-                    $amountSpecialHoliday += $holidayHours * $base * 0.30;
-                    $regAmount += $holidayHours * $base;
-                    $regTotalMinutes += $holidayHours * 60;
-                    $totalMinutes += $holidayHours * 60;
-                }
+              // ✅ SPECIAL HOLIDAY LOGIC
+if ($holidayHours > 0) {
+    // With duty → Base + 30%
+    $amountSpecialHoliday += $holidayHours * $base * 0.30;
+    $regAmount += $holidayHours * $base;
+    $regTotalMinutes += $holidayHours * 60;
+    $totalMinutes += $holidayHours * 60;
+    $totalDays += 1;
+} else {
+    // No duty → Only 30% goodwill (policy-based)
+    $amountSpecialHoliday += 8 * $base * 0.30;
+    $holidayHours = 0;
+}
+
 
                 if ($otHours > 0) {
                     $otAmount += $otHours * $base;
