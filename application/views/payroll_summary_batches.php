@@ -40,7 +40,9 @@
                       <th>Project Title</th>
                       <th>Location</th>
                       <th>Payroll Period</th>
-                      <th class="text-right">Total Payroll (₱)</th>
+                     <th class="text-right">Gross Payroll (₱)</th>
+
+
                       <th class="text-center">Actions</th>
                     </tr>
                   </thead>
@@ -51,9 +53,12 @@
   <td><?= $batch['projectTitle'] ?></td>
   <td><?= $batch['projectLocation'] ?></td>
   <td><?= date('M d, Y', strtotime($batch['start_date'])) ?> – <?= date('M d, Y', strtotime($batch['end_date'])) ?></td>
-  <td class="text-right font-weight-bold text-success">₱ <?= number_format($batch['total_payroll'], 2) ?></td>
+<td class="text-right text-success">₱ <?= number_format($batch['gross_total'], 2) ?></td>
+<!-- <td class="text-right text-primary">₱ <?= number_format($batch['net_total'], 2) ?></td> -->
+
+
   <td class="text-center">
-    <form method="post" action="<?= base_url('project/delete_summary_batch') ?>" onsubmit="return confirm('Are you sure you want to delete this summary?');">
+ <form method="post" action="<?= base_url('Project/delete_summary_batch') ?>" onsubmit="return confirm('Are you sure you want to delete this summary?');">
       <input type="hidden" name="projectID" value="<?= $batch['projectID'] ?>">
       <input type="hidden" name="start_date" value="<?= $batch['start_date'] ?>">
       <input type="hidden" name="end_date" value="<?= $batch['end_date'] ?>">
@@ -66,13 +71,15 @@
 
   <?php endforeach; ?>
 </tbody>
-                  </tbody>
-                  <tfoot>
-                    <tr>
-                      <td colspan="3" class="text-right font-weight-bold">Grand Total</td>
-                      <td class="text-right font-weight-bold text-primary">₱ <?= number_format($grand_total, 2) ?></td>
-                    </tr>
-                  </tfoot>
+                 <tfoot>
+  <tr>
+    <td colspan="3" class="text-right font-weight-bold">Grand Totals</td>
+    <td class="text-right font-weight-bold text-success">₱ <?= number_format($grand_total_gross, 2) ?></td>
+    <!-- <td class="text-right font-weight-bold text-primary">₱ <?= number_format($grand_total_net, 2) ?></td> -->
+    <td></td>
+  </tr>
+</tfoot>
+ss
                 </table>
               </div>
             <?php endif; ?>

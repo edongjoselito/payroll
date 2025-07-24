@@ -744,11 +744,10 @@ public function view_payroll_summary_batches()
     }
 
     $summary = [];
-    $grandTotal = 0;
+    $grandTotalGross = 0;
 
     foreach ($batches as $batch) {
-        // ✅ Use gross_pay as actual total payroll
-        $total = $this->Project_model->get_total_grosspay_for_summary(
+        $gross = $this->Project_model->get_total_grosspay_latest_only(
             $batch->projectID,
             $batch->start_date,
             $batch->end_date,
@@ -761,34 +760,37 @@ public function view_payroll_summary_batches()
             'projectLocation' => $batch->projectLocation,
             'start_date' => $batch->start_date,
             'end_date' => $batch->end_date,
-            'total_payroll' => $total
+            'gross_total' => $gross
         ];
 
-        $grandTotal += $total;
+        $grandTotalGross += $gross;
     }
 
     $data['batch_summaries'] = $summary;
-    $data['grand_total'] = $grandTotal;
+    $data['grand_total_gross'] = $grandTotalGross;
 
     $this->load->view('payroll_summary_batches', $data);
 }
 
+
+
 public function delete_summary_batch()
 {
     $projectID = $this->input->post('projectID');
-    $start = $this->input->post('start_date');
-    $end = $this->input->post('end_date');
+    $start_date = $this->input->post('start_date');
+    $end_date = $this->input->post('end_date');
     $settingsID = $this->session->userdata('settingsID');
 
-    if ($projectID && $start && $end) {
-        $this->load->model('Project_model');
-        $this->Project_model->delete_summary_batch($projectID, $start, $end, $settingsID);
-        $this->session->set_flashdata('success', 'Payroll summary deleted successfully.');
+    $this->load->model('Project_model'); // ✅ Corrected
+    $result = $this->Project_model->delete_summary_batch($projectID, $start_date, $end_date, $settingsID);
+
+    if ($result) {
+        $this->session->set_flashdata('success', 'Payroll batch deleted successfully.');
     } else {
-        $this->session->set_flashdata('error', 'Invalid batch data.');
+        $this->session->set_flashdata('error', 'Failed to delete payroll batch.');
     }
 
-    redirect('view_payroll_summary_batches');
+    redirect('view_payroll_summary_batches'); // ✅ Ensure this matches your routing
 }
 
 
