@@ -675,6 +675,7 @@ public function get_total_grosspay_latest_only($projectID, $start_date, $end_dat
 
 
 
+
 public function get_total_netpay_for_summary($projectID, $start_date, $end_date, $settingsID)
 {
     $this->db->select_sum('net_pay');
