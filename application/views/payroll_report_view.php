@@ -582,33 +582,29 @@ while ($loopDate <= $endDate):
             $base = ($row->rateAmount / 30) / 8;
         }
 
+        // Check if it's a holiday
         if (preg_match('/holiday|regularho|legal|special/i', $status) || $holidayHours > 0) {
             $showHoliday = true;
 
             if ($holidayHours <= 0 && $regHours > 0) {
                 $holidayHours = $regHours;
                 $regHours = 0;
-            } elseif ($holidayHours <= 0 && floatval($raw['holiday_hours'] ?? 0) > 0) {
-                $holidayHours = floatval($raw['holiday_hours']);
             }
 
             $holidayLabel = ucfirst($status ?: 'Holiday');
         }
 
         if ($showHoliday) {
-            if (strpos(strtolower($status), 'regularho') !== false || strpos(strtolower($status), 'legal') !== false) {
+            if (strpos($status, 'regularho') !== false || strpos($status, 'legal') !== false) {
                 // ✅ REGULAR HOLIDAY LOGIC
-              if ($holidayHours > 0) {
-    // Regular holiday = base entitlement + pay for hours worked
-    $amountRegularHoliday += 8 * $base; // always get one day base
-    $regAmount += $holidayHours * $base; // worked hours get paid on top
-    $regTotalMinutes += $holidayHours * 60;
-    $totalMinutes += $holidayHours * 60;
-} else {
-    // Absent but still entitled to one day base
-    $amountRegularHoliday += 8 * $base;
-}
+                $amountRegularHoliday += 8 * $base;
 
+                if ($holidayHours > 0) {
+                    $regAmount += $holidayHours * $base;
+                    $regTotalMinutes += $holidayHours * 60;
+                    $totalMinutes += $holidayHours * 60;
+                    $totalDays += 1;
+                }
 
                 if ($otHours > 0) {
                     $otAmount += $otHours * $base;
@@ -617,22 +613,18 @@ while ($loopDate <= $endDate):
                 }
 
                 $holidayLabel = 'R.Holiday';
-                if (($holidayHours + $otHours) > 0) $totalDays += 1;
-            } else {
-              // ✅ SPECIAL HOLIDAY LOGIC
-if ($holidayHours > 0) {
-    // With duty → Base + 30%
-    $amountSpecialHoliday += $holidayHours * $base * 0.30;
-    $regAmount += $holidayHours * $base;
-    $regTotalMinutes += $holidayHours * 60;
-    $totalMinutes += $holidayHours * 60;
-    $totalDays += 1;
-} else {
-    // No duty → Only 30% goodwill (policy-based)
-    $amountSpecialHoliday += 8 * $base * 0.30;
-    $holidayHours = 0;
-}
 
+            } else {
+                // ✅ SPECIAL HOLIDAY LOGIC
+                if ($holidayHours > 0) {
+                    $regAmount += $holidayHours * $base;
+                    $amountSpecialHoliday += $holidayHours * $base * 0.30;
+                    $regTotalMinutes += $holidayHours * 60;
+                    $totalMinutes += $holidayHours * 60;
+                    $totalDays += 1;
+                } else {
+                    $amountSpecialHoliday += 8 * $base * 0.30;
+                }
 
                 if ($otHours > 0) {
                     $otAmount += $otHours * $base;
@@ -641,10 +633,9 @@ if ($holidayHours > 0) {
                 }
 
                 $holidayLabel = 'S.Holiday';
-                if (($holidayHours + $otHours) > 0) $totalDays += 1;
             }
 
-            // ✅ Show holiday display cell
+            // ✅ Output holiday cell
             echo "<td colspan='2' style='background-color: #ffe5e5; color: red; font-weight: bold; text-align: center;'>";
             echo "{$holidayLabel}<br>(";
             $parts = [];
@@ -655,7 +646,7 @@ if ($holidayHours > 0) {
             echo ")</td>";
 
         } else {
-            // ✅ Normal workday
+            // ✅ Normal workday logic
             if ($regHours <= 0 && $otHours > 0 && in_array($status, ['absent', 'absentee'])) {
                 echo "<td class='text-danger text-center font-weight-bold'>A</td>";
                 echo "<td>" . number_format($otHours, 2) . "</td>";
@@ -665,6 +656,9 @@ if ($holidayHours > 0) {
                 echo "<td>" . displayAmount($regHours) . "</td>";
                 echo "<td>" . displayAmount($otHours) . "</td>";
             }
+
+            $regAmount += $regHours * $base;
+            $otAmount += $otHours * $base;
 
             $regTotalMinutes += $regHours * 60;
             $otTotalMinutes += $otHours * 60;
