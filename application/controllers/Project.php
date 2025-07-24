@@ -594,41 +594,51 @@ public function view_payroll_batch()
             'holiday'
         ];
 
-        foreach ($data['dates'] as $d) {
-            if (isset($logs[$pid][$d])) {
-              $status = strtolower(trim($logs[$pid][$d]['status']));
-$normalizedStatus = preg_replace('/[^a-z]/', '', $status); // remove spaces, dashes, etc.
+       foreach ($data['dates'] as $d) {
+    if (isset($logs[$pid][$d])) {
+        $status = strtolower(trim($logs[$pid][$d]['status']));
+        $normalizedStatus = preg_replace('/[^a-z]/', '', $status);
 
-// ✅ Handle all expected valid attendance types
-$validStatuses = [
-    'present',
-    'regularho',
-    'regularholiday',
-    'legalholiday',
-    'specialholiday',
-    'specialnonworkingholiday',
-    'specialnonworking',
-    'specialnon',
-    'specialno',
-    'holiday'
-];
+        $validStatuses = [
+            'present',
+            'regularho',
+            'regularholiday',
+            'legalholiday',
+            'specialholiday',
+            'specialnonworkingholiday',
+            'specialnonworking',
+            'specialnon',
+            'specialno',
+            'holiday'
+        ];
 
-if (in_array($normalizedStatus, $validStatuses)) {
+        if (in_array($normalizedStatus, $validStatuses)) {
+            $row->reg_hours_per_day[$d] = [
+                'hours' => $logs[$pid][$d]['hours'],
+                'overtime_hours' => $logs[$pid][$d]['overtime_hours'],
+                'status' => $status
+            ];
+        } elseif ($normalizedStatus === 'dayoff') {
+            $row->reg_hours_per_day[$d] = 'Day Off';
+        } else {
+            // ✅ Absent with OT hours fallback
+            $hours = $logs[$pid][$d]['hours'] ?? 0;
+            $ot = $logs[$pid][$d]['overtime_hours'] ?? 0;
 
-                    $row->reg_hours_per_day[$d] = [
-                        'hours' => $logs[$pid][$d]['hours'],
-                        'overtime_hours' => $logs[$pid][$d]['overtime_hours'],
-                        'status' => $status
-                    ];
-                } elseif ($normalizedStatus === 'dayoff') {
-                    $row->reg_hours_per_day[$d] = 'Day Off';
-                } else {
-                    $row->reg_hours_per_day[$d] = '-';
-                }
+            if ($ot > 0 || $hours > 0) {
+                $row->reg_hours_per_day[$d] = [
+                    'hours' => $hours,
+                    'overtime_hours' => $ot,
+                    'status' => $status
+                ];
             } else {
                 $row->reg_hours_per_day[$d] = '-';
             }
         }
+    } else {
+        $row->reg_hours_per_day[$d] = '-';
+    }
+}
     }
 
     // ✅ Load payroll view (already working)
