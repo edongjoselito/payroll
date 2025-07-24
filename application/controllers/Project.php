@@ -790,7 +790,7 @@ public function delete_summary_batch()
         $this->session->set_flashdata('error', 'Failed to delete payroll batch.');
     }
 
-    redirect('view_payroll_summary_batches'); // ✅ Ensure this matches your routing
+    redirect('project/view_payroll_summary_batches'); // ✅ Ensure this matches your routing
 }
 
 

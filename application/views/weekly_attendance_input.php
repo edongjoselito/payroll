@@ -540,40 +540,60 @@ $('#attendanceSavedModal').modal('show');
 // 6. Adjust max hours based on attendance type
 function handleAttendanceChange(select) {
     const container = select.closest('.attendance-box');
-    const hoursInput = container.querySelector('.hours-input');
+    const regularHoursInput = container.querySelector('input[name^="regular_hours"]');
+    const overtimeHoursInput = container.querySelector('input[name^="overtime_hours"]');
     const value = select.value;
 
-    hoursInput.disabled = false;
-    hoursInput.value = "";
+    regularHoursInput.disabled = false;
+    overtimeHoursInput.disabled = false;
 
     if (value === 'Absent' || value === 'Day Off') {
-        hoursInput.disabled = true;
-        hoursInput.value = '';
-    } else if (value === 'Regular Holiday') {
-        hoursInput.max = 16;
+        regularHoursInput.disabled = true;
+        regularHoursInput.value = '';
+        overtimeHoursInput.disabled = true;
+        overtimeHoursInput.value = '';
+    } else if (value === 'Regular Holiday' || value === 'Special Non-Working Holiday') {
+        regularHoursInput.max = 16;
+        regularHoursInput.value = '0';  // Optional: pre-fill 0
+        overtimeHoursInput.value = '';
     } else {
-        hoursInput.max = 8;
+        regularHoursInput.max = 8;
     }
 }
 
 
-// 7. Optional validation to check if hours exceed max
 function validateAttendanceForm() {
     let isValid = true;
+
     document.querySelectorAll('.attendance-box').forEach(box => {
         const select = box.querySelector('.attendance-select');
-       const regularHoursInput = box.querySelector('input[name^="regular_hours"]');
-const overtimeHoursInput = box.querySelector('input[name^="overtime_hours"]');
+        const regularHoursInput = box.querySelector('input[name^="regular_hours"]');
+        const overtimeHoursInput = box.querySelector('input[name^="overtime_hours"]');
 
+        if (regularHoursInput && !regularHoursInput.disabled) {
+            const regVal = parseFloat(regularHoursInput.value || 0);
+            const regMax = parseFloat(regularHoursInput.max || 8);
+            if (regVal < 0 || regVal > regMax) {
+                alert(`⚠ Regular hours for "${select.value}" must be between 0 and ${regMax}.`);
+                regularHoursInput.focus();
+                isValid = false;
+            }
+        }
 
-        if (!hours.disabled && parseFloat(hours.value || 0) > parseFloat(hours.max)) {
-            alert(`Exceeds max hours for ${select.value}. Max allowed: ${hours.max}`);
-            hours.focus();
-            isValid = false;
+        if (overtimeHoursInput && !overtimeHoursInput.disabled) {
+            const otVal = parseFloat(overtimeHoursInput.value || 0);
+            const otMax = parseFloat(overtimeHoursInput.max || 8);
+            if (otVal < 0 || otVal > otMax) {
+                alert(`⚠ Overtime hours for "${select.value}" must be between 0 and ${otMax}.`);
+                overtimeHoursInput.focus();
+                isValid = false;
+            }
         }
     });
+
     return isValid;
 }
+
 </script>
 
 
