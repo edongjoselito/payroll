@@ -598,15 +598,17 @@ while ($loopDate <= $endDate):
         if ($showHoliday) {
             if (strpos(strtolower($status), 'regularho') !== false || strpos(strtolower($status), 'legal') !== false) {
                 // ✅ REGULAR HOLIDAY LOGIC
-                if ($holidayHours > 0) {
-                    // Worked on holiday → double pay
-                    $amountRegularHoliday += $holidayHours * $base * 2;
-                    $regTotalMinutes += $holidayHours * 60;
-                    $totalMinutes += $holidayHours * 60;
-                } else {
-                    // Not worked, but entitled to base pay (no double)
-                    $amountRegularHoliday += 8 * $base;
-                }
+              if ($holidayHours > 0) {
+    // Regular holiday = base entitlement + pay for hours worked
+    $amountRegularHoliday += 8 * $base; // always get one day base
+    $regAmount += $holidayHours * $base; // worked hours get paid on top
+    $regTotalMinutes += $holidayHours * 60;
+    $totalMinutes += $holidayHours * 60;
+} else {
+    // Absent but still entitled to one day base
+    $amountRegularHoliday += 8 * $base;
+}
+
 
                 if ($otHours > 0) {
                     $otAmount += $otHours * $base;
