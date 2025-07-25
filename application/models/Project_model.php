@@ -656,17 +656,12 @@ public function get_summary_batches_by_project($projectID, $settingsID)
 public function get_total_grosspay_latest_only($projectID, $start_date, $end_date, $settingsID)
 {
     $sql = "
-        SELECT SUM(p.gross_pay) AS gross_pay
-        FROM payroll_summary p
-        INNER JOIN (
-            SELECT MAX(summaryID) AS latest_summary
-            FROM payroll_summary
-            WHERE projectID = ?
-              AND start_date = ?
-              AND end_date = ?
-              AND settingsID = ?
-            GROUP BY personnelID
-        ) AS sub ON p.summaryID = sub.latest_summary
+        SELECT SUM(gross_pay) AS gross_pay
+        FROM payroll_summary
+        WHERE projectID = ?
+          AND start_date = ?
+          AND end_date = ?
+          AND settingsID = ?
     ";
 
     $query = $this->db->query($sql, [$projectID, $start_date, $end_date, $settingsID]);

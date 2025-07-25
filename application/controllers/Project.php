@@ -437,25 +437,33 @@ if ($status === 'present' || $status === 'regular ho') {
             
         }
 
-        // Compute gross pay
-        $rate = floatval($row->rateAmount);
-        $gross = 0;
+       // Compute gross pay
+$rate = floatval($row->rateAmount);
+$gross = 0;
+$reg_pay = 0;
+$ot_pay = 0;
 
-        switch (strtolower($row->rateType)) {
-            case 'hour':
-                $gross = ($row->total_reg_hours + $row->total_ot_hours) * $rate;
-                break;
-            case 'day':
-                $gross = $row->present_days * $rate;
-                break;
-            case 'month':
-                $gross = ($row->present_days * $rate) / 26; // 26 working days/month default
-                break;
-        }
+switch (strtolower($row->rateType)) {
+    case 'hour':
+        $reg_pay = $row->total_reg_hours * $rate;
+        $ot_pay = $row->total_ot_hours * $rate;
+        break;
+    case 'day':
+        $hourly_rate = $rate / 8;
+        $reg_pay = $row->total_reg_hours * $hourly_rate;
+        $ot_pay = $row->total_ot_hours * $hourly_rate;
+        break;
+    case 'month':
+        $hourly_rate = $rate / 240;
+        $reg_pay = $row->total_reg_hours * $hourly_rate;
+        $ot_pay = $row->total_ot_hours * $hourly_rate;
+        break;
+}
 
-        $gross = round($gross, 2);
-        $row->gross = $gross;
-        $row->total_deduction =
+$gross = round($reg_pay + $ot_pay, 2);
+$row->gross = $gross;
+
+$row->total_deduction =
     floatval($row->sss) +
     floatval($row->philhealth) +
     floatval($row->pagibig) +
@@ -463,40 +471,40 @@ if ($status === 'present' || $status === 'regular ho') {
     floatval($row->loan) +
     floatval($row->other_deduction);
 
-        $row->take_home = $gross - $row->total_deduction;
+$row->take_home = $gross - $row->total_deduction;
 
-        // Save to payroll_summary (skip if duplicate exists)
-        $exists = $this->db->get_where('payroll_summary', [
-            'personnelID' => $pid,
-            'projectID' => $projectID,
-            'start_date' => $start,
-            'end_date' => $end,
-        ])->row();
+// Save to payroll_summary (skip if duplicate exists)
+$exists = $this->db->get_where('payroll_summary', [
+    'personnelID' => $pid,
+    'projectID' => $projectID,
+    'start_date' => $start,
+    'end_date' => $end,
+])->row();
 
-        if (!$exists) {
-            $batch[] = [
-                'personnelID' => $pid,
-                'projectID' => $projectID,
-                'settingsID' => $settingsID,
-                'start_date' => $start,
-                'end_date' => $end,
-                'reg_hours' => $row->total_reg_hours,
-                'ot_hours' => $row->total_ot_hours,
-               'reg_pay' => ($row->rateType == 'hour') ? $row->total_reg_hours * $rate : (($row->rateType == 'day') ? $row->present_days * $rate : (($row->rateType == 'month') ? (($row->present_days * $rate) / 26) : 0)),
-'ot_pay' => ($row->rateType == 'hour') ? $row->total_ot_hours * $rate : 0,
+if (!$exists) {
+    $batch[] = [
+        'personnelID' => $pid,
+        'projectID' => $projectID,
+        'settingsID' => $settingsID,
+        'start_date' => $start,
+        'end_date' => $end,
+        'reg_hours' => $row->total_reg_hours,
+        'ot_hours' => $row->total_ot_hours,
+        'reg_pay' => round($reg_pay, 2),
+        'ot_pay' => round($ot_pay, 2),
+        'gross_pay' => $gross,
+        'ca_deduction' => $row->ca_cashadvance,
+        'sss_deduction' => $row->sss,
+        'pagibig_deduction' => $row->pagibig,
+        'philhealth_deduction' => $row->philhealth,
+        'loan_deduction' => $row->loan,
+        'other_deduction' => $row->other_deduction,
+        'total_deduction' => $row->total_deduction,
+        'net_pay' => $row->take_home,
+        'created_at' => date('Y-m-d H:i:s')
+    ];
+}
 
-                'gross_pay' => $gross,
-                'ca_deduction' => $row->ca_cashadvance,
-                'sss_deduction' => $row->sss,
-                'pagibig_deduction' => $row->pagibig,
-                'philhealth_deduction' => $row->philhealth,
-                'loan_deduction' => $row->loan,
-                'other_deduction' => $row->other_deduction,
-                'total_deduction' => $row->total_deduction,
-                'net_pay' => $row->take_home,
-                'created_at' => date('Y-m-d H:i:s')
-            ];
-        }
     }
 
     if (!empty($batch)) {
