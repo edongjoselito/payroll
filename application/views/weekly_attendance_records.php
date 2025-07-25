@@ -99,6 +99,42 @@ td:first-child {
         <i class="mdi mdi-filter-variant"></i>View Attendance
     </button>
 </div>
+<button class="btn btn-info mt-2 shadow-sm" data-toggle="modal" data-target="#viewPayrollModal">
+    <i class="mdi mdi-eye"></i> View Monthly Payroll
+</button>
+<!-- View Payroll Modal -->
+<div class="modal fade" id="viewPayrollModal" tabindex="-1" role="dialog" aria-labelledby="viewPayrollModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <form method="post" action="<?= base_url('MonthlyPayroll/view_record') ?>">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewPayrollModalLabel">
+                        <i class="mdi mdi-calendar-month"></i> Select Month to View
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="view_payroll_month" class="font-weight-bold">Month</label>
+                        <select class="form-control" id="view_payroll_month" name="payroll_month" required>
+    <option value="">Select Month</option>
+    <?php foreach ($saved_months as $s_month): ?>
+        <option value="<?= $s_month ?>"><?= date('F Y', strtotime($s_month . '-01')) ?></option>
+    <?php endforeach; ?>
+</select>
+
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-info">View</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 <!-- Modal: View Attendance Records -->
 <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-md" role="document">

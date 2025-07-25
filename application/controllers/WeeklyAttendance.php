@@ -127,7 +127,8 @@ public function records()
             'project'       => $this->WeeklyAttendance_model->getProjectById($projectID)
         ];
     }
-
+$this->load->model('MonthlyPayroll_model');
+    $data['saved_months'] = $this->MonthlyPayroll_model->get_saved_months();
     $this->load->view('weekly_attendance_records', $data);
 }
 

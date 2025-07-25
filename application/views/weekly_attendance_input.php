@@ -110,11 +110,10 @@ input.is-invalid {
                               <button class="btn btn-info mt-2 shadow-sm" data-toggle="modal"
                                    data-target="#generateModal">
                                    <i class="mdi mdi-calendar-search"></i> Generate Attendance
-          
-
-
                          </div>
-
+<button class="btn btn-primary mt-2 shadow-sm" data-toggle="modal" data-target="#monthlyPayrollModal">
+    <i class="mdi mdi-calendar-month"></i> Generate Monthly Payroll
+</button>
                          <?php if ($this->session->flashdata('msg')): ?>
 
                          <div class="alert alert-success alert-dismissible fade show">
@@ -127,6 +126,34 @@ input.is-invalid {
 
                          <div class="card">
                               <div class="card-body">
+<!-- Modal: Select Month for Monthly Payroll -->
+<div class="modal fade" id="monthlyPayrollModal" tabindex="-1" role="dialog" aria-labelledby="monthlyPayrollModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <form method="post" action="<?= base_url('MonthlyPayroll/generate') ?>">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="monthlyPayrollModalLabel">
+                        <i class="mdi mdi-calendar-month"></i> Select Month
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span>&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="payroll_month" class="font-weight-bold">Month</label>
+                        <input type="month" class="form-control" id="payroll_month" name="payroll_month"
+                            value="<?= date('Y-m'); ?>" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Proceed</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 
                                    <!-- Modal: Generate Attendance -->
                                    <div class="modal fade" id="generateModal" tabindex="-1" role="dialog"
