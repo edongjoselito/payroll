@@ -44,13 +44,22 @@ if ($hasSpecialHoliday) $amountColspan++;
     <title>PMS - Payroll Report</title>
     <?php include('includes/head.php'); ?>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <style>
-body {
-  font-family: 'Calibri', 'Arial', sans-serif;
-  font-size: 13px;
-  margin: 20px;
+ <style>
+body, html {
+   font-family: 'Segoe UI', 'Calibri', 'Arial', sans-serif;
+  font-size: 14px;
+  margin: 0;
+  padding: 0;
   color: #000;
   background: #fff;
+  height: 100%;
+}
+
+.print-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  justify-content: space-between;
 }
 
 .header {
@@ -71,24 +80,25 @@ body {
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 th, td {
   border: 1px solid #000;
-  padding: 6px 8px;
+  padding: 8px 10px;
   text-align: center;
   vertical-align: middle;
 }
 
 thead th {
   padding: 4px 6px !important;
-  font-size: 14px !important;
+  font-size: 15px !important;
   line-height: 1.2;
   vertical-align: middle !important;
   text-align: center;
   font-weight: 600;
 }
+
 .badge-warning {
   background-color: #ffc107;
   color: #000;
@@ -99,7 +109,7 @@ thead th {
 
 tbody td {
   padding: 4px 6px;
-  font-size: 11.5px;
+  font-size: 13px;
   line-height: 1.2;
   vertical-align: middle;
   text-align: center;
@@ -109,19 +119,11 @@ tbody td:nth-child(2) {
   text-align: left;
 }
 
-.signature strong {
-  font-size: 13px;
-}
-.hide-col {
-  visibility: visible !important;
-}
 td.unused-holiday {
   background-color: #f9f9f9;
   color: #aaa;
   font-style: italic;
 }
-
-
 
 .holiday-cell {
   background-color: #ffe5e5 !important;
@@ -141,6 +143,7 @@ tbody td:nth-last-child(-n+10) {
   justify-content: space-between;
   font-size: 12px;
   page-break-inside: avoid;
+  break-inside: avoid;
 }
 
 .signature div {
@@ -162,7 +165,7 @@ tbody td:nth-last-child(-n+10) {
 }
 
 .signature em {
-  font-size: 13px;
+  font-size: 14px;
   color: #333;
 }
 
@@ -179,29 +182,10 @@ th {
 .scrollable-wrapper {
   overflow-x: auto;
   width: 100%;
+  flex-grow: 1;
 }
 
-/* Payslip Modal Styling */
-.modal-content {
-  background: #fff;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-  color: #000;
-  font-family: Arial, sans-serif;
-}
-
-.modal-header {
-  background: #fff !important;
-  color: #000 !important;
-  border-bottom: 1px solid #ddd;
-}
-
-.modal-body h6 {
-  font-weight: bold;
-  border-bottom: 1px solid #ccc;
-  padding-bottom: 4px;
-  margin-bottom: 10px;
-}
+/* Header info box */
 .header-box {
   display: flex;
   justify-content: space-between;
@@ -249,44 +233,75 @@ th {
   margin-top: 4px;
 }
 
+/* Payslip Modal Styling */
+.modal-content {
+  background: #fff;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  color: #000;
+  font-family: Arial, sans-serif;
+}
+
+.modal-header {
+  background: #fff !important;
+  color: #000 !important;
+  border-bottom: 1px solid #ddd;
+}
+
+.modal-body h6 {
+  font-weight: bold;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 4px;
+  margin-bottom: 10px;
+}
+
 /* === PRINT FIXES === */
 @media print {
-  body {
-    transform: scale(0.75);
-    transform-origin: top left;
-    margin: 0;
-    font-size: 10px;
-    overflow: visible !important;
+  html, body {
+    height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 10px !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    overflow: visible !important;
   }
 
   @page {
     size: A4 landscape;
-    margin: 0.5cm;
+    margin: 1cm;
+  }
+
+  .print-container {
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 100vh !important;
+    justify-content: space-between !important;
+  }
+
+  .scrollable-wrapper {
+    overflow: visible !important;
+    flex-grow: 1 !important;
   }
 
   .btn, .modal, .no-print, .modal-backdrop {
     display: none !important;
   }
 
-  .scrollable-wrapper {
-    overflow: visible !important;
-  }
-
   .payroll-table {
     width: 100% !important;
-    table-layout: auto !important;
-    font-size: 9px;
+    table-layout: fixed !important;
+    font-size: 10px !important;
+    word-wrap: break-word !important;
   }
 
   .payroll-table th,
   .payroll-table td {
-    word-wrap: break-word;
-    padding: 2px !important;
-    font-size: 9px !important;
+    padding: 4px !important;
+    font-size: 10px !important;
     page-break-inside: avoid !important;
     break-inside: avoid;
+    word-break: break-word;
   }
 
   .payroll-table th:first-child,
@@ -304,17 +319,11 @@ th {
     page-break-inside: avoid !important;
   }
 
-  .header, .signature {
-    page-break-inside: avoid;
-  }
-
   .signature {
-    margin-top: 100px;
-    padding-top: 50px;
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    page-break-inside: avoid;
+    margin-top: auto !important;
+    padding-top: 40px;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
   }
 
   .signature div {
@@ -322,9 +331,8 @@ th {
     text-align: center;
   }
 
-  /* Print only the modal for payslip, half-page layout */
   .modal-content, .modal-content * {
-    visibility: visible;
+    visibility: visible !important;
   }
 
   .modal-content {
@@ -337,14 +345,13 @@ th {
     padding: 20px;
     box-sizing: border-box;
   }
-
-
 }
 </style>
 
+
 </head>
 <body>
-  
+  <class="print-container">
 <div class="header-box">
   <div class="box-content">
     <div class="info-row">
@@ -888,8 +895,8 @@ $netPay = $salary - $total_deduction;
   </div>
 </div>
 <?php endif; ?>
-
-
+</div>
+</div>
 <script>
 function printPayslip(elementId) {
     var printContents = document.getElementById(elementId).innerHTML;
