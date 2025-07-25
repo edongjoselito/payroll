@@ -1,121 +1,208 @@
 <!DOCTYPE html>
 <html lang="en">
-<title>PMS - Monthly Attendance & Payroll</title>
+<title>PMS - Monthly Attendance</title>
+
 <?php include('includes/head.php'); ?>
 
-<body>
-<link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.css">
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.css">
-<link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/buttons.bootstrap4.min.css">
+<link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.css">
+<link rel="stylesheet" href="<?= base_url(); ?>assets/libs/select2/select2.min.css">
 
+<style>
+thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8f9fa;
+    z-index: 2;
+    text-align: center;
+}
+th, td {
+    vertical-align: middle !important;
+    text-align: center;
+    font-size: 14px;
+}
+td:first-child, th:first-child {
+    text-align: left;
+    background: #f8f9fa;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.05);
+}
+.attendance-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+.attendance-select, .hours-input {
+    width: 90px;
+    height: 30px;
+    font-size: 13px;
+    padding: 2px 6px;
+    text-align: center;
+}
+</style>
+
+<body>
 <div id="wrapper">
     <?php include('includes/top-nav-bar.php'); ?>
     <?php include('includes/sidebar.php'); ?>
 
     <div class="content-page">
-        <div class="content">
-            <div class="container-fluid">
+        <div class="content container-fluid">
+            <h4 class="page-title mt-2">Monthly Attendance</h4>
 
-                <div class="page-title-box d-flex justify-content-between align-items-center">
-                    <h4 class="page-title">Monthly Attendance & Payroll</h4>
-                    <form method="get" class="form-inline">
-                        <input type="month" name="month" value="<?= $month ?>" class="form-control mr-2" />
-                        <button type="submit" class="btn btn-primary">Generate</button>
+            <!-- Month Picker Modal -->
+            <button class="btn btn-info shadow-sm mb-3" data-toggle="modal" data-target="#generateModal">
+                <i class="mdi mdi-calendar-search"></i> Generate Monthly Attendance
+            </button>
+
+            <div class="modal fade" id="generateModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+                    <form method="get" action="<?= base_url('Monthly') ?>">
+                        <div class="modal-content border-0 shadow-sm">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="mdi mdi-calendar-month"></i> Select Month</h5>
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            </div>
+                            <div class="modal-body">
+                                <label>Select Month:</label>
+                                <input type="month" name="month" class="form-control" value="<?= $month ?>" required>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-primary">Generate</button>
+                            </div>
+                        </div>
                     </form>
                 </div>
-
-                <?php if ($this->session->flashdata('success')): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <?= $this->session->flashdata('success') ?>
-                        <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    </div>
-                <?php elseif ($this->session->flashdata('error')): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <?= $this->session->flashdata('error') ?>
-                        <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    </div>
-                <?php endif; ?>
-
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="page-title">Payroll Summary for <?= date('F Y', strtotime($month)) ?></h5>
-
-                        <div class="table-responsive">
-                            <table id="datatable" class="table table-bordered table-striped dt-responsive nowrap" style="width:100%">
-                                <thead class="thead-light">
-                                    <tr>
-                                        <th>#</th>
-                                        <th>Personnel</th>
-                                        <th>Days Present</th>
-                                        <th>Total Salary (₱)</th>
-                                        <th>Action</th>
-                                    </tr>
-                                </thead>
-                           <tbody>
-<?php if (empty($salaries)): ?>
-    <tr><td colspan="5" class="text-center">No attendance records found.</td></tr>
-<?php else: ?>
-    <?php $i = 1; foreach ($salaries as $index => $row): ?>
-        <tr>
-            <td><?= $i++ ?></td>
-            <td><?= $row->fullname ?></td>
-            <td><?= $row->present_days ?></td>
-            <td>₱<?= number_format($row->total_salary, 2) ?></td>
-            <td>
-                <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#payslipModal<?= $index ?>">
-                    Payslip
-                </button>
-            </td>
-        </tr>
-
-        <!-- Modal per personnel -->
-        <div class="modal fade" id="payslipModal<?= $index ?>" tabindex="-1" role="dialog">
-          <div class="modal-dialog modal-dialog-centered modal-md" role="document">
-            <div class="modal-content">
-              <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Payslip - <?= $row->fullname ?></h5>
-                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
-              </div>
-           <div class="modal-body">
-    <p><strong>Total Days Worked:</strong> <?= $row->present_days ?></p>
-    <p><strong>Total Hours Worked:</strong> <?= $row->total_hours ?></p>
-    <p><strong>Rate per Hour:</strong> ₱<?= number_format($row->per_hour, 2) ?></p>
-    <hr>
-    <p><strong>1st Cutoff (1–15):</strong> ₱<?= number_format($row->first_half, 2) ?></p>
-    <p><strong>2nd Cutoff (16–<?= date('t', strtotime($month)) ?>):</strong> ₱<?= number_format($row->second_half, 2) ?></p>
-    <hr>
-    <h5><strong>Total Salary:</strong> ₱<?= number_format($row->total_salary, 2) ?></h5>
-</div>
-
-              <div class="modal-footer">
-                <button class="btn btn-secondary" data-dismiss="modal">Close</button>
-              </div>
             </div>
-          </div>
-        </div>
-    <?php endforeach; ?>
-<?php endif; ?>
-</tbody>
 
-                            </table>
-                        </div>
-                    </div>
+            <?php if (!empty($personnel)): ?>
+            <form method="post" action="<?= base_url('Monthly/save') ?>" onsubmit="return validateAttendanceForm();">
+                <input type="hidden" name="month" value="<?= $month ?>">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover table-striped nowrap" id="attendanceTable">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>Personnel</th>
+                                <?php
+                                $daysInMonth = date('t', strtotime($month . '-01'));
+                                for ($d = 1; $d <= $daysInMonth; $d++):
+                                    $date = $month . '-' . str_pad($d, 2, '0', STR_PAD_LEFT);
+                                ?>
+                                <th><?= date('M d', strtotime($date)) ?><br><small>Status / Hours</small></th>
+                                <?php endfor; ?>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($personnel as $emp): ?>
+                            <tr>
+                                <td><?= $emp->last_name . ', ' . $emp->first_name ?></td>
+                                <?php for ($d = 1; $d <= $daysInMonth; $d++):
+                                    $date = $month . '-' . str_pad($d, 2, '0', STR_PAD_LEFT);
+                                ?>
+                                <td class="text-center align-middle">
+                                    <div class="attendance-box">
+                                        <select name="attendance_status[<?= $emp->personnelID ?>][<?= $date ?>]" class="form-control attendance-select" onchange="handleAttendanceChange(this)">
+                                            <option value="Present">Present</option>
+                                            <option value="Absent">Absent</option>
+                                            <option value="Day Off">Day Off</option>
+                                            <option value="Regular Holiday">Regular Holiday</option>
+                                            <option value="Special Non-Working Holiday">Special Holiday</option>
+                                        </select>
+                                        <input type="number" name="regular_hours[<?= $emp->personnelID ?>][<?= $date ?>]" class="form-control hours-input" min="0" max="8" step="0.25" placeholder="Reg Hrs">
+                                        <input type="number" name="overtime_hours[<?= $emp->personnelID ?>][<?= $date ?>]" class="form-control hours-input mt-1" min="0" max="8" step="0.25" placeholder="OT Hrs">
+                                    </div>
+                                </td>
+                                <?php endfor; ?>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
-
-            </div>
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="submit" class="btn btn-success shadow-sm px-4">
+                        <i class="mdi mdi-content-save"></i> Save Attendance
+                    </button>
+                </div>
+            </form>
+            <?php else: ?>
+                <div class="alert alert-info mt-3">Please select a month to display personnel attendance input.</div>
+            <?php endif; ?>
         </div>
-        <?php include('includes/footer.php'); ?>
     </div>
+
+    <?php include('includes/footer.php'); ?>
 </div>
 
-<!-- DataTable Scripts -->
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
-<script src="<?= base_url(); ?>assets/libs/datatables/jquery.dataTables.min.js"></script>
-<script src="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.js"></script>
-<script src="<?= base_url(); ?>assets/libs/datatables/dataTables.responsive.min.js"></script>
-<script src="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.js"></script>
-<script src="<?= base_url(); ?>assets/js/pages/datatables.init.js"></script>
-<script src="<?= base_url(); ?>assets/js/app.min.js"></script>
+<script src="<?= base_url(); ?>assets/libs/select2/select2.min.js"></script>
+<script>
+$(document).ready(function () {
+    $('.attendance-select').select2({ width: '100%', minimumResultsForSearch: Infinity });
+});
 
+// Attendance logic
+function handleAttendanceChange(select) {
+    const container = select.closest('.attendance-box');
+    const reg = container.querySelector('input[name^="regular_hours"]');
+    const ot = container.querySelector('input[name^="overtime_hours"]');
+    const val = select.value;
+
+    reg.disabled = false;
+    ot.disabled = false;
+
+    if (val === 'Absent' || val === 'Day Off') {
+        reg.disabled = true; reg.value = '';
+        ot.disabled = true; ot.value = '';
+    } else if (val === 'Regular Holiday' || val === 'Special Non-Working Holiday') {
+        reg.max = 16; reg.value = '0';
+        ot.value = '';
+    } else {
+        reg.max = 8;
+    }
+}
+
+function validateAttendanceForm() {
+    let valid = true;
+    document.querySelectorAll('.attendance-box').forEach(box => {
+        const reg = box.querySelector('input[name^="regular_hours"]');
+        const ot = box.querySelector('input[name^="overtime_hours"]');
+        if (reg && !reg.disabled && (reg.value < 0 || reg.value > parseFloat(reg.max))) {
+            alert('Invalid Regular Hours'); reg.focus(); valid = false;
+        }
+        if (ot && !ot.disabled && (ot.value < 0 || ot.value > parseFloat(ot.max))) {
+            alert('Invalid OT Hours'); ot.focus(); valid = false;
+        }
+    });
+    return valid;
+}
+</script>
+<script>
+    // Autofill all attendance rows on page load
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.attendance-box').forEach(box => {
+        const select = box.querySelector('select');
+        const regInput = box.querySelector('input[name^="regular_hours"]');
+        const otInput = box.querySelector('input[name^="overtime_hours"]');
+
+        // Autofill
+        if (select) select.value = 'Present';
+        if (regInput) {
+            regInput.value = '8';
+            regInput.disabled = false;
+        }
+        if (otInput) {
+            otInput.value = '0';
+            otInput.disabled = false;
+        }
+    });
+
+    // Trigger change to apply logic for status (in case you add conditions later)
+    $('.attendance-select').trigger('change.select2');
+});
+
+</script>
 </body>
 </html>

@@ -110,7 +110,10 @@ input.is-invalid {
                               <button class="btn btn-info mt-2 shadow-sm" data-toggle="modal"
                                    data-target="#generateModal">
                                    <i class="mdi mdi-calendar-search"></i> Generate Attendance
-          
+          <!-- Monthly Generate -->
+<button class="btn btn-success mt-2 shadow-sm ml-2" data-toggle="modal" data-target="#generateMonthlyModal">
+    <i class="mdi mdi-calendar-range"></i> Generate Monthly Attendance
+</button>
 
 
                          </div>
@@ -404,6 +407,37 @@ foreach ($employees as $emp): ?>
                     </div>
                </div>
                <?php endif; ?>
+               <!-- Modal: Generate Monthly Attendance -->
+<div class="modal fade" id="generateMonthlyModal" tabindex="-1" role="dialog" aria-labelledby="generateMonthlyLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <form method="get" action="<?= base_url('Monthly'); ?>">
+            <div class="modal-content border-0 shadow-sm">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="generateMonthlyLabel">
+                        <i class="mdi mdi-calendar-range"></i>Monthly Attendance
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span>&times;</span>
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <label for="month" class="font-weight-bold">Select Month:</label>
+                    <input type="month" name="month" id="month" class="form-control" required value="<?= date('Y-m'); ?>">
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">
+                        <i class="mdi mdi-check"></i> Generate
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
 <?php if ($this->session->flashdata('attendance_success')): 
   $success = $this->session->flashdata('attendance_success');
   $fromFormatted = date("F d, Y", strtotime($success['from']));
@@ -440,6 +474,7 @@ foreach ($employees as $emp): ?>
     </div>
   </div>
 </div>
+
 <?php endif; ?>
 
                <?php include('includes/footer.php'); ?>

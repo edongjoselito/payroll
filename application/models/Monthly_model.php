@@ -1,141 +1,83 @@
 <?php
 class Monthly_model extends CI_Model {
 
-    // Get attendance records for a given month for office-based personnel
-public function getMonthlyAttendance($month)
-{
-    $start = $month . '-01';
-    $end = date("Y-m-t", strtotime($start));
-    $settingsID = $this->session->userdata('settingsID');
-
-    $this->db->select("p.personnelID, CONCAT(p.first_name, ' ', COALESCE(p.middle_name, ''), ' ', p.last_name, ' ', COALESCE(p.name_ext, '')) AS fullname");
-    $this->db->from('personnelattendance a');
-    $this->db->join('personnel p', 'p.personnelID = a.personnelID');
-    $this->db->where("a.attendance_date BETWEEN '$start' AND '$end'");
-    $this->db->where('p.settingsID', $settingsID);
-    $this->db->group_by('p.personnelID'); // ✅ This line removes duplicates
-    return $this->db->get()->result();
-}
-
-
-    // Calculate salaries for office-based personnel based on rateType
-public function calculateMonthlySalary($month)
-{
-    $settingsID = $this->session->userdata('settingsID');
-
-    $firstCutoffStart = $month . '-01';
-    $firstCutoffEnd = $month . '-15';
-    $secondCutoffStart = $month . '-16';
-    $secondCutoffEnd = date("Y-m-t", strtotime($month . '-01'));
-
-    // Get personnel with monthly rate
-    $this->db->select('personnelID, first_name, middle_name, last_name, name_ext, rateAmount');
-    $this->db->from('personnel');
-    $this->db->where('settingsID', $settingsID);
-    $this->db->where('rateType', 'Month');
-    $personnelList = $this->db->get()->result();
-
-    $salaries = [];
-
-    foreach ($personnelList as $person) {
-        // Get attendance records for the month
-        $this->db->select('attendance_date, attendance_status, workDuration');
-        $this->db->from('personnelattendance');
-        $this->db->where('personnelID', $person->personnelID);
-        $this->db->where("attendance_date BETWEEN '$firstCutoffStart' AND '$secondCutoffEnd'");
-        $attendanceRecords = $this->db->get()->result();
-
-        $firstHours = 0;
-        $secondHours = 0;
-
-        foreach ($attendanceRecords as $record) {
-            $recordDate = $record->attendance_date;
-
-            if ($record->attendance_status === 'Present') {
-                $hours = floatval($record->workDuration);
-            } elseif ($record->attendance_status === 'Half-Day') {
-                $hours = 4;
-            } else {
-                continue;
-            }
-
-            if ($recordDate >= $firstCutoffStart && $recordDate <= $firstCutoffEnd) {
-                $firstHours += $hours;
-            } elseif ($recordDate >= $secondCutoffStart && $recordDate <= $secondCutoffEnd) {
-                $secondHours += $hours;
-            }
-        }
-
-        $perHourRate = $person->rateAmount / (30 * 8); // 240 hours in a month
-        $firstSalary = $perHourRate * $firstHours;
-        $secondSalary = $perHourRate * $secondHours;
-        $totalSalary = $firstSalary + $secondSalary;
-
-        $salaries[] = (object)[
-            'fullname'       => trim("{$person->first_name} {$person->middle_name} {$person->last_name} {$person->name_ext}"),
-            'present_days'   => round(($firstHours + $secondHours) / 8, 2),
-            'total_hours'    => $firstHours + $secondHours,
-            'first_hours'    => $firstHours,
-            'second_hours'   => $secondHours,
-            'per_hour'       => $perHourRate,
-            'first_half'     => $firstSalary,
-            'second_half'    => $secondSalary,
-            'total_salary'   => $totalSalary
-        ];
+    public function get_personnel($settingsID) {
+        return $this->db->get_where('personnel', ['settingsID' => $settingsID])->result();
     }
 
-    return $salaries;
-}
-
-
-
-
-public function getOfficePersonnel()
-{
-    $settingsID = $this->session->userdata('settingsID'); // filter by company/tenant
-    $this->db->select('*');
-    $this->db->from('personnel');
-    $this->db->where('settingsID', $settingsID); 
-    $this->db->where('rateType', 'Month'); // ✅ Only include monthly paid personnel
-    return $this->db->get()->result();
-}
-
-
-public function getAttendanceByDate($date)
-{
+    public function save_monthly_attendance($post) {
+    $attendance_status = $post['attendance_status'];
+    $regular_hours = $post['regular_hours'];
+    $overtime_hours = $post['overtime_hours'];
     $settingsID = $this->session->userdata('settingsID');
+    $encoder = $this->session->userdata('username'); // or IDNumber
 
-    $this->db->select('a.*, p.first_name, p.middle_name, p.last_name, p.name_ext');
-    $this->db->from('personnelattendance a');
-    $this->db->join('personnel p', 'p.personnelID = a.personnelID');
-    $this->db->where('a.attendance_date', $date);
-    $this->db->where('p.settingsID', $settingsID);
-    return $this->db->get()->result_array();
+    foreach ($attendance_status as $personnelID => $days) {
+        foreach ($days as $date => $status) {
+            $regHours = $regular_hours[$personnelID][$date] ?? 0;
+            $otHours = $overtime_hours[$personnelID][$date] ?? 0;
+
+            $data = [
+                'personnelID' => $personnelID,
+                'date' => $date,
+                'status' => $status,
+                'regular_hours' => $regHours,
+                'overtime_hours' => $otHours,
+                'settingsID' => $settingsID,
+                'encoded_by' => $encoder
+            ];
+
+            $this->db->replace('monthly', $data);
+        }
+    }
 }
-public function getPresentAttendanceByDate($date)
+public function get_all_personnel($settingsID)
 {
-    $settingsID = $this->session->userdata('settingsID');
-
-    $this->db->select('a.*, p.first_name, p.middle_name, p.last_name, p.name_ext');
-    $this->db->from('personnelattendance a');
-    $this->db->join('personnel p', 'p.personnelID = a.personnelID');
-    $this->db->where('a.attendance_date', $date);
-    $this->db->where('a.attendance_status', 'Present');
-    $this->db->where('p.settingsID', $settingsID);
-    return $this->db->get()->result();
+    return $this->db->where('settingsID', $settingsID)
+                    ->order_by('last_name', 'asc')
+                    ->get('personnel')->result();
 }
-public function getPresentPersonnelByDate($date)
+
+public function get_monthly_records($month, $settingsID)
 {
-    $settingsID = $this->session->userdata('settingsID');
+    $this->db->select('personnelID, date, status, regular_hours, overtime_hours');
+    $this->db->where('DATE_FORMAT(date, "%Y-%m") =', $month);  // ✅ add '=' here
+    $this->db->where('settingsID', $settingsID);
+    $query = $this->db->get('monthly');
 
-    $this->db->select('a.*, p.first_name, p.middle_name, p.last_name, p.name_ext');
-    $this->db->from('personnelattendance a');
-    $this->db->join('personnel p', 'p.personnelID = a.personnelID');
-    $this->db->where('a.attendance_date', $date);
-    $this->db->where('a.attendance_status', 'Present');
-    $this->db->where('p.settingsID', $settingsID);
-    return $this->db->get()->result();
+    $result = [];
+    foreach ($query->result() as $row) {
+        $day = date('j', strtotime($row->date)); // 1–31
+        $result[$row->personnelID][$day] = [
+            'status' => $row->status,
+            'reg' => $row->regular_hours,
+            'ot' => $row->overtime_hours
+        ];
+    }
+    return $result;
 }
+// 🔁 Update one attendance record
+    public function updateAttendance($personnelID, $date, $data)
+    {
+        $updateData = [
+            'status' => $data['status'],
+            'regular_hours' => $data['reg'],
+            'holiday_hours' => $data['holiday'],
+            'overtime_hours' => $data['ot'],
+            'encoded_by' => $this->session->userdata('username') ?? 'system',
+            'encoded_at' => date('Y-m-d H:i:s'),
+        ];
 
+        $this->db->where('personnelID', $personnelID);
+        $this->db->where('date', $date);
+        return $this->db->update('monthly', $updateData);
+    }
+
+    // ❌ Delete records by full month
+    public function deleteMonth($month)
+    {
+        $this->db->like('date', $month, 'after'); // e.g., '2025-07'
+        return $this->db->delete('monthly');
+    }
 
 }

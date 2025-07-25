@@ -98,6 +98,30 @@ td:first-child {
     <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#filterModal">
         <i class="mdi mdi-filter-variant"></i>View Attendance
     </button>
+    <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#monthlyModal">
+    <i class="mdi mdi-calendar-month"></i> View Monthly Attendance
+</button>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="monthlyModal" tabindex="-1" role="dialog" aria-labelledby="monthlyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered" role="document">
+    <form action="<?= base_url('Monthly/records') ?>" method="get" target="_blank">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="monthlyModalLabel">Select Month</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span>&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="month" name="month" class="form-control" value="<?= date('Y-m') ?>" required>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-info">View</button>
+        </div>
+      </div>
+    </form>
+  </div>
 </div>
 <!-- Modal: View Attendance Records -->
 <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
