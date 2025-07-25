@@ -754,6 +754,9 @@ public function view_payroll_summary_batches()
     $settingsID = $this->session->userdata('settingsID');
     $projectID = $this->input->get('project_id');
 
+    // 👇 Fetch projects only for the logged-in company (for the modal dropdown)
+    $data['projects'] = $this->Project_model->get_projects_by_settings($settingsID);
+
     // Get either all summary batches or specific project
     if ($projectID) {
         $batches = $this->Project_model->get_summary_batches_by_project($projectID, $settingsID);
@@ -789,6 +792,7 @@ public function view_payroll_summary_batches()
 
     $this->load->view('payroll_summary_batches', $data);
 }
+
 
 
 

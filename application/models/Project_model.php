@@ -684,6 +684,14 @@ public function get_total_netpay_for_summary($projectID, $start_date, $end_date,
     $query = $this->db->get();
     return $query->row()->net_pay ?? 0;
 }
+public function get_projects_by_settings($settingsID)
+{
+    return $this->db
+        ->where('settingsID', $settingsID)
+        ->order_by('projectTitle', 'ASC')
+        ->get('project')
+        ->result();
+}
 
 
 public function delete_summary_batch($projectID, $start_date, $end_date, $settingsID)
