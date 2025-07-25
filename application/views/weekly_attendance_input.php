@@ -110,10 +110,7 @@ input.is-invalid {
                               <button class="btn btn-info mt-2 shadow-sm" data-toggle="modal"
                                    data-target="#generateModal">
                                    <i class="mdi mdi-calendar-search"></i> Generate Attendance
-          <!-- Monthly Generate -->
-<button class="btn btn-success mt-2 shadow-sm ml-2" data-toggle="modal" data-target="#generateMonthlyModal">
-    <i class="mdi mdi-calendar-range"></i> Generate Monthly Attendance
-</button>
+          
 
 
                          </div>
@@ -407,37 +404,6 @@ foreach ($employees as $emp): ?>
                     </div>
                </div>
                <?php endif; ?>
-               <!-- Modal: Generate Monthly Attendance -->
-<div class="modal fade" id="generateMonthlyModal" tabindex="-1" role="dialog" aria-labelledby="generateMonthlyLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
-        <form method="get" action="<?= base_url('Monthly'); ?>">
-            <div class="modal-content border-0 shadow-sm">
-                <div class="modal-header bg-success text-white">
-                    <h5 class="modal-title" id="generateMonthlyLabel">
-                        <i class="mdi mdi-calendar-range"></i>Monthly Attendance
-                    </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span>&times;</span>
-                    </button>
-                </div>
-
-                <div class="modal-body">
-                    <label for="month" class="font-weight-bold">Select Month:</label>
-                    <input type="month" name="month" id="month" class="form-control" required value="<?= date('Y-m'); ?>">
-
-                </div>
-
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">
-                        <i class="mdi mdi-check"></i> Generate
-                    </button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </form>
-    </div>
-</div>
-
 <?php if ($this->session->flashdata('attendance_success')): 
   $success = $this->session->flashdata('attendance_success');
   $fromFormatted = date("F d, Y", strtotime($success['from']));
@@ -474,7 +440,6 @@ foreach ($employees as $emp): ?>
     </div>
   </div>
 </div>
-
 <?php endif; ?>
 
                <?php include('includes/footer.php'); ?>
@@ -575,60 +540,40 @@ $('#attendanceSavedModal').modal('show');
 // 6. Adjust max hours based on attendance type
 function handleAttendanceChange(select) {
     const container = select.closest('.attendance-box');
-    const regularHoursInput = container.querySelector('input[name^="regular_hours"]');
-    const overtimeHoursInput = container.querySelector('input[name^="overtime_hours"]');
+    const hoursInput = container.querySelector('.hours-input');
     const value = select.value;
 
-    regularHoursInput.disabled = false;
-    overtimeHoursInput.disabled = false;
+    hoursInput.disabled = false;
+    hoursInput.value = "";
 
     if (value === 'Absent' || value === 'Day Off') {
-        regularHoursInput.disabled = true;
-        regularHoursInput.value = '';
-        overtimeHoursInput.disabled = true;
-        overtimeHoursInput.value = '';
-    } else if (value === 'Regular Holiday' || value === 'Special Non-Working Holiday') {
-        regularHoursInput.max = 16;
-        regularHoursInput.value = '0';  // Optional: pre-fill 0
-        overtimeHoursInput.value = '';
+        hoursInput.disabled = true;
+        hoursInput.value = '';
+    } else if (value === 'Regular Holiday') {
+        hoursInput.max = 16;
     } else {
-        regularHoursInput.max = 8;
+        hoursInput.max = 8;
     }
 }
 
 
+// 7. Optional validation to check if hours exceed max
 function validateAttendanceForm() {
     let isValid = true;
-
     document.querySelectorAll('.attendance-box').forEach(box => {
         const select = box.querySelector('.attendance-select');
-        const regularHoursInput = box.querySelector('input[name^="regular_hours"]');
-        const overtimeHoursInput = box.querySelector('input[name^="overtime_hours"]');
+       const regularHoursInput = box.querySelector('input[name^="regular_hours"]');
+const overtimeHoursInput = box.querySelector('input[name^="overtime_hours"]');
 
-        if (regularHoursInput && !regularHoursInput.disabled) {
-            const regVal = parseFloat(regularHoursInput.value || 0);
-            const regMax = parseFloat(regularHoursInput.max || 8);
-            if (regVal < 0 || regVal > regMax) {
-                alert(`⚠ Regular hours for "${select.value}" must be between 0 and ${regMax}.`);
-                regularHoursInput.focus();
-                isValid = false;
-            }
-        }
 
-        if (overtimeHoursInput && !overtimeHoursInput.disabled) {
-            const otVal = parseFloat(overtimeHoursInput.value || 0);
-            const otMax = parseFloat(overtimeHoursInput.max || 8);
-            if (otVal < 0 || otVal > otMax) {
-                alert(`⚠ Overtime hours for "${select.value}" must be between 0 and ${otMax}.`);
-                overtimeHoursInput.focus();
-                isValid = false;
-            }
+        if (!hours.disabled && parseFloat(hours.value || 0) > parseFloat(hours.max)) {
+            alert(`Exceeds max hours for ${select.value}. Max allowed: ${hours.max}`);
+            hours.focus();
+            isValid = false;
         }
     });
-
     return isValid;
 }
-
 </script>
 
 
