@@ -89,20 +89,15 @@
     </a>
      <ul class="nav-second-level nav" aria-expanded="false">
         <li><a href="<?= base_url('OtherDeduction/summary') ?>">Deduction Summary</a></li>
- <li><a href="<?= base_url('OtherDeduction/summary') ?>">Loan Summary</a></li>    </ul>
-</li>
+<li><a href="<?= base_url('OtherDeduction/loan_summary') ?>"></i> Loan Summary</a></li>
 
+     </ul>
 <li>
     <a href="<?= base_url(); ?>User" class="waves-effect">
         <i class="fas fa-user-cog"></i>
         <span> Manage Users </span>
     </a>
 </li>
-
-
-
-
-
 <li>
     <a href="<?= base_url('Company') ?>" class="waves-effect">
         <i class="fas fa-building"></i>

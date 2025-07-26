@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<title>PMS - Deduction Summary</title>
+<title>PMS - Loan Summary</title>
 
 <?php include('includes/head.php'); ?>
 
@@ -18,7 +18,7 @@
 <div class="container-fluid">
 
     <div class="page-title-box d-flex justify-content-between align-items-center">
-        <h4 class="page-title">Deduction Summary</h4>
+        <h4 class="page-title">Loan Summary</h4>
     </div>
 
     <?php if ($this->session->flashdata('success')): ?>
@@ -33,82 +33,50 @@
         </div>
     <?php endif; ?>
 
-    <?php
-    $has_ca = false;
-    $has_gd = false;
-    foreach ($summary as $row) {
-        if (!empty($row->ca_amount) && $row->ca_amount > 0) $has_ca = true;
-        if (!empty($row->gd_amount) && $row->gd_amount > 0) $has_gd = true;
-    }
-    ?>
-
     <div class="card">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
-            <span><strong>All Record of Deductions</strong></span>
-            <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle="collapse" data-target="#deductionTable" aria-expanded="true">
+            <span><strong>All Record of Loans</strong></span>
+            <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle="collapse" data-target="#loanTable" aria-expanded="true">
                 Hide / View Table
             </button>
         </div>
-        <div class="collapse show" id="deductionTable">
+        <div class="collapse show" id="loanTable">
             <div class="card-body">
                 <div class="table-responsive">
                     <table id="datatable" class="table table-bordered table-hover dt-responsive nowrap" style="width:100%">
                         <thead class="thead-light">
                             <tr>
                                 <th>Personnel Name</th>
-                                <?php if ($has_ca): ?>
-                                    <th>Cash Advance Desc</th>
-                                    <th>CA Amount</th>
-                                    <th>CA Date</th>
-                                <?php endif; ?>
-                                <?php if ($has_gd): ?>
-                                    <th>Gov't Deduction Desc</th>
-                                    <th>GD Amount</th>
-                                    <th>GD Date</th>
-                                <?php endif; ?>
+                                <th>Loan Description</th>
+                                <th>Monthly Deduction</th>
+                                <th>Loan Amount</th>
+                                
                             </tr>
                         </thead>
                         <tbody>
                             <?php 
-                            $total_ca = 0;
-                            $total_gd = 0;
+                            $total_amount = 0;
+                            $total_monthly = 0;
                             foreach ($summary as $row): 
-                                if (
-                                    (empty($row->ca_amount) || $row->ca_amount == 0) &&
-                                    (empty($row->gd_amount) || $row->gd_amount == 0)
-                                ) continue;
+                                if (empty($row->amount) && empty($row->monthly_deduction)) continue;
 
-                                $total_ca += $row->ca_amount ?? 0;
-                                $total_gd += $row->gd_amount ?? 0;
+                                $total_amount += $row->amount ?? 0;
+                                $total_monthly += $row->monthly_deduction ?? 0;
                             ?>
                             <tr>
                                 <td><?= $row->full_name ?></td>
-                                <?php if ($has_ca): ?>
-                                    <td><?= $row->ca_desc ?? '-' ?></td>
-                                    <td><?= $row->ca_amount ? '₱' . number_format($row->ca_amount, 2) : '-' ?></td>
-                                    <td><?= $row->ca_date ?? '-' ?></td>
-                                <?php endif; ?>
-                                <?php if ($has_gd): ?>
-                                    <td><?= $row->gd_desc ?? '-' ?></td>
-                                    <td><?= $row->gd_amount ? '₱' . number_format($row->gd_amount, 2) : '-' ?></td>
-                                    <td><?= $row->gd_date ?? '-' ?></td>
-                                <?php endif; ?>
+                                <td><?= $row->loan_description ?? '-' ?></td>
+                                
+                                <td><?= $row->monthly_deduction ? '₱' . number_format($row->monthly_deduction, 2) : '-' ?></td>
+                                <td><?= $row->amount ? '₱' . number_format($row->amount, 2) : '-' ?></td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
                         <tfoot>
                             <tr class="font-weight-bold bg-white border-top">
-                                <td class="text-right"><?= $has_ca && $has_gd ? 'TOTAL CA:' : 'TOTAL:' ?></td>
-                                <?php if ($has_ca): ?>
-                                    <td></td>
-                                    <td>₱<?= number_format($total_ca, 2) ?></td>
-                                    <td></td>
-                                <?php endif; ?>
-                                <?php if ($has_gd): ?>
-                                    <td class="text-right"><?= $has_ca ? 'TOTAL GD:' : '' ?></td>
-                                    <td>₱<?= number_format($total_gd, 2) ?></td>
-                                    <td></td>
-                                <?php endif; ?>
+                                <td colspan="3" class="text-right">Total Amount:</td>
+                                <td>₱<?= number_format($total_amount, 2) ?></td>
+                                <td></td>
                             </tr>
                         </tfoot>
                     </table>

@@ -111,6 +111,25 @@ public function get_all_deductions($settingsID)
 
         return $this->db->get()->result();
     }
+public function get_loan_summary($settingsID)
+{
+    $this->db->select("
+        pl.*, 
+        CONCAT(
+            p.last_name, ', ', p.first_name,
+            IF(p.middle_name != '', CONCAT(' ', LEFT(p.middle_name, 1), '.'), ''),
+            IF(p.name_ext != '', CONCAT(' ', p.name_ext), '')
+        ) AS full_name
+    ");
+    $this->db->from('personnelloans pl');
+    $this->db->join('personnel p', 'p.personnelID = pl.personnelID');
+    $this->db->where('pl.settingsID', $settingsID);
+    $this->db->order_by('p.last_name', 'ASC');
+    $this->db->order_by('p.first_name', 'ASC');
+    return $this->db->get()->result();
+}
+
+
 
 
 }

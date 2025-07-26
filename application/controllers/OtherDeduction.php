@@ -40,6 +40,13 @@ class OtherDeduction extends CI_Controller {
     $data['summary'] = $this->OtherDeduction_model->get_all_deductions($settingsID);
     $this->load->view('deduction_summary_view', $data); // updated filename
 }
+public function loan_summary()
+{
+    $settingsID = $this->session->userdata('settingsID');
+    $this->load->model('OtherDeduction_model');
+    $data['summary'] = $this->OtherDeduction_model->get_loan_summary($settingsID);
+    $this->load->view('LoanSummary', $data);
+}
 
 
 }
