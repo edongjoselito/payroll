@@ -84,12 +84,14 @@
 <li>
     <a href="javascript: void(0);" class="waves-effect">
         <i class="fas fa-file-alt"></i>
-        <span>View Reports </span>
+        <span>View Summaries </span>
         <span class="menu-arrow"></span>
     </a>
      <ul class="nav-second-level nav" aria-expanded="false">
+<li><a href="<?= base_url('OtherDeduction/attendance_summary') ?>"></i> Attendance Summary</a></li>
         <li><a href="<?= base_url('OtherDeduction/summary') ?>">Deduction Summary</a></li>
 <li><a href="<?= base_url('OtherDeduction/loan_summary') ?>"></i> Loan Summary</a></li>
+
 
      </ul>
 <li>

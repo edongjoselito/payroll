@@ -47,6 +47,20 @@ public function loan_summary()
     $data['summary'] = $this->OtherDeduction_model->get_loan_summary($settingsID);
     $this->load->view('LoanSummary', $data);
 }
+public function attendance_summary()
+{
+    $settingsID = $this->session->userdata('settingsID');
+    $this->load->model('OtherDeduction_model');
+    $data['summary'] = $this->OtherDeduction_model->get_attendance_summary($settingsID);
+    $this->load->view('AttendanceSummary', $data);
+}
+public function filter_attendance_summary()
+{
+    $type = $this->input->get('filter_type');
+    $now = date('Y-m-d');
+    $data['summary'] = $this->OtherDeduction_model->get_attendance_summary_filtered($type, $now);
+    $this->load->view('AttendanceSummary', $data);
+}
 
 
 }

@@ -128,8 +128,55 @@ public function get_loan_summary($settingsID)
     $this->db->order_by('p.first_name', 'ASC');
     return $this->db->get()->result();
 }
+public function get_attendance_summary($settingsID)
+{
+    $sql = "
+        SELECT 
+            p.personnelID,
+            CONCAT(
+                p.last_name, ', ', p.first_name,
+                IF(p.middle_name != '', CONCAT(' ', LEFT(p.middle_name, 1), '.'), ''),
+                IF(p.name_ext != '', CONCAT(' ', p.name_ext), '')
+            ) AS full_name,
+            SUM(CASE WHEN a.status = 'Absent' THEN 1 ELSE 0 END) AS absent_count,
+            SUM(CASE WHEN a.status = 'Late' THEN 1 ELSE 0 END) AS late_count,
+            GROUP_CONCAT(DISTINCT CASE WHEN a.status = 'Absent' THEN DATE_FORMAT(a.date, '%Y-%m-%d') END ORDER BY a.date SEPARATOR ', ') AS absent_dates,
+            GROUP_CONCAT(DISTINCT CASE WHEN a.status = 'Late' THEN DATE_FORMAT(a.date, '%Y-%m-%d') END ORDER BY a.date SEPARATOR ', ') AS late_dates
+        FROM personnel p
+        LEFT JOIN attendance a ON a.personnelID = p.personnelID AND a.settingsID = p.settingsID
+        WHERE p.settingsID = ?
+        GROUP BY p.personnelID
+        ORDER BY p.last_name, p.first_name
+    ";
 
+    return $this->db->query($sql, array($settingsID))->result();
+}
 
+public function get_attendance_summary_filtered($type, $baseDate)
+{
+    $this->db->select("CONCAT_WS(' ', CONCAT(p.last_name, ','), p.first_name, p.middle_name, p.name_ext) AS full_name");
 
+    $this->db->select("a.personnelID, GROUP_CONCAT(a.date) AS absent_dates, COUNT(*) AS absent_count");
+    $this->db->from('attendance a');
+    $this->db->join('personnel p', 'p.personnelID = a.personnelID');
+    $this->db->where('a.status', 'Absent');
+    $this->db->where('a.settingsID', $this->session->userdata('settingsID'));
+
+    if ($type == 'weekly') {
+        $monday = date('Y-m-d', strtotime('monday this week', strtotime($baseDate)));
+        $sunday = date('Y-m-d', strtotime('sunday this week', strtotime($baseDate)));
+        $this->db->where('a.date >=', $monday);
+        $this->db->where('a.date <=', $sunday);
+    } elseif ($type == 'monthly') {
+        $this->db->where('MONTH(a.date)', date('m', strtotime($baseDate)));
+        $this->db->where('YEAR(a.date)', date('Y', strtotime($baseDate)));
+    } elseif ($type == 'yearly') {
+        $this->db->where('YEAR(a.date)', date('Y', strtotime($baseDate)));
+    }
+
+    $this->db->group_by('a.personnelID');
+    $this->db->order_by('p.last_name, p.first_name');
+    return $this->db->get()->result();
+}
 
 }
