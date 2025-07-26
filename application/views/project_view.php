@@ -104,13 +104,6 @@
     <i class="fas fa-edit"></i>
 </button>
 
-<a href="<?= base_url('Project/payroll_summary/' . $proj->settingsID . '/' . $proj->projectID) ?>"
-   class="btn btn-secondary btn-sm"
-   data-toggle="tooltip"
-   title="Payroll Summary"
-   target="_blank">
-    <i class="fas fa-file-alt"></i>
-</a>
 
 <a href="<?= base_url('Project/delete/' . $proj->projectID) ?>"
    class="btn btn-danger btn-sm"
