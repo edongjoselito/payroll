@@ -70,7 +70,7 @@
 <li>
     <a href="javascript: void(0);" class="waves-effect">
         <i class="fas fa-hand-holding-usd"></i>
-        <span> Deductions </span>
+        <span>Manage Deductions </span>
         <span class="menu-arrow"></span>
     </a>
 
