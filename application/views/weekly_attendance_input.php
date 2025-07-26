@@ -157,6 +157,7 @@ input.is-invalid {
     </div>
 </div>
 
+
                                    <!-- Modal: Generate Attendance -->
                                    <div class="modal fade" id="generateModal" tabindex="-1" role="dialog"
                                         aria-labelledby="generateModalLabel" aria-hidden="true">

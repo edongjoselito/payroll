@@ -22,16 +22,19 @@ class MonthlyPayroll extends CI_Controller
     // After selecting month
 public function generate()
 {
-    // Get selected month (format: YYYY-MM)
     $month = $this->input->post('payroll_month');
     if (!$month) {
-        redirect('MonthlyPayroll');
+        $this->session->set_flashdata('error', 'Please select a valid month.');
+        redirect('WeeklyAttendance/records');
+        return;
     }
 
-    // Get all personnel (no project filter)
-    $personnel = $this->MonthlyPayroll_model->get_all_personnel();
+    $settingsID = $this->session->userdata('settingsID');
 
-    // Build all days for the selected month
+    // Get only Bi-Month and Monthly personnel
+    $personnel = $this->MonthlyPayroll_model->get_all_personnel($settingsID, ['Bi-Month', 'Monthly']);
+
+    // Build days
     $year = (int)substr($month, 0, 4);
     $monthNum = (int)substr($month, 5, 2);
     $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $monthNum, $year);
@@ -40,18 +43,19 @@ public function generate()
         $dates[] = sprintf('%04d-%02d-%02d', $year, $monthNum, $d);
     }
 
-    // --- NEW: Get all saved months for the modal dropdown
     $saved_months = $this->MonthlyPayroll_model->get_saved_months();
 
-    // Send to view
     $data = [
-        'personnel'    => $personnel,
-        'dates'        => $dates,
-        'month'        => $month,
-        'saved_months' => $saved_months,   // <-- add this
+        'personnel' => $personnel,
+        'dates' => $dates,
+        'month' => $month,
+        'saved_months' => $saved_months,
     ];
+
     $this->load->view('monthly_payroll_input', $data);
 }
+
+
 
     // Save attendance/payroll data
    public function save()
@@ -80,7 +84,9 @@ public function generate()
     }
 
     $this->session->set_flashdata('msg', 'Monthly payroll saved successfully!');
-    redirect('MonthlyPayroll/view_record');
+    $this->session->set_userdata('payroll_month', $month);
+redirect('MonthlyPayroll/view_record');
+
 }
 public function view_record()
 {
@@ -126,7 +132,8 @@ public function update_attendance()
         $this->session->set_flashdata('msg', 'Record not found.');
     }
 
-    redirect('MonthlyPayroll/view_record');
+    redirect('MonthlyPayroll/view_record?month=' . $payroll_month);
+
 }
 
 }

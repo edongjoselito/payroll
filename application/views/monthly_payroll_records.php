@@ -150,17 +150,20 @@ tbody tr td {
                 <br><span class="cell-ot"><?= number_format($ot,2) ?> OT</span>
             <?php endif; ?>
             <!-- Edit icon/button -->
-            <a href="#" 
-                class="edit-pen" 
-                title="Edit"
-                data-toggle="modal"
-                data-target="#editAttendanceModal"
-                data-personnel="<?= $person->personnelID ?>"
-                data-day="<?= $day ?>"
-                data-status="<?= $status ?>"
-                data-reg="<?= $reg ?>"
-                data-ot="<?= $ot ?>"
-            ><i class="mdi mdi-pencil"></i></a>
+           <a href="#" 
+   class="edit-pen" 
+   title="Edit"
+   data-toggle="modal"
+   data-target="#editAttendanceModal"
+   data-personnel="<?= $person->personnelID ?>"
+   data-day="<?= $day ?>"
+   data-status="<?= $status ?>"
+   data-reg="<?= $reg ?>"
+   data-ot="<?= $ot ?>"
+   onclick="event.preventDefault();"
+>
+<i class="mdi mdi-pencil"></i></a>
+
         </td>
         <?php endforeach; ?>
         <td class="totals-cell">

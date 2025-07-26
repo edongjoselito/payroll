@@ -11,28 +11,20 @@ class MonthlyPayroll_model extends CI_Model
 //     $this->db->order_by('last_name, first_name');
 //     return $this->db->get()->result();
 // }
-// In MonthlyPayroll_model.php
-public function get_all_personnel($settingsID = null)
+public function get_all_personnel($settingsID = null, $allowedTypes = ['Bi-Month', 'Monthly'])
 {
-    // Build subquery: get all assigned personnelID for this settingsID
-    $this->db->select('personnelID');
-    if ($settingsID) {
+    $this->db->from('personnel');
+    if ($settingsID !== null) {
         $this->db->where('settingsID', $settingsID);
     }
-    $assigned = $this->db->get('project_personnel_assignment')->result_array();
-    $assignedIDs = array_column($assigned, 'personnelID');
-    
-    // Main query: Get personnel NOT assigned
-    $this->db->from('personnel');
-    if (!empty($assignedIDs)) {
-        $this->db->where_not_in('personnelID', $assignedIDs);
-    }
-    if ($settingsID) {
-        $this->db->where('settingsID', $settingsID); // if your personnel table has settingsID
+    if (!empty($allowedTypes)) {
+        $this->db->where_in('salaryType', $allowedTypes); // Make sure the field name matches
     }
     $this->db->order_by('last_name, first_name');
     return $this->db->get()->result();
 }
+
+
 
 public function save_payroll_monthly($personnelID, $month, $details)
 {
@@ -55,6 +47,21 @@ public function save_payroll_monthly($personnelID, $month, $details)
         $this->db->insert('payroll_attendance_monthly', $data);
     }
 }
+public function save_attendance($data)
+{
+    $this->db->where('personnelID', $data['personnelID']);
+    $this->db->where('date', $data['date']);
+    $exists = $this->db->get('attendance')->row();
+
+    if ($exists) {
+        $this->db->where('personnelID', $data['personnelID']);
+        $this->db->where('date', $data['date']);
+        return $this->db->update('attendance', $data);
+    } else {
+        return $this->db->insert('attendance', $data);
+    }
+}
+
 public function get_saved_months()
 {
     $this->db->select('DISTINCT(payroll_month)', FALSE);
@@ -71,8 +78,11 @@ public function get_saved_months()
 public function get_monthly_payroll_records($month)
 {
     // Get all personnel
-    $this->db->order_by('last_name, first_name');
-    $personnel = $this->db->get('personnel')->result();
+  $this->db->from('personnel');
+$this->db->where_in('rateType', ['Month', 'Bi-Month']);
+$this->db->order_by('last_name, first_name');
+$personnel = $this->db->get()->result();
+
 
     // Get all payroll monthly records for the selected month
     $rows = $this->db->get_where('payroll_attendance_monthly', ['payroll_month' => $month])->result();
