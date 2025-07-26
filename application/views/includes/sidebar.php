@@ -89,8 +89,7 @@
     </a>
      <ul class="nav-second-level nav" aria-expanded="false">
         <li><a href="<?= base_url('OtherDeduction/summary') ?>">Deduction Summary</a></li>
-        <!-- You can add more reports below -->
-    </ul>
+ <li><a href="<?= base_url('OtherDeduction/summary') ?>">Loan Summary</a></li>    </ul>
 </li>
 
 <li>
