@@ -42,24 +42,6 @@
 </li>
 
 
-  
-               
-
-<!-- <li>
-    <a href="javascript: void(0);" class="waves-effect">
-        <i class="fas fa-calendar-check"></i>
-        <span>Office Attendance </span>
-        <span class="menu-arrow"></span>
-    </a>
-
-    <ul class="nav-second-level nav" aria-expanded="false">
-        <li><a href="<?= base_url('Monthly/officeAttendance') ?>">Office Attendance</a></li>
-        <li><a href="<?= base_url('Monthly/presentPersonnel') ?>">Present Personnel</a></li>
-        <li><a href="<?= base_url('Monthly') ?>">Monthly Payroll</a></li>
-    </ul>
-</li> -->
-
-
 
                       <li>
                         <a href="javascript: void(0);" class="waves-effect">
@@ -99,45 +81,23 @@
     </ul>
 </li>
 
-                    <!-- <li>
-                        <a href="javascript: void(0);" class="waves-effect">
-                            <i class="fas fa-cogs"></i>
-                            <span> Settings </span>
-                            <span class="menu-arrow"></span>
-                        </a>
-
-                        <ul class="nav-second-level nav" aria-expanded="false">
-                            <li><a href="<?= base_url(); ?>Loan/loans_view">Loans</a></li>
-                        </ul>
-                         
-                    </li> -->
-  <!-- <li class="nav-item dropdown">
-    <a class="nav-link dropdown-toggle" href="#" id="loanDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        MANAGE LOAN
+<li>
+    <a href="javascript: void(0);" class="waves-effect">
+        <i class="fas fa-file-alt"></i>
+        <span>View Reports </span>
+        <span class="menu-arrow"></span>
     </a>
-    <div class="dropdown-menu" aria-labelledby="loanDropdown">
-        <a class="dropdown-item" href="<?= base_url('Loan/personnel_loan') ?>">Personnel Loan</a>
-    </div>
-</li> -->
+     <ul class="nav-second-level nav" aria-expanded="false">
+        <li><a href="<?= base_url('OtherDeduction/summary') ?>">Deduction Summary</a></li>
+        <!-- You can add more reports below -->
+    </ul>
+</li>
+
 <li>
     <a href="<?= base_url(); ?>User" class="waves-effect">
         <i class="fas fa-user-cog"></i>
         <span> Manage Users </span>
     </a>
-</li>
-<li>
-    <a href="javascript: void(0);" class="waves-effect">
-        <i class="fas fa-file-alt"></i>
-        <span> Reports </span>
-        <span class="menu-arrow"></span>
-    </a>
-    <!-- <ul class="nav-second-level nav" aria-expanded="false">
-       <li><a href="<?= base_url('project/audit_logs') ?>"><i class="fa fa-history"></i> Audit Logs</a></li>
-
-    </ul> -->
-    <ul class="nav-second-level nav" aria-expanded="false">
-        <li><a href="<?= base_url(); ?>Report/payroll_logs">Payroll Logs</a></li>
-    </ul>
 </li>
 
 
@@ -152,18 +112,6 @@
 </li>
 
 
-
-
-
-
-                 
-                    <!-- 
-                    <li>
-                        <a href="<?= base_url(); ?>Page/changepassword" class="waves-effect">
-                            <i class=" ion ion-ios-key"></i>
-                            <span> Change Password </span>
-                        </a>
-                    </li> -->
 
                 </ul>
 

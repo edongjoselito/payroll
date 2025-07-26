@@ -33,4 +33,13 @@ class OtherDeduction extends CI_Controller {
         $this->session->set_flashdata('success', 'Other deduction deleted successfully!');
         redirect('OtherDeduction');
     }
+ public function summary()
+{
+    $settingsID = $this->session->userdata('settingsID');
+    $this->load->model('OtherDeduction_model');
+    $data['summary'] = $this->OtherDeduction_model->get_all_deductions($settingsID);
+    $this->load->view('deduction_summary_view', $data); // updated filename
+}
+
+
 }

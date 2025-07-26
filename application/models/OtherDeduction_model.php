@@ -91,7 +91,26 @@ public function get_deductions_by_date_range($from, $to, $settingsID)
         ->result();
 }
 
+public function get_all_deductions($settingsID)
+    {
+        $this->db->select("
+            p.personnelID,
+            CONCAT(
+                p.last_name, ', ', p.first_name,
+                IF(p.middle_name != '', CONCAT(' ', LEFT(p.middle_name, 1), '.'), ''),
+                IF(p.name_ext != '', CONCAT(' ', p.name_ext), '')
+            ) AS full_name,
+            ca.description AS ca_desc, ca.amount AS ca_amount, ca.date AS ca_date,
+            gd.description AS gd_desc, gd.amount AS gd_amount, gd.date AS gd_date
+        ");
+        $this->db->from('personnel p');
+        $this->db->join('cashadvance ca', 'ca.personnelID = p.personnelID AND ca.settingsID = p.settingsID', 'left');
+        $this->db->join('government_deductions gd', 'gd.personnelID = p.personnelID AND gd.settingsID = p.settingsID', 'left');
+        $this->db->where('p.settingsID', $settingsID);
+        $this->db->order_by('p.last_name');
 
+        return $this->db->get()->result();
+    }
 
 
 }

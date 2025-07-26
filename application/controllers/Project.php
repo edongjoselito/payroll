@@ -5,7 +5,6 @@ class Project extends CI_Controller
         parent::__construct();
          $this->load->model('PayrollModel');
         $this->load->model('Project_model');
-        $this->load->model('Audit_model');
     }
 
 public function project_view()
@@ -120,12 +119,7 @@ public function save_attendance()
 
     $this->Project_model->save_batch_attendance($attendance_date, $batchData);
 
-    // ✅ Log the attendance save
-   $this->Audit_model->insert_audit_log(
-    $this->session->userdata('IDNumber'), // change this line!
-    'save_attendance',
-    'Saved attendance for date ' . $attendance_date . ' in Project ID: ' . $projectID
-);
+ 
 
 
     $this->session->set_flashdata('success', 'Attendance saved successfully.');
@@ -186,12 +180,7 @@ public function save_weekly_attendance()
         $this->Project_model->save_or_update_weekly_total_duration($settingsID, $projectID, $personnelID, $start, $end, $duration);
     }
 
-    // ✅ Add audit log
-    $this->Audit_model->insert_audit_log(
-        $this->session->userdata('user_id'),
-        'save_weekly_attendance',
-        "Saved weekly attendance for period: {$start} to {$end}, Project ID: {$projectID}"
-    );
+   
 
     $this->session->set_flashdata('success', 'Weekly attendance saved successfully.');
     redirect("project/weekly_attendance_report_summary?settingsID={$settingsID}&projectID={$projectID}&start={$start}&end={$end}");
@@ -671,12 +660,7 @@ public function delete_attendance_group()
     $this->db->where('date', $date);
     $this->db->delete('attendance');
 
-    // ✅ Log the deletion
-    $this->Audit_model->insert_audit_log(
-        $this->session->userdata('user_id'),
-        'delete_attendance',
-        "Deleted attendance for date: {$date} | Project ID: {$projectID}"
-    );
+   
 
     // Redirect back to attendance list
     redirect("project/attendance_list/{$settingsID}?pid={$projectID}");
@@ -736,12 +720,7 @@ public function export_attendance_csv($settingsID)
     exit;
 }
 
-public function audit_logs()
-{
-    $this->load->model('Audit_model');
-    $data['logs'] = $this->Audit_model->get_all_attendance_logs();
-    $this->load->view('audit_logs_view', $data);
-}
+
 
 // =======================
 // PAYROLL SUMMARY CONTROLLER

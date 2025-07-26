@@ -557,6 +557,8 @@ $endDate = strtotime($end);
         ₱<?= number_format($row->rateAmount, 2) ?> / hour
     <?php elseif ($row->rateType === 'Month'): ?>
         ₱<?= number_format($row->rateAmount, 2) ?> / month
+        <?php elseif ($row->rateType === 'Bi-Month'): ?>
+        ₱<?= number_format($row->rateAmount, 2) ?> / bi-month
     <?php endif; ?>
     </td>
 

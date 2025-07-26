@@ -17,13 +17,11 @@
             <div class="container-fluid">
 
                 <div class="page-title-box d-flex justify-content-between align-items-center">
-                    <!-- <h4 class="page-title">Personnel List</h4> -->
                   <a href="<?= base_url('personnel/create') ?>" class="btn btn-primary btn-md">Add New</a>
 <a href="<?= base_url('personnel/service_years') ?>" class="btn btn-secondary btn-md mb-3">Years of Service</a>
 
                 </div>
                 
-                <!-- <hr style="border:0; height:2px; background:linear-gradient(to right, #34A853, #FBBC05, #4285F4); border-radius:1px; margin:20px 0;"/> -->
 
                 <?php if ($this->session->flashdata('success')): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">

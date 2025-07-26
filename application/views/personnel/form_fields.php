@@ -100,6 +100,7 @@
                     <option value="Hour" <?= ($personnel->rateType ?? '') === 'Hour' ? 'selected' : '' ?>>Per Hour</option>
                     <option value="Day" <?= ($personnel->rateType ?? '') === 'Day' ? 'selected' : '' ?>>Per Day</option>
                     <option value="Month" <?= ($personnel->rateType ?? '') === 'Month' ? 'selected' : '' ?>>Per Month</option>
+                     <option value="Bi-Month" <?= ($personnel->rateType ?? '') === 'Bi-Month' ? 'selected' : '' ?>>Bi-Month</option>
                 </select>
             </div>
             <div class="form-group col-md-4">
