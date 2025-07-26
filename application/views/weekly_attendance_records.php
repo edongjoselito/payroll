@@ -95,13 +95,14 @@ td:first-child {
                                    <h4 class="text-dark font-weight-bold">Attendance Records</h4>
 <!-- 🔘 Filter Button -->
 <div class="mb-3">
-    <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#filterModal">
+    <button class="btn btn-info mt-2 shadow-sm" data-toggle="modal" data-target="#filterModal">
         <i class="mdi mdi-filter-variant"></i>View Attendance
     </button>
-</div>
-<button class="btn btn-info mt-2 shadow-sm" data-toggle="modal" data-target="#viewPayrollModal">
-    <i class="mdi mdi-eye"></i> View Monthly Payroll
+    <button class="btn btn-primary mt-2 shadow-sm" data-toggle="modal" data-target="#viewPayrollModal">
+    <i class="mdi mdi-eye"></i> View Monthly
 </button>
+</div>
+
 <!-- View Payroll Modal -->
 <div class="modal fade" id="viewPayrollModal" tabindex="-1" role="dialog" aria-labelledby="viewPayrollModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm" role="document">

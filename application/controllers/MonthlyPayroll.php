@@ -80,7 +80,7 @@ public function generate()
     }
 
     $this->session->set_flashdata('msg', 'Monthly payroll saved successfully!');
-    redirect('MonthlyPayroll/view_records');
+    redirect('MonthlyPayroll/view_record');
 }
 public function view_record()
 {
@@ -126,8 +126,7 @@ public function update_attendance()
         $this->session->set_flashdata('msg', 'Record not found.');
     }
 
-    // Redirect back to the same record view
-    redirect('MonthlyPayroll/view_record', 'refresh');
+    redirect('MonthlyPayroll/view_record');
 }
 
 }

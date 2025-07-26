@@ -110,10 +110,12 @@ input.is-invalid {
                               <button class="btn btn-info mt-2 shadow-sm" data-toggle="modal"
                                    data-target="#generateModal">
                                    <i class="mdi mdi-calendar-search"></i> Generate Attendance
-                         </div>
-<button class="btn btn-primary mt-2 shadow-sm" data-toggle="modal" data-target="#monthlyPayrollModal">
-    <i class="mdi mdi-calendar-month"></i> Generate Monthly Payroll
+                              </button>
+                              <button class="btn btn-primary mt-2 shadow-sm" data-toggle="modal" data-target="#monthlyPayrollModal">
+    <i class="mdi mdi-calendar-month"></i> Generate Monthly
 </button>
+                         </div>
+
                          <?php if ($this->session->flashdata('msg')): ?>
 
                          <div class="alert alert-success alert-dismissible fade show">

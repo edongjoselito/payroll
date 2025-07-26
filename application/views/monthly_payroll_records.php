@@ -83,14 +83,23 @@ tbody tr td {
 
 <div class="card">
 <div class="card-body">
+    
     <h4 class="text-dark font-weight-bold mb-4">
         <i class="mdi mdi-calendar-month mr-1"></i>
         Monthly Payroll Records for <?= date('F Y', strtotime($month . '-01')) ?>
+        <div>
+             <a href="<?= base_url('WeeklyAttendance/records') ?>" class="btn btn-secondary mt-3">Back</a>
+        <button class="btn btn-outline-primary mt-3" onclick="window.print()">
+        <i class="mdi mdi-printer"></i> Print
+    </button></div>
+    
     </h4>
 
     <div class="table-responsive">
         <table class="table table-bordered table-striped table-hover">
+            
             <thead class="thead-light">
+                
                 <tr>
                     <th>Personnel</th>
                     <?php foreach ($records['dates'] as $d): ?>
@@ -165,10 +174,8 @@ tbody tr td {
 </tbody>
         </table>
     </div>
-    <button class="btn btn-outline-primary mt-3" onclick="window.print()">
-        <i class="mdi mdi-printer"></i> Print
-    </button>
-    <a href="<?= base_url('WeeklyAttendance/records') ?>" class="btn btn-secondary mt-3">Back</a>
+    
+   
 </div>
 </div>
 

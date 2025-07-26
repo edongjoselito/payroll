@@ -4,13 +4,36 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class MonthlyPayroll_model extends CI_Model
 {
     // Get all personnel (no project filter)
-  public function get_all_personnel()
+//   public function get_all_personnel()
+// {
+//     $this->db->from('personnel');
+//     // No status column; fetch all personnel
+//     $this->db->order_by('last_name, first_name');
+//     return $this->db->get()->result();
+// }
+// In MonthlyPayroll_model.php
+public function get_all_personnel($settingsID = null)
 {
+    // Build subquery: get all assigned personnelID for this settingsID
+    $this->db->select('personnelID');
+    if ($settingsID) {
+        $this->db->where('settingsID', $settingsID);
+    }
+    $assigned = $this->db->get('project_personnel_assignment')->result_array();
+    $assignedIDs = array_column($assigned, 'personnelID');
+    
+    // Main query: Get personnel NOT assigned
     $this->db->from('personnel');
-    // No status column; fetch all personnel
+    if (!empty($assignedIDs)) {
+        $this->db->where_not_in('personnelID', $assignedIDs);
+    }
+    if ($settingsID) {
+        $this->db->where('settingsID', $settingsID); // if your personnel table has settingsID
+    }
     $this->db->order_by('last_name, first_name');
     return $this->db->get()->result();
 }
+
 public function save_payroll_monthly($personnelID, $month, $details)
 {
     // $details is an associative array: [ '01' => ['status'=>'Present', ...], ...]

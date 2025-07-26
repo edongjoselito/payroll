@@ -45,11 +45,11 @@
           <div class="card-body">
             <h4 class="page-title mb-4">Payroll Generation</h4>
             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#generatePayrollModal">
-              <i class="mdi mdi-calculator-variant-outline"></i> Generate Payroll
+              <i class="mdi mdi-calculator-variant"></i> Generate Payroll
             </button>
     
 <button type="button" class="btn btn-info" data-toggle="modal" data-target="#viewSavedPayrollModal">
-  View Saved Payroll
+    <i class="mdi mdi-eye"></i> View Saved Payroll
 </button>
 <button type="button" class="btn btn-success" data-toggle="modal" data-target="#payrollSummaryModal">
   <i class="mdi mdi-chart-bar"></i> Payroll Summary

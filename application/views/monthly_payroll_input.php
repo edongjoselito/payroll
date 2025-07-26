@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<title>PMS - Monthly Payroll Generation</title>
+<title>PMS - Monthly Payroll</title>
 <?php include('includes/head.php'); ?>
 
 <body>
