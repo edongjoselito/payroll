@@ -98,47 +98,50 @@
           </div>
         </div>
 
-<!-- Assign Loan Modal (Manual Input) -->
+<!-- Improved Assign Loan Modal -->
 <div class="modal fade" id="assignLoanModal" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog">
     <form method="post" action="<?= base_url('Loan/assign_personnel_loan') ?>">
       <div class="modal-content">
-        <div class="modal-header bg-info text-white">
-          <h5 class="modal-title">Assign Loan</h5>
+       <div class="modal-header bg-light">
+            <h5 class="modal-title text-dark">Assign Loan</h5>
           <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
         </div>
 
         <div class="modal-body">
           <div class="form-group">
-            <label for="personnelID">Select Personnel</label>
-            <select name="personnelID" id="personnelID" class="form-control" required>
+            <label>Personnel</label>
+            <select name="personnelID" class="form-control" required>
               <option value="">Select Personnel</option>
-              <?php foreach ($personnel as $p): ?>
+              <?php foreach($personnel as $p): ?>
                 <option value="<?= $p->personnelID ?>">
-                  <?= strtoupper($p->first_name . ' ' . $p->last_name) ?> (<?= ucfirst($p->rateType) ?>)
+                  <?= $p->last_name . ', ' . $p->first_name 
+                      . (isset($p->middle_name) && $p->middle_name ? ' ' . substr($p->middle_name, 0, 1) . '.' : '') 
+                      . (isset($p->name_ext) && $p->name_ext ? ' ' . $p->name_ext : '') ?>
                 </option>
               <?php endforeach; ?>
             </select>
           </div>
 
           <div class="form-group">
-            <label for="loan_description">Loan Description</label>
-            <input type="text" name="loan_description" id="loan_description" class="form-control" required>
+            <label>Loan Description</label>
+            <input type="text" name="loan_description" class="form-control" required>
           </div>
 
-          <div class="form-group">
-            <label for="loan_amount">Loan Amount</label>
-            <input type="number" name="loan_amount" id="loan_amount" class="form-control" required step="0.01">
-          </div>
-
-          <div class="form-group">
-            <label for="monthly_deduction">Monthly Deduction</label>
-            <input type="number" name="monthly_deduction" id="monthly_deduction" class="form-control" required step="0.01">
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label>Loan Amount</label>
+              <input type="number" name="loan_amount" class="form-control" required step="0.01">
+            </div>
+            <div class="form-group col-md-6">
+              <label>Monthly Deduction</label>
+              <input type="number" name="monthly_deduction" class="form-control" required step="0.01">
+            </div>
           </div>
         </div>
 
         <div class="modal-footer">
-          <button type="submit" class="btn btn-info">Assign</button>
+          <button type="submit" class="btn btn-info">Save</button>
           <button type="button" class="btn btn-light" data-dismiss="modal">Cancel</button>
         </div>
       </div>
@@ -146,13 +149,13 @@
   </div>
 </div>
 
-<!-- Edit Loan Modal -->
+<!-- Improved Edit Loan Modal -->
 <div class="modal fade" id="editLoanModal" tabindex="-1">
-  <div class="modal-dialog modal-lg">
+  <div class="modal-dialog">
     <form method="post" action="<?= base_url('Loan/update_personnel_loan') ?>">
       <div class="modal-content">
-        <div class="modal-header bg-info text-white">
-          <h5 class="modal-title">Edit Loan</h5>
+       <div class="modal-header bg-light">
+        <h5 class="modal-title text-dark">Edit Loan</h5>
           <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
         </div>
 
@@ -165,14 +168,15 @@
             <input type="text" name="loan_description" id="editLoanDescription" class="form-control" required>
           </div>
 
-          <div class="form-group">
-            <label>Loan Amount</label>
-            <input type="number" name="loan_amount" id="editLoanAmount" class="form-control" required>
-          </div>
-
-          <div class="form-group">
-            <label>Monthly Deduction</label>
-            <input type="number" name="monthly_deduction" id="editMonthlyDeduction" class="form-control" required>
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label>Loan Amount</label>
+              <input type="number" name="loan_amount" id="editLoanAmount" class="form-control" required step="0.01">
+            </div>
+            <div class="form-group col-md-6">
+              <label>Monthly Deduction</label>
+              <input type="number" name="monthly_deduction" id="editMonthlyDeduction" class="form-control" required step="0.01">
+            </div>
           </div>
         </div>
 
@@ -184,6 +188,7 @@
     </form>
   </div>
 </div>
+
 
 
 
