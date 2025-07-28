@@ -34,7 +34,22 @@ public function generate()
     }
 
     $settingsID = $this->session->userdata('settingsID');
-    $personnel = $this->MonthlyPayroll_model->get_all_personnel($settingsID, ['Bi-Month', 'Month']);
+   $personnel = $this->MonthlyPayroll_model->get_all_personnel($settingsID, ['Bi-Month', 'Month']);
+$personnelIDs = array_column($personnel, 'personnelID');
+
+// ✅ Check before using in `where_in`
+if (empty($personnelIDs)) {
+    $this->session->set_flashdata('error', 'No personnel found for this payroll period.');
+    redirect('WeeklyAttendance');
+    return;
+}
+
+// Safe to use now
+$existing = $this->db->where('payroll_month', $month)
+                     ->where_in('personnelID', $personnelIDs)
+                     ->get('payroll_attendance_monthly')
+                     ->num_rows();
+
 
     // 🔍 Check for existing records
     $existing = $this->db->where('payroll_month', $month)
