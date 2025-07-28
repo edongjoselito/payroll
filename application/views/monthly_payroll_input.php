@@ -11,6 +11,24 @@
         <div class="content-page">
             <div class="content">
                 <div class="container-fluid">
+<?php if ($this->session->flashdata('msg')): ?>
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <?= $this->session->flashdata('msg'); ?>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+<?php endif; ?>
+
+                
+<?php if ($this->session->flashdata('duplicate_msg')): ?>
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        <?= $this->session->flashdata('duplicate_msg'); ?>
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+<?php endif; ?>
 
                     <div class="mb-3">
                         <h4 class="page-title">Monthly Payroll Generation</h4>
@@ -112,14 +130,7 @@
         </button>
     </div>
 </form>
-<?php if ($this->session->flashdata('msg')): ?>
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        <?= $this->session->flashdata('msg'); ?>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-<?php endif; ?>
+
 
                     <?php endif; ?>
 

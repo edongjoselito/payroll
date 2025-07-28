@@ -18,7 +18,10 @@ public function get_all_personnel($settingsID = null, $allowedTypes = ['Bi-Month
         $this->db->where('settingsID', $settingsID);
     }
     if (!empty($allowedTypes)) {
-        $this->db->where_in('salaryType', $allowedTypes); // Make sure the field name matches
+      if (!empty($allowedTypes)) {
+    $this->db->where_in('rateType', $allowedTypes);  // Correct field name
+}
+
     }
     $this->db->order_by('last_name, first_name');
     return $this->db->get()->result();

@@ -21,23 +21,40 @@ class MonthlyPayroll extends CI_Controller
 
     // After selecting month
 public function generate()
-{
+{if ($this->input->get('saved') === 'true') {
+    $this->session->keep_flashdata('msg'); // keep the success message alive
+}
+
     $month = $this->input->post('payroll_month');
+
     if (!$month) {
         $this->session->set_flashdata('error', 'Please select a valid month.');
-        redirect('WeeklyAttendance/records');
+        redirect('WeeklyAttendance'); // ✅ Redirect here if no month selected
         return;
     }
 
     $settingsID = $this->session->userdata('settingsID');
+    $personnel = $this->MonthlyPayroll_model->get_all_personnel($settingsID, ['Bi-Month', 'Month']);
 
-    // Get only Bi-Month and Monthly personnel
-    $personnel = $this->MonthlyPayroll_model->get_all_personnel($settingsID, ['Bi-Month', 'Monthly']);
+    // 🔍 Check for existing records
+    $existing = $this->db->where('payroll_month', $month)
+                         ->where_in('personnelID', array_column($personnel, 'personnelID'))
+                         ->get('payroll_attendance_monthly')
+                         ->num_rows();
 
-    // Build days
+    if ($existing >= count($personnel)) {
+        // ❌ Already generated → redirect to WeeklyAttendance with warning
+        $this->session->set_flashdata('duplicate_msg',
+            'Monthly payroll for <strong>' . date('F Y', strtotime($month . '-01')) . '</strong> has already been generated for all personnel.');
+        redirect('WeeklyAttendance');
+        return;
+    }
+
+    // ✅ Proceed if not duplicate
     $year = (int)substr($month, 0, 4);
     $monthNum = (int)substr($month, 5, 2);
     $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $monthNum, $year);
+
     $dates = [];
     for ($d = 1; $d <= $daysInMonth; $d++) {
         $dates[] = sprintf('%04d-%02d-%02d', $year, $monthNum, $d);
@@ -54,6 +71,8 @@ public function generate()
 
     $this->load->view('monthly_payroll_input', $data);
 }
+
+
 
 
 
@@ -82,15 +101,28 @@ public function generate()
         // Save (insert or update)
         $this->MonthlyPayroll_model->save_payroll_monthly($personnelID, $month, $details);
     }
+$this->session->set_flashdata('msg', '✅ Monthly payroll saved successfully!');
+$this->session->set_userdata('payroll_month', $month);
 
-    $this->session->set_flashdata('msg', 'Monthly payroll saved successfully!');
-    $this->session->set_userdata('payroll_month', $month);
-redirect('MonthlyPayroll/view_record');
+// Append ?saved=true to the referer so we can detect success later
+$redirect_url = $_SERVER['HTTP_REFERER'];
+$redirect_url .= (strpos($redirect_url, '?') === false) ? '?saved=true' : '&saved=true';
+
+redirect($redirect_url);
+
 
 }
 public function view_record()
 {
+    // Get month from POST or session fallback
     $month = $this->input->post('payroll_month');
+
+    if (!$month) {
+        $month = $this->session->userdata('payroll_month'); // fallback for refresh/redirect
+    } else {
+        $this->session->set_userdata('payroll_month', $month); // set on valid post
+    }
+
     if (!$month) {
         $this->session->set_flashdata('msg', 'Please select a month.');
         redirect('MonthlyPayroll');
@@ -99,14 +131,13 @@ public function view_record()
     // Get all payroll records for the selected month
     $records = $this->MonthlyPayroll_model->get_monthly_payroll_records($month);
 
-    // Pass for display (you can use a modal, or a separate view)
     $data['month'] = $month;
     $data['records'] = $records;
-    $data['saved_months'] = $this->MonthlyPayroll_model->get_saved_months(); // so dropdown still works in the view
+    $data['saved_months'] = $this->MonthlyPayroll_model->get_saved_months();
 
-    // Show on the same page (replace the grid with view, or display both as you wish)
-   $this->load->view('monthly_payroll_records', $data);
+    $this->load->view('monthly_payroll_records', $data);
 }
+
 public function update_attendance()
 {
     $personnelID   = $this->input->post('personnelID');
@@ -132,7 +163,7 @@ public function update_attendance()
         $this->session->set_flashdata('msg', 'Record not found.');
     }
 
-    redirect('MonthlyPayroll/view_record?month=' . $payroll_month);
+  redirect($_SERVER['HTTP_REFERER']);
 
 }
 
