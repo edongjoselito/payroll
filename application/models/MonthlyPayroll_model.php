@@ -81,11 +81,10 @@ public function get_saved_months()
 public function get_monthly_payroll_records($month)
 {
     // Get all personnel
-  $this->db->from('personnel');
-$this->db->where_in('rateType', ['Month', 'Bi-Month']);
-$this->db->order_by('last_name, first_name');
-$personnel = $this->db->get()->result();
-
+    $this->db->from('personnel');
+    $this->db->where_in('rateType', ['Month', 'Bi-Month']);
+    $this->db->order_by('last_name, first_name');
+    $personnel = $this->db->get()->result();
 
     // Get all payroll monthly records for the selected month
     $rows = $this->db->get_where('payroll_attendance_monthly', ['payroll_month' => $month])->result();
@@ -99,20 +98,102 @@ $personnel = $this->db->get()->result();
         $dates[] = sprintf('%04d-%02d-%02d', $year, $monthNum, $d);
     }
 
-    // Map personnelID => [date => ['status'=>..., 'regular_hours'=>..., 'overtime_hours'=>...]]
+    // Map personnelID => [date => [...]]
     $attendance = [];
     foreach ($rows as $row) {
-        $details = json_decode($row->details_json, true); // array: ['2025-07-01' => [...], ...]
+        $details = json_decode($row->details_json, true);
         if (!$details) $details = [];
         $attendance[$row->personnelID] = $details;
     }
 
+    // Date range for the month
+    $start = date('Y-m-01', strtotime($month));
+    $end = date('Y-m-t', strtotime($month));
+
+    // Append deductions for each personnel
+    foreach ($personnel as &$p) {
+        $personnelID = $p->personnelID;
+
+        // Cash Advance (type = 'cash')
+        $cash = $this->db
+            ->select_sum('amount')
+            ->from('cashadvance')
+            ->where('personnelID', $personnelID)
+            ->where('type', 'cash')
+            ->where("(deduct_from IS NULL OR deduct_from <= '$end')", null, false)
+            ->where("(deduct_to IS NULL OR deduct_to >= '$start')", null, false)
+            ->get()->row();
+        $p->cash_advance = $cash && $cash->amount !== null ? (float)$cash->amount : 0;
+
+        // Other Deduction (type = 'Others')
+        $other = $this->db
+            ->select_sum('amount')
+            ->from('cashadvance')
+            ->where('personnelID', $personnelID)
+            ->where('type', 'Others')
+            ->where("(deduct_from IS NULL OR deduct_from <= '$end')", null, false)
+            ->where("(deduct_to IS NULL OR deduct_to >= '$start')", null, false)
+            ->get()->row();
+        $p->other_deduction = $other && $other->amount !== null ? (float)$other->amount : 0;
+
+        // Loans
+        $loan = $this->db
+            ->select_sum('monthly_deduction')
+            ->from('personnelloans')
+            ->where('personnelID', $personnelID)
+            ->where('status', 1)
+            ->where('is_paid', 0)
+            ->where("(deduct_from IS NULL OR deduct_from <= '$end')", null, false)
+            ->where("(deduct_to IS NULL OR deduct_to >= '$start')", null, false)
+            ->get()->row();
+        $p->loan = $loan && $loan->monthly_deduction !== null ? (float)$loan->monthly_deduction : 0;
+
+        // Government Deductions
+        $p->gov_sss = 0;
+        $p->gov_pagibig = 0;
+        $p->gov_philhealth = 0;
+
+        $govt = $this->db
+            ->select('description, SUM(amount) AS amount')
+            ->from('government_deductions')
+            ->where('personnelID', $personnelID)
+            ->where("(deduct_from IS NULL OR deduct_from <= '$end')", null, false)
+            ->where("(deduct_to IS NULL OR deduct_to >= '$start')", null, false)
+            ->group_by('description')
+            ->get()->result();
+
+        foreach ($govt as $g) {
+            $desc = strtolower(trim($g->description));
+            if ($desc === 'sss') {
+                $p->gov_sss = (float)$g->amount;
+            } elseif ($desc === 'pagibig' || $desc === 'pag-ibig') {
+                $p->gov_pagibig = (float)$g->amount;
+            } elseif ($desc === 'philhealth' || $desc === 'phic') {
+                $p->gov_philhealth = (float)$g->amount;
+            } else {
+                $p->other_deduction += (float)$g->amount;
+            }
+        }
+
+        // Final total deduction
+        $p->total_deduction = $p->cash_advance + $p->loan + $p->gov_sss + $p->gov_pagibig + $p->gov_philhealth + $p->other_deduction;
+
+        // Mapping for manual payroll compatibility
+        $p->ca_cashadvance = $p->cash_advance;
+        $p->sss = $p->gov_sss;
+        $p->pagibig = $p->gov_pagibig;
+        $p->philhealth = $p->gov_philhealth;
+    }
+
     return [
-        'personnel' => $personnel,
-        'dates'     => $dates,
-        'attendance'=> $attendance,
+        'personnel'  => $personnel,
+        'dates'      => $dates,
+        'attendance' => $attendance,
     ];
 }
+
+
+
 
 // Get one record for a person/month
 public function get_payroll_record($personnelID, $month)
