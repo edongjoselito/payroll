@@ -183,11 +183,15 @@ public function view_formatted()
 
     $projectID = $this->input->get('project_id');
     $this->load->model('Project_model');
+    $this->load->model('SettingsModel');
+
     $project = $this->Project_model->get_project_by_id($projectID);
     $data['project'] = $project;
 
-    $data['signatories'] = null;
-    $data['show_signatories'] = false;
+   $settingsID = $this->session->userdata('settingsID');
+$data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
+$data['show_signatories'] = true;
+
     $data['is_summary'] = false;
     $data['month'] = $month;
 
