@@ -176,7 +176,6 @@ public function view_formatted()
         return;
     }
 
-    // Load data for the selected month
     $data = $this->MonthlyPayroll_model->get_monthly_payroll_records($month);
 
     $data['start'] = $month . '-01';
@@ -199,11 +198,11 @@ public function view_formatted()
     }
 
     $attendance_data = [];
+    $this->load->database();
 
     foreach ($data['personnel'] as $p) {
         $pid = $p->personnelID;
         $p->reg_hours_per_day = [];
-
         $total_hours = 0;
         $total_ot = 0;
 
@@ -224,7 +223,6 @@ public function view_formatted()
             $total_ot += $ot;
         }
 
-        // Determine rate type and compute salary
         $rateType = strtolower($p->rateType ?? '');
         $rateAmount = floatval($p->rateAmount ?? 0);
 
@@ -233,41 +231,35 @@ public function view_formatted()
             $p->rate_per_hour = number_format($ratePerHour, 2);
             $p->amount_reg = number_format($rateAmount, 2);
             $p->amount_ot = '0.00';
-            $gross = $rateAmount;
-
+            $p->gross = number_format($rateAmount, 2);
         } elseif ($rateType === 'bi-month') {
             $monthlyAmount = $rateAmount * 2;
             $ratePerHour = ($monthlyAmount / 30) / 8;
             $p->rate_per_hour = number_format($ratePerHour, 2);
             $p->amount_reg = number_format($monthlyAmount, 2);
             $p->amount_ot = '0.00';
-            $gross = $monthlyAmount;
-
+            $p->gross = number_format($monthlyAmount, 2);
         } else {
-            continue; // skip hourly/daily
+            continue;
         }
 
-        $p->gross = number_format($gross, 2);
-
-        // Load deductions (after salary computation)
+        // ✅ Load deductions from model
         $this->load->model('MonthlyPayroll_model');
 
-        $cash_advance = $this->MonthlyPayroll_model->get_cash_advance($pid, $month);
+        $cashadvance = $this->MonthlyPayroll_model->get_cash_advance($pid, $month);
         $gov_deductions = $this->MonthlyPayroll_model->get_government_deductions($pid, $month);
-        $loan_deduction = $this->MonthlyPayroll_model->get_loan_deduction($pid, $month);
-
-        $total_deduction = $cash_advance + $gov_deductions['sss'] + $gov_deductions['pagibig'] + $gov_deductions['philhealth'] + $loan_deduction;
-        $take_home = $gross - $total_deduction;
+        $loan = $this->MonthlyPayroll_model->get_loan_deduction($pid, $month);
 
         // Assign to object for view
-        $p->cashAdvance = $cash_advance;
-        $p->sss = $gov_deductions['sss'];
-        $p->pagibig = $gov_deductions['pagibig'];
-        $p->philhealth = $gov_deductions['philhealth'];
-        $p->loan = $loan_deduction;
-        $p->otherDeduction = 0.00;
-        $p->totalDeduction = $total_deduction;
-        $p->takeHome = $take_home;
+        $p->cashadvance = number_format($cashadvance, 2);
+        $p->sss = number_format($gov_deductions['sss'], 2);
+        $p->pagibig = number_format($gov_deductions['pagibig'], 2);
+        $p->philhealth = number_format($gov_deductions['philhealth'], 2);
+        $p->loan = number_format($loan, 2);
+
+        $total_deductions = $cashadvance + $gov_deductions['sss'] + $gov_deductions['pagibig'] + $gov_deductions['philhealth'] + $loan;
+        $p->total_deduction = number_format($total_deductions, 2);
+        $p->takehome = number_format(floatval($p->gross) - $total_deductions, 2);
 
         $attendance_data[] = $p;
     }
@@ -276,7 +268,6 @@ public function view_formatted()
 
     $this->load->view('monthly_payroll_view', $data);
 }
-
 
 
 }

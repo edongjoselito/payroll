@@ -132,49 +132,58 @@ public function update_payroll_details($personnelID, $month, $details)
         'date_generated' => date('Y-m-d H:i:s')
     ]);
 }
-public function get_cash_advance($personnelID, $month)
+public function get_cash_advance($pid, $month)
 {
+    $start = date('Y-m-01', strtotime($month));
+    $end = date('Y-m-t', strtotime($month));
+
     $this->db->select_sum('amount');
-    $this->db->from('cashadvance');
-    $this->db->where('personnelID', $personnelID);
-    $this->db->where('DATE_FORMAT(deduct_from, "%Y-%m") =', $month);
-    $query = $this->db->get();
-    return floatval($query->row()->amount ?? 0);
+    $this->db->where('personnelID', $pid);
+    $this->db->where("deduct_from <=", $end);
+    $this->db->where("deduct_to >=", $start);
+    $query = $this->db->get('cashadvance');
+    return $query->row()->amount ?? 0;
 }
-public function get_government_deductions($personnelID, $month)
+
+
+public function get_government_deductions($pid, $month)
 {
-    $deductions = ['sss' => 0, 'pagibig' => 0, 'philhealth' => 0];
+    $start = date('Y-m-01', strtotime($month));
+    $end = date('Y-m-t', strtotime($month));
 
-    $this->db->select('description, amount');
-    $this->db->from('government_deductions');
-    $this->db->where('personnelID', $personnelID);
-    $this->db->where('DATE_FORMAT(deduct_from, "%Y-%m") =', $month);
-    $result = $this->db->get()->result();
+    $this->db->where('personnelID', $pid);
+    $this->db->where("deduct_from <=", $end);
+    $this->db->where("deduct_to >=", $start);
+    $query = $this->db->get('government_deductions');
 
-    foreach ($result as $row) {
-        $desc = strtolower($row->description);
-        if (strpos($desc, 'sss') !== false) {
-            $deductions['sss'] += floatval($row->amount);
-        } elseif (strpos($desc, 'pagibig') !== false) {
-            $deductions['pagibig'] += floatval($row->amount);
-        } elseif (strpos($desc, 'philhealth') !== false || strpos($desc, 'phic') !== false) {
-            $deductions['philhealth'] += floatval($row->amount);
+    $result = ['sss' => 0, 'pagibig' => 0, 'philhealth' => 0];
+    foreach ($query->result() as $row) {
+        if (stripos($row->description, 'sss') !== false) {
+            $result['sss'] += $row->amount;
+        } elseif (stripos($row->description, 'pag-ibig') !== false || stripos($row->description, 'pagibig') !== false) {
+            $result['pagibig'] += $row->amount;
+        } elseif (stripos($row->description, 'philhealth') !== false || stripos($row->description, 'phic') !== false) {
+            $result['philhealth'] += $row->amount;
         }
     }
 
-    return $deductions;
+    return $result;
 }
-public function get_loan_deduction($personnelID, $month)
+
+
+public function get_loan_deduction($pid, $month)
 {
+    $start = date('Y-m-01', strtotime($month));
+    $end = date('Y-m-t', strtotime($month));
+
     $this->db->select_sum('monthly_deduction');
-    $this->db->from('personnelloans');
-    $this->db->where('personnelID', $personnelID);
-    $this->db->where('status', 1); // active
-    $this->db->where('is_paid', 0); // not fully paid
-    $this->db->where('DATE_FORMAT(deduct_from, "%Y-%m") <=', $month);
-    $this->db->where('DATE_FORMAT(deduct_to, "%Y-%m") >=', $month);
-    $query = $this->db->get();
-    return floatval($query->row()->monthly_deduction ?? 0);
+    $this->db->where('personnelID', $pid);
+    $this->db->where('status', 1);
+    $this->db->where('is_paid', 0);
+    $this->db->where("deduct_from <=", $end);
+    $this->db->where("deduct_to >=", $start);
+    $query = $this->db->get('personnelloans');
+    return $query->row()->monthly_deduction ?? 0;
 }
 
 
