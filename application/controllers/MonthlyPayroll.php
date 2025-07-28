@@ -166,5 +166,117 @@ public function update_attendance()
   redirect($_SERVER['HTTP_REFERER']);
 
 }
+public function view_formatted()
+{
+    $month = $this->input->get('month');
+
+    if (!$month) {
+        $this->session->set_flashdata('msg', 'Missing month parameter.');
+        redirect('MonthlyPayroll');
+        return;
+    }
+
+    // Load data for the selected month
+    $data = $this->MonthlyPayroll_model->get_monthly_payroll_records($month);
+
+    $data['start'] = $month . '-01';
+    $data['end'] = $month . '-' . cal_days_in_month(CAL_GREGORIAN, date('m', strtotime($month)), date('Y', strtotime($month)));
+
+    $projectID = $this->input->get('project_id');
+    $this->load->model('Project_model');
+    $project = $this->Project_model->get_project_by_id($projectID);
+    $data['project'] = $project;
+
+    $data['signatories'] = null;
+    $data['show_signatories'] = false;
+    $data['is_summary'] = false;
+    $data['month'] = $month;
+
+    if (!isset($data['personnel']) || !isset($data['dates']) || !isset($data['attendance'])) {
+        $this->session->set_flashdata('msg', 'Missing data for view.');
+        redirect('MonthlyPayroll');
+        return;
+    }
+
+    $attendance_data = [];
+
+    foreach ($data['personnel'] as $p) {
+        $pid = $p->personnelID;
+        $p->reg_hours_per_day = [];
+
+        $total_hours = 0;
+        $total_ot = 0;
+
+        foreach ($data['dates'] as $d) {
+            $day = date('d', strtotime($d));
+            $status = $data['attendance'][$pid][$day]['status'] ?? '';
+            $reg = $data['attendance'][$pid][$day]['reg'] ?? 0;
+            $ot  = $data['attendance'][$pid][$day]['ot'] ?? 0;
+
+            $p->reg_hours_per_day[$d] = [
+                'status' => $status,
+                'hours' => $reg,
+                'overtime_hours' => $ot,
+                'holiday_hours' => 0
+            ];
+
+            $total_hours += $reg;
+            $total_ot += $ot;
+        }
+
+        // Determine rate type and compute salary
+        $rateType = strtolower($p->rateType ?? '');
+        $rateAmount = floatval($p->rateAmount ?? 0);
+
+        if ($rateType === 'month') {
+            $ratePerHour = ($rateAmount / 30) / 8;
+            $p->rate_per_hour = number_format($ratePerHour, 2);
+            $p->amount_reg = number_format($rateAmount, 2);
+            $p->amount_ot = '0.00';
+            $gross = $rateAmount;
+
+        } elseif ($rateType === 'bi-month') {
+            $monthlyAmount = $rateAmount * 2;
+            $ratePerHour = ($monthlyAmount / 30) / 8;
+            $p->rate_per_hour = number_format($ratePerHour, 2);
+            $p->amount_reg = number_format($monthlyAmount, 2);
+            $p->amount_ot = '0.00';
+            $gross = $monthlyAmount;
+
+        } else {
+            continue; // skip hourly/daily
+        }
+
+        $p->gross = number_format($gross, 2);
+
+        // Load deductions (after salary computation)
+        $this->load->model('MonthlyPayroll_model');
+
+        $cash_advance = $this->MonthlyPayroll_model->get_cash_advance($pid, $month);
+        $gov_deductions = $this->MonthlyPayroll_model->get_government_deductions($pid, $month);
+        $loan_deduction = $this->MonthlyPayroll_model->get_loan_deduction($pid, $month);
+
+        $total_deduction = $cash_advance + $gov_deductions['sss'] + $gov_deductions['pagibig'] + $gov_deductions['philhealth'] + $loan_deduction;
+        $take_home = $gross - $total_deduction;
+
+        // Assign to object for view
+        $p->cashAdvance = $cash_advance;
+        $p->sss = $gov_deductions['sss'];
+        $p->pagibig = $gov_deductions['pagibig'];
+        $p->philhealth = $gov_deductions['philhealth'];
+        $p->loan = $loan_deduction;
+        $p->otherDeduction = 0.00;
+        $p->totalDeduction = $total_deduction;
+        $p->takeHome = $take_home;
+
+        $attendance_data[] = $p;
+    }
+
+    $data['attendance_data'] = $attendance_data;
+
+    $this->load->view('monthly_payroll_view', $data);
+}
+
+
 
 }
