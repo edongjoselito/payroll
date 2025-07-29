@@ -805,7 +805,8 @@ $netPay = $salary - $total_deduction;
       <div class="modal-body p-4">
         <div class="row">
           <div class="col-md-6">
-            <p><strong>Employee:</strong> <?= htmlspecialchars($row->first_name . ' ' . $row->last_name) ?></p>
+            <p><strong>Employee:</strong> <?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></p>
+
             <p><strong>Position:</strong> <?= htmlspecialchars($row->position) ?></p>
           <?php if ($row->rateType === 'Month'): ?>
     <?php
