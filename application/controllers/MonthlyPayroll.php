@@ -46,9 +46,11 @@ if (empty($personnelIDs)) {
 
 // Safe to use now
 $existing = $this->db->where('payroll_month', $month)
+                     ->where('settingsID', $settingsID)
                      ->where_in('personnelID', $personnelIDs)
                      ->get('payroll_attendance_monthly')
                      ->num_rows();
+
 
 
     // 🔍 Check for existing records

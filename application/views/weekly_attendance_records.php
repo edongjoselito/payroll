@@ -121,9 +121,16 @@ td:first-child {
                         <label for="view_payroll_month" class="font-weight-bold">Month</label>
                         <select class="form-control" id="view_payroll_month" name="payroll_month" required>
     <option value="">Select Month</option>
-    <?php foreach ($saved_months as $s_month): ?>
-        <option value="<?= $s_month ?>"><?= date('F Y', strtotime($s_month . '-01')) ?></option>
+    <?php if (!empty($saved_months)): ?>
+    <?php foreach ($saved_months as $row): ?>
+        <option value="<?= $row->payroll_month ?>">
+            <?= date('F Y', strtotime($row->payroll_month . '-01')) ?>
+        </option>
     <?php endforeach; ?>
+<?php else: ?>
+    <option disabled>No saved payroll months</option>
+<?php endif; ?>
+
 </select>
 
                     </div>

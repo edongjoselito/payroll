@@ -36,7 +36,8 @@ public function save_payroll_monthly($personnelID, $month, $details)
         'personnelID'    => $personnelID,
         'payroll_month'  => $month,
         'details_json'   => json_encode($details),
-        'date_generated' => date('Y-m-d H:i:s')
+        'date_generated' => date('Y-m-d H:i:s'),
+        'settingsID'     => $this->session->userdata('settingsID')
     ];
     // Upsert logic: update if exists, else insert
     $this->db->where('personnelID', $personnelID);
@@ -67,17 +68,19 @@ public function save_attendance($data)
 
 public function get_saved_months()
 {
+    $settingsID = $this->session->userdata('settingsID');
+
     $this->db->select('DISTINCT(payroll_month)', FALSE);
     $this->db->from('payroll_attendance_monthly');
+    $this->db->where('settingsID', $settingsID);
     $this->db->order_by('payroll_month', 'DESC');
+
     $query = $this->db->get();
-    $result = $query->result_array();
-    $months = [];
-    foreach ($result as $row) {
-        $months[] = $row['payroll_month'];
-    }
-    return $months;
+    return $query->result();  // returns array of objects with ->payroll_month
 }
+
+
+
 public function get_monthly_payroll_records($month)
 {
     // Get all personnel

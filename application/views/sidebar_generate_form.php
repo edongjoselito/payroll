@@ -65,7 +65,6 @@
 <div class="modal fade" id="monthlyPayrollModal" tabindex="-1" role="dialog" aria-labelledby="monthlyPayrollModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-md" role="document">
     <form method="get" action="<?= base_url('MonthlyPayroll/view_formatted') ?>" target="_blank">
-
       <div class="modal-content border-0 shadow-sm">
         <div class="modal-header bg-dark text-white">
           <h5 class="modal-title" id="monthlyPayrollModalLabel">
@@ -78,26 +77,18 @@
 
         <div class="modal-body">
           <div class="form-group">
-            <label for="monthly_project_id" class="font-weight-bold">Project</label>
-            <select name="project_id" id="monthly_project_id" class="form-control select2" required>
-              <option disabled selected>Select Project</option>
-              <?php foreach ($projects as $proj): ?>
-                <option value="<?= $proj->projectID ?>"><?= $proj->projectTitle ?></option>
-              <?php endforeach; ?>
-            </select>
-          </div>
-
-          <div class="form-group mt-3">
-            <label for="monthly_batch" class="font-weight-bold">Saved Payroll Batch</label>
-            <select name="batch" id="monthly_batch" class="form-control select2" required>
-              <option disabled selected>Select Period</option>
-              <?php foreach ($batches as $batch): ?>
-                <option 
-                  value="<?= $batch->projectID . '|' . $batch->start_date . '|' . $batch->end_date ?>"
-                  data-project="<?= $batch->projectID ?>">
-                  <?= date('M d, Y', strtotime($batch->start_date)) ?> - <?= date('M d, Y', strtotime($batch->end_date)) ?>
-                </option>
-              <?php endforeach; ?>
+            <label for="month" class="font-weight-bold">Saved Month</label>
+            <select name="month" id="month" class="form-control" required>
+              <option disabled selected>Select Month</option>
+              <?php if (!empty($saved_months)): ?>
+                <?php foreach ($saved_months as $batch): ?>
+                  <option value="<?= $batch->payroll_month ?>">
+                    <?= date('F Y', strtotime($batch->payroll_month . '-01')) ?>
+                  </option>
+                <?php endforeach; ?>
+              <?php else: ?>
+                <option disabled>No months found</option>
+              <?php endif; ?>
             </select>
           </div>
         </div>
@@ -109,11 +100,10 @@
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
         </div>
       </div>
-      <input type="hidden" name="month" id="hidden_month">
-
     </form>
   </div>
 </div>
+
 
         <!-- Modal Section -->
         <div class="modal fade" id="generatePayrollModal" tabindex="-1" role="dialog" aria-labelledby="generatePayrollLabel" aria-hidden="true">
