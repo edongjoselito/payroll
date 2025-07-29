@@ -110,7 +110,7 @@ td:first-child {
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="viewPayrollModalLabel">
-                        <i class="mdi mdi-calendar-month"></i> Select Month to View
+                        <i class="mdi mdi-calendar-month"></i> Select Payroll Range to View
                     </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span>&times;</span>
@@ -118,21 +118,29 @@ td:first-child {
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label for="view_payroll_month" class="font-weight-bold">Month</label>
+                        <label for="view_payroll_month" class="font-weight-bold">Payroll Month</label>
                         <select class="form-control" id="view_payroll_month" name="payroll_month" required>
-    <option value="">Select Month</option>
-    <?php if (!empty($saved_months)): ?>
-    <?php foreach ($saved_months as $row): ?>
-        <option value="<?= $row->payroll_month ?>">
-            <?= date('F Y', strtotime($row->payroll_month . '-01')) ?>
-        </option>
-    <?php endforeach; ?>
-<?php else: ?>
-    <option disabled>No saved payroll months</option>
-<?php endif; ?>
+                            <option value="">Select Month</option>
+                            <?php if (!empty($saved_months)): ?>
+                                <?php foreach ($saved_months as $row): ?>
+                                    <option value="<?= $row->payroll_month ?>">
+                                        <?= date('F Y', strtotime($row->payroll_month . '-01')) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            <?php else: ?>
+                                <option disabled>No saved payroll months</option>
+                            <?php endif; ?>
+                        </select>
+                    </div>
 
-</select>
+                    <div class="form-group">
+                        <label for="from_date" class="font-weight-bold">From Date</label>
+                        <input type="date" name="from_date" id="from_date" class="form-control" required>
+                    </div>
 
+                    <div class="form-group">
+                        <label for="to_date" class="font-weight-bold">To Date</label>
+                        <input type="date" name="to_date" id="to_date" class="form-control" required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -143,6 +151,7 @@ td:first-child {
         </form>
     </div>
 </div>
+
 <!-- Modal: View Attendance Records -->
 <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-md" role="document">

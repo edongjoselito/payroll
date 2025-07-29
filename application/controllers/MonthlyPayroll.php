@@ -112,9 +112,12 @@ public function generate()
 
 
     // Save attendance/payroll data
-   public function save()
+public function save()
 {
     $month = $this->input->post('payroll_month');
+    $from = $this->input->post('from_date');
+    $to = $this->input->post('to_date');
+
     $personnelIDs = $this->input->post('personnelID');
     $attendance_status = $this->input->post('attendance_status');
     $regular_hours = $this->input->post('regular_hours');
@@ -122,6 +125,7 @@ public function generate()
 
     foreach ($personnelIDs as $personnelID) {
         $details = [];
+
         // Loop through days (all days posted for this personnel)
         if (isset($attendance_status[$personnelID])) {
             foreach ($attendance_status[$personnelID] as $date => $status) {
@@ -133,45 +137,68 @@ public function generate()
                 ];
             }
         }
+
+        // ✅ Save the selected range inside the JSON (as _range key)
+        $details['_range'] = [
+            'from' => $from,
+            'to' => $to,
+        ];
+
         // Save (insert or update)
         $this->MonthlyPayroll_model->save_payroll_monthly($personnelID, $month, $details);
     }
-$this->session->set_flashdata('msg', '✅ Monthly payroll saved successfully!');
-$this->session->set_userdata('payroll_month', $month);
 
-// Append ?saved=true to the referer so we can detect success later
-$redirect_url = $_SERVER['HTTP_REFERER'];
-$redirect_url .= (strpos($redirect_url, '?') === false) ? '?saved=true' : '&saved=true';
+    $this->session->set_flashdata('msg', '✅ Monthly payroll saved successfully!');
+    $this->session->set_userdata('payroll_month', $month);
 
-redirect($redirect_url);
+    // Append ?saved=true to the referer so we can detect success later
+    $redirect_url = $_SERVER['HTTP_REFERER'];
+    $redirect_url .= (strpos($redirect_url, '?') === false) ? '?saved=true' : '&saved=true';
 
-
+    redirect($redirect_url);
 }
+
 public function view_record()
 {
-    // Get month from POST or session fallback
     $month = $this->input->post('payroll_month');
+   $from = $this->input->post('from_date');
+$to   = $this->input->post('to_date');
 
-    if (!$month) {
-        $month = $this->session->userdata('payroll_month'); // fallback for refresh/redirect
-    } else {
-        $this->session->set_userdata('payroll_month', $month); // set on valid post
-    }
+if (!$month) {
+    $month = $this->session->userdata('payroll_month');
+} else {
+    $this->session->set_userdata('payroll_month', $month);
+}
 
-    if (!$month) {
-        $this->session->set_flashdata('msg', 'Please select a month.');
-        redirect('MonthlyPayroll');
-    }
+// ✅ Use fallback if not posted
+if (!$from) {
+    $from = $this->session->userdata('payroll_from');
+}
+if (!$to) {
+    $to = $this->session->userdata('payroll_to');
+}
 
-    // Get all payroll records for the selected month
-    $records = $this->MonthlyPayroll_model->get_monthly_payroll_records($month);
+if (!$from || !$to) {
+    $this->session->set_flashdata('msg', 'Please select a valid date range.');
+    redirect('MonthlyPayroll');
+}
+
+
+    // Save range to session (optional)
+    $this->session->set_userdata('payroll_from', $from);
+    $this->session->set_userdata('payroll_to', $to);
+
+    $records = $this->MonthlyPayroll_model->get_monthly_payroll_records($month, $from, $to);
 
     $data['month'] = $month;
+    $data['from'] = $from;
+    $data['to'] = $to;
     $data['records'] = $records;
     $data['saved_months'] = $this->MonthlyPayroll_model->get_saved_months();
 
     $this->load->view('monthly_payroll_records', $data);
 }
+
 
 public function update_attendance()
 {

@@ -29,28 +29,51 @@ public function get_all_personnel($settingsID = null, $allowedTypes = ['Bi-Month
 
 
 
-public function save_payroll_monthly($personnelID, $month, $details)
+public function save_payroll_monthly($personnelID, $month, $newDetails)
 {
-    // $details is an associative array: [ '01' => ['status'=>'Present', ...], ...]
+    $settingsID = $this->session->userdata('settingsID');
+
+    // Prepare initial structure
     $data = [
         'personnelID'    => $personnelID,
         'payroll_month'  => $month,
-        'details_json'   => json_encode($details),
         'date_generated' => date('Y-m-d H:i:s'),
-        'settingsID'     => $this->session->userdata('settingsID')
+        'settingsID'     => $settingsID
     ];
-    // Upsert logic: update if exists, else insert
+
+    // Check if record exists
     $this->db->where('personnelID', $personnelID);
     $this->db->where('payroll_month', $month);
-    $query = $this->db->get('payroll_attendance_monthly');
-    if ($query->num_rows() > 0) {
+    $this->db->where('settingsID', $settingsID);
+    $existing = $this->db->get('payroll_attendance_monthly')->row();
+
+    if ($existing) {
+        $existingDetails = json_decode($existing->details_json, true);
+        if (!is_array($existingDetails)) $existingDetails = [];
+
+        // ✅ Merge new entries by day (skip _range)
+        foreach ($newDetails as $day => $entry) {
+            if ($day === '_range') continue;
+            $existingDetails[$day] = $entry;
+        }
+
+        // ✅ Optionally update _range to reflect the latest submitted range
+        $existingDetails['_range'] = $newDetails['_range'] ?? [];
+
+        $data['details_json'] = json_encode($existingDetails);
+
+        // Update
         $this->db->where('personnelID', $personnelID);
         $this->db->where('payroll_month', $month);
+        $this->db->where('settingsID', $settingsID);
         $this->db->update('payroll_attendance_monthly', $data);
     } else {
+        // Insert
+        $data['details_json'] = json_encode($newDetails);
         $this->db->insert('payroll_attendance_monthly', $data);
     }
 }
+
 public function save_attendance($data)
 {
     $this->db->where('personnelID', $data['personnelID']);
@@ -81,7 +104,7 @@ public function get_saved_months()
 
 
 
-public function get_monthly_payroll_records($month)
+public function get_monthly_payroll_records($month, $filterFrom = null, $filterTo = null)
 {
     // Get all personnel
     $this->db->from('personnel');
@@ -92,35 +115,55 @@ public function get_monthly_payroll_records($month)
     // Get all payroll monthly records for the selected month
     $rows = $this->db->get_where('payroll_attendance_monthly', ['payroll_month' => $month])->result();
 
-   $year = (int)substr($month, 0, 4);
-$monthNum = (int)substr($month, 5, 2);
+    $year = (int)substr($month, 0, 4);
+    $monthNum = (int)substr($month, 5, 2);
 
-// Collect actual days from details_json
-$dateSet = [];
+    // Collect actual days from details_json
+    $dateSet = [];
 
-foreach ($rows as $row) {
-    $details = json_decode($row->details_json, true);
-    if (is_array($details)) {
-        foreach (array_keys($details) as $day) {
-            $date = sprintf('%04d-%02d-%02d', $year, $monthNum, $day);
-            $dateSet[$date] = true;
+    foreach ($rows as $row) {
+        $details = json_decode($row->details_json, true);
+        if (is_array($details)) {
+            foreach ($details as $day => $entry) {
+                if ($day === '_range') continue;
+
+                $date = sprintf('%04d-%02d-%02d', $year, $monthNum, (int)$day);
+
+                // ✅ Filter by from/to if given
+                if ($filterFrom && $filterTo && ($date < $filterFrom || $date > $filterTo)) {
+                    continue;
+                }
+
+                $dateSet[$date] = true;
+            }
         }
     }
-}
 
-// Sort and reindex dates
-$dates = array_keys($dateSet);
-sort($dates);
+    // Sort and reindex dates
+    $dates = array_keys($dateSet);
+    sort($dates);
 
     // Map personnelID => [date => [...]]
     $attendance = [];
     foreach ($rows as $row) {
         $details = json_decode($row->details_json, true);
         if (!$details) $details = [];
-        $attendance[$row->personnelID] = $details;
+
+        $personnelID = $row->personnelID;
+        foreach ($details as $day => $entry) {
+            if ($day === '_range') continue;
+
+            $date = sprintf('%04d-%02d-%02d', $year, $monthNum, (int)$day);
+
+            if ($filterFrom && $filterTo && ($date < $filterFrom || $date > $filterTo)) {
+                continue;
+            }
+
+            $attendance[$personnelID][$day] = $entry;
+        }
     }
 
-    // Date range for the month
+    // Date range for the month (used for deductions)
     $start = date('Y-m-01', strtotime($month));
     $end = date('Y-m-t', strtotime($month));
 
@@ -205,6 +248,7 @@ sort($dates);
         'attendance' => $attendance,
     ];
 }
+
 
 
 
