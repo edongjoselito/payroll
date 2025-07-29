@@ -600,23 +600,27 @@ $(document).ready(function () {
     });
 
     // ✅ Dynamic field logic based on status
-    function toggleHourFields() {
-        const status = $('#editStatus').val();
+   function toggleHourFields() {
+    const status = $('#editStatus').val();
 
-        // Always show regular + overtime, hide holiday
-        $('#regularHoursWrapper').show();
-        $('#overtimeWrapper').show();
-        $('#editHoliday').closest('.form-group').hide(); // always hide holiday hours
+    // Always show regular + overtime, hide holiday
+    $('#regularHoursWrapper').show();
+    $('#overtimeWrapper').show();
+    $('#editHoliday').closest('.form-group').hide(); // always hide holiday hours
 
-        // Set editable states
+    // Overtime is always editable
+    $('#editOvertime').prop('readonly', false);
+
+    if (status === 'Absent' || status === 'Day Off') {
+        // Lock regular hours to 0.00
+        $('#editHours').val('0.00').prop('readonly', true);
+    } else {
+        // Allow user to edit, but don't blank it
         $('#editHours').prop('readonly', false);
-        $('#editOvertime').prop('readonly', false);
-
-        if (status === 'Absent' || status === 'Day Off') {
-            // Regular = readonly, Holiday = hidden, Overtime = editable
-            $('#editHours').prop('readonly', true);
-        }
+        // Do not change the value here — retain what's already loaded
     }
+}
+
 
     // Edit modal trigger
     $('.edit-attendance').on('click', function () {
