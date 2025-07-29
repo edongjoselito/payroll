@@ -156,7 +156,10 @@ public function get_all_personnel($settingsID, $projectID)
     $this->db->where('settingsID', $settingsID);
     $this->db->where("personnelID NOT IN ($subQuery)", null, false);
 
-    return $this->db->get('personnel')->result();
+   $this->db->order_by('last_name', 'ASC');
+$this->db->order_by('first_name', 'ASC');
+return $this->db->get('personnel')->result();
+
 }
 
 
@@ -169,7 +172,10 @@ public function get_assignments_by_project($projectID)
     $this->db->join('personnel AS p', 'ppa.personnelID = p.personnelID');
     $this->db->where('ppa.projectID', $projectID);
     $this->db->order_by('p.last_name, p.first_name, p.middle_name'); // ✅ sort alphabetically
-    return $this->db->get()->result();
+    $this->db->order_by('p.last_name', 'ASC');
+$this->db->order_by('p.first_name', 'ASC');
+return $this->db->get()->result();
+
 }
 
 
