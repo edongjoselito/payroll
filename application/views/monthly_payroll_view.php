@@ -355,14 +355,7 @@ th {
   <class="print-container">
 <div class="header-box">
   <div class="box-content">
-    <div class="info-row">
-      <i class="fas fa-project-diagram"></i>
-      <strong>PROJECT</strong><span>: <?= $project->projectTitle ?? 'N/A' ?></span>
-    </div>
-    <div class="info-row">
-      <i class="fas fa-map-marker-alt"></i>
-      <strong>LOCATION</strong><span>: <?= $project->projectLocation ?? 'Unknown' ?></span>
-    </div>
+   
     <div class="info-row">
       <i class="far fa-calendar-alt"></i>
       <strong>PERIOD</strong><span>: <?= date('F d, Y', strtotime($start)) ?> - <?= date('F d, Y', strtotime($end)) ?></span>
