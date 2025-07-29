@@ -43,35 +43,53 @@ public function generate()
     $personnel = $this->MonthlyPayroll_model->get_all_personnel($settingsID, ['Bi-Month', 'Month']);
     $personnelIDs = array_column($personnel, 'personnelID');
 
-    // ✅ Check before using in `where_in`
     if (empty($personnelIDs)) {
         $this->session->set_flashdata('error', 'No personnel found for this payroll period.');
         redirect('WeeklyAttendance');
         return;
     }
 
-    // 🔍 Check for existing records
-    $existing = $this->db->where('payroll_month', $month)
-                         ->where('settingsID', $settingsID)
-                         ->where_in('personnelID', $personnelIDs)
-                         ->get('payroll_attendance_monthly')
-                         ->num_rows();
+    // ✅ Build date range to check overlap
+    $dates = [];
+    $current = strtotime($from);
+    $end = strtotime($to);
+    while ($current <= $end) {
+        $dates[] = date('d', $current); // only days (01 to 31)
+        $current = strtotime('+1 day', $current);
+    }
 
-    if ($existing >= count($personnel)) {
-        // ❌ Already generated → redirect to WeeklyAttendance with warning
+    // 🔍 Check if this date range already exists per personnel
+    $existingRows = $this->db->where('payroll_month', $month)
+                             ->where('settingsID', $settingsID)
+                             ->where_in('personnelID', $personnelIDs)
+                             ->get('payroll_attendance_monthly')
+                             ->result();
+
+    $overlapCount = 0;
+    foreach ($existingRows as $row) {
+        $existingDetails = json_decode($row->details_json, true);
+        if (!is_array($existingDetails)) continue;
+
+        foreach ($dates as $day) {
+            if (array_key_exists(ltrim($day, '0'), $existingDetails) || array_key_exists($day, $existingDetails)) {
+                $overlapCount++;
+                break; // only count once per personnel
+            }
+        }
+    }
+
+    if ($overlapCount >= count($personnel)) {
         $this->session->set_flashdata('duplicate_msg',
-            'Monthly payroll for <strong>' . date('F Y', strtotime($month . '-01')) . '</strong> has already been generated for all personnel.');
+            'Monthly payroll for <strong>' . date('F Y', strtotime($month . '-01')) . '</strong> covering this range has already been generated for all personnel.');
         redirect('WeeklyAttendance');
         return;
     }
 
-    // ✅ Proceed to generate date range
-    $dates = [];
+    // ✅ Proceed to generation
+    $fullDates = [];
     $current = strtotime($from);
-    $end = strtotime($to);
-
-    while ($current <= $end) {
-        $dates[] = date('Y-m-d', $current);
+    while ($current <= strtotime($to)) {
+        $fullDates[] = date('Y-m-d', $current);
         $current = strtotime('+1 day', $current);
     }
 
@@ -79,7 +97,7 @@ public function generate()
 
     $data = [
         'personnel' => $personnel,
-        'dates' => $dates,
+        'dates' => $fullDates,
         'month' => $month,
         'from' => $from,
         'to' => $to,
@@ -88,7 +106,6 @@ public function generate()
 
     $this->load->view('monthly_payroll_input', $data);
 }
-
 
 
 

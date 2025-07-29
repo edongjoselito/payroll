@@ -48,7 +48,7 @@
               <i class="mdi mdi-calculator-variant"></i> Generate Payroll
             </button>
     <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#monthlyPayrollModal">
-  <i class="mdi mdi-calendar-clock"></i> Monthly/Bi-Month Payroll
+  <i class="mdi mdi-calendar-clock"></i>Bi-Month Payroll
 </button>
 
 <button type="button" class="btn btn-info" data-toggle="modal" data-target="#viewSavedPayrollModal">
