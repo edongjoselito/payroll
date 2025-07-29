@@ -92,14 +92,25 @@ public function get_monthly_payroll_records($month)
     // Get all payroll monthly records for the selected month
     $rows = $this->db->get_where('payroll_attendance_monthly', ['payroll_month' => $month])->result();
 
-    // Build all days in the selected month
-    $year = (int)substr($month, 0, 4);
-    $monthNum = (int)substr($month, 5, 2);
-    $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $monthNum, $year);
-    $dates = [];
-    for ($d = 1; $d <= $daysInMonth; $d++) {
-        $dates[] = sprintf('%04d-%02d-%02d', $year, $monthNum, $d);
+   $year = (int)substr($month, 0, 4);
+$monthNum = (int)substr($month, 5, 2);
+
+// Collect actual days from details_json
+$dateSet = [];
+
+foreach ($rows as $row) {
+    $details = json_decode($row->details_json, true);
+    if (is_array($details)) {
+        foreach (array_keys($details) as $day) {
+            $date = sprintf('%04d-%02d-%02d', $year, $monthNum, $day);
+            $dateSet[$date] = true;
+        }
     }
+}
+
+// Sort and reindex dates
+$dates = array_keys($dateSet);
+sort($dates);
 
     // Map personnelID => [date => [...]]
     $attendance = [];

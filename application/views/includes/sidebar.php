@@ -55,18 +55,6 @@
                         </ul>
                     </li>
 
- <li>
-                        <a href="javascript: void(0);" class="waves-effect">
-                            <i class="fas fa-coins"></i>
-                            <span> Manage Loans </span>
-                            <span class="menu-arrow"></span>
-                        </a>
-
-                        <ul class="nav-second-level nav" aria-expanded="false">
-                            <li><a href="<?= base_url(); ?>Loan/personnel_loan"> Personnel Loans</a></li>
-                        </ul>
-                        
-                    </li>
 <li>
     <a href="javascript: void(0);" class="waves-effect">
         <i class="fas fa-hand-holding-usd"></i>
@@ -75,9 +63,11 @@
     </a>
 
     <ul class="nav-second-level nav" aria-expanded="false">
+         <li><a href="<?= base_url(); ?>Loan/personnel_loan"> Personnel Loans</a></li>
         <li><a href="<?= base_url(); ?>Borrow/cash_advance">Cash Advance</a></li>
-        <li><a href="<?= base_url(); ?>Borrow/materials_loan">Other Deductions</a></li>
         <li><a href="<?= base_url(); ?>Borrow/govt_deductions">Gov't Deductions</a></li>
+        <li><a href="<?= base_url(); ?>Borrow/materials_loan">Other Deductions</a></li>
+        
     </ul>
 </li>
 

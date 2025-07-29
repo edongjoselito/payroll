@@ -234,15 +234,40 @@ tbody tr td {
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
 <script>
-$(document).ready(function(){
-    $('.edit-pen').click(function(){
-        $('#editPersonnelID').val($(this).data('personnel'));
-        $('#editDay').val($(this).data('day'));
-        $('#editStatus').val($(this).data('status'));
-        $('#editReg').val($(this).data('reg'));
-        $('#editOT').val($(this).data('ot'));
+$(document).ready(function() {
+    function toggleRegField(status) {
+        const disableReg = (status === 'Absent' || status === 'Day Off');
+        
+        $('#editReg').val(disableReg ? 0 : $('#editReg').val()).prop('readonly', disableReg);
+    }
+$('#editReg').on('input', function () {
+    let val = parseFloat($(this).val());
+    if (val > 8) {
+        alert("Regular hours cannot exceed 8 per day.");
+        $(this).val(8);
+    }
+});
+    $('.edit-pen').click(function() {
+        const personnel = $(this).data('personnel');
+        const day = $(this).data('day');
+        const status = $(this).data('status');
+        const reg = parseFloat($(this).data('reg')) || 0;
+        const ot = parseFloat($(this).data('ot')) || 0;
+
+        $('#editPersonnelID').val(personnel);
+        $('#editDay').val(day);
+        $('#editStatus').val(status);
+        $('#editReg').val(reg);
+        $('#editOT').val(ot);
+
+        toggleRegField(status);
+    });
+
+    $('#editStatus').on('change', function() {
+        toggleRegField($(this).val());
     });
 });
 </script>
+
 </body>
 </html>
