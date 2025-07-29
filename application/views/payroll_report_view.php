@@ -589,6 +589,8 @@ while ($loopDate <= $endDate):
             $base = $row->rateAmount / 8;
         } elseif ($row->rateType === 'Month') {
             $base = ($row->rateAmount / 30) / 8;
+        }elseif ($row->rateType === 'Bi-Month') {
+            $base = ($row->rateAmount / 15) / 8;
         }
 
         // Check if it's a holiday
@@ -672,7 +674,12 @@ while ($loopDate <= $endDate):
             $regTotalMinutes += $regHours * 60;
             $otTotalMinutes += $otHours * 60;
             $totalMinutes += ($regHours + $otHours) * 60;
-            if (($regHours + $otHours) > 0) $totalDays += 1;
+            $totalHoursToday = $regHours + $otHours;
+if ($totalHoursToday > 0) {
+    $equivalentDay = $totalHoursToday / 8; // 8 hours = 1 day
+    $totalDays += $equivalentDay;
+}
+
         }
 
     } elseif (strtolower(trim($raw)) === 'day off') {
@@ -691,6 +698,8 @@ while ($loopDate <= $endDate):
             $base = $row->rateAmount / 8;
         } elseif ($row->rateType === 'Month') {
             $base = ($row->rateAmount / 30) / 8;
+        } elseif ($row->rateType === 'Bi-Month') {
+            $base = ($row->rateAmount / 15) / 8;
         }
 
         $regAmount += $regHours * $base;
@@ -699,7 +708,10 @@ while ($loopDate <= $endDate):
         $regTotalMinutes += $reg;
         $otTotalMinutes += $ot;
         $totalMinutes += ($reg + $ot);
-        if ($decimalHours > 0) $totalDays += 1;
+       if ($decimalHours > 0) {
+    $totalDays += $decimalHours / 8;
+}
+
 
         echo "<td>" . displayAmount($regHours) . "</td>";
         echo "<td>" . displayAmount($otHours) . "</td>";
@@ -751,7 +763,8 @@ $netPay = $salary - $total_deduction;
 
 <td><?= displayAmount($regTotalMinutes / 60) ?></td>
 <td><?= number_format($otTotalMinutes / 60, 2) ?></td>  
-<td><?= $totalDays ?></td> 
+<td><?= number_format($totalDays, 2) ?></td>
+
 
 <td><?= displayAmount($regAmount) ?></td>
 <td><?= displayAmount($otAmount) ?></td>

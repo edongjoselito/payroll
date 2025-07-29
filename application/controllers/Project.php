@@ -447,6 +447,7 @@ switch (strtolower($row->rateType)) {
         $reg_pay = $row->total_reg_hours * $hourly_rate;
         $ot_pay = $row->total_ot_hours * $hourly_rate;
         break;
+        
 }
 
 $gross = round($reg_pay + $ot_pay, 2);
