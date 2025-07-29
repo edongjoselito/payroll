@@ -21,41 +21,39 @@ class MonthlyPayroll extends CI_Controller
 
     // After selecting month
 public function generate()
-{if ($this->input->get('saved') === 'true') {
-    $this->session->keep_flashdata('msg'); // keep the success message alive
-}
+{
+    if ($this->input->get('saved') === 'true') {
+        $this->session->keep_flashdata('msg'); // keep the success message alive
+    }
 
-    $month = $this->input->post('payroll_month');
+    // NEW: Accept date range input
+    $from = $this->input->post('from_date');
+    $to   = $this->input->post('to_date');
 
-    if (!$month) {
-        $this->session->set_flashdata('error', 'Please select a valid month.');
-        redirect('WeeklyAttendance'); // ✅ Redirect here if no month selected
+    if (!$from || !$to || strtotime($from) > strtotime($to)) {
+        $this->session->set_flashdata('error', 'Please select a valid date range.');
+        redirect('WeeklyAttendance');
         return;
     }
 
+    // Use month from the 'from' date for backward compatibility
+    $month = date('Y-m', strtotime($from));
+
     $settingsID = $this->session->userdata('settingsID');
-   $personnel = $this->MonthlyPayroll_model->get_all_personnel($settingsID, ['Bi-Month', 'Month']);
-$personnelIDs = array_column($personnel, 'personnelID');
+    $personnel = $this->MonthlyPayroll_model->get_all_personnel($settingsID, ['Bi-Month', 'Month']);
+    $personnelIDs = array_column($personnel, 'personnelID');
 
-// ✅ Check before using in `where_in`
-if (empty($personnelIDs)) {
-    $this->session->set_flashdata('error', 'No personnel found for this payroll period.');
-    redirect('WeeklyAttendance');
-    return;
-}
-
-// Safe to use now
-$existing = $this->db->where('payroll_month', $month)
-                     ->where('settingsID', $settingsID)
-                     ->where_in('personnelID', $personnelIDs)
-                     ->get('payroll_attendance_monthly')
-                     ->num_rows();
-
-
+    // ✅ Check before using in `where_in`
+    if (empty($personnelIDs)) {
+        $this->session->set_flashdata('error', 'No personnel found for this payroll period.');
+        redirect('WeeklyAttendance');
+        return;
+    }
 
     // 🔍 Check for existing records
     $existing = $this->db->where('payroll_month', $month)
-                         ->where_in('personnelID', array_column($personnel, 'personnelID'))
+                         ->where('settingsID', $settingsID)
+                         ->where_in('personnelID', $personnelIDs)
                          ->get('payroll_attendance_monthly')
                          ->num_rows();
 
@@ -67,14 +65,14 @@ $existing = $this->db->where('payroll_month', $month)
         return;
     }
 
-    // ✅ Proceed if not duplicate
-    $year = (int)substr($month, 0, 4);
-    $monthNum = (int)substr($month, 5, 2);
-    $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $monthNum, $year);
-
+    // ✅ Proceed to generate date range
     $dates = [];
-    for ($d = 1; $d <= $daysInMonth; $d++) {
-        $dates[] = sprintf('%04d-%02d-%02d', $year, $monthNum, $d);
+    $current = strtotime($from);
+    $end = strtotime($to);
+
+    while ($current <= $end) {
+        $dates[] = date('Y-m-d', $current);
+        $current = strtotime('+1 day', $current);
     }
 
     $saved_months = $this->MonthlyPayroll_model->get_saved_months();
@@ -83,11 +81,14 @@ $existing = $this->db->where('payroll_month', $month)
         'personnel' => $personnel,
         'dates' => $dates,
         'month' => $month,
+        'from' => $from,
+        'to' => $to,
         'saved_months' => $saved_months,
     ];
 
     $this->load->view('monthly_payroll_input', $data);
 }
+
 
 
 

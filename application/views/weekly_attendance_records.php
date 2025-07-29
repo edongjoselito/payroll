@@ -103,7 +103,7 @@ td:first-child {
 </button>
 </div>
 
-<!-- View Payroll Modal -->
+<!-- View Monthly Modal -->
 <div class="modal fade" id="viewPayrollModal" tabindex="-1" role="dialog" aria-labelledby="viewPayrollModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
         <form method="post" action="<?= base_url('MonthlyPayroll/view_record') ?>">

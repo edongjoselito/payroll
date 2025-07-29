@@ -153,11 +153,17 @@ input.is-invalid {
                     </button>
                 </div>
                 <div class="modal-body">
-                    <div class="form-group">
-                        <label for="payroll_month" class="font-weight-bold">Month</label>
-                        <input type="month" class="form-control" id="payroll_month" name="payroll_month"
-                            value="<?= date('Y-m'); ?>" required>
-                    </div>
+                   <div class="form-group">
+    <label for="from_date" class="font-weight-bold">From</label>
+    <input type="date" class="form-control" id="from_date" name="from_date"
+        value="<?= date('Y-m-01'); ?>" required>
+</div>
+<div class="form-group">
+    <label for="to_date" class="font-weight-bold">To</label>
+    <input type="date" class="form-control" id="to_date" name="to_date"
+        value="<?= date('Y-m-t'); ?>" required>
+</div>
+
                 </div>
                 <div class="modal-footer">
                     <button type="submit" class="btn btn-success">Proceed</button>
