@@ -199,6 +199,7 @@ public function view_formatted()
     $data['end'] = $month . '-' . cal_days_in_month(CAL_GREGORIAN, date('m', strtotime($month)), date('Y', strtotime($month)));
 
     $projectID = $this->input->get('project_id');
+    
     $this->load->model('Project_model');
     $this->load->model('SettingsModel');
 
