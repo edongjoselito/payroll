@@ -521,6 +521,35 @@ foreach ($attendance_data as $row) {
 }
 ?> -->
 
+<?php
+// Initialize total accumulators
+$totalGross = 0;
+$totalCA = 0;
+$totalSSS = 0;
+$totalPagibig = 0;
+$totalPHIC = 0;
+$totalLoan = 0;
+$totalOther = 0;
+$totalDeduction = 0;
+$totalNet = 0;
+
+// 👉 Calculate dynamic colspan for the TOTAL row
+$dateColumnCount = 0;
+$loopDate = strtotime($start);
+while ($loopDate <= strtotime($end)) {
+    $dateColumnCount += 2; // 2 columns per day (Reg. & OT)
+    $loopDate = strtotime('+1 day', $loopDate);
+}
+
+$fixedColsBeforeDays = 5; // L/N, Name, Position, Rate, Rate/Hour
+$totalTimeCols = 3;       // Reg, OT, Days
+$amountCols = 2;          // Reg, OT in Amount section
+
+if ($hasRegularHoliday) $amountCols++;
+if ($hasSpecialHoliday) $amountCols++;
+
+$totalPrefixCols = $fixedColsBeforeDays + $dateColumnCount + $totalTimeCols + $amountCols;
+?>
 
 <?php $ln = 1; foreach ($attendance_data as $row): ?>
 <?php if (!in_array($row->rateType, ['Month', 'Bi-Month'])) continue; ?>
@@ -755,6 +784,15 @@ $otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60,
 $salary = $regAmount + $otAmount + $amountRegularHoliday + $amountSpecialHoliday;
 $total_deduction = $cash_advance + $sss + $pagibig + $philhealth + $loan + $other_deduction;
 $netPay = $salary - $total_deduction;
+$totalGross += $salary;
+$totalCA += $cash_advance;
+$totalSSS += $sss;
+$totalPagibig += $pagibig;
+$totalPHIC += $philhealth;
+$totalLoan += $loan;
+$totalOther += $other_deduction;
+$totalDeduction += $total_deduction;
+$totalNet += $netPay;
 
 
 ?>
@@ -869,13 +907,27 @@ $netPay = $salary - $total_deduction;
   </div>
 </div>
 <?php endforeach; ?>
+<tr style="font-weight:bold; background:#f1f1f1;">
+  <td colspan="<?= $totalPrefixCols ?>" class="text-right">TOTAL</td>
+  <td><?= number_format($totalGross, 2) ?></td>
+  <td><?= number_format($totalCA, 2) ?></td>
+  <td><?= number_format($totalSSS, 2) ?></td>
+  <td><?= number_format($totalPagibig, 2) ?></td>
+  <td><?= number_format($totalPHIC, 2) ?></td>
+  <td><?= number_format($totalLoan, 2) ?></td>
+  <td><?= number_format($totalOther, 2) ?></td>
+  <td><?= number_format($totalDeduction, 2) ?></td>
+  <td><?= number_format($totalNet, 2) ?></td>
+  <?php if (empty($is_summary)): ?>
+    <td colspan="3"></td>
+  <?php endif; ?>
+</tr>
 
 </tbody>
 
 </table>
-<div style="text-align: right; font-weight: bold; font-size: 15px; margin-top: 10px;">
-    TOTAL PAYROLL = ₱ <?= number_format($totalPayroll ?? 0, 2) ?>
-</div>
+
+
 
 
 

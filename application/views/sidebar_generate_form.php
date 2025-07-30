@@ -161,7 +161,7 @@
 <!-- View Saved Payroll Modal -->
 <div class="modal fade" id="viewSavedPayrollModal" tabindex="-1" role="dialog" aria-labelledby="viewSavedPayrollModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-md" role="document">
-    <form action="<?= base_url('project/view_payroll_batch') ?>" method="get">
+    <form action="<?= base_url('project/view_payroll_batch') ?>" method="get" target="_blank">
       <div class="modal-content border-0 shadow-sm">
         <div class="modal-header bg-info text-white">
           <h5 class="modal-title" id="viewSavedPayrollModalLabel">
