@@ -61,50 +61,43 @@
 
           </div>
         </div>
-<!-- Monthly/Bi-Month Payroll Modal -->
-<div class="modal fade" id="monthlyPayrollModal" tabindex="-1" role="dialog" aria-labelledby="monthlyPayrollModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-md" role="document">
-    <form method="get" action="<?= base_url('MonthlyPayroll/view_formatted') ?>" target="_blank">
-      <div class="modal-content border-0 shadow-sm">
-        <div class="modal-header bg-dark text-white">
-          <h5 class="modal-title" id="monthlyPayrollModalLabel">
-            <i class="mdi mdi-calendar-clock"></i> Generate Monthly/Bi-Month Payroll
-          </h5>
-          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-            <span>&times;</span>
-          </button>
-        </div>
 
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="month" class="font-weight-bold">Saved Month</label>
-            <select name="month" id="month" class="form-control" required>
-              <option disabled selected>Select Month</option>
-              <?php if (!empty($saved_months)): ?>
-                <?php foreach ($saved_months as $batch): ?>
-                  <option value="<?= $batch->payroll_month ?>">
-                    <?= date('F Y', strtotime($batch->payroll_month . '-01')) ?>
-                  </option>
-                <?php endforeach; ?>
-              <?php else: ?>
-                <option disabled>No months found</option>
-              <?php endif; ?>
-            </select>
-          </div>
-        </div>
+                    <!-- Monthly/Bi-Month Payroll Modal -->
+                    <div class="modal fade" id="monthlyPayrollModal" tabindex="-1" role="dialog" aria-labelledby="monthlyPayrollModalLabel" aria-hidden="true">
+                      <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+                        <form method="get" action="<?= base_url('MonthlyPayroll/view_formatted') ?>" target="_blank">
+                          <div class="modal-content border-0 shadow-sm">
+                            <div class="modal-header bg-dark text-white">
+                              <h5 class="modal-title" id="monthlyPayrollModalLabel">
+                                <i class="mdi mdi-calendar-clock"></i> Generate Payroll by Date Range
+                              </h5>
+                              <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                                <span>&times;</span>
+                              </button>
+                            </div>
 
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-dark">
-            <i class="mdi mdi-check"></i> Generate
-          </button>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
+                            <div class="modal-body">
+                              <div class="form-group">
+                                <label class="font-weight-bold">From (Start Date)</label>
+                                <input type="date" name="start" class="form-control" required>
+                              </div>
 
+                              <div class="form-group">
+                                <label class="font-weight-bold">To (End Date)</label>
+                                <input type="date" name="end" class="form-control" required>
+                              </div>
+                            </div>
 
+                            <div class="modal-footer">
+                              <button type="submit" class="btn btn-dark">
+                                <i class="mdi mdi-check"></i> Generate
+                              </button>
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            </div>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
         <!-- Modal Section -->
         <div class="modal fade" id="generatePayrollModal" tabindex="-1" role="dialog" aria-labelledby="generatePayrollLabel" aria-hidden="true">
           <div class="modal-dialog modal-dialog-centered modal-md" role="document">

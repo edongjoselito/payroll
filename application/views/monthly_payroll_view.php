@@ -531,6 +531,7 @@ foreach ($attendance_data as $row) {
 
 $regAmount = 0;
 $otAmount = 0;
+
 $regTotalMinutes = 0;
 $otTotalMinutes = 0;
 $totalMinutes = 0;
@@ -612,7 +613,8 @@ if ($row->rateType === 'Hour') {
                     $regAmount += $holidayHours * $base;
                     $regTotalMinutes += $holidayHours * 60;
                     $totalMinutes += $holidayHours * 60;
-                    $totalDays += 1;
+                    $totalDays += $holidayHours / 8;
+
                 }
 
                 if ($otHours > 0) {
@@ -630,7 +632,8 @@ if ($row->rateType === 'Hour') {
                     $amountSpecialHoliday += $holidayHours * $base * 0.30;
                     $regTotalMinutes += $holidayHours * 60;
                     $totalMinutes += $holidayHours * 60;
-                    $totalDays += 1;
+                    $totalDays += $holidayHours / 8;
+
                 } else {
                     $amountSpecialHoliday += 8 * $base * 0.30;
                 }
@@ -672,7 +675,8 @@ if ($row->rateType === 'Hour') {
             $regTotalMinutes += $regHours * 60;
             $otTotalMinutes += $otHours * 60;
             $totalMinutes += ($regHours + $otHours) * 60;
-            if (($regHours + $otHours) > 0) $totalDays += 1;
+            $totalDays += $regHours / 8;
+
         }
 
     } elseif (strtolower(trim($raw)) === 'day off') {
@@ -757,7 +761,7 @@ $netPay = $salary - $total_deduction;
 
 <td><?= displayAmount($regTotalMinutes / 60) ?></td>
 <td><?= number_format($otTotalMinutes / 60, 2) ?></td>  
-<td><?= $totalDays ?></td> 
+<td><?= number_format($totalDays, 2) ?></td> 
 
 <td><?= displayAmount($regAmount) ?></td>
 <td><?= displayAmount($otAmount) ?></td>

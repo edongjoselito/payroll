@@ -127,7 +127,8 @@ public function get_monthly_payroll_records($month, $filterFrom = null, $filterT
             foreach ($details as $day => $entry) {
                 if ($day === '_range') continue;
 
-                $date = sprintf('%04d-%02d-%02d', $year, $monthNum, (int)$day);
+               $date = sprintf('%04d-%02d-%s', $year, $monthNum, str_pad($day, 2, '0', STR_PAD_LEFT));
+
 
                 // ✅ Filter by from/to if given
                 if ($filterFrom && $filterTo && ($date < $filterFrom || $date > $filterTo)) {
@@ -153,13 +154,15 @@ public function get_monthly_payroll_records($month, $filterFrom = null, $filterT
         foreach ($details as $day => $entry) {
             if ($day === '_range') continue;
 
-            $date = sprintf('%04d-%02d-%02d', $year, $monthNum, (int)$day);
+          $date = sprintf('%04d-%02d-%s', $year, $monthNum, str_pad($day, 2, '0', STR_PAD_LEFT));
+
 
             if ($filterFrom && $filterTo && ($date < $filterFrom || $date > $filterTo)) {
                 continue;
             }
 
-            $attendance[$personnelID][$day] = $entry;
+           $attendance[$personnelID][str_pad($day, 2, '0', STR_PAD_LEFT)] = $entry;
+
         }
     }
 

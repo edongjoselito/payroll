@@ -230,34 +230,36 @@ public function update_attendance()
 }
 public function view_formatted()
 {
-    $month = $this->input->get('month');
+    $from = $this->input->get('start'); // YYYY-MM-DD
+    $to = $this->input->get('end');     // YYYY-MM-DD
 
-    if (!$month) {
-        $this->session->set_flashdata('msg', 'Missing month parameter.');
+    if (!$from || !$to) {
+        $this->session->set_flashdata('msg', 'Start and End date are required.');
         redirect('MonthlyPayroll');
         return;
     }
 
-    $data = $this->MonthlyPayroll_model->get_monthly_payroll_records($month);
+    $month = date('Y-m', strtotime($from)); // Extract just '2025-07'
+    $data = $this->MonthlyPayroll_model->get_monthly_payroll_records($month, $from, $to);
 
-    $data['start'] = $month . '-01';
-    $data['end'] = $month . '-' . cal_days_in_month(CAL_GREGORIAN, date('m', strtotime($month)), date('Y', strtotime($month)));
+    $data['start'] = $from;
+    $data['end'] = $to;
 
     $projectID = $this->input->get('project_id');
-    
+
     $this->load->model('Project_model');
     $this->load->model('SettingsModel');
 
     $project = $this->Project_model->get_project_by_id($projectID);
     $data['project'] = $project;
 
-   $settingsID = $this->session->userdata('settingsID');
-$data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
-$data['show_signatories'] = true;
+    $settingsID = $this->session->userdata('settingsID');
+    $data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
+    $data['show_signatories'] = true;
 
     $data['is_summary'] = false;
-    $data['month'] = $month;
 
+    // Send to view
     if (!isset($data['personnel']) || !isset($data['dates']) || !isset($data['attendance'])) {
         $this->session->set_flashdata('msg', 'Missing data for view.');
         redirect('MonthlyPayroll');
@@ -272,12 +274,16 @@ $data['show_signatories'] = true;
         $p->reg_hours_per_day = [];
         $total_hours = 0;
         $total_ot = 0;
+        $total_days = 0; // ✅ Added for fractional day computation
 
         foreach ($data['dates'] as $d) {
-            $day = date('d', strtotime($d));
-            $status = $data['attendance'][$pid][$day]['status'] ?? '';
-            $reg = $data['attendance'][$pid][$day]['reg'] ?? 0;
-            $ot  = $data['attendance'][$pid][$day]['ot'] ?? 0;
+            $dayKey = date('d', strtotime($d));  // keep '01', '02', etc.
+
+            $attn = $data['attendance'][$pid][$dayKey] ?? ['status' => '', 'reg' => 0, 'ot' => 0];
+
+            $status = $attn['status'];
+            $reg = $attn['reg'];
+            $ot  = $attn['ot'];
 
             $p->reg_hours_per_day[$d] = [
                 'status' => $status,
@@ -288,36 +294,62 @@ $data['show_signatories'] = true;
 
             $total_hours += $reg;
             $total_ot += $ot;
+
+            // ✅ Add fractional day logic
+            if ($reg > 0) {
+                $total_days += $reg / 8;
+            }
         }
 
         $rateType = strtolower($p->rateType ?? '');
         $rateAmount = floatval($p->rateAmount ?? 0);
 
+        $actual_hours = $total_hours;
+        $actual_ot = $total_ot;
+
+        // Compute based on working days selected (e.g., 15 for bi-month, 30 for full)
+        $working_days = count($data['dates']); // Days shown in table
+        $total_working_hours = $working_days * 8;
+        if ($total_working_hours == 0) $total_working_hours = 1; // avoid division by zero
+
         if ($rateType === 'month') {
-            $ratePerHour = ($rateAmount / 30) / 8;
-            $p->rate_per_hour = number_format($ratePerHour, 2);
-            $p->amount_reg = number_format($rateAmount, 2);
-            $p->amount_ot = '0.00';
-            $p->gross = number_format($rateAmount, 2);
+            $hourlyRate = $rateAmount / $total_working_hours;
+
+            $amount_reg = $actual_hours * $hourlyRate;
+            $amount_ot = $actual_ot * $hourlyRate * 1.25; // 25% OT bonus
+
+            $p->rate_per_hour = number_format($hourlyRate, 2);
+            $p->amount_reg = number_format($amount_reg, 2);
+            $p->amount_ot = number_format($amount_ot, 2);
+            $p->gross = number_format($amount_reg + $amount_ot, 2);
+
         } elseif ($rateType === 'bi-month') {
             $monthlyAmount = $rateAmount * 2;
-            $ratePerHour = ($monthlyAmount / 30) / 8;
-            $p->rate_per_hour = number_format($ratePerHour, 2);
-            $p->amount_reg = number_format($monthlyAmount, 2);
-            $p->amount_ot = '0.00';
-            $p->gross = number_format($monthlyAmount, 2);
+            $hourlyRate = $monthlyAmount / $total_working_hours;
+
+            $amount_reg = $actual_hours * $hourlyRate;
+            $amount_ot = $actual_ot * $hourlyRate * 1.25;
+
+            $p->rate_per_hour = number_format($hourlyRate, 2);
+            $p->amount_reg = number_format($amount_reg, 2);
+            $p->amount_ot = number_format($amount_ot, 2);
+            $p->gross = number_format($amount_reg + $amount_ot, 2);
+
         } else {
             continue;
         }
 
-        // ✅ Load deductions from model
-        $this->load->model('MonthlyPayroll_model');
+        // ✅ Add total days to the personnel object
+        $p->total_days = number_format($total_days, 2);
 
+        // Load deductions using month part of $from
+        $month = date('Y-m', strtotime($from));
+
+        $this->load->model('MonthlyPayroll_model');
         $cashadvance = $this->MonthlyPayroll_model->get_cash_advance($pid, $month);
         $gov_deductions = $this->MonthlyPayroll_model->get_government_deductions($pid, $month);
         $loan = $this->MonthlyPayroll_model->get_loan_deduction($pid, $month);
 
-        // Assign to object for view
         $p->cashadvance = number_format($cashadvance, 2);
         $p->sss = number_format($gov_deductions['sss'], 2);
         $p->pagibig = number_format($gov_deductions['pagibig'], 2);
@@ -335,6 +367,5 @@ $data['show_signatories'] = true;
 
     $this->load->view('monthly_payroll_view', $data);
 }
-
 
 }
