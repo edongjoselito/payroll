@@ -87,6 +87,96 @@ input.is-invalid {
 .attendance-row:hover {
     background-color: #f9f9f9;
 }
+/* Page Title Styling */
+.page-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    border-left: 5px solid #007bff;
+    padding-left: 10px;
+}
+
+/* Table Header */
+.table thead th {
+    font-size: 13px;
+    font-weight: 600;
+    background-color: #f1f3f5;
+    color: #343a40;
+}
+
+/* Alternating row color */
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #fafafa;
+}
+
+/* Buttons */
+.btn {
+    border-radius: 0.375rem;
+    font-size: 14px;         /* slightly larger font */
+    padding: 8px 18px;       /* more breathing room */
+    font-weight: 500;
+    transition: transform 0.5s ease;
+}
+
+.btn i {
+    margin-right: 5px;
+}
+
+/* Attendance Box Inputs */
+.attendance-box select,
+.attendance-box input {
+    font-size: 13px;
+    height: 30px;
+    padding: 3px 6px;
+    border-radius: 0.25rem;
+}
+
+/* Modal Styling */
+.modal-content {
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+.modal-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+.modal-footer {
+    border-top: 1px solid #dee2e6;
+}
+
+/* Alert Styling */
+.alert {
+    font-size: 14px;
+    border-radius: 5px;
+    padding: 8px 16px;
+}
+
+/* Card Section Info */
+.card h5 {
+    font-size: 18px;
+    color: #343a40;
+}
+.card p {
+    font-size: 13px;
+    color: #6c757d;
+    margin-bottom: 4px;
+}
+/* Smooth enlarge on hover */
+.btn:hover {
+    transform: scale(1.05);
+}
+
+/* Optional: add focus effect for accessibility */
+.btn:focus {
+    box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
 
 </style>
 
@@ -115,21 +205,24 @@ input.is-invalid {
 
                          <div class="mb-3">
                               <h4 class="page-title">Weekly Attendance</h4>
-                             <?php if ($this->session->flashdata('duplicate_msg')): ?>
-    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-        <?= $this->session->flashdata('duplicate_msg'); ?>
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span>&times;</span>
+                            <?php if ($this->session->flashdata('duplicate_msg')): ?>
+    <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center shadow-sm border-left border-4 border-warning" role="alert" style="font-size: 14px;">
+        <i class="mdi mdi-alert-circle-outline mr-2" style="font-size: 20px;"></i>
+        <div class="flex-fill">
+            <?= $this->session->flashdata('duplicate_msg'); ?>
+        </div>
+        <button type="button" class="close ml-3" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
         </button>
     </div>
 <?php endif; ?>
 
 
-                              <button class="btn btn-info mt-2 shadow-sm" data-toggle="modal"
-                                   data-target="#generateModal">
-                                   <i class="mdi mdi-calendar-search"></i> Generate Attendance
-                              </button>
-                              <button class="btn btn-primary mt-2 shadow-sm" data-toggle="modal" data-target="#monthlyPayrollModal">
+
+                            <button class="btn btn-info btn-sm mt-2 mr-2 shadow-sm" data-toggle="modal" data-target="#generateModal">
+    <i class="mdi mdi-calendar-search"></i> Generate Attendance
+</button>
+                              <button class="btn btn-primary btn-sm mt-2 shadow-sm" data-toggle="modal" data-target="#monthlyPayrollModal">
     <i class="mdi mdi-calendar-month"></i> Generate Monthly
 </button>
                          </div>
@@ -322,6 +415,10 @@ input.is-invalid {
                                         <?php foreach ($dates as $date): ?>
                                         <input type="hidden" name="dates[]" value="<?= $date ?>">
                                         <?php endforeach; ?>
+<h5 class="text-dark font-weight-bold mb-2 mt-4">
+    <i class="mdi mdi-table"></i> Attendance Input Table
+</h5>
+<hr class="mb-3 mt-0">
 
                                         <div class="table-responsive mt-3">
                                              <table id="attendanceTable"
