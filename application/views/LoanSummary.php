@@ -3,6 +3,18 @@
 <title>PMS - Loan Summary</title>
 
 <?php include('includes/head.php'); ?>
+<style>
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.emoji-bounce {
+  width: 80px;
+  height: 80px;
+  animation: bounce 2s infinite;
+}
+</style>
 
 <body>
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.css">
@@ -53,32 +65,50 @@
                                 
                             </tr>
                         </thead>
-                        <tbody>
-                            <?php 
-                            $total_amount = 0;
-                            $total_monthly = 0;
-                            foreach ($summary as $row): 
-                                if (empty($row->amount) && empty($row->monthly_deduction)) continue;
+                   <tbody>
+<?php 
+$total_amount = 0;
+$total_monthly = 0;
+$hasData = false;
 
-                                $total_amount += $row->amount ?? 0;
-                                $total_monthly += $row->monthly_deduction ?? 0;
-                            ?>
-                            <tr>
-                                <td><?= $row->full_name ?></td>
-                                <td><?= $row->loan_description ?? '-' ?></td>
-                                
-                                <td><?= $row->monthly_deduction ? '₱' . number_format($row->monthly_deduction, 2) : '-' ?></td>
-                                <td><?= $row->amount ? '₱' . number_format($row->amount, 2) : '-' ?></td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                        <tfoot>
-                            <tr class="font-weight-bold bg-white border-top">
-                                <td colspan="3" class="text-right">Total Amount:</td>
-                                <td>₱<?= number_format($total_amount, 2) ?></td>
-                                <td></td>
-                            </tr>
-                        </tfoot>
+foreach ($summary as $row): 
+    if (empty($row->amount) && empty($row->monthly_deduction)) continue;
+
+    $hasData = true;
+    $total_amount += $row->amount ?? 0;
+    $total_monthly += $row->monthly_deduction ?? 0;
+?>
+    <tr>
+        <td><?= $row->full_name ?></td>
+        <td><?= $row->loan_description ?? '-' ?></td>
+        <td><?= $row->monthly_deduction ? '₱' . number_format($row->monthly_deduction, 2) : '-' ?></td>
+        <td><?= $row->amount ? '₱' . number_format($row->amount, 2) : '-' ?></td>
+    </tr>
+<?php endforeach; ?>
+
+<?php if (!$hasData): ?>
+    <tr>
+        <td colspan="4" class="text-center">
+            <img src="https://em-content.zobj.net/source/apple/391/thinking-face_1f914.png" alt="Thinking Emoji" class="emoji-bounce"><br>
+            <span class="text-muted" style="font-size: 1.2rem;">
+                That’s weird, they dont have any Loans ?
+            </span>
+        </td>
+    </tr>
+<?php endif; ?>
+</tbody>
+
+
+<?php if ($hasData): ?>
+<tfoot>
+    <tr class="font-weight-bold bg-white border-top">
+        <td colspan="3" class="text-right">Total Amount:</td>
+        <td>₱<?= number_format($total_amount, 2) ?></td>
+        <td></td>
+    </tr>
+</tfoot>
+<?php endif; ?>
+
                     </table>
                 </div>
             </div>

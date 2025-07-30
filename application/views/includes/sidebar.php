@@ -70,11 +70,7 @@
         
     </ul>
 </li>
-<li>
-    <a href="<?= base_url('thirteenth') ?>">
-        <i class="fas fa-coins"></i> 13th Month Pay
-    </a>
-</li>
+
 
 <li>
     <a href="javascript: void(0);" class="waves-effect">
@@ -89,6 +85,11 @@
 
 
      </ul>
+     <li>
+    <a href="<?= base_url('thirteenth') ?>">
+        <i class="fas fa-coins"></i> 13th Month Pay
+    </a>
+</li>
 <li>
     <a href="<?= base_url(); ?>User" class="waves-effect">
         <i class="fas fa-user-cog"></i>

@@ -3,6 +3,18 @@
 <title>PMS - Deduction Summary</title>
 
 <?php include('includes/head.php'); ?>
+<style>
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.emoji-bounce {
+  width: 80px;
+  height: 80px;
+  animation: bounce 2s infinite;
+}
+</style>
 
 <body>
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.css">
@@ -68,49 +80,69 @@
                                 <?php endif; ?>
                             </tr>
                         </thead>
-                        <tbody>
-                            <?php 
-                            $total_ca = 0;
-                            $total_gd = 0;
-                            foreach ($summary as $row): 
-                                if (
-                                    (empty($row->ca_amount) || $row->ca_amount == 0) &&
-                                    (empty($row->gd_amount) || $row->gd_amount == 0)
-                                ) continue;
+                     <tbody>
+<?php 
+$total_ca = 0;
+$total_gd = 0;
+$hasData = false;
 
-                                $total_ca += $row->ca_amount ?? 0;
-                                $total_gd += $row->gd_amount ?? 0;
-                            ?>
-                            <tr>
-                                <td><?= $row->full_name ?></td>
-                                <?php if ($has_ca): ?>
-                                    <td><?= $row->ca_desc ?? '-' ?></td>
-                                    <td><?= $row->ca_amount ? '₱' . number_format($row->ca_amount, 2) : '-' ?></td>
-                                    <td><?= $row->ca_date ?? '-' ?></td>
-                                <?php endif; ?>
-                                <?php if ($has_gd): ?>
-                                    <td><?= $row->gd_desc ?? '-' ?></td>
-                                    <td><?= $row->gd_amount ? '₱' . number_format($row->gd_amount, 2) : '-' ?></td>
-                                    <td><?= $row->gd_date ?? '-' ?></td>
-                                <?php endif; ?>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                        <tfoot>
-                            <tr class="font-weight-bold bg-white border-top">
-                                <td class="text-right"><?= $has_ca && $has_gd ? 'TOTAL CA:' : 'TOTAL:' ?></td>
-                                <?php if ($has_ca): ?>
-                                    <td></td>
-                                    <td>₱<?= number_format($total_ca, 2) ?></td>
-                                    <td></td>
-                                <?php endif; ?>
-                                <?php if ($has_gd): ?>
-                                    <td class="text-right"><?= $has_ca ? 'TOTAL GD:' : '' ?></td>
-                                    <td>₱<?= number_format($total_gd, 2) ?></td>
-                                    <td></td>
-                                <?php endif; ?>
-                            </tr>
-                        </tfoot>
+foreach ($summary as $row): 
+    if (
+        (!empty($row->ca_amount) && $row->ca_amount > 0) ||
+        (!empty($row->gd_amount) && $row->gd_amount > 0)
+    ) {
+        $hasData = true;
+        $total_ca += $row->ca_amount ?? 0;
+        $total_gd += $row->gd_amount ?? 0;
+?>
+    <tr>
+        <td><?= $row->full_name ?></td>
+        <?php if ($has_ca): ?>
+            <td><?= $row->ca_desc ?? '-' ?></td>
+            <td><?= $row->ca_amount ? '₱' . number_format($row->ca_amount, 2) : '-' ?></td>
+            <td><?= $row->ca_date ?? '-' ?></td>
+        <?php endif; ?>
+        <?php if ($has_gd): ?>
+            <td><?= $row->gd_desc ?? '-' ?></td>
+            <td><?= $row->gd_amount ? '₱' . number_format($row->gd_amount, 2) : '-' ?></td>
+            <td><?= $row->gd_date ?? '-' ?></td>
+        <?php endif; ?>
+    </tr>
+<?php 
+    }
+endforeach;
+?>
+
+<?php if (!$hasData): ?>
+    <tr>
+        <td colspan="<?= 1 + ($has_ca ? 3 : 0) + ($has_gd ? 3 : 0) ?>" class="text-center">
+            <img src="https://em-content.zobj.net/source/apple/391/thinking-face_1f914.png" alt="Thinking Emoji" class="emoji-bounce"><br>
+            <span class="text-muted" style="font-size: 1.2rem;">
+                That’s weird, they don’t have any Deductions?
+            </span>
+        </td>
+    </tr>
+<?php endif; ?>
+</tbody>
+
+                      <?php if ($hasData): ?>
+<tfoot>
+    <tr class="font-weight-bold bg-white border-top">
+        <td class="text-right"><?= $has_ca && $has_gd ? 'TOTAL CA:' : 'TOTAL:' ?></td>
+        <?php if ($has_ca): ?>
+            <td></td>
+            <td>₱<?= number_format($total_ca, 2) ?></td>
+            <td></td>
+        <?php endif; ?>
+        <?php if ($has_gd): ?>
+            <td class="text-right"><?= $has_ca ? 'TOTAL GD:' : '' ?></td>
+            <td>₱<?= number_format($total_gd, 2) ?></td>
+            <td></td>
+        <?php endif; ?>
+    </tr>
+</tfoot>
+<?php endif; ?>
+
                     </table>
                 </div>
             </div>
