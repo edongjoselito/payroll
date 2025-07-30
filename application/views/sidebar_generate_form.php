@@ -28,7 +28,17 @@
   display: flex !important;
   align-items: center !important;
 }
+ .btn-sm-custom {
+    font-size: 13px;
+    padding: 8px 16px;
+    border-radius: 0.25rem;
+    transition: all 0.2s ease-in-out;
+  }
 
+  .btn-sm-custom:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  }
   </style>
 </head>
 <body>
@@ -40,27 +50,27 @@
   <div class="content-page">
     <div class="content">
       <div class="container-fluid">
+<!-- Payroll Generation Card -->
+<div class="card shadow-sm border-0 mb-3">
+  <div class="card-body">
+    <h4 class="page-title mb-3">Payroll Generation</h4>
 
-        <div class="card border-0 shadow-sm">
-          <div class="card-body">
-            <h4 class="page-title mb-4">Payroll Generation</h4>
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#generatePayrollModal">
-              <i class="mdi mdi-calculator-variant"></i> Generate Payroll
-            </button>
-    <button type="button" class="btn btn-dark" data-toggle="modal" data-target="#monthlyPayrollModal">
-  <i class="mdi mdi-calendar-clock"></i>Bi-Month Payroll
-</button>
-
-<button type="button" class="btn btn-info" data-toggle="modal" data-target="#viewSavedPayrollModal">
-    <i class="mdi mdi-eye"></i> View Saved Payroll
-</button>
-<button type="button" class="btn btn-success" data-toggle="modal" data-target="#payrollSummaryModal">
-  <i class="mdi mdi-chart-bar"></i> Payroll Summary
-</button>
-
-
-          </div>
-        </div>
+    <div class="d-flex flex-wrap">
+      <button type="button" class="btn btn-primary btn-sm-custom mr-2 mt-2" data-toggle="modal" data-target="#generatePayrollModal">
+        <i class="mdi mdi-calculator-variant"></i> Generate Payroll
+      </button>
+      <button type="button" class="btn btn-dark btn-sm-custom mr-2 mt-2" data-toggle="modal" data-target="#monthlyPayrollModal">
+        <i class="mdi mdi-calendar-clock"></i> Bi-Month Payroll
+      </button>
+      <button type="button" class="btn btn-info btn-sm-custom mr-2 mt-2" data-toggle="modal" data-target="#viewSavedPayrollModal">
+        <i class="mdi mdi-eye"></i> View Saved Payroll
+      </button>
+      <button type="button" class="btn btn-success btn-sm-custom mt-2" data-toggle="modal" data-target="#payrollSummaryModal">
+        <i class="mdi mdi-chart-bar"></i> Payroll Summary
+      </button>
+    </div>
+  </div>
+</div>
 
                     <!-- Monthly/Bi-Month Payroll Modal -->
                     <div class="modal fade" id="monthlyPayrollModal" tabindex="-1" role="dialog" aria-labelledby="monthlyPayrollModalLabel" aria-hidden="true">

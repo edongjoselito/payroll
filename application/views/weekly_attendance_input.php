@@ -203,31 +203,30 @@ input.is-invalid {
     </div>
 <?php endif; ?>
 
-                         <div class="mb-3">
-                              <h4 class="page-title">Weekly Attendance</h4>
-                            <?php if ($this->session->flashdata('duplicate_msg')): ?>
-    <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center shadow-sm border-left border-4 border-warning" role="alert" style="font-size: 14px;">
-        <i class="mdi mdi-alert-circle-outline mr-2" style="font-size: 20px;"></i>
-        <div class="flex-fill">
-            <?= $this->session->flashdata('duplicate_msg'); ?>
-        </div>
-        <button type="button" class="close ml-3" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
+                       <div class="card shadow-sm mb-3 border-0">
+    <div class="card-body">
+        <h4 class="page-title">Weekly Attendance</h4>
+
+        <?php if ($this->session->flashdata('duplicate_msg')): ?>
+            <div class="alert alert-warning alert-dismissible fade show d-flex align-items-center shadow-sm border-left border-4 border-warning mt-2" role="alert" style="font-size: 14px;">
+                <i class="mdi mdi-alert-circle-outline mr-2" style="font-size: 20px;"></i>
+                <div class="flex-fill">
+                    <?= $this->session->flashdata('duplicate_msg'); ?>
+                </div>
+                <button type="button" class="close ml-3" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        <?php endif; ?>
+
+        <button class="btn btn-info btn-sm mt-2 mr-2 shadow-sm" data-toggle="modal" data-target="#generateModal">
+            <i class="mdi mdi-calendar-search"></i> Generate Attendance
+        </button>
+        <button class="btn btn-primary btn-sm mt-2 shadow-sm" data-toggle="modal" data-target="#monthlyPayrollModal">
+            <i class="mdi mdi-calendar-month"></i> Generate Monthly
         </button>
     </div>
-<?php endif; ?>
-
-
-
-                            <button class="btn btn-info btn-sm mt-2 mr-2 shadow-sm" data-toggle="modal" data-target="#generateModal">
-    <i class="mdi mdi-calendar-search"></i> Generate Attendance
-</button>
-                              <button class="btn btn-primary btn-sm mt-2 shadow-sm" data-toggle="modal" data-target="#monthlyPayrollModal">
-    <i class="mdi mdi-calendar-month"></i> Generate Monthly
-</button>
-                         </div>
-
-                      
+</div>
 
 
                          <div class="card">

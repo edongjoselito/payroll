@@ -49,6 +49,54 @@ td:first-child {
      background-color: #28a745 !important;
 }
 
+/* Match global button appearance */
+.btn {
+    border-radius: 0.375rem;
+    font-size: 14px;
+    padding: 8px 18px;
+    font-weight: 500;
+    transition: transform 0.5s ease;
+}
+.btn:hover {
+    transform: scale(1.05);
+}
+.btn i {
+    margin-right: 5px;
+}
+
+/* Match section title */
+h4.page-title, h4.text-dark.font-weight-bold {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2c3e50;
+    border-left: 5px solid #007bff;
+    padding-left: 10px;
+    margin-bottom: 1rem;
+}
+
+/* Modal consistency */
+.modal-content {
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+.modal-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+}
+.modal-footer {
+    border-top: 1px solid #dee2e6;
+}
+
+/* Table consistency */
+.table thead th {
+    font-size: 13px;
+    font-weight: 600;
+    background-color: #f1f3f5;
+    color: #343a40;
+}
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #fafafa;
+}
 
 @media print {
 
@@ -92,16 +140,18 @@ td:first-child {
 
                          <div class="card">
                               <div class="card-body">
-                                   <h4 class="text-dark font-weight-bold">Attendance Records</h4>
+                               <h4 class="page-title">Attendance Records</h4>
+
 <!-- 🔘 Filter Button -->
 <div class="mb-3">
-    <button class="btn btn-info mt-2 shadow-sm" data-toggle="modal" data-target="#filterModal">
-        <i class="mdi mdi-filter-variant"></i>View Attendance
+    <button class="btn btn-info btn-sm mt-2 mr-2 shadow-sm" data-toggle="modal" data-target="#filterModal">
+        <i class="mdi mdi-filter-variant"></i> View Attendance
     </button>
-    <button class="btn btn-primary mt-2 shadow-sm" data-toggle="modal" data-target="#viewPayrollModal">
-    <i class="mdi mdi-eye"></i> View Monthly
-</button>
+    <button class="btn btn-primary btn-sm mt-2 shadow-sm" data-toggle="modal" data-target="#viewPayrollModal">
+        <i class="mdi mdi-eye"></i> View Monthly
+    </button>
 </div>
+
 
 <!-- View Monthly Modal -->
 <div class="modal fade" id="viewPayrollModal" tabindex="-1" role="dialog" aria-labelledby="viewPayrollModalLabel" aria-hidden="true">
@@ -294,7 +344,8 @@ $to = $selectedTo ?? '';
         <div class="table-responsive">
           <table class="table table-bordered table-striped table-hover">
 
-                <thead class="thead-light">
+              <th style="font-size: 13px; font-weight: 600;">
+
                 <tr>
                     <th>Personnel</th>
                     <?php foreach ($dates as $d): ?>
