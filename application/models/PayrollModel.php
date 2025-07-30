@@ -193,10 +193,13 @@ public function generate_payroll($startDate, $endDate, $cutoff)
         }
 
         $rate = (float) $person->rateAmount;
-        $rateType = strtolower($person->rateType); // e.g., 'daily' or 'hourly'
+        $rateType = strtolower($person->rateType); // e.g., 'daily', 'hourly', 'bi-month'
 
         if ($rateType == 'daily') {
             $gross = $rate * ($totalReg / 8); // assuming 8 hours a day
+        } elseif ($rateType == 'bi-month') {
+            $hourly = $rate / 120; // ₱400 / 120 hours = ₱3.33/hour
+            $gross = $hourly * $totalReg;
         } else {
             $gross = $rate * $totalReg;
         }
@@ -216,7 +219,6 @@ public function generate_payroll($startDate, $endDate, $cutoff)
 
     return $payroll;
 }
-
 
 
 

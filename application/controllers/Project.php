@@ -447,8 +447,17 @@ switch (strtolower($row->rateType)) {
         $reg_pay = $row->total_reg_hours * $hourly_rate;
         $ot_pay = $row->total_ot_hours * $hourly_rate;
         break;
-        
+  case 'bi-month':
+case 'bi-monthly':
+case 'bimonth':
+    // Bi-month = 15 days * 8 hours = 120 hours
+    $hourly_rate = $rate / 120;
+    $reg_pay = $row->total_reg_hours * $hourly_rate;
+    $ot_pay = $row->total_ot_hours * $hourly_rate;
+    break;
+
 }
+
 
 $gross = round($reg_pay + $ot_pay, 2);
 $row->gross = $gross;
