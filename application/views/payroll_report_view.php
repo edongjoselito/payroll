@@ -441,7 +441,6 @@ foreach ($attendance_data as $row) {
     <th rowspan="3">Gross</th>
     <th rowspan="3">Cash Advance</th>
     <th rowspan="3">SSS (Gov’t)</th>
-    <th rowspan="3">Pag-IBIG (Gov’t)</th>
     <th rowspan="3">PHIC (Gov’t)</th>
     <th rowspan="3">Loan</th>
     <th rowspan="3">Other Deduction</th>
@@ -532,7 +531,6 @@ foreach ($attendance_data as $row) {
 $totalGross = 0;
 $totalCA = 0;
 $totalSSS = 0;
-$totalPagibig = 0;
 $totalPHIC = 0;
 $totalLoan = 0;
 $totalOther = 0;
@@ -762,7 +760,8 @@ $sss = $row->gov_sss ?? 0;
 $pagibig = $row->gov_pagibig ?? 0;
 $philhealth = $row->gov_philhealth ?? 0;
 $loan = $row->loan ?? 0;
-$total_deduction = $cash_advance + $sss + $pagibig + $philhealth + $loan + $other_deduction;
+$total_deduction = $cash_advance + $sss + $philhealth + $loan + $other_deduction;
+
 $netPay = $salary - $total_deduction;
 if ($netPay > 0) {
     $totalPayroll += $netPay;
@@ -790,7 +789,6 @@ $netPay = $salary - $total_deduction;
 $totalGross += $salary;
 $totalCA += $cash_advance;
 $totalSSS += $sss;
-$totalPagibig += $pagibig;
 $totalPHIC += $philhealth;
 $totalLoan += $loan;
 $totalOther += $other_deduction;
@@ -819,7 +817,6 @@ $totalNet += $netPay;
 
 <td><?= displayAmount($cash_advance) ?></td>
 <td><?= displayAmount($sss) ?></td>
-<td><?= displayAmount($pagibig) ?></td>
 <td><?= displayAmount($philhealth) ?></td>
 <td><?= displayAmount($loan) ?></td>
 <td><?= displayAmount($other_deduction) ?></td>
@@ -890,7 +887,6 @@ $totalNet += $netPay;
             <ul class="list-unstyled">
               <li>Cash Advance: <?= number_format($cash_advance, 2) ?></li>
             <li>SSS (Gov’t): <?= number_format($sss, 2) ?></li>
-<li>Pag-IBIG (Gov’t): <?= number_format($pagibig, 2) ?></li>
 <li>PHIC (Gov’t): <?= number_format($philhealth, 2) ?></li>
 
               <li>Loan: <?= number_format($loan, 2) ?></li>
@@ -915,7 +911,6 @@ $totalNet += $netPay;
   <td><?= number_format($totalGross, 2) ?></td>
   <td><?= number_format($totalCA, 2) ?></td>
   <td><?= number_format($totalSSS, 2) ?></td>
-  <td><?= number_format($totalPagibig, 2) ?></td>
   <td><?= number_format($totalPHIC, 2) ?></td>
   <td><?= number_format($totalLoan, 2) ?></td>
   <td><?= number_format($totalOther, 2) ?></td>
