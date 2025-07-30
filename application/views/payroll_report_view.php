@@ -418,6 +418,21 @@ foreach ($attendance_data as $row) {
     }
 }
 ?>
+<?php
+$showCA = $showSSS = $showPHIC = $showLoan = $showOther = false;
+
+foreach ($attendance_data as $row) {
+    if (!empty($row->ca_cashadvance)) $showCA = true;
+    if (!empty($row->gov_sss)) $showSSS = true;
+    if (!empty($row->gov_philhealth)) $showPHIC = true;
+    if (!empty($row->loan)) $showLoan = true;
+    if (!empty($row->other_deduction)) $showOther = true;
+}
+
+// 🔐 Only show total deduction column if any deduction type has value
+$showTotalDeduction = $showCA || $showSSS || $showPHIC || $showLoan || $showOther;
+?>
+
 
 <table class="payroll-table">
 <thead>
@@ -439,12 +454,25 @@ foreach ($attendance_data as $row) {
 
   <th colspan="<?= $amountColspan ?>" class="text-center">AMOUNT</th>
     <th rowspan="3">Gross</th>
-    <th rowspan="3">Cash Advance</th>
-    <th rowspan="3">SSS (Gov’t)</th>
-    <th rowspan="3">PHIC (Gov’t)</th>
-    <th rowspan="3">Loan</th>
-    <th rowspan="3">Other Deduction</th>
-    <th rowspan="3">Total Deduction</th>
+   <?php if ($showCA): ?>
+  <th rowspan="3">Cash Advance</th>
+<?php endif; ?>
+<?php if ($showSSS): ?>
+  <th rowspan="3">SSS (Gov’t)</th>
+<?php endif; ?>
+<?php if ($showPHIC): ?>
+  <th rowspan="3">PHIC (Gov’t)</th>
+<?php endif; ?>
+<?php if ($showLoan): ?>
+  <th rowspan="3">Loan</th>
+<?php endif; ?>
+<?php if ($showOther): ?>
+  <th rowspan="3">Other Deduction</th>
+<?php endif; ?>
+
+  <?php if ($showTotalDeduction): ?>
+  <th rowspan="3">Total Deduction</th>
+<?php endif; ?>
     <th rowspan="3">Take Home</th>
     <?php if (empty($is_summary)): ?>
         <th rowspan="3" colspan="3">Signature</th>
@@ -815,12 +843,25 @@ $totalNet += $netPay;
 <td><?= number_format($regAmount + $otAmount + $amountRegularHoliday + $amountSpecialHoliday, 2) ?></td>
 
 
-<td><?= displayAmount($cash_advance) ?></td>
-<td><?= displayAmount($sss) ?></td>
-<td><?= displayAmount($philhealth) ?></td>
-<td><?= displayAmount($loan) ?></td>
-<td><?= displayAmount($other_deduction) ?></td>
-<td><?= displayAmount($total_deduction) ?></td>
+<?php if ($showCA): ?>
+  <td><?= displayAmount($cash_advance) ?></td>
+<?php endif; ?>
+<?php if ($showSSS): ?>
+  <td><?= displayAmount($sss) ?></td>
+<?php endif; ?>
+<?php if ($showPHIC): ?>
+  <td><?= displayAmount($philhealth) ?></td>
+<?php endif; ?>
+<?php if ($showLoan): ?>
+  <td><?= displayAmount($loan) ?></td>
+<?php endif; ?>
+<?php if ($showOther): ?>
+  <td><?= displayAmount($other_deduction) ?></td>
+<?php endif; ?>
+
+<?php if ($showTotalDeduction): ?>
+  <td><?= displayAmount($total_deduction) ?></td>
+<?php endif; ?>
 <td>
   <span class="d-print-block d-none"><?= number_format($netPay, 2) ?></span>
   <a href="#" class="btn btn-link btn-sm d-print-none" data-toggle="modal" data-target="#payslipModal<?= $ln ?>">
@@ -909,12 +950,25 @@ $totalNet += $netPay;
 <tr style="font-weight:bold; background:#f1f1f1;">
   <td colspan="<?= $totalPrefixCols ?>" class="text-right">TOTAL</td>
   <td><?= number_format($totalGross, 2) ?></td>
+  <?php if ($showCA): ?>
   <td><?= number_format($totalCA, 2) ?></td>
+<?php endif; ?>
+<?php if ($showSSS): ?>
   <td><?= number_format($totalSSS, 2) ?></td>
+<?php endif; ?>
+<?php if ($showPHIC): ?>
   <td><?= number_format($totalPHIC, 2) ?></td>
+<?php endif; ?>
+<?php if ($showLoan): ?>
   <td><?= number_format($totalLoan, 2) ?></td>
+<?php endif; ?>
+<?php if ($showOther): ?>
   <td><?= number_format($totalOther, 2) ?></td>
+<?php endif; ?>
+
+  <?php if ($showTotalDeduction): ?>
   <td><?= number_format($totalDeduction, 2) ?></td>
+<?php endif; ?>
   <td><?= number_format($totalNet, 2) ?></td>
   <?php if (empty($is_summary)): ?>
     <td colspan="3"></td>
