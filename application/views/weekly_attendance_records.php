@@ -207,7 +207,7 @@ h4.page-title, h4.text-dark.font-weight-bold {
   <div class="modal-dialog modal-dialog-centered modal-md" role="document">
     <form method="get" action="<?= base_url('WeeklyAttendance/records') ?>">
       <div class="modal-content shadow-sm border-0">
-        <div class="modal-header bg-primary text-white">
+        <div class="modal-header text-white">
           <h5 class="modal-title" id="filterModalLabel">
             <i class="mdi mdi-calendar-search mr-2"></i> View Attendance Records
           </h5>

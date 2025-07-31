@@ -3,7 +3,58 @@
 <title>PMS - 13th Month Pay</title>
 
 <?php include('includes/head.php'); ?>
+<style>
+thead th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    vertical-align: middle;
+}
+.table td, .table th {
+    vertical-align: middle;
+}
+.btn + .btn {
+    margin-left: 8px;
+}
+/* Glow and Enlarge on Hover */
+.glow-hover {
+    transition: all 0.3s ease-in-out;
+}
 
+.glow-hover:hover {
+    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(0, 123, 255, 0.6);
+    z-index: 10;
+}
+
+@media print {
+    .d-print-none {
+        display: none !important;
+    }
+
+    .dataTables_filter,
+    .dataTables_length,
+    .dataTables_info,
+    .dataTables_paginate {
+        display: none !important;
+    }
+
+    @page {
+        size: A4 landscape;
+        margin: 20mm;
+    }
+
+    .table th, .table td {
+        border: 1px solid #000 !important;
+        padding: 4px !important;
+    }
+
+    body {
+        font-size: 11pt;
+        color: #000;
+    }
+}
+
+</style>
 <body>
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.css">
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.css">
@@ -32,12 +83,19 @@
             <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
     <?php endif; ?>
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3 d-print-none">
+    <button class="btn btn-info btn-sm me-2 glow-hover" onclick="window.print();">
+        <i class="fas fa-print"></i> Print Report
+    </button>
+    <button class="btn btn-info btn-sm me-2 glow-hover" data-toggle="modal" data-target="#filterModal">
+        <i class="fas fa-search"></i> Select Period
+    </button>
+    <button class="btn btn-outline-secondary btn-sm glow-hover" type="button" data-toggle="collapse" data-target="#reportTable" aria-expanded="true">
+        Hide / View Table
+    </button>
+</div>
 
-    <div class="mb-2">
-        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#filterModal">
-            <i class="fas fa-filter"></i> Select Period
-        </button>
-    </div>
+
 
     <div class="card">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
@@ -51,52 +109,52 @@
     </div>
 <?php endif; ?>
 
-            <button class="btn btn-outline-secondary btn-sm" type="button" data-toggle="collapse" data-target="#reportTable" aria-expanded="true">
-                Hide / View Table
-            </button>
+           
         </div>
         <div class="collapse show" id="reportTable">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table id="datatable" class="table table-bordered table-striped dt-responsive nowrap" style="width:100%">
-                        <thead class="thead-light">
-                            <tr>
-                                <th>#</th>
-                                <th>Employee</th>
-                                <th>Position</th>
-                                <th>Total Regular Hours</th>
-                                <th>Hourly Rate</th>
-                                <th>Total Basic Pay</th>
-                                <th><b>13th Month Pay</b></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php $i = 1; foreach ($payroll_data as $emp): 
-                                $rate = $emp['rateAmount'];
-                                $rateType = $emp['rateType'];
-                                $regHours = $emp['total_regular_hours'];
-                                switch (strtolower($rateType)) {
-                                    case 'hour': $hourly = $rate; break;
-                                    case 'day': $hourly = $rate / 8; break;
-                                    case 'month': $hourly = ($rate / 30) / 8; break;
-                                    case 'bi-month': $hourly = ($rate / 15) / 8; break;
-                                    default: $hourly = 0; break;
-                                }
-                                $basic = $hourly * $regHours;
-                                $thirteenth = $basic / 12;
-                            ?>
-                            <tr>
-                                <td><?= $i++ ?></td>
-                                <td><?= $emp['name'] ?></td>
-                                <td><?= $emp['position'] ?></td>
-                                <td><?= number_format($regHours, 2) ?></td>
-                                <td>₱<?= number_format($hourly, 2) ?></td>
-                                <td>₱<?= number_format($basic, 2) ?></td>
-                                <td><strong>₱<?= number_format($thirteenth, 2) ?></strong></td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                  <table id="datatable" class="table table-bordered table-striped dt-responsive nowrap" style="width:100%">
+    <thead class="thead-light text-center">
+        <tr>
+            <th>No.</th>
+            <th>Name of Worker</th>
+            <th>Designation</th>
+            <th>Total Basic Salary for Year 2024</th>
+            <th>13th Month Pay<br><small>(Divided by 12)</small></th>
+            <th>Net Pay</th>
+            <th>Received By</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php $i = 1; foreach ($payroll_data as $emp): 
+            $rate = $emp['rateAmount'];
+            $rateType = $emp['rateType'];
+            $regHours = $emp['total_regular_hours'];
+            switch (strtolower($rateType)) {
+                case 'hour': $hourly = $rate; break;
+                case 'day': $hourly = $rate / 8; break;
+                case 'month': $hourly = ($rate / 30) / 8; break;
+                case 'bi-month': $hourly = ($rate / 15) / 8; break;
+                default: $hourly = 0; break;
+            }
+            $basic = $hourly * $regHours;
+            $thirteenth = $basic / 12;
+            $netpay = $thirteenth; // You may change this logic if needed
+        ?>
+        <tr class="text-center">
+            <td><?= $i++ ?></td>
+            <td class="text-left"><?= $emp['name'] ?></td>
+            <td><?= $emp['position'] ?></td>
+            <td>₱<?= number_format($basic, 2) ?></td>
+            <td><strong>₱<?= number_format($thirteenth, 2) ?></strong></td>
+            <td>₱<?= number_format($netpay, 2) ?></td>
+            <td>____________________</td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
+
                 </div>
             </div>
         </div>
