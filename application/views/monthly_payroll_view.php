@@ -246,7 +246,6 @@ th {
 .modal-header {
   background: #fff !important;
   color: #000 !important;
-  border-bottom: 1px solid #ddd;
 }
 
 .modal-body h6 {
@@ -262,15 +261,56 @@ th {
     height: 100%;
     margin: 0 !important;
     padding: 0 !important;
-    font-size: 10px !important;
+    font-size: 9px !important; /* Slightly reduced to fit large tables */
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     overflow: visible !important;
+    zoom: 75%; /* Tweak to fit in A4 landscape */
   }
+
+  .no-print-payslip { display: none !important; } /* Hide payslips when printing payroll */
+  .no-print-payroll { display: none !important; } /* Hide payroll when printing payslip */
 
   @page {
     size: A4 landscape;
     margin: 1cm;
+  }
+
+  hr {
+    border: none !important;
+    height: 1px !important;
+    color: #ccc !important;
+    background-color: #ccc !important;
+    margin: 4px 0 !important;
+  }
+
+  .payroll-table {
+    width: 100% !important;
+    table-layout: fixed !important;
+    font-size: 9px !important;
+    word-break: break-word !important;
+    border-collapse: collapse !important;
+  }
+
+  .payroll-table th,
+  .payroll-table td {
+    padding: 3px 4px !important;
+    font-size: 9px !important;
+    word-break: break-word;
+    page-break-inside: avoid !important;
+    break-inside: avoid;
+  }
+
+  .payroll-table th:first-child,
+  .payroll-table td:first-child {
+    min-width: 25px;
+    max-width: 30px;
+  }
+
+
+
+  .btn, .modal, .no-print, .modal-backdrop {
+    display: none !important;
   }
 
   .print-container {
@@ -285,39 +325,12 @@ th {
     flex-grow: 1 !important;
   }
 
-  .btn, .modal, .no-print, .modal-backdrop {
-    display: none !important;
-  }
-
-  .payroll-table {
-    width: 100% !important;
-    table-layout: fixed !important;
-    font-size: 10px !important;
-    word-wrap: break-word !important;
-  }
-
-  .payroll-table th,
-  .payroll-table td {
-    padding: 4px !important;
-    font-size: 10px !important;
+  table, thead, tbody, tr, td, th {
     page-break-inside: avoid !important;
-    break-inside: avoid;
-    word-break: break-word;
-  }
-
-  .payroll-table th:first-child,
-  .payroll-table td:first-child {
-    min-width: 25px;
-    max-width: 30px;
   }
 
   thead {
     display: table-header-group;
-    font-size: 14px !important;
-  }
-
-  table, thead, tbody, tr, td, th {
-    page-break-inside: avoid !important;
   }
 
   .signature {
@@ -344,15 +357,20 @@ th {
     height: 50%;
     overflow: hidden;
     padding: 20px;
-    box-sizing: border-box;
+  }
+
+  div, footer {
+    border: none !important;
   }
 }
+
 </style>
 
 
 </head>
 <body>
-  <class="print-container">
+<div class="print-container">
+
 <div class="header-box">
   <div class="box-content">
    
