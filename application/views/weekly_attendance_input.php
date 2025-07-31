@@ -177,7 +177,14 @@ input.is-invalid {
     box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.25);
     outline: none;
 }
-
+.toast-header-success {
+    background-color: #28a745;
+    color: white;
+}
+.toast-body-success {
+    background-color: #eaf9ef;
+    color: #155724;
+}
 </style>
 
 
@@ -553,32 +560,25 @@ foreach ($employees as $emp): ?>
   $toFormatted = date("F d, Y", strtotime($success['to']));
   $projectTitle = $success['projectTitle'];
 ?>
-<!-- Modal: Attendance Saved -->
-<div class="modal fade" id="attendanceSavedModal" tabindex="-1" role="dialog" aria-labelledby="attendanceSavedLabel" aria-hidden="true">
-  <div class="modal-dialog modal-md modal-dialog-centered" role="document">
-    <div class="modal-content border-success">
-      <div class="modal-header bg-success text-white">
-        <h5 class="modal-title" id="attendanceSavedLabel">
-          ✅ Attendance Saved Successfully
-        </h5>
-        <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-          <span>&times;</span>
-        </button>
-      </div>
-      <div class="modal-body text-dark">
-        <strong>Your weekly attendance has been saved.</strong>
-        <p>
-          📁 <strong>Project:</strong> <?= htmlspecialchars($projectTitle) ?><br>
-          📅 <strong>Period:</strong> <?= $fromFormatted ?> to <?= $toFormatted ?>
-        </p>
-        <small>You may now view or delete the saved attendance.</small>
-      </div>
-      <div class="modal-footer">
-       <a href="<?= base_url('WeeklyAttendance/records?projectID=' . urlencode($success['projectID']) . '&from=' . $success['from'] . '&to=' . $success['to']) ?>" class="btn btn-info">
-    <i class="mdi mdi-eye"></i> View Attendance
-</a>
-
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+<div aria-live="polite" aria-atomic="true" style="position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 1055;">
+  <div class="toast show shadow" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 360px;">
+    <div class="toast-header toast-header-success">
+      <i class="fas fa-check-circle me-2"></i>
+      <strong class="me-auto">Attendance Saved</strong>
+      <button type="button" class="close text-white" data-dismiss="toast" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="toast-body toast-body-success">
+      <p class="mb-2"><strong>Your weekly attendance has been saved.</strong></p>
+      <p class="mb-2">
+        📁 <strong>Project:</strong> <?= htmlspecialchars($projectTitle) ?><br>
+        📅 <strong>Period:</strong> <?= $fromFormatted ?> to <?= $toFormatted ?>
+      </p>
+      <div class="text-end">
+        <a href="<?= base_url('WeeklyAttendance/records?projectID=' . urlencode($success['projectID']) . '&from=' . $success['from'] . '&to=' . $success['to']) ?>" class="btn btn-sm btn-outline-success">
+          <i class="fas fa-eye"></i> View Attendance
+        </a>
       </div>
     </div>
   </div>
@@ -717,6 +717,9 @@ const overtimeHoursInput = box.querySelector('input[name^="overtime_hours"]');
     });
     return isValid;
 }
+ setTimeout(() => {
+    $('.toast').toast('hide');
+  }, 6000); // dismiss after 6 seconds
 </script>
 
 
