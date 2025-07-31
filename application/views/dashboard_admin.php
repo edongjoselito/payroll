@@ -40,7 +40,22 @@
     font-size: 14px;
 }
 
+.noti-icon-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 10px;
+    padding: 4px 6px;
+    border-radius: 50%;
+    background-color: #dc3545;
+    color: white;
+    animation: bounce 1.5s infinite;
+}
 
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-5px); }
+}
 </style>
 
 <body>

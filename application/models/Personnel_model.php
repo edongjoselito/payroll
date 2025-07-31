@@ -57,7 +57,22 @@ public function getActiveWithDateEmployed()
     return $this->db->get('personnel')->result();
 }
 
+// BIRTHDAY-----------------
+public function getTodayBirthdays() {
+    $today = date('m-d');
+    $this->db->select('last_name, first_name, position, birthdate');
+    $this->db->from('personnel');
+    $this->db->where('DATE_FORMAT(birthdate, "%m-%d") =', $today); // <-- Fix here
+    $query = $this->db->get();
+    return $query->result();
+}
 
-
+  public function getMonthBirthdays() {
+        $currentMonth = date('m');
+        $this->db->select('last_name, first_name, position, birthdate');
+        $this->db->from('personnel');
+        $this->db->where('MONTH(birthdate)', $currentMonth);
+        return $this->db->get()->result();
+    }
 }
 

@@ -12,11 +12,22 @@ class Page extends CI_Controller
 		$this->load->model('StudentModel');
 		$this->load->model('SettingsModel');
 		// $this->load->helper('url');
+         $this->load->model('Personnel_model');
 
 
 		if ($this->session->userdata('logged_in') !== TRUE) {
 			redirect('login');
 		}
+    // Load both birthday sets once and share globally with views
+    if ($this->session->userdata('logged_in')) {
+        $today = $this->Personnel_model->getTodayBirthdays();
+        $month = $this->Personnel_model->getMonthBirthdays();
+        $this->load->vars([
+            'today_birthdays' => $today,
+            'month_birthdays' => $month,
+            'birthday_count' => count($today)
+        ]);
+    }
 	}
 
 public function admin()
@@ -30,6 +41,10 @@ public function admin()
   $this->db->where('settingsID', $settingsID);
     $data['user_count'] = $this->db->count_all_results('o_users');
     $this->load->view('dashboard_admin', $data);
+    $this->load->model('Personnel_model');
+$data['birthdays'] = $this->Personnel_model->getTodayBirthdays();
+
+
 }
 
 
@@ -322,9 +337,21 @@ public function saveAdminFromSuperAdmin()
     }
 }
 
+// BIRTHDAY----------------
+public function birthdays_today() {
+    $this->load->model('Personnel_model');
+    $data['title'] = "Today's Birthday Celebrants";
+    $data['birthdays'] = $this->Personnel_model->getTodayBirthdays();
 
+    $this->load->view('birthdays_today', $data); // load only 1 full template view
+}
 
-
-
+public function birthdays_month() {
+     $this->load->model('Personnel_model');
+    $data['title'] = "This Month's Birthday Celebrants";
+    $data['birthdays'] = $this->Personnel_model->getMonthBirthdays();
+ $data['birthday_count'] = count($data['birthdays']);
+    $this->load->view('birthdays_month', $data); // same here
+}
 
 }
