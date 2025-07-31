@@ -77,9 +77,9 @@
                       <div class="modal-dialog modal-dialog-centered modal-md" role="document">
                         <form method="get" action="<?= base_url('MonthlyPayroll/view_formatted') ?>" target="_blank">
                           <div class="modal-content border-0 shadow-sm">
-                            <div class="modal-header bg-dark text-white">
+                            <div class="modal-header bg-white text-black">
                               <h5 class="modal-title" id="monthlyPayrollModalLabel">
-                                <i class="mdi mdi-calendar-clock"></i> Generate Payroll by Date Range
+                                <i class="mdi mdi-calendar-clock"></i> Generate Bi-Month Payroll
                               </h5>
                               <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
                                 <span>&times;</span>
@@ -113,7 +113,7 @@
           <div class="modal-dialog modal-dialog-centered modal-md" role="document">
             <form method="get" action="<?= base_url('project/payroll_report') ?>" target="_blank" id="payrollForm">
               <div class="modal-content border-0 shadow-sm">
-                <div class="modal-header bg-primary text-white">
+                <div class="modal-header bg-white text-black">
                   <h5 class="modal-title" id="generatePayrollLabel">
                     <i class="mdi mdi-file-document-box"></i> Generate Payroll Report
                   </h5>
@@ -173,7 +173,7 @@
   <div class="modal-dialog modal-dialog-centered modal-md" role="document">
     <form action="<?= base_url('project/view_payroll_batch') ?>" method="get" target="_blank">
       <div class="modal-content border-0 shadow-sm">
-        <div class="modal-header bg-info text-white">
+        <div class="modal-header bg-white text-black">
           <h5 class="modal-title" id="viewSavedPayrollModalLabel">
             <i class="mdi mdi-clipboard-text"></i> View Saved Payroll Batch
           </h5>
@@ -228,7 +228,7 @@
   <div class="modal-dialog modal-dialog-centered modal-md" role="document">
     <form action="<?= base_url('project/view_payroll_summary_batches') ?>" method="get">
       <div class="modal-content border-0 shadow-sm">
-        <div class="modal-header bg-success text-white">
+        <div class="modal-header bg-white text-black">
           <h5 class="modal-title" id="payrollSummaryModalLabel">
             <i class="mdi mdi-chart-bar"></i> Select Project for Payroll Summary
           </h5>

@@ -11,7 +11,7 @@ class Thirteenth extends CI_Controller {
 
    public function index()
 {
-    $period = $this->input->get('period'); // jan-jun or jul-dec
+    $period = $this->input->get('period');
     $data['selected_period'] = $period;
     $data['payroll_data'] = $this->Thirteenth_model->get_13th_month_data($period);
     $this->load->view('thirteenth_month', $data);
