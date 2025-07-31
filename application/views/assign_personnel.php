@@ -1,6 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <?php include('includes/head.php'); ?>
+<style>
+/* Enhanced Buttons */
+.btn {
+  padding: 6px 12px !important;
+  font-size: 15px;
+  border-radius: 6px;
+  margin-right: 4px;
+  transition: all 0.25s ease-in-out;
+}
+
+td .btn:last-child,
+form .btn:last-child {
+  margin-right: 0;
+}
+
+.btn:hover {
+  transform: scale(1.07);
+  opacity: 0.95;
+}
+
+/* Glow Hover */
+.btn-success:hover {
+  box-shadow: 0 0 8px rgba(40, 167, 69, 0.4);
+}
+.btn-primary:hover {
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+}
+.btn-danger:hover {
+  box-shadow: 0 0 8px rgba(220, 53, 69, 0.4);
+}
+.btn-secondary:hover {
+  box-shadow: 0 0 8px rgba(108, 117, 125, 0.4);
+}
+</style>
 
 <body>
     <div id="wrapper">

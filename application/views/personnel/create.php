@@ -1,6 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
 <?php include(APPPATH . 'views/includes/head.php'); ?>
+<style>
+.btn {
+    transition: all 0.25s ease-in-out;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+    opacity: 0.95;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+    border-color: rgba(0, 123, 255, 0.4);
+}
+
+.btn-secondary:hover {
+    box-shadow: 0 0 8px rgba(108, 117, 125, 0.5);
+    border-color: rgba(108, 117, 125, 0.4);
+}
+
+.btn-info:hover {
+    box-shadow: 0 0 8px rgba(23, 162, 184, 0.5);
+    border-color: rgba(23, 162, 184, 0.4);
+}
+
+.btn-danger:hover {
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.5);
+    border-color: rgba(220, 53, 69, 0.4);
+}
+</style>
 
 <body>
     <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.css">

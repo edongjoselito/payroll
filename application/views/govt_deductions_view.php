@@ -4,7 +4,31 @@
     <title>PMS - Government Deductions</title>
     <?php include('includes/head.php'); ?>
     <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.css">
+    <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.css">
+    <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/buttons.bootstrap4.min.css">
 </head>
+<style>
+/* Smooth button animation */
+.btn {
+    transition: all 0.25s ease-in-out;
+}
+
+/* Scale on hover */
+.btn:hover {
+    transform: scale(1.05);
+    opacity: 0.95;
+}
+
+/* Glow on hover for main button types */
+.btn-primary:hover,
+.btn-success:hover,
+.btn-info:hover,
+.btn-danger:hover {
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+    border-color: rgba(0, 123, 255, 0.3);
+}
+</style>
+
 <body>
 <div id="wrapper">
     <?php include('includes/top-nav-bar.php'); ?>
@@ -19,13 +43,21 @@
                 </div>
 
                 <?php if($this->session->flashdata('success')): ?>
-                    <div class="alert alert-success"><?= $this->session->flashdata('success'); ?></div>
+                    <div class="alert alert-success alert-dismissible fade show">
+                        <?= $this->session->flashdata('success'); ?>
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    </div>
+                <?php elseif($this->session->flashdata('error')): ?>
+                    <div class="alert alert-danger alert-dismissible fade show">
+                        <?= $this->session->flashdata('error'); ?>
+                        <button type="button" class="close" data-dismiss="alert">&times;</button>
+                    </div>
                 <?php endif; ?>
 
-                <div class="card mt-3">
+                <div class="card">
                     <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-bordered table-hover">
+                            <table id="datatable" class="table table-bordered table-striped dt-responsive nowrap" style="width:100%">
                                 <thead class="thead-light">
                                     <tr>
                                         <th>Personnel Name</th>
@@ -39,66 +71,66 @@
                                 </thead>
                                 <tbody>
                                     <?php foreach ($deductions as $row): ?>
-                                        <tr>
-                                            <td><?= $row->fullname ?></td>
-                                            <td><?= $row->description ?></td>
-                                            <td>₱<?= number_format($row->amount, 2) ?></td>
-                                            <td><?= $row->date ?></td>
-                                            <td><?= $row->deduct_from ?? '—' ?></td>
-                                            <td><?= $row->deduct_to ?? '—' ?></td>
-                                            <td>
-                                                <button class="btn btn-sm btn-info" data-toggle="modal" data-target="#editModal<?= $row->id ?>">Edit</button>
-                                                <a href="<?= base_url('Borrow/delete_govt_deduction/'.$row->id) ?>" onclick="return confirm('Delete this record?')" class="btn btn-sm btn-danger">Delete</a>
-                                            </td>
-                                        </tr>
+                                    <tr>
+                                        <td><?= $row->fullname ?></td>
+                                        <td><?= $row->description ?></td>
+                                        <td>₱<?= number_format($row->amount, 2) ?></td>
+                                        <td><?= $row->date ?></td>
+                                        <td><?= $row->deduct_from ?? '—' ?></td>
+                                        <td><?= $row->deduct_to ?? '—' ?></td>
+                                        <td>
+                                            <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#editModal<?= $row->id ?>">Edit</button>
+                                            <a href="<?= base_url('Borrow/delete_govt_deduction/'.$row->id) ?>" onclick="return confirm('Delete this record?')" class="btn btn-danger btn-sm">Delete</a>
+                                        </td>
+                                    </tr>
 
-                                        <!-- Edit Modal -->
-                                        <div class="modal fade" id="editModal<?= $row->id ?>" tabindex="-1">
-                                            <div class="modal-dialog">
-                                                <div class="modal-content">
-                                                    <form method="post" action="<?= base_url('Borrow/update_govt_deduction/' . $row->id) ?>">
-                                                        <div class="modal-header">
-                                                            <h5 class="modal-title">Edit Deduction</h5>
-                                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <!-- Edit Modal -->
+                                    <div class="modal fade" id="editModal<?= $row->id ?>" tabindex="-1">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <form method="post" action="<?= base_url('Borrow/update_govt_deduction/' . $row->id) ?>">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Edit Deduction</h5>
+                                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <div class="form-group">
+                                                            <label>Description</label>
+                                                            <select name="description" class="form-control" required>
+                                                                <option value="SSS" <?= $row->description == 'SSS' ? 'selected' : '' ?>>SSS</option>
+                                                                <option value="PhilHealth" <?= $row->description == 'PhilHealth' ? 'selected' : '' ?>>PhilHealth</option>
+                                                                <option value="Pag-IBIG" <?= $row->description == 'Pag-IBIG' ? 'selected' : '' ?>>Pag-IBIG</option>
+                                                            </select>
                                                         </div>
-                                                        <div class="modal-body">
-                                                            <div class="form-group">
-                                                                <label>Description</label>
-                                                                <select name="description" class="form-control" required>
-                                                                    <option value="SSS" <?= $row->description == 'SSS' ? 'selected' : '' ?>>SSS</option>
-                                                                    <option value="PhilHealth" <?= $row->description == 'PhilHealth' ? 'selected' : '' ?>>PhilHealth</option>
-                                                                    <option value="Pag-IBIG" <?= $row->description == 'Pag-IBIG' ? 'selected' : '' ?>>Pag-IBIG</option>
-                                                                </select>
+                                                        <div class="form-row">
+                                                            <div class="form-group col-md-6">
+                                                                <label>Amount</label>
+                                                                <input type="number" name="amount" class="form-control" value="<?= $row->amount ?>" required>
                                                             </div>
-                                                            <div class="form-row">
-                                                                <div class="form-group col-md-6">
-                                                                    <label>Amount</label>
-                                                                    <input type="number" name="amount" class="form-control" value="<?= $row->amount ?>" required>
-                                                                </div>
-                                                                <div class="form-group col-md-6">
-                                                                    <label>Date</label>
-                                                                    <input type="date" name="date" class="form-control" value="<?= $row->date ?>" required>
-                                                                </div>
-                                                            </div>
-                                                            <div class="form-row">
-                                                                <div class="form-group col-md-6">
-                                                                    <label>Deduct From</label>
-                                                                    <input type="date" name="deduct_from" class="form-control" value="<?= $row->deduct_from ?>">
-                                                                </div>
-                                                                <div class="form-group col-md-6">
-                                                                    <label>Deduct To</label>
-                                                                    <input type="date" name="deduct_to" class="form-control" value="<?= $row->deduct_to ?>">
-                                                                </div>
+                                                            <div class="form-group col-md-6">
+                                                                <label>Date</label>
+                                                                <input type="date" name="date" class="form-control" value="<?= $row->date ?>" required>
                                                             </div>
                                                         </div>
-                                                        <div class="modal-footer">
-                                                            <button type="submit" class="btn btn-success">Update</button>
-                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                        <div class="form-row">
+                                                            <div class="form-group col-md-6">
+                                                                <label>Deduct From</label>
+                                                                <input type="date" name="deduct_from" class="form-control" value="<?= $row->deduct_from ?>">
+                                                            </div>
+                                                            <div class="form-group col-md-6">
+                                                                <label>Deduct To</label>
+                                                                <input type="date" name="deduct_to" class="form-control" value="<?= $row->deduct_to ?>">
+                                                            </div>
                                                         </div>
-                                                    </form>
-                                                </div>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="submit" class="btn btn-success">Update</button>
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                    </div>
+                                                </form>
                                             </div>
                                         </div>
+                                    </div>
                                     <?php endforeach; ?>
                                 </tbody>
                             </table>
@@ -127,11 +159,11 @@
                         <select name="personnelID" class="form-control" required>
                             <option value="">Select Personnel</option>
                             <?php foreach($personnel as $p): ?>
-                                <option value="<?= $p->personnelID ?>">
-                                    <?= $p->last_name . ', ' . $p->first_name ?>
-                                    <?= ($p->middle_name) ? ' ' . substr($p->middle_name, 0, 1) . '.' : '' ?>
-                                    <?= ($p->name_ext) ? ' ' . $p->name_ext : '' ?>
-                                </option>
+                            <option value="<?= $p->personnelID ?>">
+                                <?= $p->last_name . ', ' . $p->first_name ?>
+                                <?= ($p->middle_name) ? ' ' . substr($p->middle_name, 0, 1) . '.' : '' ?>
+                                <?= ($p->name_ext) ? ' ' . $p->name_ext : '' ?>
+                            </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -178,6 +210,9 @@
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/datatables/jquery.dataTables.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.js"></script>
+<script src="<?= base_url(); ?>assets/libs/datatables/dataTables.responsive.min.js"></script>
+<script src="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.js"></script>
+<script src="<?= base_url(); ?>assets/js/pages/datatables.init.js"></script>
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
 </body>
 </html>

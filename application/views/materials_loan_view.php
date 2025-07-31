@@ -3,6 +3,27 @@
 <title>PMS - Other Deductions</title>
 
 <?php include('includes/head.php'); ?>
+<style>
+/* Smooth transition for all buttons */
+.btn {
+  transition: all 0.25s ease-in-out;
+}
+
+/* Hover effects: scale and light glow */
+.btn:hover {
+  transform: scale(1.05);
+  opacity: 0.95;
+}
+
+/* Soft glow for colored buttons */
+.btn-primary:hover,
+.btn-success:hover,
+.btn-info:hover,
+.btn-danger:hover {
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+  border-color: rgba(0, 123, 255, 0.3);
+}
+</style>
 
 <body>
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.css">

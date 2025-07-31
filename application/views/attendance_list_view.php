@@ -7,6 +7,40 @@
         .print-btn {
             float: right;
         }
+/* Button Enhancements */
+.btn {
+    padding: 6px 12px !important;
+    font-size: 15px;
+    border-radius: 6px;
+    margin-right: 6px;
+    transition: all 0.25s ease-in-out;
+}
+.btn:last-child {
+    margin-right: 0;
+}
+
+.btn:hover {
+    transform: scale(1.07);
+    opacity: 0.95;
+}
+
+.btn-info:hover {
+    box-shadow: 0 0 8px rgba(23, 162, 184, 0.4);
+}
+.btn-success:hover {
+    box-shadow: 0 0 8px rgba(40, 167, 69, 0.4);
+}
+.btn-outline-danger:hover,
+.btn-danger:hover {
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.4);
+}
+
+/* Print/Export Buttons Container */
+.page-title .d-flex .btn {
+    margin-left: 8px;
+}
+</style>
+
     </style>
 </head>
 <body>

@@ -1,14 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
+<head>
 <title>PMS - Attendance Summary</title>
-
 <?php include('includes/head.php'); ?>
 
-<body>
+<style>
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.emoji-bounce {
+  width: 80px;
+  height: 80px;
+  animation: bounce 2s infinite;
+}
+</style>
+
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.css">
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.css">
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/buttons.bootstrap4.min.css">
+</head>
 
+<body>
 <div id="wrapper">
 <?php include('includes/top-nav-bar.php'); ?>
 <?php include('includes/sidebar.php'); ?>
@@ -58,18 +71,40 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($summary as $row): ?>
-                                <?php if ($row->absent_count == 0) continue; ?>
-                                <tr>
-                                    <td><?= $row->full_name ?></td>
-                                    <td><?= $row->absent_count ?></td>
-                                    <td>
-                                        <?php foreach (explode(',', $row->absent_dates ?? '') as $date): ?>
-                                            <span class="badge badge-light border" style="opacity: 0.9;"><?= date('M d, Y', strtotime($date)) ?></span><br>
-                                        <?php endforeach; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
+                        <?php
+                        $hasAbsent = false;
+                        foreach ($summary as $row):
+                            if ($row->absent_count > 0):
+                                $hasAbsent = true;
+                        ?>
+                            <tr>
+                                <td><?= $row->full_name ?></td>
+                                <td><?= $row->absent_count ?></td>
+                                <td>
+                                    <?php foreach (explode(',', $row->absent_dates ?? '') as $date): ?>
+                                        <span class="badge badge-light border" style="opacity: 0.9;">
+                                            <?= date('M d, Y', strtotime($date)) ?>
+                                        </span><br>
+                                    <?php endforeach; ?>
+                                </td>
+                            </tr>
+                        <?php
+                            endif;
+                        endforeach;
+                        ?>
+
+                        <?php if (!$hasAbsent): ?>
+                            <tr>
+                              <td colspan="3" class="text-center">
+    <img src="https://em-content.zobj.net/source/apple/391/hugging-face_1f917.png" alt="Hugging Emoji" class="emoji-bounce"><br>
+    <span class="text-muted" style="font-size: 1.2rem;">
+        Everyone’s been attending? That’s awesome!
+        <img src="https://em-content.zobj.net/source/apple/391/smiling-face-with-smiling-eyes_1f60a.png" alt="Happy Face" style="width: 24px; vertical-align: middle;">
+    </span>
+</td>
+
+                            </tr>
+                        <?php endif; ?>
                         </tbody>
                     </table>
                 </div>

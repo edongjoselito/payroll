@@ -85,10 +85,16 @@
 
 
      </ul>
+     
      <li>
-    <a href="<?= base_url('thirteenth') ?>">
-        <i class="fas fa-coins"></i> 13th Month Pay
+        <a href="javascript: void(0);" class="waves-effect">
+        <i class="fas fa-file-alt"></i>
+        <span>View 13th Month</span>
+        <span class="menu-arrow"></span>
     </a>
+         <ul class="nav-second-level nav" aria-expanded="false">
+   <li> <a href="<?= base_url('thirteenth') ?>">13th Month Pay</a></li>
+         </ul>
 </li>
 <li>
     <a href="<?= base_url(); ?>User" class="waves-effect">

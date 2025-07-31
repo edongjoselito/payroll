@@ -3,6 +3,34 @@
     <title>PMS - Company Info</title>
 
 <?php include('includes/head.php'); ?>
+<style>
+    .btn-info, .btn-success, .btn-light {
+        transition: all 0.3s ease;
+        transform-origin: center;
+        border-radius: 8px;
+        font-weight: 500;
+        padding: 8px 16px;
+    }
+
+    .btn-info:hover,
+    .btn-success:hover,
+    .btn-light:hover {
+        transform: scale(1.06);
+        box-shadow: 0 0 12px rgba(0, 170, 255, 0.4);
+    }
+
+    /* Optional slight glow always */
+    .btn-info:focus,
+    .btn-success:focus,
+    .btn-light:focus {
+        box-shadow: 0 0 8px rgba(0, 170, 255, 0.4);
+    }
+
+    /* Optional better spacing between title and button */
+    .page-title-box {
+        margin-bottom: 20px;
+    }
+</style>
 
 <body>
 <div id="wrapper">

@@ -3,6 +3,36 @@
     <title>PMS - Personnel List</title>
 
 <?php include('includes/head.php'); ?>
+<style>
+.btn {
+    transition: all 0.25s ease-in-out;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+    opacity: 0.95;
+}
+
+.btn-primary:hover {
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5);
+    border-color: rgba(0, 123, 255, 0.4);
+}
+
+.btn-secondary:hover {
+    box-shadow: 0 0 8px rgba(108, 117, 125, 0.5);
+    border-color: rgba(108, 117, 125, 0.4);
+}
+
+.btn-info:hover {
+    box-shadow: 0 0 8px rgba(23, 162, 184, 0.5);
+    border-color: rgba(23, 162, 184, 0.4);
+}
+
+.btn-danger:hover {
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.5);
+    border-color: rgba(220, 53, 69, 0.4);
+}
+</style>
 
 <body>
     <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.css">
@@ -48,18 +78,28 @@ foreach ($personnel as $p) {
         break;
     }
 }
+$hasSSS = $hasPhilHealth = $hasPagibig = $hasTIN = false;
+
+foreach ($personnel as $p) {
+    if (!empty($p->sss_number)) $hasSSS = true;
+    if (!empty($p->philhealth_number)) $hasPhilHealth = true;
+    if (!empty($p->pagibig_number)) $hasPagibig = true;
+    if (!empty($p->tin_number)) $hasTIN = true;
+}
+
 ?>
 
   <table id="datatable" class="table table-bordered table-striped dt-responsive nowrap" style="width:100%">
     <thead>
     <tr>
-        <th>Name</th>
-        <th>Address</th>
-        <th>Contact</th>
-       <th>SSS</th>
-<th>PhilHealth</th>
-<th>Pag-IBIG</th>
-<th>TIN</th>
+       <th>Name</th>
+<th>Address</th>
+<th>Contact</th>
+<?php if ($hasSSS): ?><th>SSS</th><?php endif; ?>
+<?php if ($hasPhilHealth): ?><th>PhilHealth</th><?php endif; ?>
+<?php if ($hasPagibig): ?><th>Pag-IBIG</th><?php endif; ?>
+<?php if ($hasTIN): ?><th>TIN</th><?php endif; ?>
+
 <th>Date Employed</th>
 <?php if ($hasTerminated): ?>
 <th>Date Terminated</th>
@@ -73,7 +113,18 @@ foreach ($personnel as $p) {
 
                              <tbody>
 <?php if (empty($personnel)): ?>
-  <tr><td colspan="<?= $hasTerminated ? '12' : '11' ?>" class="text-center">No personnel records found.</td></tr>
+ <?php
+$colCount = 9; // base columns: name, address, contact, date employed, status, duration, actions
+
+if ($hasSSS) $colCount++;
+if ($hasPhilHealth) $colCount++;
+if ($hasPagibig) $colCount++;
+if ($hasTIN) $colCount++;
+if ($hasTerminated) $colCount++;
+?>
+
+<tr><td colspan="<?= $colCount ?>" class="text-center">No personnel records found.</td></tr>
+
 
 <?php else: ?>
   <?php foreach ($personnel as $p): ?>
@@ -96,10 +147,11 @@ foreach ($personnel as $p) {
         <td><?= "{$p->last_name}, {$p->first_name} {$p->middle_name} {$p->name_ext}" ?></td>
         <td><?= $p->address ?></td>
         <td><?= $p->contact_number ?></td>
-      <td><?= $p->sss_number ?></td>
-<td><?= $p->philhealth_number ?></td>
-<td><?= $p->pagibig_number ?></td>
-<td><?= $p->tin_number ?></td>
+     <?php if ($hasSSS): ?><td><?= $p->sss_number ?></td><?php endif; ?>
+<?php if ($hasPhilHealth): ?><td><?= $p->philhealth_number ?></td><?php endif; ?>
+<?php if ($hasPagibig): ?><td><?= $p->pagibig_number ?></td><?php endif; ?>
+<?php if ($hasTIN): ?><td><?= $p->tin_number ?></td><?php endif; ?>
+
 <td><?= $hasStart ? date('M d, Y', strtotime($p->date_employed)) : '—'; ?></td>
 <?php if ($hasTerminated): ?>
 <td><?= $hasEnd ? date('M d, Y', strtotime($p->date_terminated)) : '—'; ?></td>

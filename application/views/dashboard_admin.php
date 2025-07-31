@@ -3,6 +3,45 @@
 <title>PMS - Dashboard</title>
 
 <?php include('includes/head.php'); ?>
+<style>
+.card-hover {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+}
+
+.card-hover:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    background-color: #f7f9fc;
+}
+.card-hover .media i {
+    transition: transform 0.3s ease;
+}
+.card-hover:hover .media i {
+    transform: scale(1.2);
+}
+.company-header-box {
+    background: linear-gradient(135deg, #f8f9fa, #ffffff);
+    border-left: 5px solid #007bff;
+    border-radius: 6px;
+    transition: box-shadow 0.3s ease;
+}
+
+.company-header-box:hover {
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+.company-header-box h4 {
+    font-size: 22px;
+    letter-spacing: 0.5px;
+}
+
+.company-header-box p {
+    font-size: 14px;
+}
+
+
+</style>
 
 <body>
 
@@ -27,25 +66,29 @@
                 <!-- Start Content-->
                 <div class="container-fluid">
                     <!-- start page title -->
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="page-title-box">
-                              <h4 class="page-title">
-    <?= isset($company->SchoolName) ? strtoupper($company->SchoolName) : 'No School Name'; ?><br />
-    <small class="text-muted"><?= $company->SchoolAddress ?? 'No Address'; ?></small>
-</h4>
+               <div class="row">
+    <div class="col-12">
+        <div class="company-header-box p-4 mb-3 rounded shadow-sm d-flex justify-content-between align-items-center">
+            <div>
+                <h4 class="mb-1 text-uppercase text-primary font-weight-bold">
+                    <i class="mdi mdi-office-building mr-1 text-secondary"></i>
+                    <?= isset($company->SchoolName) ? strtoupper($company->SchoolName) : 'NO SCHOOL NAME'; ?>
+                </h4>
+                <p class="mb-0 text-muted">
+                    <i class="mdi mdi-map-marker text-danger mr-1"></i>
+                    <?= $company->SchoolAddress ?? 'No Address'; ?>
+                </p>
+            </div>
+            <div class="page-title-right">
+                <ol class="breadcrumb p-0 m-0">
+                    <!-- <li class="breadcrumb-item"><span class="badge badge-purple">SY <?= $this->session->userdata('sy') ?> <?= $this->session->userdata('semester') ?></span></li> -->
+                </ol>
+            </div>
+        </div>
+        <hr style="border:0; height:2px; background:linear-gradient(to right, #4285F4 60%, #FBBC05 80%, #34A853 100%); border-radius:1px; margin:10px 0 30px;" />
+    </div>
+</div>
 
-
-                                <div class="page-title-right">
-                                    <ol class="breadcrumb p-0 m-0">
-                                        <!-- <li class="breadcrumb-item"><a href="#"><span class="badge badge-purple mb-3">Currently login to <b>SY <?php echo $this->session->userdata('sy'); ?> <?php echo $this->session->userdata('semester'); ?></span></b></a></li> -->
-                                    </ol>
-                                </div>
-                                <div class="clearfix"></div>
-                                <hr style="border:0; height:2px; background:linear-gradient(to right, #4285F4 60%, #FBBC05 80%, #34A853 100%); border-radius:1px; margin:20px 0;" />
-                            </div>
-                        </div>
-                    </div>
                     <!-- end page title -->
                     <div class="row">
                         <!-- <div class="col-xl-3 col-sm-6">
@@ -76,40 +119,57 @@
                                 </div>
                             </div>
                         </div> -->
+<div class="col-xl-6 col-sm-6">
+    <div class="card card-hover" onclick="window.location.href='<?= base_url(); ?>Project/project_view'">
+        <div class="card-body widget-style-2">
+            <div class="media">
+                <div class="media-body align-self-center">
+                    <h2 class="my-0">
+                        <span data-plugin="counterup"><?= $project_count ?></span>
+                    </h2>
+                    <p class="mb-0 text-dark">Projects</p>
+                </div>
+                <i class="mdi mdi-domain text-primary bg-light"></i>
+            </div>
+        </div>
+    </div>
+</div>
 
-                        <div class="col-xl-6 col-sm-6">
-                            <div class="card">
-                                <div class="card-body widget-style-2">
-                                    <div class="media">
-                                        <div class="media-body align-self-center">
-                                           <h2 class="my-0">
-    <span data-plugin="counterup"><?= $project_count ?></span>
-</h2>
-                                            <p class="mb-0"><a href="<?= base_url(); ?>Page/profileList">Projects</a></p>
-                                        </div>
-                                        <i class="mdi mdi-layers-plus text-info bg-light"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
-                        <div class="col-xl-6 col-sm-6">
-                            <div class="card">
-                                <div class="card-body widget-style-2">
-                                    <div class="media">
-                                        <div class="media-body align-self-center">
-<h2 class="my-0">
-    <span data-plugin="counterup"><?= $personnel_count ?></span>
-</h2>                                            <p class="mb-0"><a href="<?= base_url(); ?>Page/employeeList">Personnel</a></p>
-                                        </div>
-                                        <i class="mdi mdi-teach text-primary bg-light"></i>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+<div class="col-xl-6 col-sm-6">
+    <div class="card card-hover" onclick="window.location.href='<?= base_url(); ?>Personnel/manage'">
+        <div class="card-body widget-style-2">
+            <div class="media">
+                <div class="media-body align-self-center">
+                    <h2 class="my-0">
+                        <span data-plugin="counterup"><?= $personnel_count ?></span>
+                    </h2>
+                    <p class="mb-0 text-dark">Personnel</p>
+                </div>
+                <i class="mdi mdi-account-group text-primary bg-light"></i>
+            </div>
+        </div>
+    </div>
+</div>
 
-                 
+
+    <div class="col-xl-6 col-sm-6">
+    <div class="card card-hover" onclick="window.location.href='<?= base_url(); ?>User'">
+        <div class="card-body widget-style-2">
+            <div class="media">
+                <div class="media-body align-self-center">
+                    <h2 class="my-0">
+                        <span data-plugin="counterup"><?= $user_count ?></span>
+                    </h2>
+                    <p class="mb-0 text-dark">Manage Users</p>
+                </div>
+                <i class="mdi mdi-account text-primary bg-light"></i>
+
+            </div>
+        </div>
+    </div>
+</div>
+
 
             </div>
 

@@ -3,6 +3,27 @@
     <title>PMS - Cash Advance</title>
 
 <?php include('includes/head.php'); ?>
+<style>
+/* Smooth button animation */
+.btn {
+    transition: all 0.25s ease-in-out;
+}
+
+/* Scale on hover */
+.btn:hover {
+    transform: scale(1.05);
+    opacity: 0.95;
+}
+
+/* Glowing effect for primary/important buttons */
+.btn-primary:hover,
+.btn-success:hover,
+.btn-info:hover,
+.btn-danger:hover {
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+    border-color: rgba(0, 123, 255, 0.3);
+}
+</style>
 
 <body>
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.css">
