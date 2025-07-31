@@ -52,12 +52,18 @@
 
                 </div>
                 
-
+<!-- to be modified by aria live -->
                 <?php if ($this->session->flashdata('success')): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
         <?= $this->session->flashdata('success') ?>
         <button type="button" class="close" data-dismiss="alert">&times;</button>
     </div>
+
+<!-- to be modified into aria live -->
+
+
+
+
 <?php elseif ($this->session->flashdata('error')): ?>
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <?= $this->session->flashdata('error') ?>
@@ -65,7 +71,7 @@
     </div>
 <?php endif; ?>
 
-
+<!-- to be modified into aria live -->
                 <div class="card">
                     <div class="card-body">
                       <h5 class="page-title">Personnel List</h5>

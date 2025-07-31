@@ -1013,7 +1013,9 @@ $totalNet += $netPay;
     </div>
   </div>
 </div>
+
 <?php endforeach; ?>
+
 <tr style="font-weight:bold; background:#f1f1f1;">
   <td colspan="<?= $totalPrefixCols ?>" class="text-right">TOTAL</td>
   <td><?= number_format($totalGross, 2) ?></td>
