@@ -254,6 +254,21 @@ th {
   padding-bottom: 4px;
   margin-bottom: 10px;
 }
+#print-all-payslips-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  padding: 20px;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+
+.print-card p {
+  margin: 4px 0;
+}
 
 /* === PRINT FIXES === */
 @media print {
@@ -267,7 +282,55 @@ th {
     overflow: visible !important;
     zoom: 75%; /* Tweak to fit in A4 landscape */
   }
+ #print-all-payslips-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2x2 layout on A4 */
+  gap: 16px;
+  justify-content: center;
+  padding: 20px;
+}
 
+
+.print-card {
+  width: 390px;              /* ≈ 4.1 inches */
+  height: 550px;             /* ≈ 5.8 inches */
+  padding: 18px 20px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  background-color: #f8f9fa;
+  border: 1.5px solid #444;
+  border-radius: 6px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+
+.print-card p {
+  margin: 4px 0;
+  font-size: 12.5px;
+}
+
+  .page-break {
+    page-break-after: always;
+  }
+
+  .no-print,
+  .no-print *, 
+  .modal, 
+  .modal-backdrop {
+    display: none !important;
+  }
+
+  .page-break {
+    page-break-after: always;
+    break-after: page;
+  }
+
+  
   .no-print-payslip { display: none !important; } /* Hide payslips when printing payroll */
   .no-print-payroll { display: none !important; } /* Hide payroll when printing payslip */
 
@@ -394,7 +457,14 @@ th {
     <button onclick="window.print()" class="btn btn-primary btn-sm">
       <i class="fas fa-print"></i> Print Payroll Summary
     </button>
+    <div class="print-button no-print mt-2">
+  <button onclick="printAllPayslips()" class="btn btn-success btn-sm">
+    <i class="fas fa-file-invoice-dollar"></i> Print All Payslips
+  </button>
+</div>
+
   </div>
+  
 </div>
 
 
@@ -881,7 +951,8 @@ $totalNet += $netPay;
         <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
       </div>
       <div class="modal-body p-4">
-        <div class="row">
+        <div id="print-all-payslips-container">
+
           <div class="col-md-6">
             <p><strong>Employee:</strong> <?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></p>
 
@@ -968,9 +1039,97 @@ $totalNet += $netPay;
 
 
 
+<!-- === PRINTABLE ALL PAYSLIPS SECTION (hidden by default) === -->
+<div id="allPayslips" class="no-print-payroll d-none">
+  <div id="print-all-payslips-container">
+    <?php foreach ($attendance_data as $ln => $row): ?>
+      <?php if (!in_array($row->rateType, ['Month', 'Bi-Month'])) continue; ?>
 
+      <?php
+        // Full Name and Base Info
+        $fullName = htmlspecialchars($row->last_name . ', ' . $row->first_name);
+        $position = htmlspecialchars($row->position);
+        $rateType = $row->rateType;
+        $rateAmount = $row->rateAmount ?? 0;
+        $printedDate = date('F d, Y');
 
+        // Rate Calculations
+        $workingDaysInMonth = getWorkingDaysInMonth($start);
+        $dailyRate = ($rateType === 'Month') ? ($rateAmount / $workingDaysInMonth) : ($rateAmount / 8);
+        $hourlyRate = ($rateType === 'Month') ? ($dailyRate / 8) : (($rateType === 'Day') ? ($rateAmount / 8) : $rateAmount);
+        $otRate = $hourlyRate * 1.25;
+
+        // Attendance Values
+        $regFormatted = isset($row->regTotalMinutes) ? round($row->regTotalMinutes / 60, 2) : 0;
+        $otFormatted = isset($row->otTotalMinutes) ? round($row->otTotalMinutes / 60, 2) : 0;
+        $totalDays = isset($row->total_days) ? round($row->total_days, 0) : 0;
+
+        // Earnings and Deductions
+        $salary = $row->salary ?? ($regFormatted * $hourlyRate + $otFormatted * $otRate);
+        $cash_advance = $row->ca_cashadvance ?? 0;
+        $sss = $row->gov_sss ?? 0;
+        $pagibig = $row->gov_pagibig ?? 0;
+        $philhealth = $row->gov_philhealth ?? 0;
+        $loan = $row->loan ?? 0;
+        $other_deduction = $row->other_deduction ?? 0;
+
+        $total_deduction = $cash_advance + $sss + $pagibig + $philhealth + $loan + $other_deduction;
+        $netPay = $salary - $total_deduction;
+      ?>
+
+      <div class="print-card" style="page-break-inside: avoid; margin-bottom: 30px; padding: 20px; border: 1px solid #ddd;">
+        <h4 style="margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 6px;">
+          Payslip - <?= $fullName ?>
+        </h4>
+
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+          <div>
+            <p><strong>Employee:</strong> <?= $fullName ?></p>
+            <p><strong>Position:</strong> <?= $position ?></p>
+            <p><strong>Rate:</strong> ₱<?= number_format($rateAmount, 2) ?> / <?= $rateType ?></p>
+            <?php if ($rateType === 'Month'): ?>
+              <p><strong>Daily Rate:</strong> ₱<?= number_format($dailyRate, 2) ?></p>
+              <p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p>
+              <p><strong>Overtime Rate:</strong> ₱<?= number_format($otRate, 2) ?></p>
+            <?php endif; ?>
+          </div>
+          <div style="text-align: right;">
+            <p><strong>Period:</strong><br><?= date('F d', strtotime($start)) ?> - <?= date('F d, Y', strtotime($end)) ?></p>
+            <p><strong>Printed:</strong> <?= $printedDate ?></p>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+          <div style="width: 48%;">
+            <h5 style="border-bottom: 1px solid #ccc;">Earnings</h5>
+            <p>Regular Time: <?= number_format($regFormatted, 2) ?> hrs</p>
+            <p>Overtime: <?= number_format($otFormatted, 2) ?> hrs</p>
+            <p>Total Days: <?= $totalDays ?></p>
+            <p><strong>Gross Salary: ₱<?= number_format($salary, 2) ?></strong></p>
+          </div>
+
+          <div style="width: 48%;">
+            <h5 style="border-bottom: 1px solid #ccc;">Deductions</h5>
+            <p>Cash Advance: ₱<?= number_format($cash_advance, 2) ?></p>
+            <p>SSS (Gov’t): ₱<?= number_format($sss, 2) ?></p>
+            <p>Pag-IBIG (Gov’t): ₱<?= number_format($pagibig, 2) ?></p>
+            <p>PHIC (Gov’t): ₱<?= number_format($philhealth, 2) ?></p>
+            <p>Loan: ₱<?= number_format($loan, 2) ?></p>
+            <p>Other Deduction: ₱<?= number_format($other_deduction, 2) ?></p>
+            <p><strong>Total Deduction: ₱<?= number_format($total_deduction, 2) ?></strong></p>
+          </div>
+        </div>
+
+        <div style="margin-top: 10px; text-align: right;">
+          <h4><strong>Net Pay: ₱<?= number_format($netPay, 2) ?></strong></h4>
+        </div>
+      </div>
+
+    <?php endforeach; ?>
+  </div>
 </div>
+
+
 <br>
 <?php if (!empty($signatories) && $show_signatories): ?>
 <div class="row mt-5 signature">
@@ -1008,6 +1167,23 @@ function printPayslip(elementId) {
     window.print();
     document.body.innerHTML = originalContents;
     location.reload(); // Restore modal functionality
+}
+</script>
+<script>
+function printAllPayslips() {
+  // Store original content
+  const originalContent = document.body.innerHTML;
+  const payslips = document.getElementById("allPayslips").innerHTML;
+
+  // Replace with only payslips
+  document.body.innerHTML = payslips;
+
+  // Trigger print
+  window.print();
+
+  // Restore original content
+  document.body.innerHTML = originalContent;
+  location.reload(); // Restore Bootstrap modals, etc.
 }
 </script>
 

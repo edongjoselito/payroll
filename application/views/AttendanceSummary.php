@@ -47,9 +47,9 @@
     <?php endif; ?>
 
     <div class="mb-2">
-        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#filterModal">
-            <i class="fas fa-filter"></i> Select by Period
-        </button>
+      <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#filterModal">
+    <i class="fas fa-clock"></i> Select by Period
+</button>
     </div>
 
     <div class="card">
