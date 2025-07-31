@@ -129,7 +129,7 @@
                     </h2>
                     <p class="mb-0 text-dark">Projects</p>
                 </div>
-                <i class="mdi mdi-domain text-primary bg-light"></i>
+                <i class="mdi mdi-domain text-success bg-light"></i>
             </div>
         </div>
     </div>
@@ -146,7 +146,7 @@
                     </h2>
                     <p class="mb-0 text-dark">Personnel</p>
                 </div>
-                <i class="mdi mdi-account-group text-primary bg-light"></i>
+                <i class="mdi mdi-account-group text-success bg-light"></i>
             </div>
         </div>
     </div>
@@ -163,8 +163,23 @@
                     </h2>
                     <p class="mb-0 text-dark">Manage Users</p>
                 </div>
-                <i class="mdi mdi-account text-primary bg-light"></i>
+                <i class="mdi mdi-account text-success bg-light"></i>
 
+            </div>
+        </div>
+    </div>
+</div>
+<div class="col-xl-6 col-sm-6">
+    <div class="card card-hover" onclick="window.location.href='<?= base_url(); ?>Company'">
+        <div class="card-body widget-style-2">
+            <div class="media">
+                <div class="media-body align-self-center">
+                    <h2 class="my-0">
+                        <span data-plugin="counterup">1</span> <!-- or make this dynamic later -->
+                    </h2>
+                    <p class="mb-0 text-dark">Company Information</p>
+                </div>
+                <i class="mdi mdi-office-building text-success bg-light"></i>
             </div>
         </div>
     </div>

@@ -134,7 +134,7 @@ input.is-invalid {
 
 /* Modal Styling */
 .modal-content {
-    border-radius: 8px;
+    border-radius: 5px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
 }
 .modal-header {
