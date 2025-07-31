@@ -16,40 +16,35 @@
                 <span class="badge badge-danger rounded-circle noti-icon-badge"><?= $birthday_count; ?></span>
             <?php endif; ?>
         </a>
-      <div class="dropdown-menu dropdown-menu-right dropdown-lg">
-    <div class="dropdown-item noti-title">
-        <h5 class="font-16 m-0">🎉 Birthday Celebrants</h5>
-    </div>
+        <div class="dropdown-menu dropdown-menu-right dropdown-lg">
+            <!-- item-->
+            <div class="dropdown-item noti-title">
+                <h5 class="font-16 m-0">Birthday Celebrants</h5>
+            </div>
 
-    <div class="slimscroll noti-scroll">
-        <div class="inbox-widget">
-            <!-- Today's Celebrants -->
-            <?php if (!empty($today_birthdays)): ?>
-                <?php foreach ($today_birthdays as $person): ?>
-                    <div class="inbox-item">
-                        <div class="inbox-item-img">
-                            <img src="<?= base_url(); ?>assets/images/cake.png" class="rounded-circle" alt="Cake" />
+            <div class="slimscroll noti-scroll">
+                <div class="inbox-widget">
+                    <a href="<?= base_url(); ?>Page/birthdays_today">
+                        <div class="inbox-item">
+                            <div class="inbox-item-img">
+                                <img src="<?= base_url(); ?>assets/images/cake.png" class="rounded-circle" alt="">
+                            </div>
+                            <p class="inbox-item-author">Today's</p>
+                            <p class="inbox-item-text text-truncate">Birthday Celebrants</p>
                         </div>
-                        <p class="inbox-item-author text-success">🎂 <?= $person->last_name . ' , ' . $person->first_name; ?></p>
-                        <p class="inbox-item-text text-muted text-truncate">Happy Birthday today!</p>
-                    </div>
-                <?php endforeach; ?>
-            <?php else: ?>
-                <div class="inbox-item">
-                    <p class="inbox-item-author text-muted">No birthday today.</p>
-                </div>
-            <?php endif; ?>
-
-            <hr class="my-1">
-
-            <!-- This Month's Celebrants -->
-            <a href="<?= base_url(); ?>Page/birthdays_month" class="dropdown-item text-center text-info">
-                🎉 View all <?= count($month_birthdays); ?> celebrants this month
-            </a>
+                    </a>
+                    <a href="<?= base_url(); ?>Page/birthdays_month">
+                        <div class="inbox-item">
+                            <div class="inbox-item-img">
+                                <img src="<?= base_url(); ?>assets/images/cake.png" class="rounded-circle" alt="">
+                            </div>
+                            <p class="inbox-item-author">This Month's</p>
+                            <p class="inbox-item-text text-truncate">Birthday Celebrants</p>
+                        </div>
+                    </a>
+                </div> <!-- end inbox-widget -->
+            </div>
         </div>
-    </div>
-</div>
-
     </li>
 <?php endif; ?>
 
