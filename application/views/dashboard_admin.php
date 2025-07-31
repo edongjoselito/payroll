@@ -129,7 +129,8 @@
                     </h2>
                     <p class="mb-0 text-dark">Projects</p>
                 </div>
-                <i class="mdi mdi-domain text-success bg-light"></i>
+              <i class="mdi mdi-hard-hat text-primary bg-light"></i>
+
             </div>
         </div>
     </div>
@@ -146,7 +147,7 @@
                     </h2>
                     <p class="mb-0 text-dark">Personnel</p>
                 </div>
-                <i class="mdi mdi-account-group text-success bg-light"></i>
+                <i class="mdi mdi-account text-primary bg-light"></i>
             </div>
         </div>
     </div>
@@ -163,7 +164,7 @@
                     </h2>
                     <p class="mb-0 text-dark">Manage Users</p>
                 </div>
-                <i class="mdi mdi-account text-success bg-light"></i>
+                <i class="mdi mdi-account-group text-primary bg-light"></i>
 
             </div>
         </div>
@@ -179,7 +180,7 @@
                     </h2>
                     <p class="mb-0 text-dark">Company Information</p>
                 </div>
-                <i class="mdi mdi-office-building text-success bg-light"></i>
+                <i class="mdi mdi-office-building text-primary bg-light"></i>
             </div>
         </div>
     </div>
