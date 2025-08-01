@@ -3,19 +3,18 @@
             <title>PMS - Manage Users</title>
 
         <?php include('includes/head.php'); ?>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
 <style>
-/* Button Enhancements */
+/* General button animation */
 .btn {
-    
     border-radius: 6px;
     transition: all 0.25s ease-in-out;
 }
-
 .btn:hover {
     transform: scale(1.07);
     opacity: 0.95;
 }
-
 .btn-primary:hover {
     box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
 }
@@ -32,6 +31,7 @@
     box-shadow: 0 0 8px rgba(108, 117, 125, 0.4);
 }
 </style>
+
 
         <body>
         <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.css">
@@ -80,10 +80,29 @@
                                                     <td><?= $u->email ?></td>
                                                     <td><?= $u->position ?></td>
                                                     <td><?= $u->acctStat ?></td>
-                                                    <td>
-                                                        <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#editModal<?= $u->username ?>">Edit</button>
-                                                        <a href="<?= base_url('User/delete/'.$u->username) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this user?')">Delete</a>
-                                                    </td>
+                                                  <td class="text-center">
+ <button 
+  class="btn btn-outline-info btn-sm me-1" 
+  data-bs-toggle="tooltip" 
+  data-placement="top" 
+  title="Edit"
+  type="button"
+  data-toggle="modal" 
+  data-target="#editModal<?= $u->username ?>">
+  <i class="fas fa-edit"></i>
+</button>
+
+  <a 
+    href="<?= base_url('User/delete/'.$u->username) ?>" 
+    class="btn btn-outline-danger btn-sm" 
+    data-toggle="tooltip" 
+    data-placement="top" 
+    title="Delete" 
+    onclick="return confirm('Delete this user?')">
+    <i class="fas fa-trash-alt"></i>
+  </a>
+</td>
+
                                                 </tr>
 
                                                <!-- Edit Modal -->
@@ -257,6 +276,10 @@
         <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.responsive.min.js"></script>
         <script src="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.js"></script>
         <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
-
+<script>$(function () {
+  $('[data-bs-toggle="tooltip"]').tooltip();
+});
+</script>
         </body>
         </html>
+S

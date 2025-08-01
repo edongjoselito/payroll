@@ -42,6 +42,48 @@ td .btn:last-child {
 .btn-secondary:hover {
   box-shadow: 0 0 8px rgba(108, 117, 125, 0.4);
 }
+.icon-expand-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 44px;
+  height: 44px;
+  padding: 0 12px;
+  overflow: hidden;
+  white-space: nowrap;
+  border-radius: 6px;
+  transition: width 0.6s ease, padding 0.6s ease;
+  position: relative;
+}
+
+.icon-expand-btn i {
+  font-size: 18px;
+  transition: transform 0.4s ease;
+}
+
+.icon-expand-btn span {
+  opacity: 0;
+  width: 0;
+  margin-left: 0;
+  overflow: hidden;
+  transition: all 0.6s ease;
+  display: inline-block;
+}
+
+.icon-expand-btn:hover {
+  width: 170px; /* Enough space for icon + "Add New Project" */
+  justify-content: flex-start;
+  padding: 0 16px;
+}
+
+.icon-expand-btn:hover span {
+  opacity: 1;
+  width: auto;
+  margin-left: 8px;
+}
+
+
 </style>
 
 <body>
@@ -73,14 +115,15 @@ td .btn:last-child {
                     <div class="col-12">
                         <div class="page-title-box d-flex justify-content-between align-items-center">
                             <!-- <h4 class="page-title">Project Management</h4> -->
-                         <button type="button"
-        class="btn btn-success btn-md"
-        title="Add New Project"
-        data-bs-toggle="tooltip"
-        data-toggle="modal"
-        data-target="#addModal">
+        <button type="button"
+    class="btn btn-success icon-expand-btn"
+    data-toggle="modal"
+    data-target="#addModal">
     <i class="mdi mdi-plus"></i>
+    <span>Add New Project</span>
 </button>
+
+
 
 
                         </div>
