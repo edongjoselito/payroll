@@ -24,6 +24,9 @@ th {
      vertical-align: middle !important;
      text-align: center;
 }
+.btn i {
+  margin-right: 0 !important;
+}
 
 td {
      min-height: 40px;
@@ -325,17 +328,17 @@ $to = $selectedTo ?? '';
             </div>
 
           <div class="d-flex justify-content-end mb-3">
-  <button class="btn btn-outline-primary btn-sm mr-2" onclick="window.print()">
-    <i class="mdi mdi-printer"></i> Print
-  </button>
+ <button class="btn btn-outline-primary btn-sm mr-2" onclick="window.print()" data-toggle="tooltip" data-placement="top" title="Print Attendance">
+  <i class="mdi mdi-printer" style="font-size: 18px;"></i>
+</button>
 
   <form action="<?= base_url('WeeklyAttendance/deleteAttendance') ?>" method="post" onsubmit="return confirm('Are you sure you want to delete...?')" style="display: inline;">
     <input type="hidden" name="projectID" value="<?= $projectID ?>">
     <input type="hidden" name="from" value="<?= $from ?>">
     <input type="hidden" name="to" value="<?= $to ?>">
-    <button type="submit" class="btn btn-danger btn-sm">
-      <i class="mdi mdi-delete"></i> Delete
-    </button>
+  <button type="submit" class="btn btn-danger btn-sm" data-toggle="tooltip" data-placement="top" title="Delete Attendance">
+  <i class="mdi mdi-delete" style="font-size: 18px;"></i>
+</button>
   </form>
 </div>
 
@@ -344,16 +347,16 @@ $to = $selectedTo ?? '';
         <div class="table-responsive">
           <table class="table table-bordered table-striped table-hover">
 
-              <th style="font-size: 13px; font-weight: 600;">
+             <thead class="thead-light">
+<tr>
+    <th>Personnel</th>
+    <?php foreach ($dates as $d): ?>
+        <th><?= date('M d', strtotime($d)) ?></th>
+    <?php endforeach; ?>
+    <th>Total Hours</th>
+</tr>
+</thead>
 
-                <tr>
-                    <th>Personnel</th>
-                    <?php foreach ($dates as $d): ?>
-                        <th><?= date('M d', strtotime($d)) ?></th>
-                    <?php endforeach; ?>
-                    <th>Total Hours</th>
-                </tr>
-                </thead>
                 <tbody>
                 <?php foreach ($attendances as $pid => $person): ?>
                     <tr>
@@ -708,6 +711,10 @@ $(document).ready(function () {
 
     $('#editStatus').on('change', toggleHourFields);
 });
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip();
+});
+
 </script>
 
 
