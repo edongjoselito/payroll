@@ -728,6 +728,8 @@ $totalPrefixCols = $fixedColsBeforeDays + $dateColumnCount + $totalTimeCols + $a
 ?>
 
 <?php $ln = 1; foreach ($attendance_data as $row): ?>
+<?php if ($row->rateType === 'Month' || $row->rateType === 'Bi-Month') continue; ?>
+
 
 <tr>
 <?php
@@ -1137,7 +1139,9 @@ $totalNet = bcadd($totalNet, $netPay, 2);
 <!-- === PRINTABLE ALL PAYSLIPS SECTION (hidden by default) === -->
 <div id="allPayslips" class="no-print-payroll d-none">
   <div id="print-all-payslips-container">
-   <?php foreach ($attendance_data as $ln => $row): ?>
+<?php foreach ($attendance_data as $ln => $row): ?>
+<?php if ($row->rateType === 'Month' || $row->rateType === 'Bi-Month') continue; ?>
+
 
   <?php
     $fullName = htmlspecialchars($row->last_name . ', ' . $row->first_name);
