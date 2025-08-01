@@ -133,84 +133,86 @@ if ($success || $error):
 
                         </tr>
                     </thead>
-                    <tbody>
-                        <?php foreach ($cash_advances as $row): ?>
-                        <tr>
-                            <td><?= $row->fullname ?></td>
-                            <td>₱<?= number_format($row->amount, 2) ?></td>
-                            <td><?= $row->date ?></td>
-                       <td class="text-center">
-    <button class="btn btn-outline-info btn-sm" 
-        data-toggle="modal" 
-        data-target="#editCashModal<?= $row->id ?>" 
-        data-bs-toggle="tooltip" 
-        data-bs-placement="top" 
-        title="Update">
-        <i class="fas fa-edit"></i>
-    </button>
-    <a 
-        href="<?= base_url('Borrow/delete_cash_advance/'.$row->id) ?>" 
-        class="btn btn-outline-danger btn-sm" 
-        data-bs-toggle="tooltip" 
-        data-bs-placement="top" 
-        title="Delete" 
-        onclick="return confirm('Delete this record?')">
-        <i class="fas fa-trash-alt"></i>
-    </a>
-</td>
+<tbody>
+<?php if (!empty($cash_advances)): ?>
+    <?php foreach ($cash_advances as $row): ?>
+    <tr>
+        <td><?= $row->fullname ?></td>
+        <td>₱<?= number_format($row->amount, 2) ?></td>
+        <td><?= $row->date ?></td>
+        <td class="text-center">
+            <button class="btn btn-outline-info btn-sm" 
+                data-toggle="modal" 
+                data-target="#editCashModal<?= $row->id ?>" 
+                data-bs-toggle="tooltip" 
+                data-bs-placement="top" 
+                title="Update">
+                <i class="fas fa-edit"></i>
+            </button>
+            <a 
+                href="<?= base_url('Borrow/delete_cash_advance/'.$row->id) ?>" 
+                class="btn btn-outline-danger btn-sm" 
+                data-bs-toggle="tooltip" 
+                data-bs-placement="top" 
+                title="Delete" 
+                onclick="return confirm('Delete this record?')">
+                <i class="fas fa-trash-alt"></i>
+            </a>
+        </td>
+    </tr>
 
-
-                        </tr>
-
-                        <div class="modal fade" id="editCashModal<?= $row->id ?>" tabindex="-1">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                   <form method="post" action="<?= base_url('Borrow/update_cash_advance/' . $row->id) ?>">
-
-
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Edit Cash Advance</h5>
-                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <input type="hidden" name="id" value="<?= $row->id ?>">
-                                            <div class="form-group">
-                                                <label>Personnel</label>
-                                                <input class="form-control" value="<?= $row->fullname ?>" readonly>
-                                            </div>
-                                           <div class="form-row">
-    <div class="form-group col-md-6">
-        <label>Amount</label>
-        <input type="number" name="amount" class="form-control" value="<?= $row->amount ?>" required>
-    </div>
-    <div class="form-group col-md-6">
-        <label>Date</label>
-        <input type="date" name="date" class="form-control" value="<?= $row->date ?>" required>
-    </div>
-</div>
-
-<div class="form-row">
-    <div class="form-group col-md-6">
-        <label>Deduct From</label>
-        <input type="date" name="deduct_from" class="form-control" value="<?= $row->deduct_from ?? '' ?>">
-    </div>
-    <div class="form-group col-md-6">
-        <label>Deduct To</label>
-        <input type="date" name="deduct_to" class="form-control" value="<?= $row->deduct_to ?? '' ?>">
-    </div>
-</div>
-
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-primary">Update</button>
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        </div>
-                                    </form>
-                                </div>
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editCashModal<?= $row->id ?>" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form method="post" action="<?= base_url('Borrow/update_cash_advance/' . $row->id) ?>">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Edit Cash Advance</h5>
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id" value="<?= $row->id ?>">
+                        <div class="form-group">
+                            <label>Personnel</label>
+                            <input class="form-control" value="<?= $row->fullname ?>" readonly>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>Amount</label>
+                                <input type="number" name="amount" class="form-control" value="<?= $row->amount ?>" required>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Date</label>
+                                <input type="date" name="date" class="form-control" value="<?= $row->date ?>" required>
                             </div>
                         </div>
-                        <?php endforeach; ?>
-                    </tbody>
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label>Deduct From</label>
+                                <input type="date" name="deduct_from" class="form-control" value="<?= $row->deduct_from ?? '' ?>">
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label>Deduct To</label>
+                                <input type="date" name="deduct_to" class="form-control" value="<?= $row->deduct_to ?? '' ?>">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Update</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <?php endforeach; ?>
+<?php else: ?>
+    <tr>
+        <td colspan="4" class="text-center text-muted">No data available in table</td>
+    </tr>
+<?php endif; ?>
+</tbody>
+
                 </table>
             </div>
         </div>

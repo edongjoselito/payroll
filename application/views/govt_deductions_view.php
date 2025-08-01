@@ -131,83 +131,88 @@ if ($success || $error):
                                         <th>Action</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <?php foreach ($deductions as $row): ?>
-                                    <tr>
-                                        <td><?= $row->fullname ?></td>
-                                        <td><?= $row->description ?></td>
-                                        <td>₱<?= number_format($row->amount, 2) ?></td>
-                                        <td><?= $row->date ?></td>
-                                        <td><?= $row->deduct_from ?? '—' ?></td>
-                                        <td><?= $row->deduct_to ?? '—' ?></td>
-                                        <td>
-<!-- EDIT Button -->
-<button class="btn btn-outline-info btn-sm me-1" 
-        data-toggle="modal" 
-        data-target="#editModal<?= $row->id ?>">
-    <i class="fas fa-edit" data-toggle="tooltip" title="Edit Deduction"></i>
-</button>
+                              <tbody>
+  <?php if (!empty($deductions)): ?>
+    <?php foreach ($deductions as $row): ?>
+      <tr>
+        <td><?= $row->fullname ?></td>
+        <td><?= $row->description ?></td>
+        <td>₱<?= number_format($row->amount, 2) ?></td>
+        <td><?= $row->date ?></td>
+        <td><?= $row->deduct_from ?? '—' ?></td>
+        <td><?= $row->deduct_to ?? '—' ?></td>
+        <td>
+          <!-- EDIT Button -->
+          <button class="btn btn-outline-info btn-sm me-1" 
+                  data-toggle="modal" 
+                  data-target="#editModal<?= $row->id ?>">
+            <i class="fas fa-edit" data-toggle="tooltip" title="Edit Deduction"></i>
+          </button>
 
-<!-- DELETE Button -->
-<a href="<?= base_url('Borrow/delete_govt_deduction/' . $row->id) ?>" 
-   class="btn btn-outline-danger btn-sm" 
-   onclick="return confirm('Delete this deduction?')">
-    <i class="fas fa-trash-alt" data-toggle="tooltip" title="Delete Deduction"></i>
-</a>
+          <!-- DELETE Button -->
+          <a href="<?= base_url('Borrow/delete_govt_deduction/' . $row->id) ?>" 
+             class="btn btn-outline-danger btn-sm" 
+             onclick="return confirm('Delete this deduction?')">
+            <i class="fas fa-trash-alt" data-toggle="tooltip" title="Delete Deduction"></i>
+          </a>
+        </td>
+      </tr>
 
+      <!-- Edit Modal -->
+      <div class="modal fade" id="editModal<?= $row->id ?>" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <form method="post" action="<?= base_url('Borrow/update_govt_deduction/' . $row->id) ?>">
+              <div class="modal-header">
+                <h5 class="modal-title">Edit Deduction</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+              </div>
+              <div class="modal-body">
+                <div class="form-group">
+                  <label>Description</label>
+                  <select name="description" class="form-control" required>
+                    <option value="SSS" <?= $row->description == 'SSS' ? 'selected' : '' ?>>SSS</option>
+                    <option value="PhilHealth" <?= $row->description == 'PhilHealth' ? 'selected' : '' ?>>PhilHealth</option>
+                    <option value="Pag-IBIG" <?= $row->description == 'Pag-IBIG' ? 'selected' : '' ?>>Pag-IBIG</option>
+                  </select>
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label>Amount</label>
+                    <input type="number" name="amount" class="form-control" value="<?= $row->amount ?>" required>
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label>Date</label>
+                    <input type="date" name="date" class="form-control" value="<?= $row->date ?>" required>
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group col-md-6">
+                    <label>Deduct From</label>
+                    <input type="date" name="deduct_from" class="form-control" value="<?= $row->deduct_from ?>">
+                  </div>
+                  <div class="form-group col-md-6">
+                    <label>Deduct To</label>
+                    <input type="date" name="deduct_to" class="form-control" value="<?= $row->deduct_to ?>">
+                  </div>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-success">Update</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    <?php endforeach; ?>
+  <?php else: ?>
+    <tr>
+      <td colspan="7" class="text-center text-muted">No data available in table</td>
+    </tr>
+  <?php endif; ?>
+</tbody>
 
-                                        </td>
-                                    </tr>
-
-                                    <!-- Edit Modal -->
-                                    <div class="modal fade" id="editModal<?= $row->id ?>" tabindex="-1">
-                                        <div class="modal-dialog">
-                                            <div class="modal-content">
-                                                <form method="post" action="<?= base_url('Borrow/update_govt_deduction/' . $row->id) ?>">
-                                                    <div class="modal-header">
-                                                        <h5 class="modal-title">Edit Deduction</h5>
-                                                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                                    </div>
-                                                    <div class="modal-body">
-                                                        <div class="form-group">
-                                                            <label>Description</label>
-                                                            <select name="description" class="form-control" required>
-                                                                <option value="SSS" <?= $row->description == 'SSS' ? 'selected' : '' ?>>SSS</option>
-                                                                <option value="PhilHealth" <?= $row->description == 'PhilHealth' ? 'selected' : '' ?>>PhilHealth</option>
-                                                                <option value="Pag-IBIG" <?= $row->description == 'Pag-IBIG' ? 'selected' : '' ?>>Pag-IBIG</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="form-row">
-                                                            <div class="form-group col-md-6">
-                                                                <label>Amount</label>
-                                                                <input type="number" name="amount" class="form-control" value="<?= $row->amount ?>" required>
-                                                            </div>
-                                                            <div class="form-group col-md-6">
-                                                                <label>Date</label>
-                                                                <input type="date" name="date" class="form-control" value="<?= $row->date ?>" required>
-                                                            </div>
-                                                        </div>
-                                                        <div class="form-row">
-                                                            <div class="form-group col-md-6">
-                                                                <label>Deduct From</label>
-                                                                <input type="date" name="deduct_from" class="form-control" value="<?= $row->deduct_from ?>">
-                                                            </div>
-                                                            <div class="form-group col-md-6">
-                                                                <label>Deduct To</label>
-                                                                <input type="date" name="deduct_to" class="form-control" value="<?= $row->deduct_to ?>">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    <div class="modal-footer">
-                                                        <button type="submit" class="btn btn-success">Update</button>
-                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <?php endforeach; ?>
-                                </tbody>
                             </table>
                         </div>
                     </div>

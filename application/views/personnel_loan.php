@@ -138,53 +138,54 @@ if ($success || $error):
             <th>Action</th>
           </tr>
         </thead>
-        <tbody>
-          <?php if (!empty($assigned_loans)): ?>
-            <?php foreach ($assigned_loans as $loan): ?>
-              <tr>
-                <td><?= "{$loan->last_name}, {$loan->first_name} " . ($loan->middle_name ?? '') . " " . ($loan->name_ext ?? '') ?></td>
-                <td><?= htmlspecialchars($loan->position ?? '') ?></td>
-                <td><?= htmlspecialchars($loan->loan_description ?? 'N/A') ?></td>
-                <td>₱<?= number_format($loan->amount, 2) ?></td>
-                <td>₱<?= number_format($loan->monthly_deduction, 2) ?></td>
-                <td><?= $loan->date_assigned ? date('Y-m-d', strtotime($loan->date_assigned)) : 'N/A' ?></td>
-                <td>
-                  <?php if ($loan->status == 1): ?>
-                    <span class="badge badge-success">Active</span>
-                  <?php else: ?>
-                    <span class="badge badge-secondary">Deducted</span>
-                  <?php endif; ?>
-                </td>
-                <td>
-              <!-- EDIT Button: outline-info -->
-               
-<button class="btn btn-outline-info btn-sm me-1 edit-btn"
-
-  data-loanid="<?= $loan->loan_id ?>"
-  data-personnelid="<?= $loan->personnelID ?>"
-  data-description="<?= $loan->loan_description ?>"
-  data-amount="<?= $loan->amount ?>"
-  data-monthly="<?= $loan->monthly_deduction ?>"
-  data-toggle="tooltip"
-  title="Edit Loan">
-  <i class="fas fa-edit"></i>
-</button>
-
-<!-- DELETE Button: outline-danger -->
-<a href="<?= base_url('Loan/delete_personnel_loan/' . $loan->loan_id . '/' . $loan->personnelID) ?>"
-   class="btn btn-outline-danger btn-sm"
-   onclick="return confirm('Delete this loan?')"
-   data-toggle="tooltip"
-   title="Delete Loan">
-  <i class="fas fa-trash-alt"></i>
-</a>
-
-
-                </td>
-              </tr>
-            <?php endforeach; ?>
+       <tbody>
+  <?php if (!empty($assigned_loans)): ?>
+    <?php foreach ($assigned_loans as $loan): ?>
+      <tr>
+        <td><?= "{$loan->last_name}, {$loan->first_name} " . ($loan->middle_name ?? '') . " " . ($loan->name_ext ?? '') ?></td>
+        <td><?= htmlspecialchars($loan->position ?? '') ?></td>
+        <td><?= htmlspecialchars($loan->loan_description ?? 'N/A') ?></td>
+        <td>₱<?= number_format($loan->amount, 2) ?></td>
+        <td>₱<?= number_format($loan->monthly_deduction, 2) ?></td>
+        <td><?= $loan->date_assigned ? date('Y-m-d', strtotime($loan->date_assigned)) : 'N/A' ?></td>
+        <td>
+          <?php if ($loan->status == 1): ?>
+            <span class="badge badge-success">Active</span>
+          <?php else: ?>
+            <span class="badge badge-secondary">Deducted</span>
           <?php endif; ?>
-        </tbody>
+        </td>
+        <td>
+          <!-- EDIT Button -->
+          <button class="btn btn-outline-info btn-sm me-1 edit-btn"
+            data-loanid="<?= $loan->loan_id ?>"
+            data-personnelid="<?= $loan->personnelID ?>"
+            data-description="<?= $loan->loan_description ?>"
+            data-amount="<?= $loan->amount ?>"
+            data-monthly="<?= $loan->monthly_deduction ?>"
+            data-toggle="tooltip"
+            title="Edit Loan">
+            <i class="fas fa-edit"></i>
+          </button>
+
+          <!-- DELETE Button -->
+          <a href="<?= base_url('Loan/delete_personnel_loan/' . $loan->loan_id . '/' . $loan->personnelID) ?>"
+            class="btn btn-outline-danger btn-sm"
+            onclick="return confirm('Delete this loan?')"
+            data-toggle="tooltip"
+            title="Delete Loan">
+            <i class="fas fa-trash-alt"></i>
+          </a>
+        </td>
+      </tr>
+    <?php endforeach; ?>
+  <?php else: ?>
+    <tr>
+      <td colspan="8" class="text-center text-muted">No data available in table</td>
+    </tr>
+  <?php endif; ?>
+</tbody>
+
       </table>
     </div>
   </div>

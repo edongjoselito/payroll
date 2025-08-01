@@ -131,85 +131,88 @@ if ($success || $error):
                             <th>Manage</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <?php foreach ($material_loans as $row): ?>
-                        <tr>
-                            <td><?= $row->fullname ?></td>
-                            <td><?= $row->description ?></td>
-                            <td>₱<?= number_format($row->amount, 2) ?></td>
-                            <td><?= date('Y-m-d', strtotime($row->date)) ?></td>
-                             <td><?= $row->deduct_from ? date('Y-m-d', strtotime($row->deduct_from)) : '' ?></td>
-    <td><?= $row->deduct_to ? date('Y-m-d', strtotime($row->deduct_to)) : '' ?></td>
-                            <td>
-                         <!-- EDIT Button -->
-<button class="btn btn-outline-info btn-sm me-1" data-toggle="modal" data-target="#editMaterialModal<?= $row->id ?>">
-  <i class="fas fa-edit" data-toggle="tooltip" title="Edit Deduction"></i>
-</button>
+                   <tbody>
+  <?php if (!empty($material_loans)): ?>
+    <?php foreach ($material_loans as $row): ?>
+    <tr>
+      <td><?= $row->fullname ?></td>
+      <td><?= $row->description ?></td>
+      <td>₱<?= number_format($row->amount, 2) ?></td>
+      <td><?= date('Y-m-d', strtotime($row->date)) ?></td>
+      <td><?= $row->deduct_from ? date('Y-m-d', strtotime($row->deduct_from)) : '' ?></td>
+      <td><?= $row->deduct_to ? date('Y-m-d', strtotime($row->deduct_to)) : '' ?></td>
+      <td>
+        <!-- EDIT Button -->
+        <button class="btn btn-outline-info btn-sm me-1" data-toggle="modal" data-target="#editMaterialModal<?= $row->id ?>">
+          <i class="fas fa-edit" data-toggle="tooltip" title="Edit Deduction"></i>
+        </button>
 
-<!-- DELETE Button -->
-<a href="<?= base_url('Borrow/delete_material/' . $row->id) ?>" 
-   class="btn btn-outline-danger btn-sm" 
-   onclick="return confirm('Delete this record?')">
-  <i class="fas fa-trash-alt" data-toggle="tooltip" title="Delete Deduction"></i>
-</a>
+        <!-- DELETE Button -->
+        <a href="<?= base_url('Borrow/delete_material/' . $row->id) ?>" 
+           class="btn btn-outline-danger btn-sm" 
+           onclick="return confirm('Delete this record?')">
+          <i class="fas fa-trash-alt" data-toggle="tooltip" title="Delete Deduction"></i>
+        </a>
+      </td>
+    </tr>
 
-
-                            </td>
-                        </tr>
-
-                        <!-- Edit Modal -->
-                        <div class="modal fade" id="editMaterialModal<?= $row->id ?>" tabindex="-1">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <form method="post" action="<?= base_url('Borrow/save_material'); ?>">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title">Edit Other Deduction</h5>
-                                            <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <input type="hidden" name="id" value="<?= $row->id ?>">
-                                            <div class="form-group">
-                                                <label>Personnel</label>
-                                                <input class="form-control" value="<?= $row->fullname ?>" readonly>
-                                                <input type="hidden" name="personnelID" value="<?= $row->personnelID ?>">
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Description</label>
-                                                <input type="text" name="description" class="form-control" value="<?= $row->description ?>" required>
-                                            </div>
-                                            <div class="form-row">
-                                                <div class="form-group col-md-6">
-                                                    <label>Amount</label>
-                                                    <input type="number" name="amount" class="form-control" value="<?= $row->amount ?>" required>
-                                                </div>
-                                                <div class="form-group col-md-6">
-                                                    <label>Date</label>
-                                                    <input type="date" name="date" class="form-control" value="<?= $row->date ?>" required>
-                                                </div>
-                                            </div>
-                                           <div class="form-row">
-    <div class="form-group col-md-6">
-        <label>Deduct From</label>
-        <input type="date" name="deduct_from" class="form-control" value="<?= $row->deduct_from ?? '' ?>">
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editMaterialModal<?= $row->id ?>" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form method="post" action="<?= base_url('Borrow/save_material'); ?>">
+            <div class="modal-header">
+              <h5 class="modal-title">Edit Other Deduction</h5>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" name="id" value="<?= $row->id ?>">
+              <div class="form-group">
+                <label>Personnel</label>
+                <input class="form-control" value="<?= $row->fullname ?>" readonly>
+                <input type="hidden" name="personnelID" value="<?= $row->personnelID ?>">
+              </div>
+              <div class="form-group">
+                <label>Description</label>
+                <input type="text" name="description" class="form-control" value="<?= $row->description ?>" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label>Amount</label>
+                  <input type="number" name="amount" class="form-control" value="<?= $row->amount ?>" required>
+                </div>
+                <div class="form-group col-md-6">
+                  <label>Date</label>
+                  <input type="date" name="date" class="form-control" value="<?= $row->date ?>" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group col-md-6">
+                  <label>Deduct From</label>
+                  <input type="date" name="deduct_from" class="form-control" value="<?= $row->deduct_from ?? '' ?>">
+                </div>
+                <div class="form-group col-md-6">
+                  <label>Deduct To</label>
+                  <input type="date" name="deduct_to" class="form-control" value="<?= $row->deduct_to ?? '' ?>">
+                </div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">Update</button>
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
-    <div class="form-group col-md-6">
-        <label>Deduct To</label>
-        <input type="date" name="deduct_to" class="form-control" value="<?= $row->deduct_to ?? '' ?>">
-    </div>
-</div>
+    <?php endforeach; ?>
+  <?php else: ?>
+    <tr>
+      <td colspan="7" class="text-center text-muted">No data available in table</td>
+    </tr>
+  <?php endif; ?>
+</tbody>
 
-
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="submit" class="btn btn-primary">Update</button>
-                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
-                    </tbody>
                 </table>
             </div>
         </div>
