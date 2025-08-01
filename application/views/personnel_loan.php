@@ -27,6 +27,52 @@
   box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
   border-color: rgba(0, 123, 255, 0.3);
 }
+.toast-header-success {
+    background-color: #28a745 !important;
+    color: #fff;
+    border-radius: 4px 4px 0 0;
+}
+
+.toast-body-success {
+    background-color: #eaf9ef;
+    color: #155724;
+}
+
+.toast-header-danger {
+    background-color: #dc3545 !important;
+    color: #fff;
+    border-radius: 4px 4px 0 0;
+}
+
+.toast-body-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.toast-header i {
+    font-size: 1.1rem;
+    margin-right: 0.6rem;
+}
+
+.toast-header strong {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-right: auto;
+}
+
+.toast .close,
+.toast .btn-close {
+    color: white;
+    font-size: 1rem;
+    opacity: 0.85;
+    margin-left: 0.5rem;
+}
+
+.toast .close:hover,
+.toast .btn-close:hover {
+    opacity: 1;
+}
+
 </style>
 
 <body>
@@ -46,17 +92,35 @@
           </button>
         </div>
 
-        <?php if ($this->session->flashdata('success')): ?>
-          <div class="alert alert-success alert-dismissible fade show">
-            <?= $this->session->flashdata('success') ?>
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-          </div>
-        <?php elseif ($this->session->flashdata('error')): ?>
-          <div class="alert alert-danger alert-dismissible fade show">
-            <?= $this->session->flashdata('error') ?>
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-          </div>
-        <?php endif; ?>
+ <?php
+$success = $this->session->flashdata('success');
+$error = $this->session->flashdata('error');
+
+if ($success || $error):
+    $message = $success ?: $error;
+    $isDelete = stripos($message, 'deleted') !== false;
+    $type = $error || $isDelete ? 'danger' : 'success';
+    $icon = $type === 'success' ? 'check-circle' : 'trash-alt';
+    $title = $type === 'success' ? 'Success' : 'Deleted';
+?>
+<div aria-live="polite" aria-atomic="true" style="position: fixed; top: 75px; left: 50%; transform: translateX(-50%); z-index: 1055;">
+    <div class="toast fade" id="sessionToast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3500" style="min-width: 320px;">
+        <div class="toast-header toast-header-<?= $type ?>">
+            <i class="fas fa-<?= $icon ?> me-2"></i>
+            <strong class="me-auto"><?= $title ?></strong>
+            <button type="button" class="close" data-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body toast-body-<?= $type ?>">
+            <?= $message ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
+
+
 
        <div class="card">
   <div class="card-body">
@@ -92,17 +156,30 @@
                   <?php endif; ?>
                 </td>
                 <td>
-                  <button class="btn btn-info btn-sm edit-btn"
-                    data-loanid="<?= $loan->loan_id ?>"
-                    data-personnelid="<?= $loan->personnelID ?>"
-                    data-description="<?= $loan->loan_description ?>"
-                    data-amount="<?= $loan->amount ?>"
-                    data-monthly="<?= $loan->monthly_deduction ?>">
-                    Edit
-                  </button>
-                  <a href="<?= base_url('Loan/delete_personnel_loan/' . $loan->loan_id . '/' . $loan->personnelID) ?>"
-                     class="btn btn-danger btn-sm"
-                     onclick="return confirm('Delete this loan?')">Delete</a>
+              <!-- EDIT Button: outline-info -->
+               
+<button class="btn btn-outline-info btn-sm me-1 edit-btn"
+
+  data-loanid="<?= $loan->loan_id ?>"
+  data-personnelid="<?= $loan->personnelID ?>"
+  data-description="<?= $loan->loan_description ?>"
+  data-amount="<?= $loan->amount ?>"
+  data-monthly="<?= $loan->monthly_deduction ?>"
+  data-toggle="tooltip"
+  title="Edit Loan">
+  <i class="fas fa-edit"></i>
+</button>
+
+<!-- DELETE Button: outline-danger -->
+<a href="<?= base_url('Loan/delete_personnel_loan/' . $loan->loan_id . '/' . $loan->personnelID) ?>"
+   class="btn btn-outline-danger btn-sm"
+   onclick="return confirm('Delete this loan?')"
+   data-toggle="tooltip"
+   title="Delete Loan">
+  <i class="fas fa-trash-alt"></i>
+</a>
+
+
                 </td>
               </tr>
             <?php endforeach; ?>
@@ -228,6 +305,16 @@ $(document).on('click', '.edit-btn', function () {
     $('#editLoanAmount').val($(this).data('amount'));
     $('#editMonthlyDeduction').val($(this).data('monthly'));
     $('#editLoanModal').modal('show');
+});
+</script>
+<script>
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+<script>
+$(document).ready(function () {
+    $('#sessionToast').toast('show');
 });
 </script>
 

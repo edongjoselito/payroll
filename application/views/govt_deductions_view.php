@@ -27,6 +27,52 @@
     box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
     border-color: rgba(0, 123, 255, 0.3);
 }
+.toast-header-success {
+    background-color: #28a745 !important;
+    color: #fff;
+    border-radius: 4px 4px 0 0;
+}
+
+.toast-body-success {
+    background-color: #eaf9ef;
+    color: #155724;
+}
+
+.toast-header-danger {
+    background-color: #dc3545 !important;
+    color: #fff;
+    border-radius: 4px 4px 0 0;
+}
+
+.toast-body-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+.toast-header i {
+    font-size: 1.1rem;
+    margin-right: 0.6rem;
+}
+
+.toast-header strong {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-right: auto;
+}
+
+.toast .close,
+.toast .btn-close {
+    color: white;
+    font-size: 1rem;
+    opacity: 0.85;
+    margin-left: 0.5rem;
+}
+
+.toast .close:hover,
+.toast .btn-close:hover {
+    opacity: 1;
+}
+
 </style>
 
 <body>
@@ -42,17 +88,33 @@
                     <button class="btn btn-primary" data-toggle="modal" data-target="#addGovDeductionModal">+ Add Deduction</button>
                 </div>
 
-                <?php if($this->session->flashdata('success')): ?>
-                    <div class="alert alert-success alert-dismissible fade show">
-                        <?= $this->session->flashdata('success'); ?>
-                        <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    </div>
-                <?php elseif($this->session->flashdata('error')): ?>
-                    <div class="alert alert-danger alert-dismissible fade show">
-                        <?= $this->session->flashdata('error'); ?>
-                        <button type="button" class="close" data-dismiss="alert">&times;</button>
-                    </div>
-                <?php endif; ?>
+             <?php
+$success = $this->session->flashdata('success');
+$error = $this->session->flashdata('error');
+
+if ($success || $error):
+    $message = $success ?: $error;
+    $isDelete = stripos($message, 'deleted') !== false;
+    $type = $error || $isDelete ? 'danger' : 'success';
+    $icon = $type === 'success' ? 'check-circle' : 'trash-alt';
+    $title = $type === 'success' ? 'Success' : 'Deleted';
+?>
+<div aria-live="polite" aria-atomic="true" style="position: fixed; top: 75px; left: 50%; transform: translateX(-50%); z-index: 1055;">
+    <div class="toast fade" id="sessionToast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3500" style="min-width: 320px;">
+        <div class="toast-header toast-header-<?= $type ?>">
+            <i class="fas fa-<?= $icon ?> me-2"></i>
+            <strong class="me-auto"><?= $title ?></strong>
+            <button type="button" class="close" data-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body toast-body-<?= $type ?>">
+            <?= $message ?>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
+
 
                 <div class="card">
                     <div class="card-body">
@@ -79,8 +141,21 @@
                                         <td><?= $row->deduct_from ?? '—' ?></td>
                                         <td><?= $row->deduct_to ?? '—' ?></td>
                                         <td>
-                                            <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#editModal<?= $row->id ?>">Edit</button>
-                                            <a href="<?= base_url('Borrow/delete_govt_deduction/'.$row->id) ?>" onclick="return confirm('Delete this record?')" class="btn btn-danger btn-sm">Delete</a>
+<!-- EDIT Button -->
+<button class="btn btn-outline-info btn-sm me-1" 
+        data-toggle="modal" 
+        data-target="#editModal<?= $row->id ?>">
+    <i class="fas fa-edit" data-toggle="tooltip" title="Edit Deduction"></i>
+</button>
+
+<!-- DELETE Button -->
+<a href="<?= base_url('Borrow/delete_govt_deduction/' . $row->id) ?>" 
+   class="btn btn-outline-danger btn-sm" 
+   onclick="return confirm('Delete this deduction?')">
+    <i class="fas fa-trash-alt" data-toggle="tooltip" title="Delete Deduction"></i>
+</a>
+
+
                                         </td>
                                     </tr>
 
@@ -214,5 +289,17 @@
 <script src="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.js"></script>
 <script src="<?= base_url(); ?>assets/js/pages/datatables.init.js"></script>
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
+<script>
+$(document).ready(function () {
+    $('#sessionToast').toast('show');
+});
+</script>
+<script>
+$(function () {
+  $('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+
+
 </body>
 </html>

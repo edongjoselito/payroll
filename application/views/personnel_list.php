@@ -47,8 +47,16 @@
             <div class="container-fluid">
 
                 <div class="page-title-box d-flex justify-content-between align-items-center">
-                  <a href="<?= base_url('personnel/create') ?>" class="btn btn-primary btn-md">Add New</a>
-<a href="<?= base_url('personnel/service_years') ?>" class="btn btn-secondary btn-md mb-3">Years of Service</a>
+         <div class="mb-3">
+    <a href="<?= base_url('personnel/create') ?>" class="btn btn-primary btn-md mr-2" title="Add Now" data-bs-toggle="tooltip">
+        <i class="fas fa-user-plus me-1"></i> Add New
+    </a>
+    <a href="<?= base_url('personnel/service_years') ?>" class="btn btn-secondary btn-md" title="View Year of Service" data-bs-toggle="tooltip">
+        <i class="fas fa-calendar-alt me-1"></i> Years of Service
+    </a>
+</div>
+
+
 
                 </div>
                 
@@ -170,8 +178,24 @@ if ($hasTerminated) $colCount++;
 <td><?= $duration ?></td>
 
         <td>
-            <a href="<?= base_url('personnel/edit/'.$p->personnelID) ?>" class="btn btn-info btn-sm">Edit</a>
-            <a href="<?= base_url('personnel/delete/'.$p->personnelID) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this record?')">Delete</a>
+           <a href="<?= base_url('personnel/edit/'.$p->personnelID) ?>" 
+   class="btn btn-outline-info btn-sm me-1" 
+   title="Edit"
+   data-bs-toggle="tooltip" 
+   data-bs-placement="top">
+   <i class="fas fa-edit"></i>
+</a>
+
+<a href="<?= base_url('personnel/delete/'.$p->personnelID) ?>" 
+   class="btn btn-outline-danger btn-sm" 
+   title="Delete" 
+   data-bs-toggle="tooltip" 
+   data-bs-placement="top"
+   onclick="return confirm('Delete this record?')">
+   <i class="fas fa-trash-alt"></i>
+</a>
+
+
         </td>
     </tr>
 <?php endforeach; ?>
@@ -196,6 +220,14 @@ if ($hasTerminated) $colCount++;
 <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.responsive.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.js"></script>
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.map(function (tooltipTriggerEl) {
+    return new bootstrap.Tooltip(tooltipTriggerEl);
+  });
+});
+</script>
 
 </body>
 </html>

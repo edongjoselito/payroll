@@ -73,9 +73,16 @@ td .btn:last-child {
                     <div class="col-12">
                         <div class="page-title-box d-flex justify-content-between align-items-center">
                             <!-- <h4 class="page-title">Project Management</h4> -->
-                            <button class="btn btn-success btn-md" data-toggle="modal" data-target="#addModal">
-                                <i class="mdi mdi-plus"></i> Add New Project
-                            </button>
+                         <button type="button"
+        class="btn btn-success btn-md"
+        title="Add New Project"
+        data-bs-toggle="tooltip"
+        data-toggle="modal"
+        data-target="#addModal">
+    <i class="mdi mdi-plus"></i>
+</button>
+
+
                         </div>
                         <hr>
                     </div>
@@ -274,9 +281,10 @@ td .btn:last-child {
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
 
     <script>
-        $(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-})
+     $(function () {
+    $('[title]').tooltip(); // initialize all elements with title as tooltip
+});
+
 
     </script>
 </body>

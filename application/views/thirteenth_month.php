@@ -84,10 +84,11 @@ thead th {
         </div>
     <?php endif; ?>
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3 d-print-none">
-    <button class="btn btn-info btn-sm me-2 glow-hover" onclick="window.print();">
+   <button class="btn btn-outline-secondary btn-sm glow-hover me-2" onclick="window.print();">
+
         <i class="fas fa-print"></i> Print Report
     </button>
-    <button class="btn btn-info btn-sm me-2 glow-hover" data-toggle="modal" data-target="#filterModal">
+<button class="btn btn-outline-secondary btn-sm glow-hover me-2" data-toggle="modal" data-target="#filterModal">
         <i class="fas fa-search"></i> Select Period
     </button>
     <button class="btn btn-outline-secondary btn-sm glow-hover" type="button" data-toggle="collapse" data-target="#reportTable" aria-expanded="true">

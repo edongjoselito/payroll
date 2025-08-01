@@ -87,6 +87,9 @@ form .btn:last-child {
         .toast .btn-close:hover {
             opacity: 1;
         }
+.btn i:hover {
+    transform: scale(1.15);
+}
 
 </style>
 
@@ -104,29 +107,33 @@ form .btn:last-child {
                     </div>
                     <hr>
 
-<?php if ($this->session->flashdata('success') || $this->session->flashdata('error')): ?>
-    <?php
-        $isSuccess = $this->session->flashdata('success') ? true : false;
-        $type = $isSuccess ? 'success' : 'danger';
-        $message = $this->session->flashdata($type);
-        $icon = $isSuccess ? 'check-circle' : 'exclamation-circle';
-        $title = $isSuccess ? 'Success' : 'Error';
-    ?>
+<?php
+$success = $this->session->flashdata('success');
+$error = $this->session->flashdata('error');
+
+if ($success || $error):
+    $message = $success ?: $error;
+    $isDelete = stripos($message, 'deleted') !== false;
+    $type = $error || $isDelete ? 'danger' : 'success';
+    $icon = $type === 'success' ? 'check-circle' : 'trash-alt';
+    $title = $type === 'success' ? 'Success' : ($isDelete ? 'Deleted' : 'Error');
+?>
 <div aria-live="polite" aria-atomic="true" style="position: fixed; top: 75px; left: 50%; transform: translateX(-50%); z-index: 1055;">
-        <div class="toast show shadow" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 320px;">
-            <div class="toast-header toast-header-<?= $type ?>">
-                <i class="fas fa-<?= $icon ?> me-2"></i>
-                <strong class="me-auto"><?= $title ?></strong>
-                <button type="button" class="close" data-dismiss="toast" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="toast-body toast-body-<?= $type ?>">
-                <?= $message ?>
-            </div>
+    <div class="toast show shadow" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 320px;">
+        <div class="toast-header toast-header-<?= $type ?>">
+            <i class="fas fa-<?= $icon ?> me-2"></i>
+            <strong class="me-auto"><?= $title ?></strong>
+            <button type="button" class="close" data-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body toast-body-<?= $type ?>">
+            <?= $message ?>
         </div>
     </div>
+</div>
 <?php endif; ?>
+
 
 
              <div class="card shadow-sm">
@@ -159,9 +166,13 @@ form .btn:last-child {
 
             <!-- Button floats right on same row -->
             <div class="col-md-2 text-end mt-md-0 mt-2">
-                <button type="submit" class="btn btn-primary w-100 glow-hover">
-                    <i class="fas fa-plus-circle me-1"></i> Assign
-                </button>
+              <button type="submit" 
+        class="btn btn-primary glow-hover"
+        data-toggle="tooltip"
+        title="Assign Personnel">
+    <i class="fas fa-plus-circle fa-lg"></i>
+</button>
+
             </div>
         </form>
     </div>
@@ -189,11 +200,14 @@ form .btn:last-child {
         ($a->name_ext ? ' ' . $a->name_ext : '') ?>
     </td>
     <td class="text-end">
-        <a href="<?= base_url('project/delete_assignment/' . $a->ppID . '/' . $settingsID . '/' . $projectID) ?>"
-           class="btn btn-danger btn-sm"
-           onclick="return confirm('Remove this assignment?')">
-           <i class="fas fa-trash-alt"></i>
-        </a>
+      <a href="<?= base_url('project/delete_assignment/' . $a->ppID . '/' . $settingsID . '/' . $projectID) ?>"
+   class="btn btn-danger btn-sm"
+   title="Remove Personnel"
+   data-toggle="tooltip"
+   onclick="return confirm('Remove this assignment?')">
+   <i class="fas fa-trash-alt"></i>
+</a>
+
     </td>
 </tr>
 <?php endforeach; ?>

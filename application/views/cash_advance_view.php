@@ -3,6 +3,8 @@
     <title>PMS - Cash Advance</title>
 
 <?php include('includes/head.php'); ?>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
 <style>
 /* Smooth button animation */
 .btn {
@@ -23,7 +25,53 @@
     box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
     border-color: rgba(0, 123, 255, 0.3);
 }
+.toast-header-success {
+    background-color: #28a745 !important;
+    color: #fff;
+    border-radius: 4px 4px 0 0;
+}
+.toast-body-success {
+    background-color: #eaf9ef;
+    color: #155724;
+}
+.toast-header-danger {
+    background-color: #dc3545 !important;
+    color: #fff;
+    border-radius: 4px 4px 0 0;
+}
+.toast-body-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+.toast .btn-close-white {
+  color: white;
+  opacity: 0.85;
+}
+.toast .btn-close-white:hover {
+  opacity: 1;
+}
+.toast-header i {
+    font-size: 1.1rem;
+    margin-right: 0.6rem;
+}
+.toast-header strong {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin-right: auto;
+}
+.toast .close,
+.toast .btn-close {
+    color: white;
+    font-size: 1rem;
+    opacity: 0.85;
+    margin-left: 0.5rem;
+}
+.toast .close:hover,
+.toast .btn-close:hover {
+    opacity: 1;
+}
 </style>
+
 
 <body>
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.css">
@@ -43,17 +91,34 @@
         <button class="btn btn-primary btn-md" data-toggle="modal" data-target="#addCashModal">+ Add Cash Advance</button>
     </div>
 
-    <?php if ($this->session->flashdata('success')): ?>
-        <div class="alert alert-success alert-dismissible fade show">
-            <?= $this->session->flashdata('success') ?>
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-        </div>
-    <?php elseif ($this->session->flashdata('error')): ?>
-        <div class="alert alert-danger alert-dismissible fade show">
-            <?= $this->session->flashdata('error') ?>
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
-        </div>
-    <?php endif; ?>
+  <?php
+$success = $this->session->flashdata('success');
+$error = $this->session->flashdata('error');
+
+if ($success || $error):
+    $message = $success ?: $error;
+    $isDelete = stripos($message, 'deleted') !== false;
+    $type = $error || $isDelete ? 'danger' : 'success';
+    $icon = $type === 'success' ? 'check-circle' : 'trash-alt';
+    $title = $type === 'success' ? 'Success' : 'Deleted';
+?>
+<div aria-live="polite" aria-atomic="true" style="position: fixed; top: 75px; left: 50%; transform: translateX(-50%); z-index: 1055;">
+  <div class="toast fade show shadow" id="sessionToast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="3500" style="min-width: 320px;">
+    <div class="toast-header toast-header-<?= $type ?>">
+      <i class="fas fa-<?= $icon ?>"></i>
+      <strong class="ml-2 mr-auto"><?= $title ?></strong>
+      <button type="button" class="close ml-2" data-dismiss="toast" aria-label="Close" style="font-size: 1.25rem;">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="toast-body toast-body-<?= $type ?>">
+      <?= $message ?>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
+
+
 
     <div class="card">
         <div class="card-body">
@@ -64,7 +129,8 @@
                             <th>Personnel Name</th>
                             <th>C/A Amount</th>
                             <th>Date</th>
-                            <th>Manage</th>
+                            <th class="text-center">Manage</th>
+
                         </tr>
                     </thead>
                     <tbody>
@@ -73,10 +139,27 @@
                             <td><?= $row->fullname ?></td>
                             <td>₱<?= number_format($row->amount, 2) ?></td>
                             <td><?= $row->date ?></td>
-                            <td>
-                                <button class="btn btn-info btn-sm" data-toggle="modal" data-target="#editCashModal<?= $row->id ?>">Edit</button>
-                                <a href="<?= base_url('Borrow/delete_cash_advance/'.$row->id) ?>" class="btn btn-danger btn-sm" onclick="return confirm('Delete this record?')">Delete</a>
-                            </td>
+                       <td class="text-center">
+    <button class="btn btn-outline-info btn-sm" 
+        data-toggle="modal" 
+        data-target="#editCashModal<?= $row->id ?>" 
+        data-bs-toggle="tooltip" 
+        data-bs-placement="top" 
+        title="Update">
+        <i class="fas fa-edit"></i>
+    </button>
+    <a 
+        href="<?= base_url('Borrow/delete_cash_advance/'.$row->id) ?>" 
+        class="btn btn-outline-danger btn-sm" 
+        data-bs-toggle="tooltip" 
+        data-bs-placement="top" 
+        title="Delete" 
+        onclick="return confirm('Delete this record?')">
+        <i class="fas fa-trash-alt"></i>
+    </a>
+</td>
+
+
                         </tr>
 
                         <div class="modal fade" id="editCashModal<?= $row->id ?>" tabindex="-1">
@@ -204,5 +287,16 @@
 <script src="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.js"></script>
 <script src="<?= base_url(); ?>assets/js/pages/datatables.init.js"></script>
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
+<script>
+    $(function () {
+        $('[data-bs-toggle="tooltip"]').tooltip();
+    });
+    $(document).ready(function () {
+    $('.toast').toast({ delay: 4000 });
+    $('.toast').toast('show');
+});
+
+</script>
+
 </body>
 </html>
