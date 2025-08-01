@@ -3,6 +3,8 @@
 <title>PMS - Attendance</title>
 
 <?php include('includes/head.php'); ?>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <?php $flash = $this->session->flashdata('attendance_exists'); ?>
 
 <style>
@@ -365,10 +367,14 @@ input.is-invalid {
                                              </div>
 
                                              <div class="mt-2 mt-sm-0">
-                                                  <button class="btn btn-outline-dark btn-sm" data-toggle="modal"
-                                                       data-target="#notesModal">
-                                                       <i class="mdi mdi-information-outline"></i> View Attendance Notes
-                                                  </button>
+                                                <button type="button"
+    class="btn btn-outline-dark btn-sm"
+    title="View Attendance Notes"
+    onclick="showNotesSweetAlert()">
+    <i class="mdi mdi-information-outline"></i>
+</button>
+
+
                                              </div>
                                         </div>
                                    </div>
@@ -377,34 +383,6 @@ input.is-invalid {
 
 
 
-
-                                   <!-- Modal: Attendance Notes -->
-                                   <div class="modal fade" id="notesModal" tabindex="-1" role="dialog"
-                                        aria-labelledby="notesModalLabel" aria-hidden="true">
-                                        <div class="modal-dialog modal-dialog-centered" role="document">
-                                             <div class="modal-content shadow-sm">
-                                                  <div class="modal-header bg-info text-white">
-                                                       <h5 class="modal-title" id="notesModalLabel">
-                                                            📝 Attendance Notes
-                                                       </h5>
-                                                       <button type="button" class="close text-white"
-                                                            data-dismiss="modal" aria-label="Close">
-                                                            <span>&times;</span>
-                                                       </button>
-                                                  </div>
-                                                  <div class="modal-body text-dark" style="font-size: 14px;">
-                                                       🕒 Work duration in <strong>hours</strong> is required<br>
-                                                       ✍️ <em>Use decimal format: <strong>0.25 = 15 min, 0.50 = 30 min,
-                                                                 0.75 = 45 min</strong></em><br>
-                                                       ⚠ You cannot save entries without specifying hours.
-                                                  </div>
-                                                  <div class="modal-footer">
-                                                       <button type="button" class="btn btn-secondary btn-sm"
-                                                            data-dismiss="modal">Close</button>
-                                                  </div>
-                                             </div>
-                                        </div>
-                                   </div>
 
 
 
@@ -721,6 +699,34 @@ const overtimeHoursInput = box.querySelector('input[name^="overtime_hours"]');
     $('.toast').toast('hide');
   }, 6000); // dismiss after 6 seconds
 </script>
+<script>
+function showNotesSweetAlert() {
+  Swal.fire({
+    title: '<span style="font-size: 18px;"><span style="font-size: 22px;">📝</span> Attendance Notes</span>',
+    html: `
+      <div style="text-align: left; font-size: 14px; line-height: 1.6;">
+        <span>⏱️ <strong>Work duration</strong> must be entered in <strong>hours</strong>.</span><br>
+        <span>✍️ Use decimal values:</span><br>
+        <ul style="margin-left: 1.2em; padding-left: 0;">
+          <li>0.25 = 15 minutes</li>
+          <li>0.50 = 30 minutes</li>
+          <li>0.75 = 45 minutes</li>
+        </ul>
+        <span>⚠️ <strong>You cannot save without entering hours.</strong></span>
+      </div>
+    `,
+    icon: null, // removes default icon
+    showConfirmButton: true,
+    confirmButtonText: 'Understood',
+    width: '420px',
+    padding: '1.2em',
+    customClass: {
+      popup: 'shadow-sm rounded'
+    }
+  });
+}
+</script>
+
 
 
 </body>
