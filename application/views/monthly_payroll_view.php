@@ -97,15 +97,17 @@ function computePayroll($row, $start, $end) {
         $loopDate = strtotime('+1 day', $loopDate);
     }
 
-    $salary = $regAmount + $otAmount + $amountRegularHoliday + $amountSpecialHoliday;
-    $cash_advance = $row->ca_cashadvance ?? 0;
-    $sss = $row->gov_sss ?? 0;
-    $pagibig = $row->gov_pagibig ?? 0;
-    $philhealth = $row->gov_philhealth ?? 0;
-    $loan = $row->loan ?? 0;
-    $other_deduction = $row->other_deduction ?? 0;
-    $total_deduction = $cash_advance + $sss + $pagibig + $philhealth + $loan + $other_deduction;
-    $netPay = $salary - $total_deduction;
+   $salary = bcadd(bcadd($regAmount, $otAmount, 2), bcadd($amountRegularHoliday, $amountSpecialHoliday, 2), 2);
+
+   $cash_advance = (string) ($row->ca_cashadvance ?? 0);
+$sss = (string) ($row->gov_sss ?? 0);
+$pagibig = (string) ($row->gov_pagibig ?? 0);
+$philhealth = (string) ($row->gov_philhealth ?? 0);
+$loan = (string) ($row->loan ?? 0);
+$other_deduction = (string) ($row->other_deduction ?? 0);
+
+$total_deduction = bcadd(bcadd($cash_advance, $sss, 2), bcadd($philhealth, $loan, 2), 2);
+   $netPay = bcsub($salary, $total_deduction, 2);
 
     return [
         'regTotalMinutes' => $regTotalMinutes,
@@ -961,18 +963,20 @@ endwhile;
 
 
 // Totals
-$salary = $regAmount + $otAmount + $amountRegularHoliday + $amountSpecialHoliday;
+$salary = bcadd(bcadd($regAmount, $otAmount, 2), bcadd($amountRegularHoliday, $amountSpecialHoliday, 2), 2);
+
 $cash_advance = $row->ca_cashadvance ?? 0;
 $other_deduction = $row->other_deduction ?? 0;
 $sss = $row->gov_sss ?? 0;
 $pagibig = $row->gov_pagibig ?? 0;
 $philhealth = $row->gov_philhealth ?? 0;
 $loan = $row->loan ?? 0;
-$total_deduction = $cash_advance + $sss + $pagibig + $philhealth + $loan + $other_deduction;
-$netPay = $salary - $total_deduction;
-if ($netPay > 0) {
-    $totalPayroll += $netPay;
+$total_deduction = bcadd(bcadd($cash_advance, $sss, 2), bcadd($philhealth, $loan, 2), 2);
+$netPay = bcsub($salary, $total_deduction, 2);
+if (bccomp($netPay, '0', 2) > 0) {
+    $totalPayroll = bcadd($totalPayroll, $netPay, 2);
 }
+
 
 // Ensure integers to avoid float-string conversion warning
 $regTotalMinutes = intval($regTotalMinutes);
@@ -989,18 +993,26 @@ $otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60,
 
 
 // FINAL AMOUNT COMPUTATION BEFORE DISPLAY
-$salary = $regAmount + $otAmount + $amountRegularHoliday + $amountSpecialHoliday;
-$total_deduction = $cash_advance + $sss + $pagibig + $philhealth + $loan + $other_deduction;
-$netPay = $salary - $total_deduction;
-$totalGross += $salary;
-$totalCA += $cash_advance;
-$totalSSS += $sss;
+$salary = bcadd(bcadd($regAmount, $otAmount, 2), bcadd($amountRegularHoliday, $amountSpecialHoliday, 2), 2);
+
+$total_deduction = bcadd(
+    bcadd(bcadd($cash_advance, $sss, 2), bcadd($pagibig, $philhealth, 2), 2),
+    bcadd($loan, $other_deduction, 2),
+    2
+);
+
+$netPay = bcsub($salary, $total_deduction, 2);
+
+$totalGross = bcadd($totalGross, $salary, 2);
+$totalCA = bcadd($totalCA, $cash_advance, 2);
+$totalSSS = bcadd($totalSSS, $sss, 2);
 $totalPagibig += $pagibig;
-$totalPHIC += $philhealth;
-$totalLoan += $loan;
-$totalOther += $other_deduction;
-$totalDeduction += $total_deduction;
-$totalNet += $netPay;
+$totalPHIC = bcadd($totalPHIC, $philhealth, 2);
+$totalLoan = bcadd($totalLoan, $loan, 2);
+$totalOther = bcadd($totalOther, $other_deduction, 2);
+
+$totalDeduction = bcadd($totalDeduction, $total_deduction, 2);
+$totalNet = bcadd($totalNet, $netPay, 2);
 
 
 ?>
