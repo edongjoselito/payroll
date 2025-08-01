@@ -368,15 +368,15 @@ th {
     height: 100%;
     margin: 0 !important;
     padding: 0 !important;
-    font-size: 9px !important; /* Slightly reduced to fit large tables */
+    font-size: 10px !important; 
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     overflow: visible !important;
-    zoom: 75%; /* Tweak to fit in A4 landscape */
+    zoom: 75%;
   }
  #print-all-payslips-container {
   display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2x2 layout on A4 */
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   justify-content: center;
   padding: 20px;
@@ -384,8 +384,8 @@ th {
 
 
 .print-card {
-  width: 390px;              /* ≈ 4.1 inches */
-  height: 550px;             /* ≈ 5.8 inches */
+  width: 390px;    
+  height: 550px;   
   padding: 18px 20px;
   font-size: 13.5px;
   line-height: 1.4;
@@ -423,8 +423,8 @@ th {
   }
 
   
-  .no-print-payslip { display: none !important; } /* Hide payslips when printing payroll */
-  .no-print-payroll { display: none !important; } /* Hide payroll when printing payslip */
+  .no-print-payslip { display: none !important; } 
+  .no-print-payroll { display: none !important; }
 
   @page {
     size: A4 landscape;
@@ -489,7 +489,7 @@ th {
   }
 
   .signature {
-    margin-top: auto !important;
+    margin-top: 100px !important;
     padding-top: 40px;
     break-inside: avoid !important;
     page-break-inside: avoid !important;
@@ -547,11 +547,11 @@ th {
 
   <div class="print-button no-print">
     <button onclick="window.print()" class="btn btn-primary btn-sm">
-      <i class="fas fa-print"></i> Print Payroll Summary
+      <i class="fas fa-print"></i> Print Payroll
     </button>
     <div class="print-button no-print mt-2">
   <button onclick="printAllPayslips()" class="btn btn-success btn-sm">
-    <i class="fas fa-file-invoice-dollar"></i> Print All Payslips
+    <i class="fas fa-file-invoice-dollar"></i> Print Payslips
   </button>
 </div>
 

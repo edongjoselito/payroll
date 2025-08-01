@@ -500,11 +500,11 @@ th {
 
   <div class="print-button no-print">
     <button onclick="window.print()" class="btn btn-primary btn-sm">
-      <i class="fas fa-print"></i> Print Payroll Summary
+      <i class="fas fa-print"></i> Print Payroll
     </button>
      <div class="print-button no-print mt-2">
   <button onclick="printAllPayslips()" class="btn btn-success btn-sm">
-    <i class="fas fa-file-invoice-dollar"></i> Print All Payslips
+    <i class="fas fa-file-invoice-dollar"></i> Print Payslips
   </button>
 </div>
   </div>
