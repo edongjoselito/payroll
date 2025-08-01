@@ -6,6 +6,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <?php $flash = $this->session->flashdata('attendance_exists'); ?>
+<?php $attendance_success = $this->session->flashdata('attendance_success'); ?>
 
 <style>
 thead th {
@@ -179,14 +180,91 @@ input.is-invalid {
     box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.25);
     outline: none;
 }
+/* ✅ Toast: Success Header */
 .toast-header-success {
-    background-color: #28a745;
-    color: white;
+  background-color: #28a745;
+  color: #fff;
+  font-weight: 500;
+  font-size: 15px;
 }
+
+/* ✅ Toast: Success Body */
 .toast-body-success {
-    background-color: #eaf9ef;
-    color: #155724;
+  background-color: #eaf9ef;
+  color: #155724;
+  font-size: 14px;
+  padding: 10px 15px;
+  border-left: 4px solid #28a745;
 }
+
+/* 🟦 SweetAlert: Facebook-style base popup */
+.fb-style-popup {
+  padding: 1.5rem 1.25rem !important;
+  border-radius: 12px !important;
+  font-family: 'Poppins', sans-serif;
+  max-width: 480px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* 📝 Title style */
+.fb-style-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-top: 8px;
+  color: #1c1e21;
+  display: block;
+  text-align: center;
+}
+
+/* 📋 Description / Body text */
+.fb-style-text {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #555;
+  margin-top: 8px;
+}
+
+/* 🔵 Confirm Button */
+.fb-style-confirm {
+  background-color: #1877f2 !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 6px 20px !important;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+.fb-style-confirm:hover {
+  background-color: #0f66d0 !important;
+}
+
+/* 🔘 Cancel Button */
+.fb-style-cancel {
+  background-color: #e4e6eb !important;
+  color: #050505 !important;
+  border: none !important;
+  border-radius: 6px !important;
+  padding: 6px 20px !important;
+  font-weight: 500;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+}
+.fb-style-cancel:hover {
+  background-color: #d0d2d5 !important;
+}
+
+/* 🧭 Button spacing and alignment */
+.swal2-actions {
+  gap: 10px;
+  justify-content: center !important;
+}
+
+/* 📦 Button base (no shadows) */
+.swal2-popup .swal2-styled {
+  box-shadow: none !important;
+}
+
 </style>
 
 
@@ -480,88 +558,84 @@ foreach ($employees as $emp): ?>
 
                     </div>
                </div>
-               <?php if ($flash): ?>
-                    
-               <!-- Modal -->
-               <div class="modal fade" id="existingAttendanceModal" tabindex="-1" role="dialog"
-                    aria-labelledby="existingAttendanceLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-md modal-dialog-centered" role="document">
-                         <div class="modal-content">
-                              <div class="modal-header bg-warning">
-                                   <h5 class="modal-title" id="existingAttendanceLabel">
-                                        ⚠ Attendance Already Exists
-                                   </h5>
-                                   <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                        <span>&times;</span>
-                                   </button>
-                              </div>
-                              <?php
-  $fromFormatted = date("F d, Y", strtotime($flash['from']));
-  $toFormatted = date("F d, Y", strtotime($flash['to']));
-  $projectTitle = $flash['projectTitle'] ?? 'N/A';
-?>
-                              <div class="modal-body text-dark">
-                                   <strong>Attendance already exists for this date range:</strong>
-                                   <p>
-                                        📁 <strong>Project:</strong> <?= htmlspecialchars($projectTitle) ?><br>
-                                        📅 <strong>Period:</strong> <?= $fromFormatted ?> to <?= $toFormatted ?>
-                                   </p>
-                                   <small>You can either <b>view</b> or <b>delete</b> this data.</small>
-                              </div>
-
-                              <div class="modal-footer">
-                                 <a href="<?= base_url('WeeklyAttendance/records?projectID=' . $flash['projectID'] . '&from=' . $flash['from'] . '&to=' . $flash['to']) ?>"
-
-                                        class="btn btn-info">
-                                        <i class="mdi mdi-eye"></i> View Records
-                                   </a>
-                                   <form action="<?= base_url('WeeklyAttendance/deleteAttendance') ?>" method="post"
-                                        style="display:inline;">
-                                        <input type="hidden" name="projectID" value="<?= $flash['projectID'] ?>">
-                                        <input type="hidden" name="from" value="<?= $flash['from'] ?>">
-                                        <input type="hidden" name="to" value="<?= $flash['to'] ?>">
-                                        <button type="submit" class="btn btn-danger"
-                                             onclick="return confirm('Are you sure you want to delete this attendance data?');">
-                                             <i class="mdi mdi-delete"></i> Delete
-                                        </button>
-                                   </form>
-                                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                              </div>
-
-                         </div>
-                    </div>
-               </div>
-               <?php endif; ?>
-<?php if ($this->session->flashdata('attendance_success')): 
-  $success = $this->session->flashdata('attendance_success');
-  $fromFormatted = date("F d, Y", strtotime($success['from']));
-  $toFormatted = date("F d, Y", strtotime($success['to']));
-  $projectTitle = $success['projectTitle'];
-?>
-<div aria-live="polite" aria-atomic="true" style="position: fixed; top: 70px; left: 50%; transform: translateX(-50%); z-index: 1055;">
-  <div class="toast show shadow" role="alert" aria-live="assertive" aria-atomic="true" style="min-width: 360px;">
-    <div class="toast-header toast-header-success">
-      <i class="fas fa-check-circle me-2"></i>
-      <strong class="me-auto">Attendance Saved</strong>
-      <button type="button" class="close text-white" data-dismiss="toast" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
+    <?php if ($flash): ?>
+<script>
+Swal.fire({
+  title: `<span class="fb-style-title">⚠️ Attendance Already Exists</span>`,
+  html: `
+    <div class="fb-style-text text-center">
+      <strong>Project:</strong> <?= htmlspecialchars($flash['projectTitle']) ?><br>
+      <strong>Period:</strong> <?= date("F d, Y", strtotime($flash['from'])) ?> to <?= date("F d, Y", strtotime($flash['to'])) ?><br><br>
+      This attendance has already been submitted. You may choose to view or delete it.
     </div>
-    <div class="toast-body toast-body-success">
-      <p class="mb-2"><strong>Your weekly attendance has been saved.</strong></p>
-      <p class="mb-2">
-        📁 <strong>Project:</strong> <?= htmlspecialchars($projectTitle) ?><br>
-        📅 <strong>Period:</strong> <?= $fromFormatted ?> to <?= $toFormatted ?>
-      </p>
-      <div class="text-end">
-        <a href="<?= base_url('WeeklyAttendance/records?projectID=' . urlencode($success['projectID']) . '&from=' . $success['from'] . '&to=' . $success['to']) ?>" class="btn btn-sm btn-outline-success">
-          <i class="fas fa-eye"></i> View Attendance
-        </a>
-      </div>
-    </div>
-  </div>
-</div>
+  `,
+  icon: null,
+  showCancelButton: true,
+  confirmButtonText: 'View',
+  cancelButtonText: 'Delete',
+  reverseButtons: true,
+  focusConfirm: false,
+  width: '480px',
+  customClass: {
+    popup: 'fb-style-popup',
+    title: 'text-dark',
+    htmlContainer: 'text-muted',
+    confirmButton: 'fb-style-confirm',
+    cancelButton: 'fb-style-cancel'
+  }
+}).then((result) => {
+  if (result.isConfirmed) {
+    window.location.href = "<?= base_url('WeeklyAttendance/records?projectID=' . $flash['projectID'] . '&from=' . $flash['from'] . '&to=' . $flash['to']) ?>";
+  } else if (result.dismiss === Swal.DismissReason.cancel) {
+    Swal.fire({
+      title: `<span class="fb-style-title text-danger">🗑️ Confirm Deletion</span>`,
+      html: `
+        <div class="fb-style-text text-center">
+          This will permanently delete the attendance record.<br>Are you sure?
+        </div>
+      `,
+      icon: null,
+      showCancelButton: true,
+      confirmButtonText: 'Delete',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+      customClass: {
+        popup: 'fb-style-popup',
+        title: 'text-dark',
+        htmlContainer: 'text-muted',
+        confirmButton: 'fb-style-confirm btn-danger',
+        cancelButton: 'fb-style-cancel'
+      }
+    }).then((res) => {
+      if (res.isConfirmed) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "<?= base_url('WeeklyAttendance/deleteAttendance') ?>";
+
+        const inputs = {
+          projectID: "<?= $flash['projectID'] ?>",
+          from: "<?= $flash['from'] ?>",
+          to: "<?= $flash['to'] ?>"
+        };
+
+        for (const name in inputs) {
+          const input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = name;
+          input.value = inputs[name];
+          form.appendChild(input);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+      }
+    });
+  }
+});
+</script>
+
 <?php endif; ?>
+
 
                <?php include('includes/footer.php'); ?>
           </div>
@@ -577,22 +651,46 @@ foreach ($employees as $emp): ?>
      <link href="<?= base_url(); ?>assets/libs/select2/select2.min.css" rel="stylesheet" />
 <script src="<?= base_url(); ?>assets/libs/select2/select2.min.js"></script>
 
- <script>
+<script>
 document.addEventListener('DOMContentLoaded', function () {
     // 1. Focus on 'from' input when modal is shown
     $('#generateModal').on('shown.bs.modal', function () {
         $('#from').trigger('focus');
     });
 
-    // 2. Show flash modal if $flash is set (server-side injected)
-    <?php if ($flash): ?>
-    $('#existingAttendanceModal').modal('show');
-    <?php endif; ?>
-<?php if ($this->session->flashdata('attendance_success')): ?>
-$('#attendanceSavedModal').modal('show');
+   <?php if ($attendance_success): ?>
+Swal.fire({
+  title: `<span class="fb-style-title text-success">✅ Attendance Saved</span>`,
+  html: `
+    <div class="fb-style-text text-center">
+      <strong>Project:</strong> <?= htmlspecialchars($attendance_success['projectTitle']) ?><br>
+      <strong>Period:</strong> <?= date("F d, Y", strtotime($attendance_success['from'])) ?> to <?= date("F d, Y", strtotime($attendance_success['to'])) ?>
+    </div>
+  `,
+  icon: null,
+  showCancelButton: true,
+  confirmButtonText: 'View Attendance',
+  cancelButtonText: 'Close',
+  reverseButtons: true,
+  focusConfirm: false,
+  width: '480px',
+  customClass: {
+    popup: 'fb-style-popup',
+    title: 'text-dark',
+    htmlContainer: 'text-muted',
+    confirmButton: 'fb-style-confirm',
+    cancelButton: 'fb-style-cancel'
+  }
+}).then((result) => {
+  if (result.isConfirmed) {
+    window.location.href = "<?= base_url('WeeklyAttendance/records?projectID=' . $attendance_success['projectID'] . '&from=' . $attendance_success['from'] . '&to=' . $attendance_success['to']) ?>";
+  }
+});
 <?php endif; ?>
 
-    // 3. Enable/Disable hours input based on checkbox status
+
+
+    // 3. Enable/Disable hours input based on checkbox status (optional logic - kept in case needed)
     document.querySelectorAll('#attendanceTable td').forEach(function (cell) {
         const checkbox = cell.querySelector('input[type="checkbox"]');
         const input = cell.querySelector('input[name*="[hours]"]');
@@ -627,38 +725,51 @@ $('#attendanceSavedModal').modal('show');
             let isValid = true;
             let firstInvalid = null;
 
-            document.querySelectorAll('#attendanceTable tbody tr').forEach(function (row) {
-                const checkboxes = row.querySelectorAll('input[type="checkbox"]');
-                checkboxes.forEach(function (checkbox) {
-                    if (checkbox.checked) {
-                        const hoursInput = row.querySelector(`input[name="${checkbox.name.replace('[status]', '[hours]')}"]`);
-                        if (!hoursInput || hoursInput.value.trim() === '') {
-                            isValid = false;
-                            hoursInput.classList.add('is-invalid');
-                            if (!firstInvalid) firstInvalid = hoursInput;
-                        } else {
-                            hoursInput.classList.remove('is-invalid');
-                        }
-                    }
-                });
+            document.querySelectorAll('.attendance-box').forEach(function (box) {
+                const select = box.querySelector('.attendance-select');
+                const regularHoursInput = box.querySelector('input[name^="regular_hours"]');
+                const overtimeHoursInput = box.querySelector('input[name^="overtime_hours"]');
+
+                if (regularHoursInput && !regularHoursInput.disabled &&
+                    parseFloat(regularHoursInput.value || 0) > parseFloat(regularHoursInput.max || 8)) {
+                    alert(`Regular Hours exceeds max for ${select.value}. Max allowed: ${regularHoursInput.max}`);
+                    regularHoursInput.focus();
+                    isValid = false;
+                }
+
+                if (overtimeHoursInput && !overtimeHoursInput.disabled &&
+                    parseFloat(overtimeHoursInput.value || 0) > parseFloat(overtimeHoursInput.max || 8)) {
+                    alert(`Overtime Hours exceeds max for ${select.value}. Max allowed: ${overtimeHoursInput.max}`);
+                    overtimeHoursInput.focus();
+                    isValid = false;
+                }
             });
 
             if (!isValid) {
                 e.preventDefault();
-                alert('⚠ Please input hours for all checked personnel.');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Missing Input',
+                    text: '⚠ Please input hours for all personnel.'
+                });
                 if (firstInvalid) firstInvalid.focus();
             }
         });
     }
 
-    // 5. Initialize Select2 for attendance dropdowns
+    // 5. Initialize Select2
     $('.attendance-select').select2({
         width: '180px',
         minimumResultsForSearch: Infinity
     });
+
+    // 6. Auto-hide toast
+    setTimeout(() => {
+        $('.toast').toast('hide');
+    }, 6000);
 });
 
-// 6. Adjust max hours based on attendance type
+// 7. Adjust max hours based on attendance status
 function handleAttendanceChange(select) {
     const container = select.closest('.attendance-box');
     const hoursInput = container.querySelector('.hours-input');
@@ -677,56 +788,33 @@ function handleAttendanceChange(select) {
     }
 }
 
-
-// 7. Optional validation to check if hours exceed max
-function validateAttendanceForm() {
-    let isValid = true;
-    document.querySelectorAll('.attendance-box').forEach(box => {
-        const select = box.querySelector('.attendance-select');
-       const regularHoursInput = box.querySelector('input[name^="regular_hours"]');
-const overtimeHoursInput = box.querySelector('input[name^="overtime_hours"]');
-
-
-        if (!hours.disabled && parseFloat(hours.value || 0) > parseFloat(hours.max)) {
-            alert(`Exceeds max hours for ${select.value}. Max allowed: ${hours.max}`);
-            hours.focus();
-            isValid = false;
+// 8. Attendance Notes popup
+function showNotesSweetAlert() {
+    Swal.fire({
+        title: '<span style="font-size: 18px;"><span style="font-size: 22px;">📝</span> Attendance Notes</span>',
+        html: `
+            <div style="text-align: left; font-size: 14px; line-height: 1.6;">
+                <span>⏱️ <strong>Work duration</strong> must be entered in <strong>hours</strong>.</span><br>
+                <span>✍️ Use decimal values:</span><br>
+                <ul style="margin-left: 1.2em; padding-left: 0;">
+                    <li>0.25 = 15 minutes</li>
+                    <li>0.50 = 30 minutes</li>
+                    <li>0.75 = 45 minutes</li>
+                </ul>
+                <span>⚠️ <strong>You cannot save without entering hours.</strong></span>
+            </div>
+        `,
+        icon: null,
+        showConfirmButton: true,
+        confirmButtonText: 'Understood',
+        width: '420px',
+        padding: '1.2em',
+        customClass: {
+            popup: 'shadow-sm rounded'
         }
     });
-    return isValid;
-}
- setTimeout(() => {
-    $('.toast').toast('hide');
-  }, 6000); // dismiss after 6 seconds
-</script>
-<script>
-function showNotesSweetAlert() {
-  Swal.fire({
-    title: '<span style="font-size: 18px;"><span style="font-size: 22px;">📝</span> Attendance Notes</span>',
-    html: `
-      <div style="text-align: left; font-size: 14px; line-height: 1.6;">
-        <span>⏱️ <strong>Work duration</strong> must be entered in <strong>hours</strong>.</span><br>
-        <span>✍️ Use decimal values:</span><br>
-        <ul style="margin-left: 1.2em; padding-left: 0;">
-          <li>0.25 = 15 minutes</li>
-          <li>0.50 = 30 minutes</li>
-          <li>0.75 = 45 minutes</li>
-        </ul>
-        <span>⚠️ <strong>You cannot save without entering hours.</strong></span>
-      </div>
-    `,
-    icon: null, // removes default icon
-    showConfirmButton: true,
-    confirmButtonText: 'Understood',
-    width: '420px',
-    padding: '1.2em',
-    customClass: {
-      popup: 'shadow-sm rounded'
-    }
-  });
 }
 </script>
-
 
 
 </body>
