@@ -326,6 +326,17 @@ th {
   margin-top: 4px;
 }
 
+.print-button button {
+  transition: all 0.2s ease-in-out;
+}
+
+.print-button button:hover {
+  background-color: #0056b3 !important;
+  color: #fff !important;
+  transform: scale(1.03);
+  box-shadow: 0 0 6px rgba(0,0,0,0.15);
+}
+
 /* Payslip Modal Styling */
 .modal-content {
   background: #fff;
