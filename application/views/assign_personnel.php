@@ -145,13 +145,15 @@ form .btn:last-child {
                 <label for="personnelID" class="form-label fw-bold">Select Personnel</label>
                 <select id="personnelID" name="personnelID" class="form-control select2" required>
                     <option value="">-- Select Personnel --</option>
-                    <?php foreach ($personnel as $p): ?>
-                        <option value="<?= $p->personnelID ?>">
-                            <?= $p->last_name . ', ' . $p->first_name .
-                                ($p->middle_name ? ' ' . substr($p->middle_name, 0, 1) . '.' : '') .
-                                ($p->name_ext ? ' ' . $p->name_ext : '') ?>
-                        </option>
-                    <?php endforeach; ?>
+                   <?php foreach ($personnel as $p): ?>
+    <?php if ($p->rateType === 'Month' || $p->rateType === 'Bi-Month') continue; ?>
+    <option value="<?= $p->personnelID ?>">
+        <?= $p->last_name . ', ' . $p->first_name .
+            ($p->middle_name ? ' ' . substr($p->middle_name, 0, 1) . '.' : '') .
+            ($p->name_ext ? ' ' . $p->name_ext : '') ?>
+    </option>
+<?php endforeach; ?>
+
                 </select>
             </div>
 
@@ -178,21 +180,24 @@ form .btn:last-child {
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($assignments as $a): ?>
-        <tr>
-            <td><?= $a->last_name . ', ' . $a->first_name .
-                ($a->middle_name ? ' ' . substr($a->middle_name, 0, 1) . '.' : '') .
-                ($a->name_ext ? ' ' . $a->name_ext : '') ?>
-            </td>
-            <td class="text-end">
-                <a href="<?= base_url('project/delete_assignment/' . $a->ppID . '/' . $settingsID . '/' . $projectID) ?>"
-                   class="btn btn-danger btn-sm"
-                   onclick="return confirm('Remove this assignment?')">
-                   <i class="fas fa-trash-alt"></i>
-                </a>
-            </td>
-        </tr>
-        <?php endforeach; ?>
+       <?php foreach ($assignments as $a): ?>
+<?php if (isset($a->rateType) && ($a->rateType === 'Month' || $a->rateType === 'Bi-Month')) continue; ?>
+
+<tr>
+    <td><?= $a->last_name . ', ' . $a->first_name .
+        ($a->middle_name ? ' ' . substr($a->middle_name, 0, 1) . '.' : '') .
+        ($a->name_ext ? ' ' . $a->name_ext : '') ?>
+    </td>
+    <td class="text-end">
+        <a href="<?= base_url('project/delete_assignment/' . $a->ppID . '/' . $settingsID . '/' . $projectID) ?>"
+           class="btn btn-danger btn-sm"
+           onclick="return confirm('Remove this assignment?')">
+           <i class="fas fa-trash-alt"></i>
+        </a>
+    </td>
+</tr>
+<?php endforeach; ?>
+
     </tbody>
 </table>
 

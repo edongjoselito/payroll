@@ -158,7 +158,9 @@ public function get_all_personnel($settingsID, $projectID)
 
    $this->db->order_by('last_name', 'ASC');
 $this->db->order_by('first_name', 'ASC');
+$this->db->select('personnelID, first_name, middle_name, last_name, name_ext, rateType');
 return $this->db->get('personnel')->result();
+
 
 }
 
@@ -167,7 +169,8 @@ return $this->db->get('personnel')->result();
 public function get_assignments_by_project($projectID)
 {
     $this->db->select('ppa.ppID, ppa.projectID, ppa.settingsID, ppa.personnelID, 
-                       p.first_name, p.middle_name, p.last_name, p.name_ext');
+                       p.first_name, p.middle_name, p.last_name, p.name_ext,
+                       p.rateType');
     $this->db->from('project_personnel_assignment AS ppa');
     $this->db->join('personnel AS p', 'ppa.personnelID = p.personnelID');
     $this->db->where('ppa.projectID', $projectID);

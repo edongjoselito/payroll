@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Attendance List</title>
+    <title>PMS - Attendance List</title>
     <?php include('includes/head.php'); ?>
     <style>
         .print-btn {
