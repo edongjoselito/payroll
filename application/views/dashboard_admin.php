@@ -321,6 +321,76 @@
     </div>
 </div>
 
+  <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+     <div class="card card-hover" onclick="confirmNavigation('<?= base_url(); ?>WeeklyAttendance', event)">
+
+            <div class="card-body widget-style-2">
+                <div class="media">
+                    <div class="media-body align-self-center">
+                        <h2 class="my-0">
+                        </h2>
+                        <p class="mb-0 text-dark">Generate Attendance</p>
+                    </div>
+                    <i class="mdi mdi-calendar-check text-primary bg-light ml-3"></i>
+
+
+                </div>
+            </div>
+            <span class="hover-text">Click to view</span>
+        </div>
+    </div>
+
+  <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+     <div class="card card-hover" onclick="confirmNavigation('<?= base_url(); ?>Generatepayroll/form', event)">
+
+            <div class="card-body widget-style-2">
+                <div class="media">
+                    <div class="media-body align-self-center">
+                        <h2 class="my-0">
+                        </h2>
+                        <p class="mb-0 text-dark">Generate Payroll</p>
+                    </div>
+                  <i class="mdi mdi-clock-outline text-primary bg-light ml-3"></i>
+                </div>
+            </div>
+            <span class="hover-text">Click to view</span>
+        </div>
+    </div>
+     <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+     <div class="card card-hover" onclick="confirmNavigation('<?= base_url(); ?>Borrow/cash_advance', event)">
+
+            <div class="card-body widget-style-2">
+                <div class="media">
+                    <div class="media-body align-self-center">
+                        <h2 class="my-0">
+                        </h2>
+                        <p class="mb-0 text-dark">Manage Deductions</p>
+                    </div>
+                  <i class="mdi mdi-minus-circle-outline text-primary bg-light ml-3"></i>
+
+                </div>
+            </div>
+            <span class="hover-text">Click to view</span>
+        </div>
+    </div>
+      <div class="col-lg-3 col-md-6 col-sm-6 mb-3">
+     <div class="card card-hover" onclick="confirmNavigation('<?= base_url(); ?>OtherDeduction/attendance_summary', event)">
+
+            <div class="card-body widget-style-2">
+                <div class="media">
+                    <div class="media-body align-self-center">
+                        <h2 class="my-0">
+                        </h2>
+                        <p class="mb-0 text-dark">View Summaries</p>
+                    </div>
+                 <i class="mdi mdi-file-document-outline text-primary bg-light ml-3"></i>
+
+
+                </div>
+            </div>
+            <span class="hover-text">Click to view</span>
+        </div>
+    </div>
             </div>
 
        
