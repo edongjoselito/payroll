@@ -14,6 +14,16 @@
   height: 80px;
   animation: bounce 2s infinite;
 }
+/* Button hover effect with glow */
+.btn {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(13, 110, 253, 0.4); /* soft blue glow */
+}
+
 </style>
 
 <link rel="stylesheet" href="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.css">
