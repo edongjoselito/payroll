@@ -141,7 +141,7 @@ if ($success || $error):
                              <td><?= $row->deduct_from ? date('Y-m-d', strtotime($row->deduct_from)) : '' ?></td>
     <td><?= $row->deduct_to ? date('Y-m-d', strtotime($row->deduct_to)) : '' ?></td>
                             <td>
-                             <!-- EDIT Button -->
+                         <!-- EDIT Button -->
 <button class="btn btn-outline-info btn-sm me-1" data-toggle="modal" data-target="#editMaterialModal<?= $row->id ?>">
   <i class="fas fa-edit" data-toggle="tooltip" title="Edit Deduction"></i>
 </button>
@@ -152,6 +152,7 @@ if ($success || $error):
    onclick="return confirm('Delete this record?')">
   <i class="fas fa-trash-alt" data-toggle="tooltip" title="Delete Deduction"></i>
 </a>
+
 
                             </td>
                         </tr>
