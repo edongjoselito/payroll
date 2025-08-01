@@ -36,7 +36,99 @@ foreach ($attendance_data as $row) {
 $amountColspan = 2;
 if ($hasRegularHoliday) $amountColspan++;
 if ($hasSpecialHoliday) $amountColspan++;
+function computePayroll($row, $start, $end) {
+    $regTotalMinutes = 0;
+    $otTotalMinutes = 0;
+    $totalDays = 0;
+    $regAmount = 0;
+    $otAmount = 0;
+    $amountRegularHoliday = 0;
+    $amountSpecialHoliday = 0;
+
+    $loopDate = strtotime($start);
+    $endDate = strtotime($end);
+
+    while ($loopDate <= $endDate) {
+        $curDate = date('Y-m-d', $loopDate);
+        $raw = $row->reg_hours_per_day[$curDate] ?? null;
+
+        $status = strtolower(preg_replace('/\s+/', '', trim($raw['status'] ?? '')));
+        $regHours = floatval($raw['hours'] ?? 0);
+        $otHours = floatval($raw['overtime_hours'] ?? 0);
+        $holidayHours = floatval($raw['holiday_hours'] ?? 0);
+
+        if ($row->rateType === 'Hour') {
+            $base = $row->rateAmount;
+        } elseif ($row->rateType === 'Day') {
+            $base = $row->rateAmount / 8;
+        } elseif ($row->rateType === 'Month') {
+            $base = ($row->rateAmount / 30) / 8;
+        } elseif ($row->rateType === 'Bi-Month') {
+            $base = ($row->rateAmount / 15) / 8;
+        } else {
+            $base = 0;
+        }
+
+        if (preg_match('/holiday|regularho|legal|special/i', $status) || $holidayHours > 0) {
+            if (strpos($status, 'regularho') !== false || strpos($status, 'legal') !== false) {
+                $amountRegularHoliday += 8 * $base;
+                $regAmount += $holidayHours * $base;
+                $regTotalMinutes += $holidayHours * 60;
+                $totalDays += $holidayHours / 8;
+            } else {
+                $regAmount += $holidayHours * $base;
+                $amountSpecialHoliday += $holidayHours * $base * 0.30;
+                $regTotalMinutes += $holidayHours * 60;
+                $totalDays += $holidayHours / 8;
+            }
+
+            $otAmount += $otHours * $base;
+            $otTotalMinutes += $otHours * 60;
+        } else {
+            $regAmount += $regHours * $base;
+            $otAmount += $otHours * $base;
+
+            $regTotalMinutes += $regHours * 60;
+            $otTotalMinutes += $otHours * 60;
+
+            $totalDays += $regHours / 8;
+        }
+
+        $loopDate = strtotime('+1 day', $loopDate);
+    }
+
+    $salary = $regAmount + $otAmount + $amountRegularHoliday + $amountSpecialHoliday;
+    $cash_advance = $row->ca_cashadvance ?? 0;
+    $sss = $row->gov_sss ?? 0;
+    $pagibig = $row->gov_pagibig ?? 0;
+    $philhealth = $row->gov_philhealth ?? 0;
+    $loan = $row->loan ?? 0;
+    $other_deduction = $row->other_deduction ?? 0;
+    $total_deduction = $cash_advance + $sss + $pagibig + $philhealth + $loan + $other_deduction;
+    $netPay = $salary - $total_deduction;
+
+    return [
+        'regTotalMinutes' => $regTotalMinutes,
+        'otTotalMinutes' => $otTotalMinutes,
+        'totalDays' => $totalDays,
+        'regAmount' => $regAmount,
+        'otAmount' => $otAmount,
+        'amountRegularHoliday' => $amountRegularHoliday,
+        'amountSpecialHoliday' => $amountSpecialHoliday,
+        'salary' => $salary,
+        'cash_advance' => $cash_advance,
+        'sss' => $sss,
+        'pagibig' => $pagibig,
+        'philhealth' => $philhealth,
+        'loan' => $loan,
+        'other_deduction' => $other_deduction,
+        'total_deduction' => $total_deduction,
+        'netPay' => $netPay
+    ];
+}
+
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1044,90 +1136,87 @@ $totalNet += $netPay;
 <!-- === PRINTABLE ALL PAYSLIPS SECTION (hidden by default) === -->
 <div id="allPayslips" class="no-print-payroll d-none">
   <div id="print-all-payslips-container">
-    <?php foreach ($attendance_data as $ln => $row): ?>
-      <?php if (!in_array($row->rateType, ['Month', 'Bi-Month'])) continue; ?>
+   <?php foreach ($attendance_data as $ln => $row): ?>
+  <?php if (!in_array($row->rateType, ['Month', 'Bi-Month'])) continue; ?>
 
-      <?php
-        // Full Name and Base Info
-        $fullName = htmlspecialchars($row->last_name . ', ' . $row->first_name);
-        $position = htmlspecialchars($row->position);
-        $rateType = $row->rateType;
-        $rateAmount = $row->rateAmount ?? 0;
-        $printedDate = date('F d, Y');
+  <?php
+    $fullName = htmlspecialchars($row->last_name . ', ' . $row->first_name);
+    $position = htmlspecialchars($row->position);
+    $rateType = $row->rateType;
+    $rateAmount = $row->rateAmount ?? 0;
+    $printedDate = date('F d, Y');
 
-        // Rate Calculations
-        $workingDaysInMonth = getWorkingDaysInMonth($start);
-        $dailyRate = ($rateType === 'Month') ? ($rateAmount / $workingDaysInMonth) : ($rateAmount / 8);
-        $hourlyRate = ($rateType === 'Month') ? ($dailyRate / 8) : (($rateType === 'Day') ? ($rateAmount / 8) : $rateAmount);
-        $otRate = $hourlyRate * 1.25;
+    // Compute values based on attendance
+    $pay = computePayroll($row, $start, $end);
 
-        // Attendance Values
-        $regFormatted = isset($row->regTotalMinutes) ? round($row->regTotalMinutes / 60, 2) : 0;
-        $otFormatted = isset($row->otTotalMinutes) ? round($row->otTotalMinutes / 60, 2) : 0;
-        $totalDays = isset($row->total_days) ? round($row->total_days, 0) : 0;
+    $regFormatted = number_format($pay['regTotalMinutes'] / 60, 2);
+    $otFormatted = number_format($pay['otTotalMinutes'] / 60, 2);
+    $totalDays = number_format($pay['totalDays'], 2);
+    $salary = $pay['salary'];
+    $cash_advance = $pay['cash_advance'];
+    $sss = $pay['sss'];
+    $pagibig = $pay['pagibig'];
+    $philhealth = $pay['philhealth'];
+    $loan = $pay['loan'];
+    $other_deduction = $pay['other_deduction'];
+    $total_deduction = $pay['total_deduction'];
+    $netPay = $pay['netPay'];
 
-        // Earnings and Deductions
-        $salary = $row->salary ?? ($regFormatted * $hourlyRate + $otFormatted * $otRate);
-        $cash_advance = $row->ca_cashadvance ?? 0;
-        $sss = $row->gov_sss ?? 0;
-        $pagibig = $row->gov_pagibig ?? 0;
-        $philhealth = $row->gov_philhealth ?? 0;
-        $loan = $row->loan ?? 0;
-        $other_deduction = $row->other_deduction ?? 0;
+    $workingDaysInMonth = getWorkingDaysInMonth($start);
+    $dailyRate = ($rateType === 'Month') ? ($rateAmount / $workingDaysInMonth) : ($rateAmount / 8);
+    $hourlyRate = ($rateType === 'Month') ? ($dailyRate / 8) : (($rateType === 'Day') ? ($rateAmount / 8) : $rateAmount);
+    $otRate = $hourlyRate * 1.25;
+  ?>
 
-        $total_deduction = $cash_advance + $sss + $pagibig + $philhealth + $loan + $other_deduction;
-        $netPay = $salary - $total_deduction;
-      ?>
+  <div class="print-card" style="page-break-inside: avoid; margin-bottom: 30px; padding: 20px; border: 1px solid #ddd;">
+    <h4 style="margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 6px;">
+      Payslip - <?= $fullName ?>
+    </h4>
 
-      <div class="print-card" style="page-break-inside: avoid; margin-bottom: 30px; padding: 20px; border: 1px solid #ddd;">
-        <h4 style="margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 6px;">
-          Payslip - <?= $fullName ?>
-        </h4>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+      <div>
+        <p><strong>Employee:</strong> <?= $fullName ?></p>
+        <p><strong>Position:</strong> <?= $position ?></p>
+        <p><strong>Rate:</strong> ₱<?= number_format($rateAmount, 2) ?> / <?= $rateType ?></p>
+        <?php if ($rateType === 'Month'): ?>
+          <p><strong>Daily Rate:</strong> ₱<?= number_format($dailyRate, 2) ?></p>
+          <p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p>
+          <p><strong>Overtime Rate:</strong> ₱<?= number_format($otRate, 2) ?></p>
+        <?php endif; ?>
+      </div>
+      <div style="text-align: right;">
+        <p><strong>Period:</strong><br><?= date('F d', strtotime($start)) ?> - <?= date('F d, Y', strtotime($end)) ?></p>
+        <p><strong>Printed:</strong> <?= $printedDate ?></p>
+      </div>
+    </div>
 
-        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
-          <div>
-            <p><strong>Employee:</strong> <?= $fullName ?></p>
-            <p><strong>Position:</strong> <?= $position ?></p>
-            <p><strong>Rate:</strong> ₱<?= number_format($rateAmount, 2) ?> / <?= $rateType ?></p>
-            <?php if ($rateType === 'Month'): ?>
-              <p><strong>Daily Rate:</strong> ₱<?= number_format($dailyRate, 2) ?></p>
-              <p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p>
-              <p><strong>Overtime Rate:</strong> ₱<?= number_format($otRate, 2) ?></p>
-            <?php endif; ?>
-          </div>
-          <div style="text-align: right;">
-            <p><strong>Period:</strong><br><?= date('F d', strtotime($start)) ?> - <?= date('F d, Y', strtotime($end)) ?></p>
-            <p><strong>Printed:</strong> <?= $printedDate ?></p>
-          </div>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; margin-top: 15px;">
-          <div style="width: 48%;">
-            <h5 style="border-bottom: 1px solid #ccc;">Earnings</h5>
-            <p>Regular Time: <?= number_format($regFormatted, 2) ?> hrs</p>
-            <p>Overtime: <?= number_format($otFormatted, 2) ?> hrs</p>
-            <p>Total Days: <?= $totalDays ?></p>
-            <p><strong>Gross Salary: ₱<?= number_format($salary, 2) ?></strong></p>
-          </div>
-
-          <div style="width: 48%;">
-            <h5 style="border-bottom: 1px solid #ccc;">Deductions</h5>
-            <p>Cash Advance: ₱<?= number_format($cash_advance, 2) ?></p>
-            <p>SSS (Gov’t): ₱<?= number_format($sss, 2) ?></p>
-            <p>Pag-IBIG (Gov’t): ₱<?= number_format($pagibig, 2) ?></p>
-            <p>PHIC (Gov’t): ₱<?= number_format($philhealth, 2) ?></p>
-            <p>Loan: ₱<?= number_format($loan, 2) ?></p>
-            <p>Other Deduction: ₱<?= number_format($other_deduction, 2) ?></p>
-            <p><strong>Total Deduction: ₱<?= number_format($total_deduction, 2) ?></strong></p>
-          </div>
-        </div>
-
-        <div style="margin-top: 10px; text-align: right;">
-          <h4><strong>Net Pay: ₱<?= number_format($netPay, 2) ?></strong></h4>
-        </div>
+    <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+      <div style="width: 48%;">
+        <h5 style="border-bottom: 1px solid #ccc;">Earnings</h5>
+        <p>Regular Time: <?= $regFormatted ?> hrs</p>
+        <p>Overtime: <?= $otFormatted ?> hrs</p>
+        <p>Total Days: <?= $totalDays ?></p>
+        <p><strong>Gross Salary: ₱<?= number_format($salary, 2) ?></strong></p>
       </div>
 
-    <?php endforeach; ?>
+      <div style="width: 48%;">
+        <h5 style="border-bottom: 1px solid #ccc;">Deductions</h5>
+        <p>Cash Advance: ₱<?= number_format($cash_advance, 2) ?></p>
+        <p>SSS (Gov’t): ₱<?= number_format($sss, 2) ?></p>
+        <p>Pag-IBIG (Gov’t): ₱<?= number_format($pagibig, 2) ?></p>
+        <p>PHIC (Gov’t): ₱<?= number_format($philhealth, 2) ?></p>
+        <p>Loan: ₱<?= number_format($loan, 2) ?></p>
+        <p>Other Deduction: ₱<?= number_format($other_deduction, 2) ?></p>
+        <p><strong>Total Deduction: ₱<?= number_format($total_deduction, 2) ?></strong></p>
+      </div>
+    </div>
+
+    <div style="margin-top: 10px; text-align: right;">
+      <h4><strong>Net Pay: ₱<?= number_format($netPay, 2) ?></strong></h4>
+    </div>
+  </div>
+<?php endforeach; ?>
+
   </div>
 </div>
 
