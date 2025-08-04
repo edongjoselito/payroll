@@ -107,15 +107,18 @@ public function records()
 
         $attendances = [];
         foreach ($raw as $pid => $personData) {
-            $attendances[$pid]['name'] = $personData['name'];
-            foreach ($personData['dates'] as $date => $status) {
-                $attendances[$pid]['dates'][$date] = $status;
-                $attendances[$pid]['hours'][$date] = $personData['hours'][$date] ?? 0;
-                $attendances[$pid]['holiday'][$date] = $personData['holiday'][$date] ?? 0;
-                $attendances[$pid]['overtime'][$date] = $personData['overtime'][$date] ?? 0;
+    $attendances[$pid]['name'] = isset($personData['name']) ? $personData['name'] : 'Unknown';
 
-            }
+    if (isset($personData['dates']) && is_array($personData['dates'])) {
+        foreach ($personData['dates'] as $date => $status) {
+            $attendances[$pid]['dates'][$date] = $status;
+            $attendances[$pid]['hours'][$date] = $personData['hours'][$date] ?? 0;
+            $attendances[$pid]['holiday'][$date] = $personData['holiday'][$date] ?? 0;
+            $attendances[$pid]['overtime'][$date] = $personData['overtime'][$date] ?? 0;
         }
+    }
+}
+
 
         $data['batches'][] = [
             'projectID'     => $projectID,
