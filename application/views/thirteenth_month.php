@@ -121,7 +121,8 @@ thead th {
             <th>No.</th>
             <th>Name of Worker</th>
             <th>Designation</th>
-            <th>Total Basic Salary for Year 2024</th>
+           <th>Total Basic Salary for Year <?= htmlspecialchars($year) ?></th>
+
             <th>13th Month Pay<br><small>(Divided by 12)</small></th>
             <th>Net Pay</th>
             <th>Received By</th>
