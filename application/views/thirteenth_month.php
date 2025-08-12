@@ -15,7 +15,6 @@ thead th {
 .btn + .btn {
     margin-left: 8px;
 }
-/* Glow and Enlarge on Hover */
 .glow-hover {
     transition: all 0.3s ease-in-out;
 }
@@ -85,7 +84,6 @@ thead th {
     <?php endif; ?>
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3 d-print-none">
    <button class="btn btn-outline-secondary btn-sm glow-hover me-2" onclick="window.print();">
-
         <i class="fas fa-print"></i> Print Report
     </button>
 <button class="btn btn-outline-secondary btn-sm glow-hover me-2" data-toggle="modal" data-target="#filterModal">
@@ -96,21 +94,18 @@ thead th {
     </button>
 </div>
 
-
-
     <div class="card">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
             <span><strong>13th Month Summary</strong></span>
             <?php if (!empty($selected_period)): ?>
-    <div class="alert alert-info">
-        Showing 13th month data for: 
-        <strong>
-            <?= $selected_period == 'jan-jun' ? 'January – June' : ($selected_period == 'jul-dec' ? 'July – December' : 'Full Year') ?>
-        </strong>
-    </div>
-<?php endif; ?>
-
-           
+                <div class="alert alert-info mb-0 py-1 px-2">
+                    Showing 13th month data for:
+                    <strong>
+                        <?= $selected_period == 'jan-jun' ? 'January – June' : ($selected_period == 'jul-dec' ? 'July – December' : 'Full Year') ?>
+                    </strong>
+                    &nbsp; | &nbsp; Year: <strong><?= htmlspecialchars($year) ?></strong>
+                </div>
+            <?php endif; ?>
         </div>
         <div class="collapse show" id="reportTable">
             <div class="card-body">
@@ -121,8 +116,7 @@ thead th {
             <th>No.</th>
             <th>Name of Worker</th>
             <th>Designation</th>
-           <th>Total Basic Salary for Year <?= htmlspecialchars($year) ?></th>
-
+            <th>Total Basic Salary for Year <?= htmlspecialchars($year) ?></th>
             <th>13th Month Pay<br><small>(Divided by 12)</small></th>
             <th>Net Pay</th>
             <th>Received By</th>
@@ -130,22 +124,20 @@ thead th {
     </thead>
     <tbody>
        <?php $i = 1; foreach ($payroll_data as $emp):
-    $basic      = (float)($emp['basic_total'] ?? 0); 
-    $thirteenth = $basic / 12;
-    $netpay     = $thirteenth;
-?>
-
+            $basic      = (float)($emp['basic_total'] ?? 0.0); 
+            $thirteenth = $basic / 12;
+            $netpay     = $thirteenth;
+       ?>
 <tr class="text-center">
     <td><?= $i++ ?></td>
-    <td class="text-left"><?= $emp['last_name'].', '.$emp['first_name'] ?></td>
-    <td><?= $emp['position'] ?></td>
+    <td class="text-left"><?= htmlspecialchars(($emp['last_name'] ?? '').', '.($emp['first_name'] ?? '')) ?></td>
+    <td><?= htmlspecialchars($emp['position'] ?? '') ?></td>
     <td>₱<?= number_format($basic, 2) ?></td>
     <td><strong>₱<?= number_format($thirteenth, 2) ?></strong></td>
     <td>₱<?= number_format($netpay, 2) ?></td>
     <td>____________________</td>
 </tr>
 <?php endforeach; ?>
-
     </tbody>
 </table>
 
@@ -174,21 +166,20 @@ thead th {
                     <label for="period">Select Period</label>
                     <select class="form-control" name="period" required>
                         <option value="">Choose Period</option>
-                        <option value="jan-jun">January – June</option>
-                        <option value="jul-dec">July – December</option>
-                        <option value="full">Full Year</option>
+                        <option value="jan-jun" <?= ($selected_period ?? '')==='jan-jun'?'selected':''; ?>>January – June</option>
+                        <option value="jul-dec" <?= ($selected_period ?? '')==='jul-dec'?'selected':''; ?>>July – December</option>
+                        <option value="full"    <?= ($selected_period ?? '')==='full'?'selected':''; ?>>Full Year</option>
                     </select>
                 </div>
                 <div class="form-group">
-    <label for="year">Year</label>
-    <input type="number" 
-           class="form-control" 
-           name="year" 
-           value="<?= htmlspecialchars($year ?? date('Y')) ?>" 
-           min="2000" 
-           max="2100" />
-</div>
-
+                    <label for="year">Year</label>
+                    <input type="number"
+                           class="form-control"
+                           name="year"
+                           value="<?= htmlspecialchars($year ?? date('Y')) ?>"
+                           min="2000"
+                           max="2100" />
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-success btn-sm">Apply Filter</button>
