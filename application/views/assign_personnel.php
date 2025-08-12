@@ -183,37 +183,45 @@ if ($success || $error):
                     <h5 class="mt-4">Assigned Personnel List</h5>
                     <div class="card">
                         <div class="card-body">
-                        <table id="datatable" class="table table-bordered table-hover dt-responsive nowrap" style="width:100%">
-    <thead class="thead-light">
-        <tr>
-            <th>Personnel Name</th>
-            <th class="text-end" style="width: 120px;">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-       <?php foreach ($assignments as $a): ?>
-<?php if (isset($a->rateType) && ($a->rateType === 'Month' || $a->rateType === 'Bi-Month')) continue; ?>
+                    <table id="datatable" class="table table-bordered table-hover dt-responsive nowrap" style="width:100%">
+  <thead class="thead-light">
+    <tr>
+      <th style="width:60px">L/N</th>
+      <th>Personnel Name</th>
+      <th>Position</th>
+      <th class="text-end" style="width:120px;">Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    <?php $n = 1; foreach ($assignments as $a): ?>
+      <?php if (isset($a->rateType) && ($a->rateType === 'Month' || $a->rateType === 'Bi-Month')) continue; ?>
 
-<tr>
-    <td><?= $a->last_name . ', ' . $a->first_name .
-        ($a->middle_name ? ' ' . substr($a->middle_name, 0, 1) . '.' : '') .
-        ($a->name_ext ? ' ' . $a->name_ext : '') ?>
-    </td>
-    <td class="text-end">
-      <a href="<?= base_url('project/delete_assignment/' . $a->ppID . '/' . $settingsID . '/' . $projectID) ?>"
-   class="btn btn-danger btn-sm"
-   title="Remove Personnel"
-   data-toggle="tooltip"
-   onclick="return confirm('Remove this assignment?')">
-   <i class="fas fa-trash-alt"></i>
-</a>
-
-    </td>
-</tr>
-<?php endforeach; ?>
-
-    </tbody>
+      <?php
+        $fullName = trim(
+          ($a->last_name ?? '') . ', ' .
+          ($a->first_name ?? '') .
+          (!empty($a->middle_name) ? ' ' . substr($a->middle_name, 0, 1) . '.' : '') .
+          (!empty($a->name_ext) ? ' ' . $a->name_ext : '')
+        );
+      ?>
+      <tr>
+        <td><?= $n++ ?></td>
+        <td><?= htmlspecialchars($fullName) ?></td>
+        <td><?= htmlspecialchars($a->position ?? '—') ?></td>
+        <td class="text-end">
+          <a href="<?= base_url('project/delete_assignment/' . $a->ppID . '/' . $settingsID . '/' . $projectID) ?>"
+             class="btn btn-danger btn-sm"
+             title="Remove Personnel"
+             data-toggle="tooltip"
+             onclick="return confirm('Remove this assignment?')">
+            <i class="fas fa-trash-alt"></i>
+          </a>
+        </td>
+      </tr>
+    <?php endforeach; ?>
+  </tbody>
 </table>
+
 
                         </div>
                     </div>

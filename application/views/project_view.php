@@ -3,27 +3,23 @@
 <title>PMS - Project List</title>
 <?php include('includes/head.php'); ?>
 <style>
-/* General button styling */
 .btn {
   padding: 6px 12px !important;
   font-size: 15px;
   border-radius: 6px;
-  margin-right: 4px; /* Add spacing between buttons */
+  margin-right: 4px; 
   transition: all 0.25s ease-in-out;
 }
 
-/* Final button margin fix for last item */
 td .btn:last-child {
   margin-right: 0;
 }
 
-/* Hover effects */
 .btn:hover {
   transform: scale(1.07);
   opacity: 0.95;
 }
 
-/* Colored button glow */
 .btn-success:hover {
   box-shadow: 0 0 8px rgba(40, 167, 69, 0.4);
 }
@@ -72,7 +68,7 @@ td .btn:last-child {
 }
 
 .icon-expand-btn:hover {
-  width: 170px; /* Enough space for icon + "Add New Project" */
+  width: 170px; 
   justify-content: flex-start;
   padding: 0 16px;
 }
