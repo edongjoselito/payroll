@@ -804,6 +804,39 @@ public function delete_summary_batch()
     redirect('project/view_payroll_summary_batches'); // ✅ Ensure this matches your routing
 }
 
+public function api_get_batch_total_live()
+{
+    $projectID  = $this->input->get('projectID', true);
+    $start_date = $this->input->get('start_date', true);
+    $end_date   = $this->input->get('end_date', true);
+    $settingsID = $this->session->userdata('settingsID'); // or however you store it
+
+    if (!$projectID || !$start_date || !$end_date || !$settingsID) {
+        return $this->output->set_status_header(400)->set_content_type('application/json')
+            ->set_output(json_encode(['error' => 'Missing parameters']));
+    }
+
+    $this->load->model('Project_model');
+    $gross = $this->Project_model->compute_batch_gross_live($settingsID, $projectID, $start_date, $end_date);
+
+    return $this->output->set_content_type('application/json')
+        ->set_output(json_encode(['gross_total' => $gross]));
+}
+
+public function api_get_all_batch_totals_live()
+{
+    $settingsID = $this->session->userdata('settingsID');
+    if (!$settingsID) {
+        return $this->output->set_status_header(401)->set_content_type('application/json')
+            ->set_output(json_encode(['error' => 'Not authorized']));
+    }
+
+    $this->load->model('Project_model');
+    $rows = $this->Project_model->get_all_summary_batches_live($settingsID);
+
+    return $this->output->set_content_type('application/json')
+        ->set_output(json_encode(['batches' => $rows]));
+}
 
 
 }

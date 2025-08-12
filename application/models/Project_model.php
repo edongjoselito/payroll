@@ -712,6 +712,117 @@ public function delete_summary_batch($projectID, $start_date, $end_date, $settin
     return $this->db->delete('payroll_summary');
 }
 
+// --- LIVE (no-cache) batch gross for a period, computed from ATTENDANCE ---
+public function compute_batch_gross_live($settingsID, $projectID, $start_date, $end_date)
+{
+    // Pull attendance rows with personnel rates
+    $rows = $this->db->select("
+            a.personnelID,
+            a.date,
+            a.status,
+            COALESCE(a.work_duration, 0) AS hours,     -- total hours worked that day
+            COALESCE(a.holiday_hours, 0) AS holiday_hours,
+            p.rateType,
+            p.rateAmount
+        ")
+        ->from('attendance a')
+        ->join('personnel p', 'p.personnelID = a.personnelID', 'left')
+        ->where('a.settingsID', $settingsID)
+        ->where('a.projectID',  $projectID)
+        ->where('a.date >=',     $start_date)
+        ->where('a.date <=',     $end_date)
+        ->get()->result_array();
+
+    if (empty($rows)) {
+        return 0.0;
+    }
+
+    $total_gross = 0.0;
+
+    foreach ($rows as $r) {
+        // Derive base hourly rate
+        $rateType   = $r['rateType'];
+        $rateAmount = (float) $r['rateAmount'];
+        if ($rateType === 'Hour') {
+            $base = $rateAmount;
+        } elseif ($rateType === 'Day') {
+            $base = $rateAmount / 8.0;
+        } elseif ($rateType === 'Month') {
+            // (Same as your report: 30 days basis. If you use working days, change here.)
+            $base = ($rateAmount / 30.0) / 8.0;
+        } elseif ($rateType === 'Bi-Month') {
+            $base = ($rateAmount / 15.0) / 8.0;
+        } else {
+            $base = 0.0;
+        }
+
+        $status        = strtolower(trim(preg_replace('/\s+/', '', (string)$r['status'])));
+        $hoursTotal    = max(0.0, (float)$r['hours']);           // example: 0..24
+        $holidayHours  = max(0.0, (float)$r['holiday_hours']);   // often 0 unless marked
+
+        // Split hours into regular vs OT cap-by-8 logic (mirrors your numeric branch)
+        $regHours = min($hoursTotal, 8.0);
+        $otHours  = max(0.0, $hoursTotal - 8.0);
+
+        $regAmount = 0.0;
+        $otAmount  = 0.0;
+        $regHol    = 0.0; // regular holiday fixed credit (e.g., 8*base)
+        $speHol    = 0.0; // special holiday premium (30%)
+
+        $isHoliday = (bool) (preg_match('/holiday|regularho|legal|special/i', $status) || $holidayHours > 0);
+
+        if ($isHoliday) {
+            // Prefer holidayHours if provided; if zero but status says holiday, treat regHours as holiday work
+            $hHours = $holidayHours > 0 ? $holidayHours : $regHours;
+
+            if (strpos($status, 'regularho') !== false || strpos($status, 'legal') !== false) {
+                // Regular Holiday: your report does "regHol += 8*base" + normal pay for hours worked
+                $regHol    += 8.0 * $base;
+                $regAmount += max(0.0, $hHours) * $base;
+            } else {
+                // Special Holiday: 30% premium on holiday hours
+                $regAmount += max(0.0, $hHours) * $base;
+                $speHol    += max(0.0, $hHours) * $base * 0.30;
+            }
+
+            // OT during holiday uses base; apply multiplier here if you pay >1.0x for OT
+            $otAmount += max(0.0, $otHours) * $base; // add *1.25 if your policy is 125%
+        } else {
+            // Normal day
+            $regAmount += max(0.0, $regHours) * $base;
+            $otAmount  += max(0.0, $otHours)  * $base; // add *1.25 if your policy is 125%
+        }
+
+        $total_gross += ($regAmount + $otAmount + $regHol + $speHol);
+    }
+
+    return round($total_gross, 2);
+}
+
+// --- LIVE (no-cache) list of batches (same shape as get_all_summary_batches) with computed gross ---
+public function get_all_summary_batches_live($settingsID)
+{
+    // Use your existing batch grouping source; here we derive distinct (projectID,start,end) from payroll_summary
+    // If you store batches elsewhere, swap this FROM.
+    $batches = $this->db->select('s.projectID, s.start_date, s.end_date, p.projectTitle, p.projectLocation')
+        ->from('payroll_summary s')
+        ->join('project p', 'p.projectID = s.projectID')
+        ->where('p.settingsID', $settingsID)
+        ->group_by(['s.projectID', 's.start_date', 's.end_date'])
+        ->order_by('s.start_date', 'ASC')
+        ->get()->result_array();
+
+    foreach ($batches as &$b) {
+        $b['gross_total_live'] = $this->compute_batch_gross_live(
+            $settingsID,
+            $b['projectID'],
+            $b['start_date'],
+            $b['end_date']
+        );
+    }
+
+    return $batches;
+}
 
 
 }
