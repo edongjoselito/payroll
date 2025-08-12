@@ -5,6 +5,15 @@ function getWorkingDaysInMonth($anyDateInMonth) {
     return cal_days_in_month(CAL_GREGORIAN, $month, $year);
 }
 
+// ✅ New function to get the days between two dates (inclusive)
+function getDaysInPeriod($startDate, $endDate) {
+    $s = strtotime($startDate);
+    $e = strtotime($endDate);
+    if ($s === false || $e === false || $s > $e) return 0;
+    // inclusive of both start and end
+    return (int) floor(($e - $s) / 86400) + 1;
+}
+
 function displayAmount($value) {
     return ($value == 0 || $value === 0.00) ? '––' : number_format($value, 2);
 }
@@ -32,10 +41,10 @@ foreach ($attendance_data as $row) {
     }
 }
 
-
 $amountColspan = 2;
 if ($hasRegularHoliday) $amountColspan++;
 if ($hasSpecialHoliday) $amountColspan++;
+
 function computePayroll($row, $start, $end) {
     $regTotalMinutes = 0;
     $otTotalMinutes = 0;
@@ -97,23 +106,22 @@ function computePayroll($row, $start, $end) {
         $loopDate = strtotime('+1 day', $loopDate);
     }
 
- $salary = bcadd(bcadd($regAmount, $otAmount, 2), bcadd($amountRegularHoliday, $amountSpecialHoliday, 2), 2);
+    $salary = bcadd(bcadd($regAmount, $otAmount, 2), bcadd($amountRegularHoliday, $amountSpecialHoliday, 2), 2);
 
-   $cash_advance = (string) ($row->ca_cashadvance ?? 0);
-$sss = (string) ($row->gov_sss ?? 0);
-$pagibig = (string) ($row->gov_pagibig ?? 0);
-$philhealth = (string) ($row->gov_philhealth ?? 0);
-$loan = (string) ($row->loan ?? 0);
-$other_deduction = (string) ($row->other_deduction ?? 0);
+    $cash_advance = (string) ($row->ca_cashadvance ?? 0);
+    $sss = (string) ($row->gov_sss ?? 0);
+    $pagibig = (string) ($row->gov_pagibig ?? 0);
+    $philhealth = (string) ($row->gov_philhealth ?? 0);
+    $loan = (string) ($row->loan ?? 0);
+    $other_deduction = (string) ($row->other_deduction ?? 0);
 
     $total_deduction = bcadd(
-    bcadd(bcadd($cash_advance, $sss, 2), bcadd($pagibig, $philhealth, 2), 2),
-    bcadd($loan, $other_deduction, 2),
-    2
-);
+        bcadd(bcadd($cash_advance, $sss, 2), bcadd($pagibig, $philhealth, 2), 2),
+        bcadd($loan, $other_deduction, 2),
+        2
+    );
 
-  $netPay = bcsub($salary, $total_deduction, 2);
-
+    $netPay = bcsub($salary, $total_deduction, 2);
 
     return [
         'regTotalMinutes' => $regTotalMinutes,
@@ -135,6 +143,7 @@ $other_deduction = (string) ($row->other_deduction ?? 0);
     ];
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -507,7 +516,7 @@ th {
     </div>
     <div class="info-row">
       <i class="fas fa-clock"></i>
-      <strong>WORKING DAYS</strong><span>: <?= getWorkingDaysInMonth($start) ?> days</span>
+<strong>WORKING DAYS</strong><span>: <?= getDaysInPeriod($start, $end) ?> days</span>
     </div>
     <?php if (!empty($_GET['rateType'])): ?>
       <div class="info-row">
