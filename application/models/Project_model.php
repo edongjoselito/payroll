@@ -712,16 +712,18 @@ public function delete_summary_batch($projectID, $start_date, $end_date, $settin
     return $this->db->delete('payroll_summary');
 }
 
-// --- LIVE (no-cache) batch gross for a period, computed from ATTENDANCE ---
 public function compute_batch_gross_live($settingsID, $projectID, $start_date, $end_date)
 {
-    // Pull attendance rows with personnel rates
-    $rows = $this->db->select("
+    $OT_MULTIPLIER = 1.0;
+
+    $rows = $this->db
+        ->select("
             a.personnelID,
             a.date,
             a.status,
-            COALESCE(a.work_duration, 0) AS hours,     -- total hours worked that day
-            COALESCE(a.holiday_hours, 0) AS holiday_hours,
+            a.work_duration,
+            a.overtime_hours,
+            a.holiday_hours,
             p.rateType,
             p.rateAmount
         ")
@@ -731,7 +733,9 @@ public function compute_batch_gross_live($settingsID, $projectID, $start_date, $
         ->where('a.projectID',  $projectID)
         ->where('a.date >=',     $start_date)
         ->where('a.date <=',     $end_date)
-        ->get()->result_array();
+        ->where('p.settingsID',  $settingsID) 
+        ->get()
+        ->result_array();
 
     if (empty($rows)) {
         return 0.0;
@@ -740,57 +744,54 @@ public function compute_batch_gross_live($settingsID, $projectID, $start_date, $
     $total_gross = 0.0;
 
     foreach ($rows as $r) {
-        // Derive base hourly rate
-        $rateType   = $r['rateType'];
-        $rateAmount = (float) $r['rateAmount'];
+        $rateType   = isset($r['rateType']) ? $r['rateType'] : null;
+        $rateAmount = isset($r['rateAmount']) ? (float)$r['rateAmount'] : 0.0;
+
         if ($rateType === 'Hour') {
             $base = $rateAmount;
         } elseif ($rateType === 'Day') {
             $base = $rateAmount / 8.0;
         } elseif ($rateType === 'Month') {
-            // (Same as your report: 30 days basis. If you use working days, change here.)
             $base = ($rateAmount / 30.0) / 8.0;
         } elseif ($rateType === 'Bi-Month') {
             $base = ($rateAmount / 15.0) / 8.0;
         } else {
-            $base = 0.0;
+            $base = 0.0; 
         }
 
-        $status        = strtolower(trim(preg_replace('/\s+/', '', (string)$r['status'])));
-        $hoursTotal    = max(0.0, (float)$r['hours']);           // example: 0..24
-        $holidayHours  = max(0.0, (float)$r['holiday_hours']);   // often 0 unless marked
+        $statusRaw = array_key_exists('status', $r) ? $r['status'] : ( $r['attendance_status'] ?? '' );
+        $status    = strtolower(trim(preg_replace('/\s+/', '', (string)$statusRaw)));
 
-        // Split hours into regular vs OT cap-by-8 logic (mirrors your numeric branch)
-        $regHours = min($hoursTotal, 8.0);
-        $otHours  = max(0.0, $hoursTotal - 8.0);
+        $regHours     = max(0.0, (float)($r['work_duration']  ?? 0));
+        $otHours      = max(0.0, (float)($r['overtime_hours'] ?? 0));
+        $holidayHours = max(0.0, (float)($r['holiday_hours']  ?? 0));
 
         $regAmount = 0.0;
         $otAmount  = 0.0;
-        $regHol    = 0.0; // regular holiday fixed credit (e.g., 8*base)
-        $speHol    = 0.0; // special holiday premium (30%)
+        $regHol    = 0.0; 
+        $speHol    = 0.0;
 
-        $isHoliday = (bool) (preg_match('/holiday|regularho|legal|special/i', $status) || $holidayHours > 0);
+        $isHoliday = (bool)(preg_match('/holiday|regularho|legal|special/i', $status) || $holidayHours > 0);
 
         if ($isHoliday) {
-            // Prefer holidayHours if provided; if zero but status says holiday, treat regHours as holiday work
             $hHours = $holidayHours > 0 ? $holidayHours : $regHours;
 
             if (strpos($status, 'regularho') !== false || strpos($status, 'legal') !== false) {
-                // Regular Holiday: your report does "regHol += 8*base" + normal pay for hours worked
                 $regHol    += 8.0 * $base;
                 $regAmount += max(0.0, $hHours) * $base;
+                if ($otHours > 0) {
+                    $otAmount += $otHours * $base * $OT_MULTIPLIER;
+                }
             } else {
-                // Special Holiday: 30% premium on holiday hours
                 $regAmount += max(0.0, $hHours) * $base;
                 $speHol    += max(0.0, $hHours) * $base * 0.30;
+                if ($otHours > 0) {
+                    $otAmount += $otHours * $base * $OT_MULTIPLIER;
+                }
             }
-
-            // OT during holiday uses base; apply multiplier here if you pay >1.0x for OT
-            $otAmount += max(0.0, $otHours) * $base; // add *1.25 if your policy is 125%
         } else {
-            // Normal day
-            $regAmount += max(0.0, $regHours) * $base;
-            $otAmount  += max(0.0, $otHours)  * $base; // add *1.25 if your policy is 125%
+            $regAmount += $regHours * $base;
+            $otAmount  += $otHours  * $base * $OT_MULTIPLIER;
         }
 
         $total_gross += ($regAmount + $otAmount + $regHol + $speHol);
@@ -799,11 +800,9 @@ public function compute_batch_gross_live($settingsID, $projectID, $start_date, $
     return round($total_gross, 2);
 }
 
-// --- LIVE (no-cache) list of batches (same shape as get_all_summary_batches) with computed gross ---
+
 public function get_all_summary_batches_live($settingsID)
 {
-    // Use your existing batch grouping source; here we derive distinct (projectID,start,end) from payroll_summary
-    // If you store batches elsewhere, swap this FROM.
     $batches = $this->db->select('s.projectID, s.start_date, s.end_date, p.projectTitle, p.projectLocation')
         ->from('payroll_summary s')
         ->join('project p', 'p.projectID = s.projectID')
