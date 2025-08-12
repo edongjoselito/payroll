@@ -129,31 +129,23 @@ thead th {
         </tr>
     </thead>
     <tbody>
-        <?php $i = 1; foreach ($payroll_data as $emp): 
-            $rate = $emp['rateAmount'];
-            $rateType = $emp['rateType'];
-            $regHours = $emp['total_regular_hours'];
-            switch (strtolower($rateType)) {
-                case 'hour': $hourly = $rate; break;
-                case 'day': $hourly = $rate / 8; break;
-                case 'month': $hourly = ($rate / 30) / 8; break;
-                case 'bi-month': $hourly = ($rate / 15) / 8; break;
-                default: $hourly = 0; break;
-            }
-            $basic = $hourly * $regHours;
-            $thirteenth = $basic / 12;
-            $netpay = $thirteenth; // You may change this logic if needed
-        ?>
-        <tr class="text-center">
-            <td><?= $i++ ?></td>
-            <td class="text-left"><?= $emp['name'] ?></td>
-            <td><?= $emp['position'] ?></td>
-            <td>₱<?= number_format($basic, 2) ?></td>
-            <td><strong>₱<?= number_format($thirteenth, 2) ?></strong></td>
-            <td>₱<?= number_format($netpay, 2) ?></td>
-            <td>____________________</td>
-        </tr>
-        <?php endforeach; ?>
+       <?php $i = 1; foreach ($payroll_data as $emp):
+    $basic      = (float)($emp['basic_total'] ?? 0); 
+    $thirteenth = $basic / 12;
+    $netpay     = $thirteenth;
+?>
+
+<tr class="text-center">
+    <td><?= $i++ ?></td>
+    <td class="text-left"><?= $emp['last_name'].', '.$emp['first_name'] ?></td>
+    <td><?= $emp['position'] ?></td>
+    <td>₱<?= number_format($basic, 2) ?></td>
+    <td><strong>₱<?= number_format($thirteenth, 2) ?></strong></td>
+    <td>₱<?= number_format($netpay, 2) ?></td>
+    <td>____________________</td>
+</tr>
+<?php endforeach; ?>
+
     </tbody>
 </table>
 
@@ -187,6 +179,16 @@ thead th {
                         <option value="full">Full Year</option>
                     </select>
                 </div>
+                <div class="form-group">
+    <label for="year">Year</label>
+    <input type="number" 
+           class="form-control" 
+           name="year" 
+           value="<?= htmlspecialchars($year ?? date('Y')) ?>" 
+           min="2000" 
+           max="2100" />
+</div>
+
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-success btn-sm">Apply Filter</button>

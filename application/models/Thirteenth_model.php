@@ -103,5 +103,30 @@ class Thirteenth_model extends CI_Model {
 
     return $merged;
 }
+public function get_13th_from_payroll($start, $end)
+{
+    $settingsID = $this->session->userdata('settingsID');
+
+    $this->db->select("
+        pr.personnelID,
+        pr.first_name, pr.last_name, pr.position,
+        pr.rateType, CAST(pr.rateAmount AS DECIMAL(10,2)) AS rateAmount,
+        COALESCE(SUM(ps.reg_pay),0) AS basic_total
+    ");
+    $this->db->from('personnel pr');
+    $this->db->join(
+        'payroll_summary ps',
+        "ps.personnelID = pr.personnelID
+         AND ps.settingsID = pr.settingsID
+         AND ps.start_date >= ".$this->db->escape($start)."
+         AND ps.end_date   <= ".$this->db->escape($end),
+        'left'
+    );
+    $this->db->where('pr.settingsID', $settingsID);
+    $this->db->group_by('pr.personnelID');
+    $this->db->order_by('pr.last_name, pr.first_name');
+
+    return $this->db->get()->result_array();
+}
 
 }
