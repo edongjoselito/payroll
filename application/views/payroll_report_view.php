@@ -812,11 +812,12 @@ while ($loopDate <= $endDate):
                 $amountRegularHoliday += 8 * $base;
 
                 if ($holidayHours > 0) {
-                    $regAmount += $holidayHours * $base;
-                    $regTotalMinutes += $holidayHours * 60;
-                    $totalMinutes += $holidayHours * 60;
-                    $totalDays += 1;
-                }
+    $regAmount += $holidayHours * $base;
+    $regTotalMinutes += $holidayHours * 60;
+    $totalMinutes += $holidayHours * 60;
+    $totalDays += $holidayHours / 8;
+}
+
 
                 if ($otHours > 0) {
                     $otAmount += $otHours * $base;
@@ -828,15 +829,16 @@ while ($loopDate <= $endDate):
 
             } else {
                 // ✅ SPECIAL HOLIDAY LOGIC
-                if ($holidayHours > 0) {
-                    $regAmount += $holidayHours * $base;
-                    $amountSpecialHoliday += $holidayHours * $base * 0.30;
-                    $regTotalMinutes += $holidayHours * 60;
-                    $totalMinutes += $holidayHours * 60;
-                    $totalDays += 1;
-                } else {
-                    $amountSpecialHoliday += 8 * $base * 0.30;
-                }
+               if ($holidayHours > 0) {
+    $regAmount += $holidayHours * $base;
+    $amountSpecialHoliday += $holidayHours * $base * 0.30;
+    $regTotalMinutes += $holidayHours * 60;
+    $totalMinutes += $holidayHours * 60;
+    $totalDays += $holidayHours / 8; 
+} else {
+    $amountSpecialHoliday += 8 * $base * 0.30;
+}
+
 
                 if ($otHours > 0) {
                     $otAmount += $otHours * $base;
@@ -875,11 +877,10 @@ while ($loopDate <= $endDate):
             $regTotalMinutes += $regHours * 60;
             $otTotalMinutes += $otHours * 60;
             $totalMinutes += ($regHours + $otHours) * 60;
-            $totalHoursToday = $regHours + $otHours;
-if ($totalHoursToday > 0) {
-    $equivalentDay = $totalHoursToday / 8; // 8 hours = 1 day
-    $totalDays += $equivalentDay;
+     if ($regHours > 0) {
+    $totalDays += $regHours / 8; // prorated days from regular hours only
 }
+
 
         }
 
@@ -909,9 +910,10 @@ if ($totalHoursToday > 0) {
         $regTotalMinutes += $reg;
         $otTotalMinutes += $ot;
         $totalMinutes += ($reg + $ot);
-       if ($decimalHours > 0) {
-    $totalDays += $decimalHours / 8;
+      if ($regHours > 0) {
+    $totalDays += $regHours / 8;
 }
+
 
 
         echo "<td>" . displayAmount($regHours) . "</td>";
