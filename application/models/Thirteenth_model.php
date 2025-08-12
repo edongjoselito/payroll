@@ -3,37 +3,43 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Thirteenth_model extends CI_Model {
 
-   public function get_13th_from_attendance_reg_only($start, $end)
+  public function get_13th_from_attendance_reg_only($start, $end)
 {
     $settingsID = $this->session->userdata('settingsID');
 
     $rows = $this->db
         ->select("
-            a.personnelID,
-            a.`date`,
-            a.`status`,
-            COALESCE(a.work_duration, 0)  AS reg_hours,
-            COALESCE(a.overtime_hours, 0) AS ot_hours,
-            COALESCE(a.holiday_hours, 0)  AS holiday_hours,
+            p.personnelID,
             p.first_name,
             p.last_name,
             p.position,
             p.rateType,
-            p.rateAmount
+            p.rateAmount,
+            a.date,
+            a.status,
+            COALESCE(a.work_duration, 0)  AS reg_hours,      -- regular hours logged
+            COALESCE(a.overtime_hours, 0) AS ot_hours,       -- ignored for 13th month
+            COALESCE(a.holiday_hours, 0)  AS holiday_hours   -- 0 if not used
         ", false)
-        ->from('attendance a')
-        ->join('personnel p', 'p.personnelID = a.personnelID', 'left')
-        ->where('a.settingsID', $settingsID)
-        ->where('a.date >=', $start)
-        ->where('a.date <=', $end)
+        ->from('personnel p')
+        ->join(
+            'attendance a',
+            "a.personnelID = p.personnelID
+             AND a.settingsID = p.settingsID
+             AND a.date >= ".$this->db->escape($start)."
+             AND a.date <= ".$this->db->escape($end),
+            'left'
+        )
+        ->where('p.settingsID', $settingsID)
         ->order_by('p.last_name', 'ASC')
         ->order_by('p.first_name', 'ASC')
         ->get()->result_array();
 
-    $agg = []; 
+    $agg = [];
 
     foreach ($rows as $r) {
         $pid = $r['personnelID'];
+
         if (!isset($agg[$pid])) {
             $agg[$pid] = [
                 'personnelID' => $pid,
@@ -59,7 +65,7 @@ class Thirteenth_model extends CI_Model {
             $base = 0.0;
         }
 
-        $status       = strtolower(trim(preg_replace('/\s+/', '', (string)$r['status'])));
+        $status       = strtolower(trim(preg_replace('/\s+/', '', (string)($r['status'] ?? ''))));
         $regHours     = max(0.0, (float)$r['reg_hours']);
         $holidayHours = max(0.0, (float)$r['holiday_hours']);
 
@@ -80,6 +86,7 @@ class Thirteenth_model extends CI_Model {
 
     return array_values($agg);
 }
+
 
     public function get_13th_from_payroll($start, $end)
     {
