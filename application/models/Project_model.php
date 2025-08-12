@@ -166,7 +166,7 @@ return $this->db->get('personnel')->result();
 
 
 
-public function get_assignments_by_project($projectID)
+public function get_assignments_by_project($projectID, $settingsID = null)
 {
     $this->db->select('
         ppa.ppID,
@@ -177,15 +177,20 @@ public function get_assignments_by_project($projectID)
         p.middle_name,
         p.last_name,
         p.name_ext,
-        p.position,
+        p.position, 
         p.rateType
     ');
     $this->db->from('project_personnel_assignment AS ppa');
-    $this->db->join('personnel AS p', 'ppa.personnelID = p.personnelID AND ppa.settingsID = p.settingsID', 'left');
+    // join also on settingsID to avoid cross-tenant mixups
+    $this->db->join(
+        'personnel AS p',
+        'ppa.personnelID = p.personnelID AND ppa.settingsID = p.settingsID',
+        'left'
+    );
     $this->db->where('ppa.projectID', $projectID);
-
-    $this->db->where('ppa.settingsID', $this->session->userdata('settingsID'));
-
+    if ($settingsID !== null) {
+        $this->db->where('ppa.settingsID', $settingsID);
+    }
     $this->db->order_by('p.last_name', 'ASC');
     $this->db->order_by('p.first_name', 'ASC');
     $this->db->order_by('p.middle_name', 'ASC');
