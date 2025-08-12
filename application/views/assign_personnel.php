@@ -225,16 +225,20 @@ natcasesort($uniquePositions);
   </div>
 </div>
 
-<!-- Scripts -->
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/select2/select2.min.js"></script>
+<link href="<?= base_url(); ?>assets/libs/select2/select2.min.css" rel="stylesheet" />
 <script src="<?= base_url(); ?>assets/libs/datatables/jquery.dataTables.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.responsive.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.js"></script>
 
 <script>
+/* Make project meta available to JS (safe-escaped) */
+const PROJECT_TITLE    = <?= json_encode($project->projectTitle ?? '') ?>;
+const PROJECT_LOCATION = <?= json_encode($project->projectLocation ?? '') ?>;
+
 $(function () {
   $('#datatable').DataTable({
     responsive: true,
@@ -242,30 +246,29 @@ $(function () {
     autoWidth: false
   });
 
-  $('.select2').not('#positionFilter').select2({ width: '100%', placeholder: 'Select personnel' });
-
- $('#positionFilter').select2({
-  width: 'resolve',
-  placeholder: $('#positionFilter').data('placeholder') || 'Select position to print',
-  allowClear: true
-});
-
-
-  $('#btn-clear-position').on('click', function () {
-    $('#positionFilter').val(null).trigger('change');
-  });
-
+  $('.select2').select2({ width: '100%', placeholder: 'Select personnel' });
   $('.toast').toast({ delay: 4000 }).toast('show');
 
+  // --- Helpers --------------------------------------------------------------
+
+  // Build printable <thead>/<tbody> HTML without the "Actions" column
   function buildPrintableTable(filterPosition) {
     const tbl   = document.getElementById('datatable');
-    const ths   = Array.from(tbl.querySelectorAll('thead th'));
-    const actionsIdx = ths.findIndex(th => th.textContent.trim().toLowerCase() === 'actions');
 
+    // find index of the "Actions" header (don’t assume it’s the last)
+    const ths = Array.from(tbl.querySelectorAll('thead th'));
+    const actionsIdx = ths.findIndex(th =>
+      th.textContent.trim().toLowerCase() === 'actions'
+    );
+
+    // header HTML
     let headHtml = '<tr>';
-    ths.forEach((th, idx) => { if (idx !== actionsIdx) headHtml += '<th>' + th.textContent.trim() + '</th>'; });
+    ths.forEach((th, idx) => {
+      if (idx !== actionsIdx) headHtml += '<th>' + th.textContent.trim() + '</th>';
+    });
     headHtml += '</tr>';
 
+    // rows (derive position from data-attribute or the visible cell)
     const rows = Array.from(tbl.querySelectorAll('tbody tr'));
     const bodyHtml = rows
       .filter(tr => {
@@ -273,11 +276,12 @@ $(function () {
         if (!pos) {
           const cell = tr.querySelector('.position-cell');
           pos = cell ? cell.textContent.trim() : '';
-          tr.setAttribute('data-position', pos);
+          tr.setAttribute('data-position', pos); // cache
         }
         return !filterPosition || pos.toLowerCase() === filterPosition.toLowerCase();
       })
       .map(tr => {
+        // rebuild row, skip Actions column
         const tds = Array.from(tr.children)
           .map((td, idx) => (idx === actionsIdx ? '' : '<td>' + td.innerHTML + '</td>'))
           .join('');
@@ -288,16 +292,23 @@ $(function () {
     return { headHtml, bodyHtml };
   }
 
+  // Print via hidden iframe, including Project Title & Location at the top
   function printWithIframe(title, headHtml, bodyHtml) {
     const css = `
       @media print { @page { size: A4; margin: 12mm; } }
       body { font-family: Arial, Helvetica, sans-serif; }
-      h3 { margin: 0 0 8px 0; }
-      small { color: #444; }
+      h3 { margin: 0 0 6px 0; }
+      .meta { margin: 4px 0 8px 0; font-size: 12px; }
+      .meta strong { display:inline-block; min-width:72px; }
+      small { color: #444; display:block; margin-top: 4px; }
       table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
       th, td { border: 1px solid #333; padding: 6px 8px; text-align: left; }
       thead th { background: #f2f2f2; }
     `;
+
+    const projectTitle    = PROJECT_TITLE || '';
+    const projectLocation = PROJECT_LOCATION || '';
+
     const html = `
       <!doctype html>
       <html>
@@ -308,6 +319,10 @@ $(function () {
         </head>
         <body>
           <h3>${title}</h3>
+          <div class="meta">
+            <div><strong>Project:</strong> ${projectTitle}</div>
+            <div><strong>Location:</strong> ${projectLocation}</div>
+          </div>
           <small>Generated: ${new Date().toLocaleString()}</small>
           <table>
             <thead>${headHtml}</thead>
@@ -326,7 +341,9 @@ $(function () {
     document.body.appendChild(iframe);
 
     const doc = iframe.contentDocument || iframe.contentWindow.document;
-    doc.open(); doc.write(html); doc.close();
+    doc.open();
+    doc.write(html);
+    doc.close();
 
     iframe.onload = function () {
       iframe.contentWindow.focus();
@@ -335,7 +352,8 @@ $(function () {
     };
   }
 
-  // Buttons
+  // --- Buttons --------------------------------------------------------------
+
   $('#btn-print-all').on('click', function () {
     const { headHtml, bodyHtml } = buildPrintableTable(null);
     printWithIframe('Assigned Personnel List', headHtml, bodyHtml);
