@@ -5,12 +5,10 @@ function getWorkingDaysInMonth($anyDateInMonth) {
     return cal_days_in_month(CAL_GREGORIAN, $month, $year);
 }
 
-// ✅ New function to get the days between two dates (inclusive)
 function getDaysInPeriod($startDate, $endDate) {
     $s = strtotime($startDate);
     $e = strtotime($endDate);
     if ($s === false || $e === false || $s > $e) return 0;
-    // inclusive of both start and end
     return (int) floor(($e - $s) / 86400) + 1;
 }
 
@@ -35,7 +33,7 @@ foreach ($attendance_data as $row) {
             }
 
             if ($hasRegularHoliday && $hasSpecialHoliday) {
-                break 2; // stop both loops
+                break 2;
             }
         }
     }
@@ -141,6 +139,54 @@ function computePayroll($row, $start, $end) {
         'total_deduction' => $total_deduction,
         'netPay' => $netPay
     ];
+}
+?>
+<?php
+function fetch_other_deduction_lines($personnelID, $start, $end, $settingsID = null) {
+    static $cache = [];
+    $key = "{$personnelID}|{$start}|{$end}|{$settingsID}";
+    if (isset($cache[$key])) return $cache[$key];
+
+    $CI =& get_instance();
+    $db = $CI->db;
+
+    // Build query
+    $db->select('description, amount, date, deduct_from, deduct_to')
+       ->from('cashadvance')
+       ->where('personnelID', $personnelID)
+       ->where('type', 'Others');
+
+    $db->group_start()
+          ->group_start()
+              ->where("deduct_from IS NOT NULL AND deduct_from <> '0000-00-00'", null, false)
+              ->where("deduct_to   IS NOT NULL AND deduct_to   <> '0000-00-00'", null, false)
+              ->where('deduct_from <=', $end)
+              ->where('deduct_to >=', $start)
+          ->group_end()
+          ->or_group_start()
+              ->group_start()
+                  ->where("deduct_from IS NULL OR deduct_from = '0000-00-00'", null, false)
+              ->group_end()
+              ->group_start()
+                  ->where("deduct_to   IS NULL OR deduct_to   = '0000-00-00'", null, false)
+              ->group_end()
+              ->where('date >=', $start)
+              ->where('date <=', $end)
+          ->group_end()
+       ->group_end();
+
+    if (!empty($settingsID)) {
+        $db->where('settingsID', $settingsID);
+    }
+
+    $rows = $db->get()->result();
+
+    $total = 0.0;
+    foreach ($rows as $r) {
+        $total += (float)$r->amount;
+    }
+
+    return $cache[$key] = ['rows' => $rows, 'total' => $total];
 }
 ?>
 
@@ -945,7 +991,16 @@ $sss = (string) ($row->gov_sss ?? 0);
 $pagibig = (string) ($row->gov_pagibig ?? 0);
 $philhealth = (string) ($row->gov_philhealth ?? 0);
 $loan = (string) ($row->loan ?? 0);
-$other_deduction = (string) ($row->other_deduction ?? 0);
+// Pull detailed "Other Deduction" lines from cashadvance
+$settingsID = isset($project->settingsID) ? $project->settingsID : null;
+$odetail = fetch_other_deduction_lines($row->personnelID, $start, $end, $settingsID);
+
+// Prefer your existing value if you're already passing it; otherwise use the computed total
+$other_deduction = (string) (
+    isset($row->other_deduction) && $row->other_deduction !== ''
+        ? $row->other_deduction
+        : $odetail['total']
+);
 
 $total_deduction = $cash_advance + $sss + $philhealth + $loan + $other_deduction;
 
@@ -1024,8 +1079,21 @@ $totalNet = bcadd($totalNet, $netPay, 2);
   <td><?= displayAmount($loan) ?></td>
 <?php endif; ?>
 <?php if ($showOther): ?>
-  <td><?= displayAmount($other_deduction) ?></td>
+  <td style="text-align:left; vertical-align:top;">
+  <?php if (!empty($odetail['rows'])): ?>
+    <div style="font-size:12px; line-height:1.25; color:#555;">
+      <?php foreach ($odetail['rows'] as $it): ?>
+        <div>• <?= htmlspecialchars($it->description) ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
+      <?php endforeach; ?>
+    </div>
+  <?php else: ?>
+    ––
+  <?php endif; ?>
+</td>
+
 <?php endif; ?>
+
+
 
 <?php if ($showTotalDeduction): ?>
   <td><?= displayAmount($total_deduction) ?></td>
@@ -1210,10 +1278,20 @@ $totalNet = bcadd($totalNet, $netPay, 2);
               <?php if ($other_deduction > 0): ?>
                 <li>Other Deduction: <?= number_format($other_deduction, 2) ?></li>
               <?php endif; ?>
+              
+<?php if (!empty($odetail['rows'])): ?>
+  <ul style="margin-left:12px;">
+    <?php foreach ($odetail['rows'] as $it): ?>
+      <li><?= htmlspecialchars($it->description) ?> - ₱<?= number_format((float)$it->amount, 2) ?></li>
+    <?php endforeach; ?>
+  </ul>
+<?php endif; ?>
+
 
               <?php if ($total_deduction > 0): ?>
                 <li><strong>Total Deduction: <?= number_format($total_deduction, 2) ?></strong></li>
               <?php endif; ?>
+
             </ul>
           </div>
         </div>
@@ -1250,6 +1328,9 @@ $totalNet = bcadd($totalNet, $netPay, 2);
     $printedDate = date('F d, Y');
 
     $pay = computePayroll($row, $start, $end);
+
+    $settingsID = isset($project->settingsID) ? $project->settingsID : null;
+    $odetail_print = fetch_other_deduction_lines($row->personnelID, $start, $end, $settingsID);
 
     $regHoursRaw     = (float)$pay['regTotalMinutes'] / 60;
     $otHoursRaw      = (float)$pay['otTotalMinutes'] / 60;
@@ -1316,7 +1397,8 @@ $totalNet = bcadd($totalNet, $netPay, 2);
     if (!$hasAnyData) {
       continue;
     }
-  ?>
+?>
+
 
   <div class="print-card" style="page-break-inside: avoid; margin-bottom: 30px; padding: 20px; border: 1px solid #ddd;">
     <h4 style="margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 6px;">
@@ -1382,6 +1464,14 @@ $totalNet = bcadd($totalNet, $netPay, 2);
         <?php if ($philhealth > 0): ?><p>PHIC (Gov’t): ₱<?= number_format($philhealth, 2) ?></p><?php endif; ?>
         <?php if ($loan > 0): ?><p>Loan: ₱<?= number_format($loan, 2) ?></p><?php endif; ?>
         <?php if ($other_deduction > 0): ?><p>Other Deduction: ₱<?= number_format($other_deduction, 2) ?></p><?php endif; ?>
+          <?php if (!empty($odetail_print['rows'])): ?>
+  <div style="margin-left:12px; margin-top:2px;">
+    <?php foreach ($odetail_print['rows'] as $it): ?>
+      <div>• <?= htmlspecialchars($it->description) ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
+    <?php endforeach; ?>
+  </div>
+<?php endif; ?>
+
         <?php if ($total_deduction > 0): ?><p><strong>Total Deduction: ₱<?= number_format($total_deduction, 2) ?></strong></p><?php endif; ?>
       </div>
       <?php endif; ?>
