@@ -1041,38 +1041,110 @@ $totalNet = bcadd($totalNet, $netPay, 2);
   <td colspan="3"></td>
 <?php endif; ?>
 </tr>
-
-
 <!-- Payslip Modal -->
+<?php
+?>
 <div class="modal fade" id="payslipModal<?= $ln ?>" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-lg">
     <div class="modal-content" id="printablePayslip<?= $ln ?>">
       <div class="modal-header" style="background: #fff; border-bottom: 1px solid #ddd;">
 
-      <h5 class="modal-title">Payslip - <?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></h5>
+        <h5 class="modal-title">Payslip - <?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></h5>
 
         <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
       </div>
-      <div class="modal-body p-4">
+
+      <?php
+        $rateTypeRaw   = (string)($row->rateType ?? '');
+        $rateTypeLower = strtolower($rateTypeRaw);
+        $rateAmountNum = (float)($row->rateAmount ?? 0);
+
+        $workingDaysInMonth = getWorkingDaysInMonth($start);
+        $dailyRate  = 0.0;
+        $hourlyRate = 0.0;
+
+        if ($rateTypeLower === 'month') {
+          $dailyRate  = ($workingDaysInMonth > 0) ? $rateAmountNum / $workingDaysInMonth : 0;
+          $hourlyRate = ($dailyRate > 0) ? $dailyRate / 8 : 0;
+        } elseif (in_array($rateTypeLower, ['bi-month','bi-monthly','bimonth','bi-month '], true)) {
+          $dailyRate  = 15 > 0 ? $rateAmountNum / 15 : 0;
+          $hourlyRate = ($dailyRate > 0) ? $dailyRate / 8 : 0;
+        } elseif ($rateTypeLower === 'day') {
+          $dailyRate  = $rateAmountNum;
+          $hourlyRate = ($rateAmountNum > 0) ? $rateAmountNum / 8 : 0;
+        } else {
+          $hourlyRate = $rateAmountNum;
+          $dailyRate  = $hourlyRate * 8;
+        }
+
+        $otRate = $hourlyRate * 1.0;
+
+        $regHours = (float)$regFormatted;
+        $otHours  = (float)$otFormatted;
+
+        $regAmount = $regHours * $hourlyRate;
+        $otAmount  = $otHours  * $otRate;
+
+        $regularHolidayPay = 0.0;
+        if (isset($regular_holiday_pay)) {
+          $regularHolidayPay = (float)$regular_holiday_pay;
+        } elseif (isset($holiday_pay)) {
+          $regularHolidayPay = (float)$holiday_pay;
+        }
+
+        $salary          = (float)($salary ?? 0);
+        $cash_advance    = (float)($cash_advance ?? 0);
+        $sss             = (float)($sss ?? 0);
+        $philhealth      = (float)($philhealth ?? 0);
+        $loan            = (float)($loan ?? 0);
+        $other_deduction = (float)($other_deduction ?? 0);
+        $total_deduction = (float)($total_deduction ?? 0);
+        $netPay          = (float)($netPay ?? 0);
+        $totalDays       = (float)($totalDays ?? 0);
+
+        $hasEarningsLines =
+          ($regHours > 0 && $regAmount > 0) ||
+          ($otHours  > 0 && $otAmount  > 0) ||
+          ($regularHolidayPay > 0) ||
+          ($totalDays > 0) ||
+          ($salary > 0);
+
+        $hasDeductionsLines =
+          ($cash_advance > 0) ||
+          ($sss > 0) ||
+          ($philhealth > 0) ||
+          ($loan > 0) ||
+          ($other_deduction > 0) ||
+          ($total_deduction > 0); 
+
+        $hasAnyData = $hasEarningsLines || $hasDeductionsLines || ($netPay > 0);
+      ?>
+
+      <div class="modal-body p-4"<?= $hasAnyData ? '' : ' style="display:none;"' ?>>
         <div class="row">
           <div class="col-md-6">
-           <p><strong>Employee:</strong> <?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></p>
-
+            <p><strong>Employee:</strong> <?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></p>
             <p><strong>Position:</strong> <?= htmlspecialchars($row->position) ?></p>
-          <?php if ($row->rateType === 'Month'): ?>
-    <?php
-        $workingDaysInMonth = getWorkingDaysInMonth($start);
-        $dailyRate = $row->rateAmount / $workingDaysInMonth;
-        $hourlyRate = $dailyRate / 8;
-        $otRate = $hourlyRate * 1.25;
-    ?>
-    <p><strong>Rate:</strong> ₱<?= number_format($row->rateAmount, 2) ?> / Month</p>
-    <p><strong>Daily Rate:</strong> ₱<?= number_format($dailyRate, 2) ?></p>
-    <p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p>
-   <p><strong>Overtime Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p>
-<?php else: ?>
-    <p><strong>Rate:</strong> ₱<?= number_format($row->rateAmount, 2) ?> / <?= $row->rateType ?></p>
-<?php endif; ?>
+
+            <?php if ($rateTypeLower === 'month'): ?>
+              <p><strong>Rate:</strong> ₱<?= number_format($rateAmountNum, 2) ?> / Month</p>
+              <?php if ($dailyRate > 0): ?><p><strong>Daily Rate:</strong> ₱<?= number_format($dailyRate, 2) ?></p><?php endif; ?>
+              <?php if ($hourlyRate > 0): ?><p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p><?php endif; ?>
+              <?php if ($otRate > 0): ?><p><strong>Overtime Rate:</strong> ₱<?= number_format($otRate, 2) ?></p><?php endif; ?>
+            <?php elseif (in_array($rateTypeLower, ['bi-month','bi-monthly','bimonth','bi-month '], true)): ?>
+              <p><strong>Rate:</strong> ₱<?= number_format($rateAmountNum, 2) ?> / Bi-Month</p>
+              <?php if ($dailyRate > 0): ?><p><strong>Assumed Daily Rate (15 days):</strong> ₱<?= number_format($dailyRate, 2) ?></p><?php endif; ?>
+              <?php if ($hourlyRate > 0): ?><p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p><?php endif; ?>
+              <?php if ($otRate > 0): ?><p><strong>Overtime Rate:</strong> ₱<?= number_format($otRate, 2) ?></p><?php endif; ?>
+            <?php elseif ($rateTypeLower === 'day'): ?>
+              <p><strong>Rate:</strong> ₱<?= number_format($rateAmountNum, 2) ?> / Day</p>
+              <?php if ($hourlyRate > 0): ?><p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p><?php endif; ?>
+              <?php if ($otRate > 0): ?><p><strong>Overtime Rate:</strong> ₱<?= number_format($otRate, 2) ?></p><?php endif; ?>
+            <?php else: ?>
+              <p><strong>Rate:</strong> ₱<?= number_format($rateAmountNum, 2) ?> / Hour</p>
+              <?php if ($hourlyRate > 0): ?><p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p><?php endif; ?>
+              <?php if ($otRate > 0): ?><p><strong>Overtime Rate:</strong> ₱<?= number_format($otRate, 2) ?></p><?php endif; ?>
+            <?php endif; ?>
 
           </div>
           <div class="col-md-6 text-right">
@@ -1081,70 +1153,87 @@ $totalNet = bcadd($totalNet, $netPay, 2);
           </div>
         </div>
         <hr>
+
         <div class="row">
+          <?php if ($hasEarningsLines): ?>
           <div class="col-md-6">
             <h6>Earnings</h6>
             <ul class="list-unstyled">
-              <li>Regular Time: <?= $regFormatted ?> hrs</li>
-              <li>Overtime: <?= $otFormatted ?> hrs</li>
-              <li>Total Days: <?= $totalDays ?></li>
-              <li><strong>Gross Salary: <?= number_format($salary, 2) ?></strong></li>
+              <?php if ($regHours > 0 && $regAmount > 0): ?>
+                <li>
+                  Regular Time: <?= number_format($regHours, 2) ?> hrs × ₱<?= number_format($hourlyRate, 2) ?>/hr
+                  = <strong><?= number_format($regAmount, 2) ?></strong>
+                </li>
+              <?php endif; ?>
+
+              <?php if ($otHours > 0 && $otAmount > 0): ?>
+                <li>
+                  Overtime: <?= number_format($otHours, 2) ?> hrs × ₱<?= number_format($otRate, 2) ?>/hr
+                  = <strong><?= number_format($otAmount, 2) ?></strong>
+                </li>
+              <?php endif; ?>
+
+              <?php if ($regularHolidayPay > 0): ?>
+                <li>Regular Holiday: <strong><?= number_format($regularHolidayPay, 2) ?></strong></li>
+              <?php endif; ?>
+
+              <?php if ($totalDays > 0): ?>
+                <li>Total Days: <?= number_format($totalDays, 2) ?></li>
+              <?php endif; ?>
+
+              <?php if ($salary > 0): ?>
+                <li><strong>Gross Salary: <?= number_format($salary, 2) ?></strong></li>
+              <?php endif; ?>
             </ul>
           </div>
+          <?php endif; ?>
+
           <div class="col-md-6">
             <h6>Deductions</h6>
             <ul class="list-unstyled">
-              <li>Cash Advance: <?= number_format($cash_advance, 2) ?></li>
-            <li>SSS (Gov’t): <?= number_format($sss, 2) ?></li>
-<li>PHIC (Gov’t): <?= number_format($philhealth, 2) ?></li>
+              <?php if ($cash_advance > 0): ?>
+                <li>Cash Advance: <?= number_format($cash_advance, 2) ?></li>
+              <?php endif; ?>
 
-              <li>Loan: <?= number_format($loan, 2) ?></li>
-              <li>Other Deduction: <?= number_format($other_deduction, 2) ?></li>
+              <?php if ($sss > 0): ?>
+                <li>SSS (Gov’t): <?= number_format($sss, 2) ?></li>
+              <?php endif; ?>
 
-              <li><strong>Total Deduction: <?= number_format($total_deduction, 2) ?></strong></li>
+              <?php if ($philhealth > 0): ?>
+                <li>PHIC (Gov’t): <?= number_format($philhealth, 2) ?></li>
+              <?php endif; ?>
+
+              <?php if ($loan > 0): ?>
+                <li>Loan: <?= number_format($loan, 2) ?></li>
+              <?php endif; ?>
+
+              <?php if ($other_deduction > 0): ?>
+                <li>Other Deduction: <?= number_format($other_deduction, 2) ?></li>
+              <?php endif; ?>
+
+              <?php if ($total_deduction > 0): ?>
+                <li><strong>Total Deduction: <?= number_format($total_deduction, 2) ?></strong></li>
+              <?php endif; ?>
             </ul>
           </div>
         </div>
-        <hr>
-        <div class="text-right">
-          <h5><strong>Net Pay: <?= number_format($netPay, 2) ?></strong></h5>
-          <button onclick="printPayslip('printablePayslip<?= $ln ?>')" class="btn btn-sm btn-secondary mt-2"><i class="fas fa-print"></i> Print</button>
-        </div>
+
+        <?php if ($netPay > 0): ?>
+          <hr>
+          <div class="text-right">
+            <h5><strong>Net Pay: <?= number_format($netPay, 2) ?></strong></h5>
+            <button onclick="printPayslip('printablePayslip<?= $ln ?>')" class="btn btn-sm btn-secondary mt-2"><i class="fas fa-print"></i> Print</button>
+          </div>
+        <?php endif; ?>
       </div>
     </div>
   </div>
 </div>
-<?php endforeach; ?>
-<tr style="font-weight:bold; background:#f1f1f1;">
-  <td colspan="<?= $totalPrefixCols ?>" class="text-right">TOTAL</td>
-  <td><?= number_format($totalGross, 2) ?></td>
-  <?php if ($showCA): ?>
-  <td><?= number_format($totalCA, 2) ?></td>
-<?php endif; ?>
-<?php if ($showSSS): ?>
-  <td><?= number_format($totalSSS, 2) ?></td>
-<?php endif; ?>
-<?php if ($showPHIC): ?>
-  <td><?= number_format($totalPHIC, 2) ?></td>
-<?php endif; ?>
-<?php if ($showLoan): ?>
-  <td><?= number_format($totalLoan, 2) ?></td>
-<?php endif; ?>
-<?php if ($showOther): ?>
-  <td><?= number_format($totalOther, 2) ?></td>
-<?php endif; ?>
 
-  <?php if ($showTotalDeduction): ?>
-  <td><?= number_format($totalDeduction, 2) ?></td>
-<?php endif; ?>
-  <td><?= number_format($totalNet, 2) ?></td>
-  <?php if (empty($is_summary)): ?>
-    <td colspan="3"></td>
-  <?php endif; ?>
-</tr>
+<?php endforeach; ?>
+
 
 </tbody>
-
 </table>
 
 <!-- === PRINTABLE ALL PAYSLIPS SECTION (hidden by default) === -->
@@ -1153,34 +1242,80 @@ $totalNet = bcadd($totalNet, $netPay, 2);
 <?php foreach ($attendance_data as $ln => $row): ?>
 <?php if ($row->rateType === 'Month' || $row->rateType === 'Bi-Month') continue; ?>
 
-
   <?php
-    $fullName = htmlspecialchars($row->last_name . ', ' . $row->first_name);
-    $position = htmlspecialchars($row->position);
-    $rateType = $row->rateType;
-    $rateAmount = $row->rateAmount ?? 0;
+    $fullName    = htmlspecialchars($row->last_name . ', ' . $row->first_name);
+    $position    = htmlspecialchars($row->position);
+    $rateType    = $row->rateType;
+    $rateAmount  = (float)($row->rateAmount ?? 0);
     $printedDate = date('F d, Y');
 
-    // Compute values based on attendance
     $pay = computePayroll($row, $start, $end);
 
-    $regFormatted = number_format($pay['regTotalMinutes'] / 60, 2);
-    $otFormatted = number_format($pay['otTotalMinutes'] / 60, 2);
-    $totalDays = number_format($pay['totalDays'], 2);
-    $salary = $pay['salary'];
-    $cash_advance = $pay['cash_advance'];
-    $sss = $pay['sss'];
-    $pagibig = $pay['pagibig'];
-    $philhealth = $pay['philhealth'];
-    $loan = $pay['loan'];
-    $other_deduction = $pay['other_deduction'];
-    $total_deduction = $pay['total_deduction'];
-    $netPay = $pay['netPay'];
+    $regHoursRaw     = (float)$pay['regTotalMinutes'] / 60;
+    $otHoursRaw      = (float)$pay['otTotalMinutes'] / 60;
+    $totalDays       = (float)$pay['totalDays'];
 
+    $salary          = (float)$pay['salary'];
+    $cash_advance    = (float)$pay['cash_advance'];
+    $sss             = (float)$pay['sss'];
+    $pagibig         = (float)$pay['pagibig'];
+    $philhealth      = (float)$pay['philhealth'];
+    $loan            = (float)$pay['loan'];
+    $other_deduction = (float)$pay['other_deduction'];
+    $total_deduction = (float)$pay['total_deduction'];
+    $netPay          = (float)$pay['netPay'];
+
+    $regularHolidayPay = 0.0;
+    if (isset($pay['regular_holiday_pay'])) {
+      $regularHolidayPay = (float)$pay['regular_holiday_pay'];
+    } elseif (isset($pay['holiday_pay'])) {
+      $regularHolidayPay = (float)$pay['holiday_pay'];
+    }
+
+    $rateTypeLower = strtolower((string)$rateType);
     $workingDaysInMonth = getWorkingDaysInMonth($start);
-    $dailyRate = ($rateType === 'Month') ? ($rateAmount / $workingDaysInMonth) : ($rateAmount / 8);
-    $hourlyRate = ($rateType === 'Month') ? ($dailyRate / 8) : (($rateType === 'Day') ? ($rateAmount / 8) : $rateAmount);
-    $otRate = $hourlyRate * 1.25;
+    $dailyRate  = 0.0;
+    $hourlyRate = 0.0;
+
+    if ($rateTypeLower === 'month') {
+      $dailyRate  = ($workingDaysInMonth > 0) ? $rateAmount / $workingDaysInMonth : 0;
+      $hourlyRate = ($dailyRate > 0) ? $dailyRate / 8 : 0;
+    } elseif (in_array($rateTypeLower, ['bi-month','bi-monthly','bimonth','bi-month '], true)) {
+      $dailyRate  = 15 > 0 ? $rateAmount / 15 : 0;
+      $hourlyRate = ($dailyRate > 0) ? $dailyRate / 8 : 0;
+    } elseif ($rateTypeLower === 'day') {
+      $dailyRate  = $rateAmount;
+      $hourlyRate = ($rateAmount > 0) ? $rateAmount / 8 : 0;
+    } else { 
+      $hourlyRate = $rateAmount;
+      $dailyRate  = $hourlyRate * 8;
+    }
+    $otRate    = $hourlyRate * 1.0;
+
+    $regAmount = $regHoursRaw * $hourlyRate;
+    $otAmount  = $otHoursRaw  * $otRate;
+
+    $hasEarningsLines =
+      ($regHoursRaw > 0 && $regAmount > 0) ||
+      ($otHoursRaw  > 0 && $otAmount  > 0) ||
+      ($regularHolidayPay > 0) ||
+      ($totalDays > 0) ||
+      ($salary > 0);
+
+    $hasDeductionsLines =
+      ($cash_advance > 0) ||
+      ($sss > 0) ||
+      ($pagibig > 0) ||
+      ($philhealth > 0) ||
+      ($loan > 0) ||
+      ($other_deduction > 0) ||
+      ($total_deduction > 0);
+
+    $hasAnyData = $hasEarningsLines || $hasDeductionsLines || ($netPay > 0);
+
+    if (!$hasAnyData) {
+      continue;
+    }
   ?>
 
   <div class="print-card" style="page-break-inside: avoid; margin-bottom: 30px; padding: 20px; border: 1px solid #ddd;">
@@ -1192,11 +1327,11 @@ $totalNet = bcadd($totalNet, $netPay, 2);
       <div>
         <p><strong>Employee:</strong> <?= $fullName ?></p>
         <p><strong>Position:</strong> <?= $position ?></p>
-        <p><strong>Rate:</strong> ₱<?= number_format($rateAmount, 2) ?> / <?= $rateType ?></p>
-        <?php if ($rateType === 'Month'): ?>
+        <p><strong>Rate:</strong> ₱<?= number_format($rateAmount, 2) ?> / <?= htmlspecialchars($rateType) ?></p>
+        <?php if ($hourlyRate > 0): ?><p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p><?php endif; ?>
+        <?php if ($otRate > 0): ?><p><strong>Overtime Rate:</strong> ₱<?= number_format($otRate, 2) ?></p><?php endif; ?>
+        <?php if ($rateTypeLower !== 'hour' && $dailyRate > 0): ?>
           <p><strong>Daily Rate:</strong> ₱<?= number_format($dailyRate, 2) ?></p>
-          <p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p>
-          <p><strong>Overtime Rate:</strong> ₱<?= number_format($otRate, 2) ?></p>
         <?php endif; ?>
       </div>
       <div style="text-align: right;">
@@ -1206,35 +1341,62 @@ $totalNet = bcadd($totalNet, $netPay, 2);
     </div>
 
     <div style="display: flex; justify-content: space-between; margin-top: 15px;">
+      <?php if ($hasEarningsLines): ?>
       <div style="width: 48%;">
         <h5 style="border-bottom: 1px solid #ccc;">Earnings</h5>
-        <p>Regular Time: <?= $regFormatted ?> hrs</p>
-        <p>Overtime: <?= $otFormatted ?> hrs</p>
-        <p>Total Days: <?= $totalDays ?></p>
-        <p><strong>Gross Salary: ₱<?= number_format($salary, 2) ?></strong></p>
-      </div>
 
+        <?php if ($regHoursRaw > 0 && $regAmount > 0): ?>
+          <p>
+            Regular Time: <?= number_format($regHoursRaw, 2) ?> hrs × ₱<?= number_format($hourlyRate, 2) ?>/hr
+            = <strong><?= number_format($regAmount, 2) ?></strong>
+          </p>
+        <?php endif; ?>
+
+        <?php if ($otHoursRaw > 0 && $otAmount > 0): ?>
+          <p>
+            Overtime: <?= number_format($otHoursRaw, 2) ?> hrs × ₱<?= number_format($otRate, 2) ?>/hr
+            = <strong><?= number_format($otAmount, 2) ?></strong>
+          </p>
+        <?php endif; ?>
+
+        <?php if ($regularHolidayPay > 0): ?>
+          <p>Regular Holiday: <strong><?= number_format($regularHolidayPay, 2) ?></strong></p>
+        <?php endif; ?>
+
+        <?php if ($totalDays > 0): ?>
+          <p>Total Days: <?= number_format($totalDays, 2) ?></p>
+        <?php endif; ?>
+
+        <?php if ($salary > 0): ?>
+          <p><strong>Gross Salary: ₱<?= number_format($salary, 2) ?></strong></p>
+        <?php endif; ?>
+      </div>
+      <?php endif; ?>
+
+      <?php if ($hasDeductionsLines): ?>
       <div style="width: 48%;">
         <h5 style="border-bottom: 1px solid #ccc;">Deductions</h5>
-        <p>Cash Advance: ₱<?= number_format($cash_advance, 2) ?></p>
-        <p>SSS (Gov’t): ₱<?= number_format($sss, 2) ?></p>
-        <p>Pag-IBIG (Gov’t): ₱<?= number_format($pagibig, 2) ?></p>
-        <p>PHIC (Gov’t): ₱<?= number_format($philhealth, 2) ?></p>
-        <p>Loan: ₱<?= number_format($loan, 2) ?></p>
-        <p>Other Deduction: ₱<?= number_format($other_deduction, 2) ?></p>
-        <p><strong>Total Deduction: ₱<?= number_format($total_deduction, 2) ?></strong></p>
+        <?php if ($cash_advance > 0): ?><p>Cash Advance: ₱<?= number_format($cash_advance, 2) ?></p><?php endif; ?>
+        <?php if ($sss > 0): ?><p>SSS (Gov’t): ₱<?= number_format($sss, 2) ?></p><?php endif; ?>
+        <?php if ($pagibig > 0): ?><p>Pag-IBIG (Gov’t): ₱<?= number_format($pagibig, 2) ?></p><?php endif; ?>
+        <?php if ($philhealth > 0): ?><p>PHIC (Gov’t): ₱<?= number_format($philhealth, 2) ?></p><?php endif; ?>
+        <?php if ($loan > 0): ?><p>Loan: ₱<?= number_format($loan, 2) ?></p><?php endif; ?>
+        <?php if ($other_deduction > 0): ?><p>Other Deduction: ₱<?= number_format($other_deduction, 2) ?></p><?php endif; ?>
+        <?php if ($total_deduction > 0): ?><p><strong>Total Deduction: ₱<?= number_format($total_deduction, 2) ?></strong></p><?php endif; ?>
       </div>
+      <?php endif; ?>
     </div>
 
+    <?php if ($netPay > 0): ?>
     <div style="margin-top: 10px; text-align: right;">
       <h4><strong>Net Pay: ₱<?= number_format($netPay, 2) ?></strong></h4>
     </div>
+    <?php endif; ?>
   </div>
 <?php endforeach; ?>
 
   </div>
 </div>
-
 
 <br>
 <?php if (!empty($signatories) && $show_signatories): ?>
