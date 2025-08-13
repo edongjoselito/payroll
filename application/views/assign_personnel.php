@@ -156,27 +156,22 @@ natcasesort($uniquePositions);
 <h5 class="mt-4">Assigned Personnel List</h5>
 
 <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 no-print gap-2">
-  <div>
+  <div class="d-flex align-items-center gap-2">
     <button type="button" class="btn btn-outline-primary btn-sm" id="btn-print-all">
       <i class="fas fa-print"></i> Print All
     </button>
-  </div>
-
-  <div class="position-toolbar gap-2">
-    <select id="positionFilter" class="select2" data-placeholder="Select position to print">
-      <option value=""></option>
-      <?php foreach ($uniquePositions as $pos): ?>
-        <option value="<?= htmlspecialchars($pos) ?>"><?= htmlspecialchars($pos) ?></option>
-      <?php endforeach; ?>
+    <label class="mb-0 ms-2">Order by Position:</label>
+    <select id="orderPositionDir" class="form-control form-control-sm" style="width:auto;">
+      <option value="asc" selected>A → Z</option>
+      <option value="desc">Z → A</option>
     </select>
-    <button type="button" class="btn btn-light border btn-sm" id="btn-clear-position" title="Clear selection">
-      <i class="fas fa-times"></i>
-    </button>
-<button type="button" class="btn btn-outline-primary btn-sm" id="btn-print-position">
+    <button type="button" class="btn btn-outline-primary btn-sm" id="btn-print-position" data-toggle="modal" data-target="#selectPositionModal">
       <i class="fas fa-print"></i>
       <span class="d-none d-sm-inline"> Print by Position</span>
     </button>
   </div>
+
+  <div class="position-toolbar gap-2"></div>
 </div>
 
 <div class="card">
@@ -223,6 +218,32 @@ natcasesort($uniquePositions);
   </div>
 </div>
 
+<div class="modal fade" id="selectPositionModal" tabindex="-1" role="dialog" aria-labelledby="selectPositionModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="selectPositionModalLabel">Print by Position</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <label for="modalPositionSelect" class="form-label">Choose a Position</label>
+        <select id="modalPositionSelect" class="form-control select2" style="width:100%;">
+          <option value="">Select position to be printed</option>
+          <?php foreach ($uniquePositions as $pos): ?>
+            <option value="<?= htmlspecialchars($pos) ?>"><?= htmlspecialchars($pos) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm" id="confirmPrintByPosition">Print</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/select2/select2.min.js"></script>
@@ -245,16 +266,18 @@ const PROJECT_TITLE    = <?= json_encode($project->projectTitle ?? '') ?>;
 const PROJECT_LOCATION = <?= json_encode($project->projectLocation ?? '') ?>;
 
 $(function () {
+  // Default order by Position column (index 2)
   const dt = $('#datatable').DataTable({
     responsive: true,
     ordering: true,
     autoWidth: false,
-    order: [[1, 'asc']],
+    order: [[2, 'asc']],
     columnDefs: [
       { targets: 0, orderable: false, searchable: false }
     ]
   });
 
+  // Dynamic L/N numbering respects current search/order
   dt.on('order.dt search.dt draw.dt', function () {
     let i = 1;
     dt.column(0, { search: 'applied', order: 'applied' }).nodes().each(function (cell) {
@@ -263,72 +286,82 @@ $(function () {
   });
   dt.draw();
 
-  $('.select2').select2({ width: '100%', placeholder: 'Select personnel' });
-  $('.toast').toast({ delay: 4000 }).toast('show');
-
-function buildPrintableFromDT(dataTable, filterPosition, rowsPerPage = 35) {
-  const headers = dataTable.columns().header().toArray().map(h => $(h).text());
-  const actionsIdx  = headers.findIndex(h => /actions/i.test(h));
-  const positionIdx = headers.findIndex(h => /position/i.test(h));
-  const lnIdx       = headers.findIndex(h => /l\s*\/\s*n/i.test(h)); // "L/N"
-
-  let headHtml = '<tr>';
-  headers.forEach((h, idx) => {
-    if (idx !== actionsIdx) headHtml += '<th>' + h + '</th>';
-  });
-  headHtml += '</tr>';
-
-  const rowsApi = dataTable.rows({ search: 'applied', order: 'applied' });
-  const strip = (html) => $('<div>').html(html).text();
-
-  let bodyParts = [];
-  let chunk = [];
-  let countInPage = 0;
-  let lnCounter = 1; 
-
-  const addChunk = () => {
-    if (!chunk.length) return;
-    bodyParts.push(chunk.join(''));
-    chunk = [];
-    bodyParts.push('<tr class="page-break"><td colspan="' + (headers.length - (actionsIdx >= 0 ? 1 : 0)) + '"></td></tr>');
-  };
-
-  rowsApi.every(function () {
-    const rowData = this.data();
-
-    if (filterPosition && positionIdx >= 0) {
-      const posVal = strip(rowData[positionIdx] ?? '');
-      if (String(posVal).toLowerCase() !== String(filterPosition).toLowerCase()) return;
-    }
-
-    const tds = rowData.map((cell, idx) => {
-      if (idx === actionsIdx) return '';
-      if (idx === lnIdx) return '<td>' + (lnCounter++) + '</td>';
-      return '<td>' + cell + '</td>';
-    }).join('');
-
-    chunk.push('<tr>' + tds + '</tr>');
-    countInPage++;
-
-    if (countInPage >= rowsPerPage) {
-      addChunk();
-      countInPage = 0;
-    }
+  // Order-by-position direction dropdown
+  $('#orderPositionDir').on('change', function(){
+    const dir = $(this).val() || 'asc';
+    dt.order([2, dir]).draw();
   });
 
-  if (chunk.length) {
-    bodyParts.push(chunk.join(''));
-  } else if (!bodyParts.length) {
-    return { headHtml, bodyHtml: '' };
+  // Enhance selects (including modal select)
+  $('.select2').select2({ width: '100%' });
+  // When modal opens, ensure Select2 dropdown is correctly positioned
+  $('#selectPositionModal').on('shown.bs.modal', function () {
+    $('#modalPositionSelect').select2('open'); // optional: auto-open dropdown
+  });
+
+  // Build printable HTML from ALL DataTables rows and renumber L/N dynamically
+  function buildPrintableFromDT(dataTable, filterPosition, rowsPerPage = 35) {
+    const headers = dataTable.columns().header().toArray().map(h => $(h).text());
+    const actionsIdx  = headers.findIndex(h => /actions/i.test(h));
+    const positionIdx = headers.findIndex(h => /position/i.test(h));
+    const lnIdx       = headers.findIndex(h => /l\s*\/\s*n/i.test(h)); // "L/N"
+
+    let headHtml = '<tr>';
+    headers.forEach((h, idx) => {
+      if (idx !== actionsIdx) headHtml += '<th>' + h + '</th>';
+    });
+    headHtml += '</tr>';
+
+    const rowsApi = dataTable.rows({ search: 'applied', order: 'applied' });
+    const strip = (html) => $('<div>').html(html).text();
+
+    let bodyParts = [];
+    let chunk = [];
+    let countInPage = 0;
+    let lnCounter = 1;
+
+    const addChunk = () => {
+      if (!chunk.length) return;
+      bodyParts.push(chunk.join(''));
+      chunk = [];
+      bodyParts.push('<tr class="page-break"><td colspan="' + (headers.length - (actionsIdx >= 0 ? 1 : 0)) + '"></td></tr>');
+    };
+
+    rowsApi.every(function () {
+      const rowData = this.data();
+
+      if (filterPosition && positionIdx >= 0) {
+        const posVal = strip(rowData[positionIdx] ?? '');
+        if (String(posVal).toLowerCase() !== String(filterPosition).toLowerCase()) return;
+      }
+
+      const tds = rowData.map((cell, idx) => {
+        if (idx === actionsIdx) return '';
+        if (idx === lnIdx) return '<td>' + (lnCounter++) + '</td>';
+        return '<td>' + cell + '</td>';
+      }).join('');
+
+      chunk.push('<tr>' + tds + '</tr>');
+      countInPage++;
+
+      if (countInPage >= rowsPerPage) {
+        addChunk();
+        countInPage = 0;
+      }
+    });
+
+    if (chunk.length) {
+      bodyParts.push(chunk.join(''));
+    } else if (!bodyParts.length) {
+      return { headHtml, bodyHtml: '' };
+    }
+
+    if (bodyParts.length && /class="page-break"/i.test(bodyParts[bodyParts.length - 1])) {
+      bodyParts.pop();
+    }
+
+    return { headHtml, bodyHtml: bodyParts.join('') };
   }
-
-  if (bodyParts.length && /class="page-break"/i.test(bodyParts[bodyParts.length - 1])) {
-    bodyParts.pop();
-  }
-
-  return { headHtml, bodyHtml: bodyParts.join('') };
-}
-
 
   function printWithIframe(title, headHtml, bodyHtml) {
     const css = `
@@ -390,22 +423,27 @@ function buildPrintableFromDT(dataTable, filterPosition, rowsPerPage = 35) {
     };
   }
 
+  // Print All (follows current order)
   $('#btn-print-all').on('click', function () {
     const { headHtml, bodyHtml } = buildPrintableFromDT(dt, null, 35);
     if (!bodyHtml || bodyHtml.length === 0) { alert('No rows to print.'); return; }
     printWithIframe('Assigned Personnel List', headHtml, bodyHtml);
   });
 
-  $('#btn-print-position').on('click', function () {
-    const pos = $('#positionFilter').val() || '';
-    if (!pos) { alert('Please select a position to print.'); return; }
-    const { headHtml, bodyHtml } = buildPrintableFromDT(dt, pos, 35);
-    if (!bodyHtml || bodyHtml.length === 0) { alert('No rows found for: ' + pos); return; }
-    printWithIframe('Assigned Personnel List — ' + pos, headHtml, bodyHtml);
-  });
-
-  $('#btn-clear-position').on('click', function () {
-    $('#positionFilter').val(null).trigger('change');
+  // Confirm print from modal dropdown
+  $('#confirmPrintByPosition').on('click', function () {
+    const pos = $('#modalPositionSelect').val() || '';
+    if (!pos) {
+      alert('Please select a position.');
+      return;
+    }
+    const payload = buildPrintableFromDT(dt, pos, 35);
+    if (!payload.bodyHtml || payload.bodyHtml.length === 0) {
+      alert('No rows found for: ' + pos);
+      return;
+    }
+    $('#selectPositionModal').modal('hide');
+    printWithIframe('Assigned Personnel List — ' + pos, payload.headHtml, payload.bodyHtml);
   });
 });
 </script>
