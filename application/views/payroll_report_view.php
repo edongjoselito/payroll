@@ -197,9 +197,10 @@ function fetch_other_deduction_lines($personnelID, $start, $end, $settingsID = n
     <title>PMS - Payroll Report</title>
     <?php include('includes/head.php'); ?>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
- <style>
+<style>
+/* ===== Base ===== */
 body, html {
-   font-family: 'Segoe UI', 'Calibri', 'Arial', sans-serif;
+  font-family: 'Segoe UI', 'Calibri', 'Arial', sans-serif;
   font-size: 14px;
   margin: 0;
   padding: 0;
@@ -215,27 +216,11 @@ body, html {
   justify-content: space-between;
 }
 
-.header {
-  text-align: center;
-  margin-bottom: 20px;
-}
+.header { text-align: center; margin-bottom: 20px; }
+.header h2 { font-size: 18px; margin: 0; }
+.header p { margin: 3px 0; font-size: 14px; }
 
-.header h2 {
-  font-size: 18px;
-  margin: 0;
-}
-
-.header p {
-  margin: 3px 0;
-  font-size: 14px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
-}
-
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th, td {
   border: 1px solid #000;
   padding: 8px 10px;
@@ -267,27 +252,12 @@ tbody td {
   vertical-align: middle;
   text-align: center;
 }
+tbody td:nth-child(2) { text-align: left; }
 
-tbody td:nth-child(2) {
-  text-align: left;
-}
+td.unused-holiday { background-color: #f9f9f9; color: #aaa; font-style: italic; }
+.holiday-cell { background-color: #ffe5e5 !important; color: red !important; font-weight: bold !important; text-align: center !important; }
 
-td.unused-holiday {
-  background-color: #f9f9f9;
-  color: #aaa;
-  font-style: italic;
-}
-
-.holiday-cell {
-  background-color: #ffe5e5 !important;
-  color: red !important;
-  font-weight: bold !important;
-  text-align: center !important;
-}
-
-tbody td:nth-last-child(-n+10) {
-  font-size: 10.5px;
-}
+tbody td:nth-last-child(-n+10) { font-size: 10.5px; }
 
 .signature {
   margin-top: 60px;
@@ -298,16 +268,8 @@ tbody td:nth-last-child(-n+10) {
   page-break-inside: avoid;
   break-inside: avoid;
 }
-
-.signature div {
-  width: 32%;
-  text-align: center;
-}
-
-.signature p {
-  margin: 3px 0;
-}
-
+.signature div { width: 32%; text-align: center; }
+.signature p { margin: 3px 0; }
 .signature .name-line {
   display: inline-block;
   border-bottom: 1px solid #000;
@@ -316,29 +278,14 @@ tbody td:nth-last-child(-n+10) {
   font-weight: 400;
   padding-bottom: 2px;
 }
+.signature em { font-size: 14px; color: #333; }
 
-.signature em {
-  font-size: 14px;
-  color: #333;
-}
+th { background-color: #d9d9d9; font-weight: bold; }
+.absent { background-color: #f4cccc; color: #000; }
 
-th {
-  background-color: #d9d9d9;
-  font-weight: bold;
-}
+.scrollable-wrapper { overflow-x: auto; width: 100%; flex-grow: 1; }
 
-.absent {
-  background-color: #f4cccc;
-  color: #000;
-}
-
-.scrollable-wrapper {
-  overflow-x: auto;
-  width: 100%;
-  flex-grow: 1;
-}
-
-/* Header info box */
+/* ===== Header info box ===== */
 .header-box {
   display: flex;
   justify-content: space-between;
@@ -350,46 +297,14 @@ th {
   margin: 10px 0 20px;
   box-shadow: 0 1px 4px rgba(0,0,0,0.06);
 }
+.header-box .box-content { flex: 1 1 auto; min-width: 300px; }
+.header-box .info-row { display: flex; align-items: center; margin: 3px 0; font-size: 15px; }
+.header-box .info-row i { font-size: 13px; color: #666; width: 18px; margin-right: 8px; text-align: center; }
+.header-box strong { display: inline-block; min-width: 125px; font-weight: 600; }
+.header-box span { flex: 1; text-align: left; }
 
-.header-box .box-content {
-  flex: 1 1 auto;
-  min-width: 300px;
-}
-
-.header-box .info-row {
-  display: flex;
-  align-items: center;
-  margin: 3px 0;
-  font-size: 15px;
-}
-
-.header-box .info-row i {
-  font-size: 13px;
-  color: #666;
-  width: 18px;
-  margin-right: 8px;
-  text-align: center;
-}
-
-.header-box strong {
-  display: inline-block;
-  min-width: 125px;
-  font-weight: 600;
-}
-
-.header-box span {
-  flex: 1;
-  text-align: left;
-}
-
-.print-button {
-  margin-top: 4px;
-}
-
-.print-button button {
-  transition: all 0.2s ease-in-out;
-}
-
+.print-button { margin-top: 4px; }
+.print-button button { transition: all 0.2s ease-in-out; }
 .print-button button:hover {
   background-color: #0056b3 !important;
   color: #fff !important;
@@ -397,7 +312,7 @@ th {
   box-shadow: 0 0 6px rgba(0,0,0,0.15);
 }
 
-/* Payslip Modal Styling */
+/* ===== Payslip Modal ===== */
 .modal-content {
   background: #fff;
   border-radius: 6px;
@@ -405,21 +320,26 @@ th {
   color: #000;
   font-family: Arial, sans-serif;
 }
+.modal-header { background: #fff !important; color: #000 !important; border-bottom: 1px solid #ddd; }
+.modal-body h6 { font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 10px; }
 
-.modal-header {
-  background: #fff !important;
-  color: #000 !important;
-  border-bottom: 1px solid #ddd;
+/* ===== NEW: Other Deduction cell + list ===== */
+.od-cell { text-align: left; vertical-align: top; }
+.od-lines{
+  font-size: 12px;
+  line-height: 1.25;
+  color: #555;
+  word-break: break-word;   /* wrap long words */
+  white-space: normal;      /* ensure wrapping in table cells */
 }
 
-.modal-body h6 {
-  font-weight: bold;
-  border-bottom: 1px solid #ccc;
-  padding-bottom: 4px;
-  margin-bottom: 10px;
+/* Screen-only: keep rows compact when descriptions are long */
+@media screen {
+  .od-lines { max-height: 84px; overflow: auto; padding-right: 4px; }
+  .deduction-sublist{ max-height: 220px; overflow: auto; }
 }
 
-/* === PRINT FIXES === */
+/* ===== PRINT ===== */
 @media print {
   html, body {
     height: 100%;
@@ -430,41 +350,38 @@ th {
     print-color-adjust: exact !important;
     overflow: visible !important;
   }
- #print-all-payslips-container {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr); /* 2x2 layout on A4 */
-  gap: 16px;
-  justify-content: center;
-  padding: 20px;
-}
 
+  /* Show full deduction lists on paper */
+  .od-lines { max-height: none; overflow: visible; }
+  .deduction-sublist{ max-height: none; overflow: visible; }
 
-.print-card {
-  width: 390px;              /* ≈ 4.1 inches */
-  height: 550px;             /* ≈ 5.8 inches */
-  padding: 18px 20px;
-  font-size: 13.5px;
-  line-height: 1.4;
-  background-color: #f8f9fa;
-  border: 1.5px solid #444;
-  border-radius: 6px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  page-break-inside: avoid;
-  break-inside: avoid;
-}
-
-
-.print-card p {
-  margin: 4px 0;
-  font-size: 12.5px;
-}
-  @page {
-    size: A4 landscape;
-    margin: 1cm;
+  #print-all-payslips-container{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    justify-content: center;
+    padding: 20px;
   }
+
+  .print-card{
+    width: 390px;   /* ≈ 4.1 in */
+    height: 550px;  /* ≈ 5.8 in */
+    padding: 18px 20px;
+    font-size: 13.5px;
+    line-height: 1.4;
+    background-color: #f8f9fa;
+    border: 1.5px solid #444;
+    border-radius: 6px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .print-card p { margin: 4px 0; font-size: 12.5px; }
+
+  @page { size: A4 landscape; margin: 1cm; }
 
   .print-container {
     display: flex !important;
@@ -473,14 +390,9 @@ th {
     justify-content: space-between !important;
   }
 
-  .scrollable-wrapper {
-    overflow: visible !important;
-    flex-grow: 1 !important;
-  }
+  .scrollable-wrapper { overflow: visible !important; flex-grow: 1 !important; }
 
-  .btn, .modal, .no-print, .modal-backdrop {
-    display: none !important;
-  }
+  .btn, .modal, .no-print, .modal-backdrop { display: none !important; }
 
   .payroll-table {
     width: 100% !important;
@@ -488,59 +400,35 @@ th {
     font-size: 10px !important;
     word-wrap: break-word !important;
   }
-
-  .payroll-table th,
-  .payroll-table td {
+  .payroll-table th, .payroll-table td{
     padding: 4px !important;
     font-size: 10px !important;
     page-break-inside: avoid !important;
     break-inside: avoid;
     word-break: break-word;
   }
+  .payroll-table th:first-child, .payroll-table td:first-child{ min-width: 25px; max-width: 30px; }
 
-  .payroll-table th:first-child,
-  .payroll-table td:first-child {
-    min-width: 25px;
-    max-width: 30px;
-  }
+  thead { display: table-header-group; font-size: 14px !important; }
+  table, thead, tbody, tr, td, th { page-break-inside: avoid !important; }
 
-  thead {
-    display: table-header-group;
-    font-size: 14px !important;
-  }
+  .signature { margin-top: auto !important; padding-top: 40px; break-inside: avoid !important; page-break-inside: avoid !important; }
+  .signature div { width: 30%; text-align: center; }
 
-  table, thead, tbody, tr, td, th {
-    page-break-inside: avoid !important;
-  }
-
-  .signature {
-    margin-top: auto !important;
-    padding-top: 40px;
-    break-inside: avoid !important;
-    page-break-inside: avoid !important;
-  }
-
-  .signature div {
-    width: 30%;
-    text-align: center;
-  }
-
-  .modal-content, .modal-content * {
-    visibility: visible !important;
-  }
-
-  .modal-content {
-    position: absolute;
-    top: 0;
-    left: 0;
+  /* Keep modal content printable without clipping long lists */
+  .modal-content, .modal-content * { visibility: visible !important; }
+  .modal-content{
+    position: static;   /* was absolute */
+    top: auto; left: auto;
     width: 100%;
-    height: 50%;
-    overflow: hidden;
+    height: auto;       /* was 50% */
+    overflow: visible;  /* was hidden */
     padding: 20px;
     box-sizing: border-box;
   }
 }
 </style>
+
 
 
 </head>
@@ -1079,9 +967,9 @@ $totalNet = bcadd($totalNet, $netPay, 2);
   <td><?= displayAmount($loan) ?></td>
 <?php endif; ?>
 <?php if ($showOther): ?>
-  <td style="text-align:left; vertical-align:top;">
+ <td class="od-cell">
   <?php if (!empty($odetail['rows'])): ?>
-    <div style="font-size:12px; line-height:1.25; color:#555;">
+    <div class="od-lines">
       <?php foreach ($odetail['rows'] as $it): ?>
         <div>• <?= htmlspecialchars($it->description) ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
       <?php endforeach; ?>
@@ -1090,6 +978,7 @@ $totalNet = bcadd($totalNet, $netPay, 2);
     ––
   <?php endif; ?>
 </td>
+
 
 <?php endif; ?>
 
@@ -1280,12 +1169,13 @@ $totalNet = bcadd($totalNet, $netPay, 2);
               <?php endif; ?>
               
 <?php if (!empty($odetail['rows'])): ?>
-  <ul style="margin-left:12px;">
+  <ul class="deduction-sublist" style="margin-left:12px;">
     <?php foreach ($odetail['rows'] as $it): ?>
-      <li><?= htmlspecialchars($it->description) ?> - ₱<?= number_format((float)$it->amount, 2) ?></li>
+      <li><?= htmlspecialchars($it->description) ?> — ₱<?= number_format((float)$it->amount, 2) ?></li>
     <?php endforeach; ?>
   </ul>
 <?php endif; ?>
+
 
 
               <?php if ($total_deduction > 0): ?>
