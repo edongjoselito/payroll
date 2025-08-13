@@ -48,7 +48,6 @@ td .btn:last-child, form .btn:last-child { margin-right: 0; }
 .position-toolbar .btn {
   margin-right: 0; 
 }
-
 @media print {
   .no-print,
   .dataTables_filter,
@@ -57,7 +56,6 @@ td .btn:last-child, form .btn:last-child { margin-right: 0; }
   .dataTables_paginate,
   .select2,
   .select2-container { display:none !important; }
-
   @page { size: A4; margin: 12mm; }
   body { color:#000; }
   table { border-collapse: collapse !important; width:100% !important; font-size: 12px !important; }
@@ -233,66 +231,105 @@ natcasesort($uniquePositions);
 <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.responsive.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.js"></script>
-
+<script src="<?= base_url(); ?>assets/libs/datatables/dataTables.buttons.min.js"></script>
+<script src="<?= base_url(); ?>assets/libs/datatables/buttons.bootstrap4.min.js"></script>
+<script src="<?= base_url(); ?>assets/libs/datatables/buttons.print.min.js"></script>
+<!-- (CSV/PDF)
+<script src="<?= base_url(); ?>assets/libs/datatables/jszip.min.js"></script>
+<script src="<?= base_url(); ?>assets/libs/datatables/pdfmake.min.js"></script>
+<script src="<?= base_url(); ?>assets/libs/datatables/vfs_fonts.js"></script>
+<script src="<?= base_url(); ?>assets/libs/datatables/buttons.html5.min.js"></script>
+-->
 <script>
-/* Make project meta available to JS (safe-escaped) */
 const PROJECT_TITLE    = <?= json_encode($project->projectTitle ?? '') ?>;
 const PROJECT_LOCATION = <?= json_encode($project->projectLocation ?? '') ?>;
 
 $(function () {
-  $('#datatable').DataTable({
+  const dt = $('#datatable').DataTable({
     responsive: true,
-    ordering: false,
-    autoWidth: false
+    ordering: true,
+    autoWidth: false,
+    order: [[1, 'asc']],
+    columnDefs: [
+      { targets: 0, orderable: false, searchable: false }
+    ]
   });
+
+  dt.on('order.dt search.dt draw.dt', function () {
+    let i = 1;
+    dt.column(0, { search: 'applied', order: 'applied' }).nodes().each(function (cell) {
+      cell.textContent = i++;
+    });
+  });
+  dt.draw();
 
   $('.select2').select2({ width: '100%', placeholder: 'Select personnel' });
   $('.toast').toast({ delay: 4000 }).toast('show');
 
-  // --- Helpers --------------------------------------------------------------
+function buildPrintableFromDT(dataTable, filterPosition, rowsPerPage = 35) {
+  const headers = dataTable.columns().header().toArray().map(h => $(h).text());
+  const actionsIdx  = headers.findIndex(h => /actions/i.test(h));
+  const positionIdx = headers.findIndex(h => /position/i.test(h));
+  const lnIdx       = headers.findIndex(h => /l\s*\/\s*n/i.test(h)); // "L/N"
 
-  // Build printable <thead>/<tbody> HTML without the "Actions" column
-  function buildPrintableTable(filterPosition) {
-    const tbl   = document.getElementById('datatable');
+  let headHtml = '<tr>';
+  headers.forEach((h, idx) => {
+    if (idx !== actionsIdx) headHtml += '<th>' + h + '</th>';
+  });
+  headHtml += '</tr>';
 
-    // find index of the "Actions" header (don’t assume it’s the last)
-    const ths = Array.from(tbl.querySelectorAll('thead th'));
-    const actionsIdx = ths.findIndex(th =>
-      th.textContent.trim().toLowerCase() === 'actions'
-    );
+  const rowsApi = dataTable.rows({ search: 'applied', order: 'applied' });
+  const strip = (html) => $('<div>').html(html).text();
 
-    // header HTML
-    let headHtml = '<tr>';
-    ths.forEach((th, idx) => {
-      if (idx !== actionsIdx) headHtml += '<th>' + th.textContent.trim() + '</th>';
-    });
-    headHtml += '</tr>';
+  let bodyParts = [];
+  let chunk = [];
+  let countInPage = 0;
+  let lnCounter = 1; 
 
-    // rows (derive position from data-attribute or the visible cell)
-    const rows = Array.from(tbl.querySelectorAll('tbody tr'));
-    const bodyHtml = rows
-      .filter(tr => {
-        let pos = (tr.getAttribute('data-position') || '').trim();
-        if (!pos) {
-          const cell = tr.querySelector('.position-cell');
-          pos = cell ? cell.textContent.trim() : '';
-          tr.setAttribute('data-position', pos); // cache
-        }
-        return !filterPosition || pos.toLowerCase() === filterPosition.toLowerCase();
-      })
-      .map(tr => {
-        // rebuild row, skip Actions column
-        const tds = Array.from(tr.children)
-          .map((td, idx) => (idx === actionsIdx ? '' : '<td>' + td.innerHTML + '</td>'))
-          .join('');
-        return '<tr>' + tds + '</tr>';
-      })
-      .join('');
+  const addChunk = () => {
+    if (!chunk.length) return;
+    bodyParts.push(chunk.join(''));
+    chunk = [];
+    bodyParts.push('<tr class="page-break"><td colspan="' + (headers.length - (actionsIdx >= 0 ? 1 : 0)) + '"></td></tr>');
+  };
 
-    return { headHtml, bodyHtml };
+  rowsApi.every(function () {
+    const rowData = this.data();
+
+    if (filterPosition && positionIdx >= 0) {
+      const posVal = strip(rowData[positionIdx] ?? '');
+      if (String(posVal).toLowerCase() !== String(filterPosition).toLowerCase()) return;
+    }
+
+    const tds = rowData.map((cell, idx) => {
+      if (idx === actionsIdx) return '';
+      if (idx === lnIdx) return '<td>' + (lnCounter++) + '</td>';
+      return '<td>' + cell + '</td>';
+    }).join('');
+
+    chunk.push('<tr>' + tds + '</tr>');
+    countInPage++;
+
+    if (countInPage >= rowsPerPage) {
+      addChunk();
+      countInPage = 0;
+    }
+  });
+
+  if (chunk.length) {
+    bodyParts.push(chunk.join(''));
+  } else if (!bodyParts.length) {
+    return { headHtml, bodyHtml: '' };
   }
 
-  // Print via hidden iframe, including Project Title & Location at the top
+  if (bodyParts.length && /class="page-break"/i.test(bodyParts[bodyParts.length - 1])) {
+    bodyParts.pop();
+  }
+
+  return { headHtml, bodyHtml: bodyParts.join('') };
+}
+
+
   function printWithIframe(title, headHtml, bodyHtml) {
     const css = `
       @media print { @page { size: A4; margin: 12mm; } }
@@ -301,8 +338,11 @@ $(function () {
       .meta { margin: 4px 0 8px 0; font-size: 12px; }
       .meta strong { display:inline-block; min-width:72px; }
       small { color: #444; display:block; margin-top: 4px; }
-      table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+      table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; page-break-inside: auto; }
+      tr { page-break-inside: avoid; page-break-after: auto; }
       th, td { border: 1px solid #333; padding: 6px 8px; text-align: left; }
+      thead { display: table-header-group; }
+      tfoot { display: table-footer-group; }
       thead th { background: #f2f2f2; }
     `;
 
@@ -341,9 +381,7 @@ $(function () {
     document.body.appendChild(iframe);
 
     const doc = iframe.contentDocument || iframe.contentWindow.document;
-    doc.open();
-    doc.write(html);
-    doc.close();
+    doc.open(); doc.write(html); doc.close();
 
     iframe.onload = function () {
       iframe.contentWindow.focus();
@@ -352,19 +390,22 @@ $(function () {
     };
   }
 
-  // --- Buttons --------------------------------------------------------------
-
   $('#btn-print-all').on('click', function () {
-    const { headHtml, bodyHtml } = buildPrintableTable(null);
+    const { headHtml, bodyHtml } = buildPrintableFromDT(dt, null, 35);
+    if (!bodyHtml || bodyHtml.length === 0) { alert('No rows to print.'); return; }
     printWithIframe('Assigned Personnel List', headHtml, bodyHtml);
   });
 
   $('#btn-print-position').on('click', function () {
-    const pos = ($('#positionFilter').val() || '').trim();
+    const pos = $('#positionFilter').val() || '';
     if (!pos) { alert('Please select a position to print.'); return; }
-    const { headHtml, bodyHtml } = buildPrintableTable(pos);
-    if (!bodyHtml.trim()) { alert('No rows found for: ' + pos); return; }
+    const { headHtml, bodyHtml } = buildPrintableFromDT(dt, pos, 35);
+    if (!bodyHtml || bodyHtml.length === 0) { alert('No rows found for: ' + pos); return; }
     printWithIframe('Assigned Personnel List — ' + pos, headHtml, bodyHtml);
+  });
+
+  $('#btn-clear-position').on('click', function () {
+    $('#positionFilter').val(null).trigger('change');
   });
 });
 </script>
