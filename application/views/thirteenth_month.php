@@ -98,14 +98,22 @@ thead th {
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
             <span><strong>13th Month Summary</strong></span>
             <?php if (!empty($selected_period)): ?>
-                <div class="alert alert-info mb-0 py-1 px-2">
-                    Showing 13th month data for:
-                    <strong>
-                        <?= $selected_period == 'jan-jun' ? 'January – June' : ($selected_period == 'jul-dec' ? 'July – December' : 'Full Year') ?>
-                    </strong>
-                    &nbsp; | &nbsp; Year: <strong><?= htmlspecialchars($year) ?></strong>
-                </div>
-            <?php endif; ?>
+    <div class="alert alert-info mb-0 py-1 px-2">
+        Showing 13th month data for:
+        <strong>
+            <?= $selected_period == 'jan-jun' ? 'January – June' : ($selected_period == 'jul-dec' ? 'July – December' : 'Full Year') ?>
+        </strong>
+        &nbsp; | &nbsp; Year: <strong><?= htmlspecialchars($year) ?></strong>
+        &nbsp; | &nbsp; Employment:
+        <strong>
+            <?php
+                $emp = $employment ?? 'active';
+                echo $emp === 'inactive' ? 'Inactive' : ($emp === 'all' ? 'All' : 'Active');
+            ?>
+        </strong>
+    </div>
+<?php endif; ?>
+
         </div>
         <div class="collapse show" id="reportTable">
             <div class="card-body">
@@ -180,6 +188,16 @@ thead th {
                            min="2000"
                            max="2100" />
                 </div>
+                <div class="form-group">
+    <label for="employment">Employment Status</label>
+    <select class="form-control" name="employment">
+        <?php $emp = $employment ?? 'active'; ?>
+        <option value="active"   <?= $emp==='active'   ? 'selected' : '' ?>>Active</option>
+        <option value="inactive" <?= $emp==='inactive' ? 'selected' : '' ?>>Inactive</option>
+        <option value="all"      <?= $emp==='all'      ? 'selected' : '' ?>>All</option>
+    </select>
+</div>
+
             </div>
             <div class="modal-footer">
                 <button type="submit" class="btn btn-success btn-sm">Apply Filter</button>

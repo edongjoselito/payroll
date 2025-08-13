@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Thirteenth_model extends CI_Model {
 
-  public function get_13th_from_attendance_reg_only($start, $end)
+  public function get_13th_from_attendance_reg_only($start, $end, $employment = 'active')
 {
     $settingsID = $this->session->userdata('settingsID');
 
@@ -31,6 +31,17 @@ class Thirteenth_model extends CI_Model {
             'left'
         )
         ->where('p.settingsID', $settingsID)
+
+        ->group_start()
+            ->where("(CASE 
+                        WHEN ".$this->db->escape($employment)." = 'active' THEN 
+                            (p.date_terminated IS NULL OR p.date_terminated='0000-00-00' OR p.date_terminated > ".$this->db->escape($end).")
+                        WHEN ".$this->db->escape($employment)." = 'inactive' THEN 
+                            (p.date_terminated IS NOT NULL AND p.date_terminated <> '0000-00-00' AND p.date_terminated <= ".$this->db->escape($end).")
+                        ELSE 1=1
+                      END)", null, false)
+        ->group_end()
+
         ->order_by('p.last_name', 'ASC')
         ->order_by('p.first_name', 'ASC')
         ->get()->result_array();
@@ -88,31 +99,42 @@ class Thirteenth_model extends CI_Model {
 }
 
 
-    public function get_13th_from_payroll($start, $end)
-    {
-        $settingsID = $this->session->userdata('settingsID');
+    public function get_13th_from_payroll($start, $end, $employment = 'active')
+{
+    $settingsID = $this->session->userdata('settingsID');
 
-        $this->db->select("
-            pr.personnelID,
-            pr.first_name, pr.last_name, pr.position,
-            pr.rateType, CAST(pr.rateAmount AS DECIMAL(10,2)) AS rateAmount,
-            COALESCE(SUM(ps.reg_pay),0) AS basic_total
-        ");
-        $this->db->from('personnel pr');
-        $this->db->join(
-            'payroll_summary ps',
-            "ps.personnelID = pr.personnelID
-             AND ps.settingsID = pr.settingsID
-             AND ps.start_date >= ".$this->db->escape($start)."
-             AND ps.end_date   <= ".$this->db->escape($end),
-            'left'
-        );
-        $this->db->where('pr.settingsID', $settingsID);
-        $this->db->group_by('pr.personnelID');
-        $this->db->order_by('pr.last_name, pr.first_name');
+    $this->db->select("
+        pr.personnelID,
+        pr.first_name, pr.last_name, pr.position,
+        pr.rateType, CAST(pr.rateAmount AS DECIMAL(10,2)) AS rateAmount,
+        COALESCE(SUM(ps.reg_pay),0) AS basic_total
+    ");
+    $this->db->from('personnel pr');
+    $this->db->join(
+        'payroll_summary ps',
+        "ps.personnelID = pr.personnelID
+         AND ps.settingsID = pr.settingsID
+         AND ps.start_date >= ".$this->db->escape($start)."
+         AND ps.end_date   <= ".$this->db->escape($end),
+        'left'
+    );
+    $this->db->where('pr.settingsID', $settingsID);
 
-        return $this->db->get()->result_array();
-    }
+    $this->db->group_start()
+        ->where("(CASE 
+                    WHEN ".$this->db->escape($employment)." = 'active' THEN 
+                        (pr.date_terminated IS NULL OR pr.date_terminated='0000-00-00' OR pr.date_terminated > ".$this->db->escape($end).")
+                    WHEN ".$this->db->escape($employment)." = 'inactive' THEN 
+                        (pr.date_terminated IS NOT NULL AND pr.date_terminated <> '0000-00-00' AND pr.date_terminated <= ".$this->db->escape($end).")
+                    ELSE 1=1
+                  END)", null, false)
+    ->group_end();
+
+    $this->db->group_by('pr.personnelID');
+    $this->db->order_by('pr.last_name, pr.first_name');
+
+    return $this->db->get()->result_array();
+}
 
     public function get_13th_month_data($period = null)
     {

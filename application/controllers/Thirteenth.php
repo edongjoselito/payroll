@@ -9,25 +9,30 @@ class Thirteenth extends CI_Controller {
         $this->load->model('Thirteenth_model');
     }
 
-    public function index()
-    {
-        $period = $this->input->get('period'); 
-        $year   = $this->input->get('year') ?: date('Y');
+   public function index()
+{
+    $period     = $this->input->get('period'); 
+    $year       = $this->input->get('year') ?: date('Y');
 
-        if ($period === 'jan-jun') {
-            $start = "$year-01-01"; $end = "$year-06-30";
-        } elseif ($period === 'jul-dec') {
-            $start = "$year-07-01"; $end = "$year-12-31";
-        } else {
-            $period = 'full';
-            $start = "$year-01-01"; $end = "$year-12-31";
-        }
+    $employment = $this->input->get('employment') ?: 'active';
 
-        $data['payroll_data']    = $this->Thirteenth_model->get_13th_from_attendance_reg_only($start, $end);
-
-        $data['selected_period'] = $period;
-        $data['year']            = $year;
-
-        $this->load->view('thirteenth_month', $data);
+    if ($period === 'jan-jun') {
+        $start = "$year-01-01"; $end = "$year-06-30";
+    } elseif ($period === 'jul-dec') {
+        $start = "$year-07-01"; $end = "$year-12-31";
+    } else {
+        $period = 'full';
+        $start = "$year-01-01"; $end = "$year-12-31";
     }
+
+    $data['payroll_data']    = $this->Thirteenth_model->get_13th_from_attendance_reg_only($start, $end, $employment);
+
+    $data['selected_period'] = $period;
+    $data['year']            = $year;
+
+    $data['employment']      = $employment;
+
+    $this->load->view('thirteenth_month', $data);
+}
+
 }
