@@ -266,12 +266,12 @@ const PROJECT_TITLE    = <?= json_encode($project->projectTitle ?? '') ?>;
 const PROJECT_LOCATION = <?= json_encode($project->projectLocation ?? '') ?>;
 
 $(function () {
-  // Default order by Position column (index 2)
+  // Default order by Personnel Name (index 1) — changed from Position
   const dt = $('#datatable').DataTable({
     responsive: true,
     ordering: true,
     autoWidth: false,
-    order: [[2, 'asc']],
+    order: [[1, 'asc']],   // <-- default to Name A→Z
     columnDefs: [
       { targets: 0, orderable: false, searchable: false }
     ]
@@ -286,10 +286,10 @@ $(function () {
   });
   dt.draw();
 
-  // Order-by-position direction dropdown
+  // Order-by-position direction dropdown (user can toggle any time)
   $('#orderPositionDir').on('change', function(){
     const dir = $(this).val() || 'asc';
-    dt.order([2, dir]).draw();
+    dt.order([2, dir]).draw(); // sort by Position only when user chooses
   });
 
   // Enhance selects (including modal select)
