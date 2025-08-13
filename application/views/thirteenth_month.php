@@ -24,12 +24,12 @@ thead th {
     box-shadow: 0 0 12px rgba(0, 123, 255, 0.6);
     z-index: 10;
 }
-
+  tfoot th, tfoot td { font-weight: 700; background: #f8f9fa; }
 @media print {
     .d-print-none {
         display: none !important;
     }
-
+tfoot { display: table-footer-group; }
     .dataTables_filter,
     .dataTables_length,
     .dataTables_info,
@@ -118,36 +118,58 @@ thead th {
         <div class="collapse show" id="reportTable">
             <div class="card-body">
                 <div class="table-responsive">
-                  <table id="datatable" class="table table-bordered table-striped dt-responsive nowrap" style="width:100%">
-    <thead class="thead-light text-center">
-        <tr>
-            <th>No.</th>
-            <th>Name of Worker</th>
-            <th>Designation</th>
-            <th>Total Basic Salary for Year <?= htmlspecialchars($year) ?></th>
-            <th>13th Month Pay<br><small>(Divided by 12)</small></th>
-            <th>Net Pay</th>
-            <th>Received By</th>
-        </tr>
-    </thead>
-    <tbody>
-       <?php $i = 1; foreach ($payroll_data as $emp):
-            $basic      = (float)($emp['basic_total'] ?? 0.0); 
-            $thirteenth = $basic / 12;
-            $netpay     = $thirteenth;
-       ?>
-<tr class="text-center">
-    <td><?= $i++ ?></td>
-    <td class="text-left"><?= htmlspecialchars(($emp['last_name'] ?? '').', '.($emp['first_name'] ?? '')) ?></td>
-    <td><?= htmlspecialchars($emp['position'] ?? '') ?></td>
-    <td>₱<?= number_format($basic, 2) ?></td>
-    <td><strong>₱<?= number_format($thirteenth, 2) ?></strong></td>
-    <td>₱<?= number_format($netpay, 2) ?></td>
-    <td>____________________</td>
-</tr>
-<?php endforeach; ?>
-    </tbody>
+            <table id="datatable" class="table table-bordered table-striped dt-responsive nowrap" style="width:100%">
+  <thead class="thead-light text-center">
+    <tr>
+      <th>No.</th>
+      <th>Name of Worker</th>
+      <th>Designation</th>
+      <th>Total Basic Salary for Year <?= htmlspecialchars($year) ?></th>
+      <th>13th Month Pay<br><small>(Divided by 12)</small></th>
+      <th>Net Pay</th>
+      <th>Received By</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <?php
+      $i = 1;
+      $total_basic = 0.0;
+      $total_13th  = 0.0;
+      $total_net   = 0.0;
+
+      foreach ($payroll_data as $emp):
+        $basic      = (float)($emp['basic_total'] ?? 0.0);
+        $thirteenth = $basic / 12;
+        $netpay     = $thirteenth;
+
+        $total_basic += $basic;
+        $total_13th  += $thirteenth;
+        $total_net   += $netpay;
+    ?>
+    <tr class="text-center">
+      <td><?= $i++ ?></td>
+      <td class="text-left"><?= htmlspecialchars(($emp['last_name'] ?? '').', '.($emp['first_name'] ?? '')) ?></td>
+      <td><?= htmlspecialchars($emp['position'] ?? '') ?></td>
+      <td>₱<?= number_format($basic, 2) ?></td>
+      <td><strong>₱<?= number_format($thirteenth, 2) ?></strong></td>
+      <td>₱<?= number_format($netpay, 2) ?></td>
+      <td>____________________</td>
+    </tr>
+    <?php endforeach; ?>
+  </tbody>
+
+  <tfoot>
+    <tr class="text-center">
+      <td colspan="3" class="text-right"><strong>Totals:</strong></td>
+      <td><strong>₱<?= number_format($total_basic, 2) ?></strong></td>
+      <td><strong>₱<?= number_format($total_13th, 2) ?></strong></td>
+      <td><strong>₱<?= number_format($total_net, 2) ?></strong></td>
+      <td></td>
+    </tr>
+  </tfoot>
 </table>
+
 
                 </div>
             </div>
