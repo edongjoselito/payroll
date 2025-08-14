@@ -242,6 +242,77 @@ function fetch_gov_deduction_lines($personnelID, $start, $end, $settingsID = nul
 
     return $cache[$key] = ['rows'=>$rows, 'by'=>$by, 'totals'=>$tot];
 }
+function fetch_loan_lines($personnelID, $start, $end, $settingsID = null) {
+    static $cache = [];
+    $key = "LOAN|{$personnelID}|{$start}|{$end}|{$settingsID}";
+    if (isset($cache[$key])) return $cache[$key];
+
+    $CI =& get_instance();
+    $db = $CI->db;
+
+    // per-period amount priority
+    $db->select("
+        loan_description AS description,
+        COALESCE(
+            NULLIF(monthly_deduction, 0),
+            NULLIF(deduction_amount, 0),
+            CASE WHEN COALESCE(term_months,0) > 0 THEN amount / term_months ELSE NULL END,
+            amount
+        ) AS amount,
+        start_date, end_date, deduct_from, deduct_to, date_assigned, status, is_paid
+    ", false)
+    ->from('personnelloans')
+    ->where('personnelID', $personnelID)
+    ->where('status', 1); // adjust if you use another active flag
+
+    // ---- DATE WINDOW LOGIC (all closed with group_end()) ----
+    $db->group_start()
+
+        // A) start_date/end_date overlap
+        ->group_start()
+            ->where("(start_date IS NOT NULL AND start_date <> '0000-00-00')", null, false)
+            ->where("(end_date   IS NOT NULL AND end_date   <> '0000-00-00')",   null, false)
+            ->where('start_date <=', $end)
+            ->where('end_date   >=', $start)
+        ->group_end()
+
+        // B) OR deduct_from/deduct_to overlap (when start/end are blank)
+        ->or_group_start()
+            ->where("(start_date IS NULL OR start_date = '0000-00-00')", null, false)
+            ->where("(end_date   IS NULL OR end_date   = '0000-00-00')", null, false)
+            ->where("(deduct_from IS NOT NULL AND deduct_from <> '0000-00-00')", null, false)
+            ->where("(deduct_to   IS NOT NULL AND deduct_to   <> '0000-00-00')", null, false)
+            ->where('deduct_from <=', $end)
+            ->where('deduct_to   >=', $start)
+        ->group_end()
+
+        // C) OR no ranges at all but has a positive per-cutoff deduction (include to show description)
+        ->or_group_start()
+            ->where("(start_date IS NULL OR start_date = '0000-00-00')", null, false)
+            ->where("(end_date   IS NULL OR end_date   = '0000-00-00')", null, false)
+            ->where("(deduct_from IS NULL OR deduct_from = '0000-00-00')", null, false)
+            ->where("(deduct_to   IS NULL OR deduct_to   = '0000-00-00')", null, false)
+            ->group_start()
+                ->where("COALESCE(monthly_deduction,0) >", 0)
+                ->or_where("COALESCE(deduction_amount,0) >", 0)
+            ->group_end()
+            // optionally ensure not fully paid:
+            // ->where("(is_paid = 0 OR is_paid IS NULL)", null, false)
+        ->group_end()
+
+    ->group_end();
+
+    if (!empty($settingsID)) {
+        $db->where('settingsID', $settingsID);
+    }
+
+    $rows = $db->get()->result();
+
+    $total = 0.0;
+    foreach ($rows as $r) $total += (float)$r->amount;
+
+    return $cache[$key] = ['rows' => $rows, 'total' => $total];
+}
 
 ?>
 
@@ -253,7 +324,6 @@ function fetch_gov_deduction_lines($personnelID, $start, $end, $settingsID = nul
     <?php include('includes/head.php'); ?>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 <style>
-/* ===== Base ===== */
 body, html {
   font-family: 'Segoe UI', 'Calibri', 'Arial', sans-serif;
   font-size: 14px;
@@ -340,7 +410,6 @@ th { background-color: #d9d9d9; font-weight: bold; }
 
 .scrollable-wrapper { overflow-x: auto; width: 100%; flex-grow: 1; }
 
-/* ===== Header info box ===== */
 .header-box {
   display: flex;
   justify-content: space-between;
@@ -378,20 +447,32 @@ th { background-color: #d9d9d9; font-weight: bold; }
 .modal-header { background: #fff !important; color: #000 !important; border-bottom: 1px solid #ddd; }
 .modal-body h6 { font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 10px; }
 
-/* ===== NEW: Other Deduction cell + list ===== */
-.od-cell { text-align: left; vertical-align: top; }
-.od-lines{
-  font-size: 12px;
-  line-height: 1.25;
-  color: #555;
-  word-break: break-word;   /* wrap long words */
-  white-space: normal;      /* ensure wrapping in table cells */
+.od-cell{
+  text-align:left;
+  vertical-align:top;
+  min-width:160px;  
+  white-space:normal; 
 }
 
-/* Screen-only: keep rows compact when descriptions are long */
+.od-lines{
+  font-size:12px;
+  line-height:2.50;
+  color: #000;;
+
+  word-break:normal; 
+  overflow-wrap:anywhere;
+  hyphens:auto;
+}
+
+.od-lines > div{ position:relative; padding-left:12px; }
+.od-lines > div::before{ position:absolute; left:0; }
+
+
+
+
 @media screen {
-  .od-lines { max-height: 84px; overflow: auto; padding-right: 4px; }
-  .deduction-sublist{ max-height: 220px; overflow: auto; }
+  .od-lines { max-height: none; overflow: visible; }
+  .deduction-sublist{ max-height: 200px; overflow: auto; }
 }
 
 /* ===== PRINT ===== */
@@ -406,7 +487,6 @@ th { background-color: #d9d9d9; font-weight: bold; }
     overflow: visible !important;
   }
 
-  /* Show full deduction lists on paper */
   .od-lines { max-height: none; overflow: visible; }
   .deduction-sublist{ max-height: none; overflow: visible; }
 
@@ -419,8 +499,8 @@ th { background-color: #d9d9d9; font-weight: bold; }
   }
 
   .print-card{
-    width: 390px;   /* ≈ 4.1 in */
-    height: 550px;  /* ≈ 5.8 in */
+    width: 390px; 
+    height: 550px;
     padding: 18px 20px;
     font-size: 13.5px;
     line-height: 1.4;
@@ -470,17 +550,17 @@ th { background-color: #d9d9d9; font-weight: bold; }
   .signature { margin-top: auto !important; padding-top: 40px; break-inside: avoid !important; page-break-inside: avoid !important; }
   .signature div { width: 30%; text-align: center; }
 
-  /* Keep modal content printable without clipping long lists */
   .modal-content, .modal-content * { visibility: visible !important; }
   .modal-content{
-    position: static;   /* was absolute */
+    position: static;
     top: auto; left: auto;
     width: 100%;
-    height: auto;       /* was 50% */
-    overflow: visible;  /* was hidden */
+    height: auto;
+    overflow: visible;
     padding: 20px;
     box-sizing: border-box;
   }
+  
 }
 </style>
 
@@ -488,7 +568,8 @@ th { background-color: #d9d9d9; font-weight: bold; }
 
 </head>
 <body>
-  <class="print-container">
+ <div class="print-container">
+
 <div class="header-box">
   <div class="box-content">
     <div class="info-row">
@@ -570,7 +651,6 @@ foreach ($attendance_data as $row) {
     if (!empty($row->loan)) $showLoan = true;
     if (!empty($row->other_deduction)) $showOther = true;
 }
-// If numeric fields are blank but there are gov rows, still show the columns
 if (!$showSSS || !$showPHIC) {
     $settingsID = isset($project->settingsID) ? $project->settingsID : null;
     foreach ($attendance_data as $r0) {
@@ -580,8 +660,12 @@ if (!$showSSS || !$showPHIC) {
       if ($showSSS && $showPHIC) break;
     }
 }
-
-// 🔐 Only show total deduction column if any deduction type has value
+if (!$showLoan) {
+    foreach ($attendance_data as $r0) {
+        $ld0 = fetch_loan_lines($r0->personnelID, $start, $end, $settingsID);
+        if (!empty($ld0['rows'])) { $showLoan = true; break; }
+    }
+}
 $showTotalDeduction = $showCA || $showSSS || $showPHIC || $showLoan || $showOther;
 ?>
 
@@ -678,7 +762,6 @@ $totalPayroll = 0;
 $hasRegularHoliday = false;
 $hasSpecialHoliday = false;
 
-// Scan attendance to detect holiday presence
 foreach ($attendance_data as $row) {
     $startDate = strtotime($start);
     $endDate = strtotime($end);
@@ -707,7 +790,6 @@ foreach ($attendance_data as $row) {
 ?> -->
 
 <?php
-// Initialize total accumulators
 $totalGross = 0;
 $totalCA = 0;
 $totalSSS = 0;
@@ -717,7 +799,6 @@ $totalOther = 0;
 $totalDeduction = 0;
 $totalNet = 0;
 
-// 👉 Calculate dynamic colspan for the TOTAL row
 $dateColumnCount = 0;
 $loopDate = strtotime($start);
 while ($loopDate <= strtotime($end)) {
@@ -725,9 +806,9 @@ while ($loopDate <= strtotime($end)) {
     $loopDate = strtotime('+1 day', $loopDate);
 }
 
-$fixedColsBeforeDays = 5; // L/N, Name, Position, Rate, Rate/Hour
-$totalTimeCols = 3;       // Reg, OT, Days
-$amountCols = 2;          // Reg, OT in Amount section
+$fixedColsBeforeDays = 5;
+$totalTimeCols = 3; 
+$amountCols = 2; 
 
 if ($hasRegularHoliday) $amountCols++;
 if ($hasSpecialHoliday) $amountCols++;
@@ -947,13 +1028,16 @@ $loan = (string) ($row->loan ?? 0);
 $settingsID = isset($project->settingsID) ? $project->settingsID : null;
 $odetail = fetch_other_deduction_lines($row->personnelID, $start, $end, $settingsID);
 $gdetail   = fetch_gov_deduction_lines($row->personnelID, $start, $end, $settingsID);
+$ldetail = fetch_loan_lines($row->personnelID, $start, $end, $settingsID);
+$loan    = (string) ($loan !== '' ? $loan : $ldetail['total']);
+
 $g_by_type = $gdetail['by'];
 $g_totals  = $gdetail['totals'];
 
-// fallback the numeric fields if blank
 $sss        = (string) ($sss        !== '' ? $sss        : $g_totals['SSS']);
 $pagibig    = (string) ($pagibig    !== '' ? $pagibig    : $g_totals['Pag-IBIG']);
 $philhealth = (string) ($philhealth !== '' ? $philhealth : $g_totals['PhilHealth']);
+
 
 $other_deduction = (string) (
     isset($row->other_deduction) && $row->other_deduction !== ''
@@ -1032,7 +1116,7 @@ $totalNet = bcadd($totalNet, $netPay, 2);
     <?php if (!empty($g_by_type['SSS'])): ?>
       <div class="od-lines">
         <?php foreach ($g_by_type['SSS'] as $it): ?>
-          <div>• <?= htmlspecialchars($it->description ?: 'SSS') ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
+          <div><?= htmlspecialchars($it->description ?: 'SSS') ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
         <?php endforeach; ?>
       </div>
     <?php else: ?>
@@ -1046,12 +1130,12 @@ $totalNet = bcadd($totalNet, $netPay, 2);
     <?php if (!empty($g_by_type['PhilHealth'])): ?>
       <div class="od-lines">
         <?php foreach ($g_by_type['PhilHealth'] as $it): ?>
-          <div>• <?= htmlspecialchars($it->description ?: 'PhilHealth') ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
+          <div><?= htmlspecialchars($it->description ?: 'PhilHealth') ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
         <?php endforeach; ?>
       </div>
     <?php elseif ((float)$philhealth > 0): ?>
       <div class="od-lines">
-        <div>• PhilHealth — ₱<?= number_format((float)$philhealth, 2) ?></div>
+        <div>PhilHealth — ₱<?= number_format((float)$philhealth, 2) ?></div>
       </div>
     <?php else: ?>
       <?= displayAmount($philhealth) ?>
@@ -1060,20 +1144,31 @@ $totalNet = bcadd($totalNet, $netPay, 2);
 <?php endif; ?>
 
 
-
 <?php if ($showLoan): ?>
-  <td><?= displayAmount($loan) ?></td>
+  <td class="od-cell">
+    <?php if (!empty($ldetail['rows'])): ?>
+      <div class="od-lines">
+        <?php foreach ($ldetail['rows'] as $it): ?>
+          <div><?= htmlspecialchars($it->description ?: 'Loan') ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
+        <?php endforeach; ?>
+      </div>
+    <?php else: ?>
+      <?= displayAmount($loan) ?>
+    <?php endif; ?>
+  </td>
 <?php endif; ?>
+
+
 <?php if ($showOther): ?>
  <td class="od-cell">
   <?php if (!empty($odetail['rows'])): ?>
     <div class="od-lines">
       <?php foreach ($odetail['rows'] as $it): ?>
-        <div>• <?= htmlspecialchars($it->description) ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
+        <div><?= htmlspecialchars($it->description) ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
       <?php endforeach; ?>
     </div>
   <?php else: ?>
-    ––
+    –
   <?php endif; ?>
 </td>
 
@@ -1455,7 +1550,7 @@ $totalNet = bcadd($totalNet, $netPay, 2);
           <?php if (!empty($odetail_print['rows'])): ?>
   <div style="margin-left:12px; margin-top:2px;">
     <?php foreach ($odetail_print['rows'] as $it): ?>
-      <div>• <?= htmlspecialchars($it->description) ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
+      <div><?= htmlspecialchars($it->description) ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
     <?php endforeach; ?>
   </div>
 <?php endif; ?>
@@ -1517,19 +1612,15 @@ function printPayslip(elementId) {
 </script>
 <script>
 function printAllPayslips() {
-  // Store original content
   const originalContent = document.body.innerHTML;
   const payslips = document.getElementById("allPayslips").innerHTML;
 
-  // Replace with only payslips
   document.body.innerHTML = payslips;
 
-  // Trigger print
   window.print();
 
-  // Restore original content
   document.body.innerHTML = originalContent;
-  location.reload(); // Restore Bootstrap modals, etc.
+  location.reload();
 }
 </script>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
