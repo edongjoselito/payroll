@@ -448,8 +448,7 @@ th { background-color: #d9d9d9; font-weight: bold; }
 .modal-body h6 { font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 10px; }
 
 .od-cell{
-  text-align:left;
-  vertical-align:top;
+ 
   min-width:160px;  
   white-space:normal; 
 }
@@ -1167,8 +1166,7 @@ $totalNet = bcadd($totalNet, $netPay, 2);
         <div><?= htmlspecialchars($it->description) ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
       <?php endforeach; ?>
     </div>
-  <?php else: ?>
-    –
+ 
   <?php endif; ?>
 </td>
 
@@ -1338,36 +1336,60 @@ $totalNet = bcadd($totalNet, $netPay, 2);
           </div>
           <?php endif; ?>
 
-          <div class="col-md-6">
-            <h6>Deductions</h6>
-            <ul class="list-unstyled">
-              <?php if ($cash_advance > 0): ?>
-                <li>Cash Advance: <?= number_format($cash_advance, 2) ?></li>
-              <?php endif; ?>
+        <div class="col-md-6">
+  <h6>Deductions</h6>
+  <ul class="list-unstyled">
+    <?php if ($cash_advance > 0): ?>
+      <li>Cash Advance: <?= number_format($cash_advance, 2) ?></li>
+    <?php endif; ?>
 
-              <?php if ($sss > 0): ?>
-                <li>SSS (Gov’t): <?= number_format($sss, 2) ?></li>
-              <?php endif; ?>
+    <?php if ($sss > 0): ?>
+      <li>SSS (Gov’t): <?= number_format($sss, 2) ?></li>
+      <?php if (!empty($gdetail['by']['SSS'])): ?>
+        <ul class="deduction-sublist list-unstyled" style="margin-left:12px;">
+          <?php foreach ($gdetail['by']['SSS'] as $it): ?>
+            <li><?= htmlspecialchars($it->description ?: 'SSS') ?> — ₱<?= number_format((float)$it->amount, 2) ?></li>
+          <?php endforeach; ?>
+        </ul>
+      <?php endif; ?>
+    <?php endif; ?>
 
-              <?php if ($philhealth > 0): ?>
-                <li>PHIC (Gov’t): <?= number_format($philhealth, 2) ?></li>
-              <?php endif; ?>
+    <?php if ($philhealth > 0): ?>
+      <li>PHIC (Gov’t): <?= number_format($philhealth, 2) ?></li>
+      <?php if (!empty($gdetail['by']['PhilHealth'])): ?>
+        <ul class="deduction-sublist list-unstyled" style="margin-left:12px;">
+          <?php foreach ($gdetail['by']['PhilHealth'] as $it): ?>
+            <li><?= htmlspecialchars($it->description ?: 'PhilHealth') ?> — ₱<?= number_format((float)$it->amount, 2) ?></li>
+          <?php endforeach; ?>
+        </ul>
+      <?php endif; ?>
+    <?php endif; ?>
 
-              <?php if ($loan > 0): ?>
-                <li>Loan: <?= number_format($loan, 2) ?></li>
-              <?php endif; ?>
+    <?php if ($loan > 0): ?>
+      <li>Loan: <?= number_format($loan, 2) ?></li>
+      <?php if (!empty($ldetail['rows'])): ?>
+        <ul class="deduction-sublist list-unstyled" style="margin-left:12px;">
+          <?php foreach ($ldetail['rows'] as $it): ?>
+            <li><?= htmlspecialchars($it->description ?: 'Loan') ?> — ₱<?= number_format((float)$it->amount, 2) ?></li>
+          <?php endforeach; ?>
+        </ul>
+      <?php endif; ?>
+    <?php endif; ?>
 
-              <?php if ($other_deduction > 0): ?>
-                <li>Other Deduction: <?= number_format($other_deduction, 2) ?></li>
-              <?php endif; ?>
-              
-<?php if (!empty($odetail['rows'])): ?>
-  <ul class="deduction-sublist" style="margin-left:12px;">
-    <?php foreach ($odetail['rows'] as $it): ?>
-      <li><?= htmlspecialchars($it->description) ?> — ₱<?= number_format((float)$it->amount, 2) ?></li>
-    <?php endforeach; ?>
+    <?php if ($other_deduction > 0): ?>
+      <li>Other Deduction: <?= number_format($other_deduction, 2) ?></li>
+    <?php endif; ?>
+
+    <?php if (!empty($odetail['rows'])): ?>
+      <ul class="deduction-sublist list-unstyled" style="margin-left:12px;">
+        <?php foreach ($odetail['rows'] as $it): ?>
+          <li><?= htmlspecialchars($it->description) ?> — ₱<?= number_format((float)$it->amount, 2) ?></li>
+        <?php endforeach; ?>
+      </ul>
+    <?php endif; ?>
   </ul>
-<?php endif; ?>
+</div>
+
 
 
 
@@ -1412,8 +1434,10 @@ $totalNet = bcadd($totalNet, $netPay, 2);
 
     $pay = computePayroll($row, $start, $end);
 
-    $settingsID = isset($project->settingsID) ? $project->settingsID : null;
-    $odetail_print = fetch_other_deduction_lines($row->personnelID, $start, $end, $settingsID);
+    $settingsID     = isset($project->settingsID) ? $project->settingsID : null;
+    $odetail_print  = fetch_other_deduction_lines($row->personnelID, $start, $end, $settingsID);
+    $gdetail_print  = fetch_gov_deduction_lines($row->personnelID, $start, $end, $settingsID);
+    $ldetail_print  = fetch_loan_lines($row->personnelID, $start, $end, $settingsID);
 
     $regHoursRaw     = (float)$pay['regTotalMinutes'] / 60;
     $otHoursRaw      = (float)$pay['otTotalMinutes'] / 60;
@@ -1450,11 +1474,11 @@ $totalNet = bcadd($totalNet, $netPay, 2);
     } elseif ($rateTypeLower === 'day') {
       $dailyRate  = $rateAmount;
       $hourlyRate = ($rateAmount > 0) ? $rateAmount / 8 : 0;
-    } else { 
+    } else {
       $hourlyRate = $rateAmount;
       $dailyRate  = $hourlyRate * 8;
     }
-    $otRate    = $hourlyRate * 1.0;
+    $otRate = $hourlyRate * 1.0;
 
     $regAmount = $regHoursRaw * $hourlyRate;
     $otAmount  = $otHoursRaw  * $otRate;
@@ -1476,12 +1500,8 @@ $totalNet = bcadd($totalNet, $netPay, 2);
       ($total_deduction > 0);
 
     $hasAnyData = $hasEarningsLines || $hasDeductionsLines || ($netPay > 0);
-
-    if (!$hasAnyData) {
-      continue;
-    }
-?>
-
+    if (!$hasAnyData) continue;
+  ?>
 
   <div class="print-card" style="page-break-inside: avoid; margin-bottom: 30px; padding: 20px; border: 1px solid #ddd;">
     <h4 style="margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 6px;">
@@ -1541,21 +1561,70 @@ $totalNet = bcadd($totalNet, $netPay, 2);
       <?php if ($hasDeductionsLines): ?>
       <div style="width: 48%;">
         <h5 style="border-bottom: 1px solid #ccc;">Deductions</h5>
-        <?php if ($cash_advance > 0): ?><p>Cash Advance: ₱<?= number_format($cash_advance, 2) ?></p><?php endif; ?>
-        <?php if ($sss > 0): ?><p>SSS (Gov’t): ₱<?= number_format($sss, 2) ?></p><?php endif; ?>
-        <?php if ($pagibig > 0): ?><p>Pag-IBIG (Gov’t): ₱<?= number_format($pagibig, 2) ?></p><?php endif; ?>
-        <?php if ($philhealth > 0): ?><p>PHIC (Gov’t): ₱<?= number_format($philhealth, 2) ?></p><?php endif; ?>
-        <?php if ($loan > 0): ?><p>Loan: ₱<?= number_format($loan, 2) ?></p><?php endif; ?>
-        <?php if ($other_deduction > 0): ?><p>Other Deduction: ₱<?= number_format($other_deduction, 2) ?></p><?php endif; ?>
-          <?php if (!empty($odetail_print['rows'])): ?>
-  <div style="margin-left:12px; margin-top:2px;">
-    <?php foreach ($odetail_print['rows'] as $it): ?>
-      <div><?= htmlspecialchars($it->description) ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
-    <?php endforeach; ?>
-  </div>
-<?php endif; ?>
 
-        <?php if ($total_deduction > 0): ?><p><strong>Total Deduction: ₱<?= number_format($total_deduction, 2) ?></strong></p><?php endif; ?>
+        <?php if ($cash_advance > 0): ?>
+          <p>Cash Advance: ₱<?= number_format($cash_advance, 2) ?></p>
+        <?php endif; ?>
+
+        <?php if ($sss > 0): ?>
+          <p>SSS (Gov’t):</p>
+          <?php if (!empty($gdetail_print['by']['SSS'])): ?>
+            <div style="margin-left:12px; margin-top:2px;">
+              <?php foreach ($gdetail_print['by']['SSS'] as $it): ?>
+                <div><?= htmlspecialchars($it->description ?: 'SSS') ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
+              <?php endforeach; ?>
+            </div>
+          <?php endif; ?>
+        <?php endif; ?>
+
+        <?php if ($pagibig > 0): ?>
+          <p>Pag-IBIG (Gov’t): ₱<?= number_format($pagibig, 2) ?></p>
+          <?php if (!empty($gdetail_print['by']['Pag-IBIG'])): ?>
+            <div style="margin-left:12px; margin-top:2px;">
+              <?php foreach ($gdetail_print['by']['Pag-IBIG'] as $it): ?>
+                <div><?= htmlspecialchars($it->description ?: 'Pag-IBIG') ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
+              <?php endforeach; ?>
+            </div>
+          <?php endif; ?>
+        <?php endif; ?>
+
+        <?php if ($philhealth > 0): ?>
+          <p>PHIC (Gov’t): ₱<?= number_format($philhealth, 2) ?></p>
+          <?php if (!empty($gdetail_print['by']['PhilHealth'])): ?>
+            <div style="margin-left:12px; margin-top:2px;">
+              <?php foreach ($gdetail_print['by']['PhilHealth'] as $it): ?>
+                <div><?= htmlspecialchars($it->description ?: 'PhilHealth') ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
+              <?php endforeach; ?>
+            </div>
+          <?php endif; ?>
+        <?php endif; ?>
+
+        <?php if ($loan > 0): ?>
+          <p>Personnel Loan/s:</p>
+          <?php if (!empty($ldetail_print['rows'])): ?>
+            <div style="margin-left:12px; margin-top:2px;">
+              <?php foreach ($ldetail_print['rows'] as $it): ?>
+                <div><?= htmlspecialchars($it->description ?: 'Loan') ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
+              <?php endforeach; ?>
+            </div>
+          <?php endif; ?>
+        <?php endif; ?>
+
+        <?php if ($other_deduction > 0): ?>
+          <p>Other Deduction:</p>
+        <?php endif; ?>
+
+        <?php if (!empty($odetail_print['rows'])): ?>
+          <div style="margin-left:12px; margin-top:2px;">
+            <?php foreach ($odetail_print['rows'] as $it): ?>
+              <div><?= htmlspecialchars($it->description) ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+
+        <?php if ($total_deduction > 0): ?>
+          <p><strong>Total Deduction: ₱<?= number_format($total_deduction, 2) ?></strong></p>
+        <?php endif; ?>
       </div>
       <?php endif; ?>
     </div>
@@ -1607,7 +1676,7 @@ function printPayslip(elementId) {
     document.body.innerHTML = printContents;
     window.print();
     document.body.innerHTML = originalContents;
-    location.reload(); // Restore modal functionality
+    location.reload();
 }
 </script>
 <script>
