@@ -1414,6 +1414,32 @@ $totalNet = bcadd($totalNet, $netPay, 2);
 </div>
 
 <?php endforeach; ?>
+<tr style="background:#f3f3f3; font-weight:600;">
+  <td colspan="<?= (int)$totalPrefixCols; ?>" class="text-right">TOTAL</td>
+  <td><?= number_format((float)$totalGross, 2) ?></td>
+  <?php if ($showCA): ?>
+    <td><?= number_format((float)$totalCA, 2) ?></td>
+  <?php endif; ?>
+  <?php if ($showSSS): ?>
+    <td><?= number_format((float)$totalSSS, 2) ?></td>
+  <?php endif; ?>
+  <?php if ($showPHIC): ?>
+    <td><?= number_format((float)$totalPHIC, 2) ?></td>
+  <?php endif; ?>
+  <?php if ($showLoan): ?>
+    <td><?= number_format((float)$totalLoan, 2) ?></td>
+  <?php endif; ?>
+  <?php if ($showOther): ?>
+    <td><?= number_format((float)$totalOther, 2) ?></td>
+  <?php endif; ?>
+  <?php if ($showTotalDeduction): ?>
+    <td><?= number_format((float)$totalDeduction, 2) ?></td>
+  <?php endif; ?>
+  <td><?= number_format((float)$totalNet, 2) ?></td>
+  <?php if (empty($is_summary)): ?>
+    <td colspan="3"></td>
+  <?php endif; ?>
+</tr>
 
 
 </tbody>
