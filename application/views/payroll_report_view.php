@@ -1187,19 +1187,19 @@ $totalNet = bcadd($totalNet, $netPay, 2);
 
 
 <?php if ($showOther): ?>
- <td class="od-cell">
-  <?php if (!empty($odetail['rows'])): ?>
-    <div class="od-lines">
-      <?php foreach ($odetail['rows'] as $it): ?>
-        <div><?= htmlspecialchars($it->description) ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
-      <?php endforeach; ?>
-    </div>
- 
-  <?php endif; ?>
-</td>
-
-
+  <td class="od-cell">
+    <?php if (!empty($odetail['rows'])): ?>
+      <div class="od-lines">
+        <?php foreach ($odetail['rows'] as $it): ?>
+          <div><?= htmlspecialchars($it->description) ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
+        <?php endforeach; ?>
+      </div>
+    <?php else: ?>
+      <?= displayAmount($other_deduction) ?>
+    <?php endif; ?>
+  </td>
 <?php endif; ?>
+ 
 
 
 
