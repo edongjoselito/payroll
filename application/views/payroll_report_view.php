@@ -141,6 +141,7 @@ function computePayroll($row, $start, $end) {
     ];
 }
 ?>
+
 <?php
 function fetch_other_deduction_lines($personnelID, $start, $end, $settingsID = null) {
     static $cache = [];
@@ -188,6 +189,60 @@ function fetch_other_deduction_lines($personnelID, $start, $end, $settingsID = n
 
     return $cache[$key] = ['rows' => $rows, 'total' => $total];
 }
+function fetch_gov_deduction_lines($personnelID, $start, $end, $settingsID = null) {
+    static $cache = [];
+    $key = "GOV|{$personnelID}|{$start}|{$end}|{$settingsID}";
+    if (isset($cache[$key])) return $cache[$key];
+
+    $CI =& get_instance();
+    $db = $CI->db;
+
+    $db->select('description, amount, date, deduct_from, deduct_to')
+       ->from('government_deductions')
+       ->where('personnelID', $personnelID);
+
+    $db->group_start()
+          ->group_start()
+              ->where("deduct_from IS NOT NULL AND deduct_from <> '0000-00-00'", null, false)
+              ->where("deduct_to   IS NOT NULL AND deduct_to   <> '0000-00-00'", null, false)
+              ->where('deduct_from <=', $end)
+              ->where('deduct_to >=', $start)
+          ->group_end()
+          ->or_group_start()
+              ->group_start()->where("deduct_from IS NULL OR deduct_from = '0000-00-00'", null, false)->group_end()
+              ->group_start()->where("deduct_to   IS NULL OR deduct_to   = '0000-00-00'", null, false)->group_end()
+              ->where('date >=', $start)
+              ->where('date <=', $end)
+          ->group_end()
+       ->group_end();
+
+    if (!empty($settingsID)) {
+        $db->where('settingsID', $settingsID);
+    }
+
+    $rows = $db->get()->result();
+
+    $by  = ['SSS'=>[], 'Pag-IBIG'=>[], 'PhilHealth'=>[]];
+    $tot = ['SSS'=>0.0, 'Pag-IBIG'=>0.0, 'PhilHealth'=>0.0];
+
+    foreach ($rows as $r) {
+        // normalize: remove non-letters, compare upper-case
+        $norm = strtoupper(preg_replace('/[^A-Z]/', '', (string)$r->description));
+        if (strpos($norm, 'SSS') !== false) {
+            $by['SSS'][] = $r;             $tot['SSS'] += (float)$r->amount;
+        } elseif (strpos($norm, 'PAGIBIG') !== false) {
+            $by['Pag-IBIG'][] = $r;        $tot['Pag-IBIG'] += (float)$r->amount;
+        } elseif (
+            strpos($norm, 'PHILHEALTH') !== false ||  // PhilHealth
+            strpos($norm, 'PHIC') !== false           // PHIC
+        ) {
+            $by['PhilHealth'][] = $r;      $tot['PhilHealth'] += (float)$r->amount;
+        }
+    }
+
+    return $cache[$key] = ['rows'=>$rows, 'by'=>$by, 'totals'=>$tot];
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -514,6 +569,16 @@ foreach ($attendance_data as $row) {
     if (!empty($row->gov_philhealth)) $showPHIC = true;
     if (!empty($row->loan)) $showLoan = true;
     if (!empty($row->other_deduction)) $showOther = true;
+}
+// If numeric fields are blank but there are gov rows, still show the columns
+if (!$showSSS || !$showPHIC) {
+    $settingsID = isset($project->settingsID) ? $project->settingsID : null;
+    foreach ($attendance_data as $r0) {
+      $g0 = fetch_gov_deduction_lines($r0->personnelID, $start, $end, $settingsID);
+      if (!$showSSS && !empty($g0['by']['SSS'])) $showSSS = true;
+      if (!$showPHIC && !empty($g0['by']['PhilHealth'])) $showPHIC = true;
+      if ($showSSS && $showPHIC) break;
+    }
 }
 
 // 🔐 Only show total deduction column if any deduction type has value
@@ -879,16 +944,24 @@ $sss = (string) ($row->gov_sss ?? 0);
 $pagibig = (string) ($row->gov_pagibig ?? 0);
 $philhealth = (string) ($row->gov_philhealth ?? 0);
 $loan = (string) ($row->loan ?? 0);
-// Pull detailed "Other Deduction" lines from cashadvance
 $settingsID = isset($project->settingsID) ? $project->settingsID : null;
 $odetail = fetch_other_deduction_lines($row->personnelID, $start, $end, $settingsID);
+$gdetail   = fetch_gov_deduction_lines($row->personnelID, $start, $end, $settingsID);
+$g_by_type = $gdetail['by'];
+$g_totals  = $gdetail['totals'];
 
-// Prefer your existing value if you're already passing it; otherwise use the computed total
+// fallback the numeric fields if blank
+$sss        = (string) ($sss        !== '' ? $sss        : $g_totals['SSS']);
+$pagibig    = (string) ($pagibig    !== '' ? $pagibig    : $g_totals['Pag-IBIG']);
+$philhealth = (string) ($philhealth !== '' ? $philhealth : $g_totals['PhilHealth']);
+
 $other_deduction = (string) (
     isset($row->other_deduction) && $row->other_deduction !== ''
         ? $row->other_deduction
         : $odetail['total']
 );
+
+
 
 $total_deduction = $cash_advance + $sss + $philhealth + $loan + $other_deduction;
 
@@ -899,7 +972,6 @@ if (bccomp($netPay, '0', 2) > 0) {
 }
 
 
-// Ensure integers to avoid float-string conversion warning
 $regTotalMinutes = intval($regTotalMinutes);
 $otTotalMinutes = intval($otTotalMinutes);
 
@@ -908,12 +980,10 @@ $formattedH = floor($totalMinutesFormatted / 60);
 $formattedM = $totalMinutesFormatted % 60;
 $customDecimal = $formattedH . '.' . str_pad($formattedM, 2, '0', STR_PAD_LEFT);
 
-// Also reformat these as strings to avoid PHP 8.1 float warnings
 $regFormatted = floor($regTotalMinutes / 60) . '.' . str_pad($regTotalMinutes % 60, 2, '0', STR_PAD_LEFT);
 $otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60, 2, '0', STR_PAD_LEFT);
 
 
-// FINAL AMOUNT COMPUTATION BEFORE DISPLAY
 $salary = bcadd(bcadd($regAmount, $otAmount, 2), bcadd($amountRegularHoliday, $amountSpecialHoliday, 2), 2);
 
 $total_deduction = bcadd(
@@ -958,11 +1028,39 @@ $totalNet = bcadd($totalNet, $netPay, 2);
   <td><?= displayAmount($cash_advance) ?></td>
 <?php endif; ?>
 <?php if ($showSSS): ?>
-  <td><?= displayAmount($sss) ?></td>
+  <td class="od-cell">
+    <?php if (!empty($g_by_type['SSS'])): ?>
+      <div class="od-lines">
+        <?php foreach ($g_by_type['SSS'] as $it): ?>
+          <div>• <?= htmlspecialchars($it->description ?: 'SSS') ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
+        <?php endforeach; ?>
+      </div>
+    <?php else: ?>
+      <?= displayAmount($sss) ?>
+    <?php endif; ?>
+  </td>
 <?php endif; ?>
+
 <?php if ($showPHIC): ?>
-  <td><?= displayAmount($philhealth) ?></td>
+  <td class="od-cell">
+    <?php if (!empty($g_by_type['PhilHealth'])): ?>
+      <div class="od-lines">
+        <?php foreach ($g_by_type['PhilHealth'] as $it): ?>
+          <div>• <?= htmlspecialchars($it->description ?: 'PhilHealth') ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
+        <?php endforeach; ?>
+      </div>
+    <?php elseif ((float)$philhealth > 0): ?>
+      <div class="od-lines">
+        <div>• PhilHealth — ₱<?= number_format((float)$philhealth, 2) ?></div>
+      </div>
+    <?php else: ?>
+      <?= displayAmount($philhealth) ?>
+    <?php endif; ?>
+  </td>
 <?php endif; ?>
+
+
+
 <?php if ($showLoan): ?>
   <td><?= displayAmount($loan) ?></td>
 <?php endif; ?>
