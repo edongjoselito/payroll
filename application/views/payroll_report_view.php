@@ -408,7 +408,34 @@ tbody td:nth-last-child(-n+10) { font-size: 10.5px; }
 th { background-color: #d9d9d9; font-weight: bold; }
 .absent { background-color: #f4cccc; color: #000; }
 
-.scrollable-wrapper { overflow-x: auto; width: 100%; flex-grow: 1; }
+.scrollable-wrapper {
+  width: 100%;
+  flex-grow: 1;
+  overflow-x: hidden;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+}
+
+#bottomScroller {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0; 
+  height: 16px;  
+  overflow-x: auto;
+  overflow-y: hidden;
+  z-index: 9999; 
+}
+
+#bottomScroller .sizer { height: 1px; }
+
+@media screen {
+  .print-container { padding-bottom: 18px; }
+}
+
+@media print {
+  #bottomScroller { display: none !important; }
+}
 
 .header-box {
   display: flex;
@@ -608,7 +635,8 @@ th { background-color: #d9d9d9; font-weight: bold; }
 </div>
 
 
-<div class="scrollable-wrapper">
+<div class="scrollable-wrapper" id="mainScroll">
+
   <?php
 $hasRegularHoliday = false;
 $hasSpecialHoliday = false;
@@ -1665,7 +1693,9 @@ $totalNet = bcadd($totalNet, $netPay, 2);
 
   </div>
 </div>
-
+<div id="bottomScroller" class="no-print" aria-hidden="true">
+  <div class="sizer"></div>
+</div>
 <br>
 <?php if (!empty($signatories) && $show_signatories): ?>
 <div class="row mt-5 signature">
@@ -1720,5 +1750,49 @@ function printAllPayslips() {
 </script>
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+(function () {
+  const real = document.getElementById('mainScroll');
+  const fake = document.getElementById('bottomScroller');
+  if (!real || !fake) return;
+  const sizer = fake.querySelector('.sizer');
+
+  let syncing = false;
+
+  function setWidths() {
+    // Match proxy width to real content width
+    sizer.style.width = real.scrollWidth + 'px';
+    // Show/hide proxy if not needed
+    const needs = real.scrollWidth > real.clientWidth + 1;
+    fake.style.display = needs ? 'block' : 'none';
+    if (needs) fake.scrollLeft = real.scrollLeft;
+  }
+
+  function syncFromReal() {
+    if (syncing) return;
+    syncing = true;
+    fake.scrollLeft = real.scrollLeft;
+    syncing = false;
+  }
+
+  function syncFromFake() {
+    if (syncing) return;
+    syncing = true;
+    real.scrollLeft = fake.scrollLeft;
+    syncing = false;
+  }
+
+  // Wire up events
+  real.addEventListener('scroll', syncFromReal, { passive: true });
+  fake.addEventListener('scroll', syncFromFake, { passive: true });
+  window.addEventListener('resize', setWidths);
+
+  // Initial pass (after layout)
+  window.addEventListener('load', setWidths);
+  // In case fonts/layout shift shortly after load
+  setTimeout(setWidths, 50);
+})();
+</script>
+
 </body>
 </html>
