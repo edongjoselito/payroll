@@ -270,7 +270,9 @@ if ($success || $error):
     <option value="PhilHealth"></option>
     <option value="Pag-IBIG"></option>
   </datalist>
-  <small class="form-text text-muted">Type any description you want shown in payroll.</small>
+  <small class="form-text text-muted"><strong>NOTE:</strong> always include Philhealth , SSS , Pag-IBIG before your comment to reflect at payroll.</small>
+    <small class="form-text text-muted"><strong>EXAMPLE:</strong> PhilHealth - Month of June , SSS - Month of July , Pag-IBIG - Month of August ,</small>
+
 </div>
 
                     <div class="form-row">
