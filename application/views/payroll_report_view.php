@@ -583,7 +583,16 @@ th { background-color: #d9d9d9; font-weight: bold; }
     padding: 20px;
     box-sizing: border-box;
   }
-  
+
+
+}
+@media print {
+  html body, html body * { visibility: visible !important; }
+
+  .no-print, .btn, .modal, .modal-backdrop {
+    visibility: hidden !important;
+    display: none !important;
+  }
 }
 </style>
 
@@ -620,7 +629,7 @@ th { background-color: #d9d9d9; font-weight: bold; }
   </div>
 
   <div class="print-button no-print">
-    <button onclick="window.print()" class="btn btn-primary btn-sm">
+<button onclick="$('.modal').modal('hide'); setTimeout(() => window.print(), 250);" class="btn btn-primary btn-sm">
       <i class="fas fa-print"></i> Print Payroll
     </button>
      <div class="print-button no-print mt-2">
@@ -1248,19 +1257,72 @@ $totalNet = bcadd($totalNet, $netPay, 2);
 <?php endif; ?>
 </tr>
 <!-- Payslip Modal -->
-<?php
-?>
-<div class="modal fade" id="payslipModal<?= $ln ?>" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-lg">
+<div class="modal fade" id="payslipModal<?= $ln ?>" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md">
     <div class="modal-content" id="printablePayslip<?= $ln ?>">
-      <div class="modal-header" style="background: #fff; border-bottom: 1px solid #ddd;">
 
-        <h5 class="modal-title">Payslip - <?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></h5>
+      <!-- SCREEN-ONLY styles scoped to this modal -->
+      <style>
+        /* Wrap everything in the modal ID to avoid leaking styles */
+        #payslipModal<?= $ln ?> .payslip-card{
+          max-width: 520px;
+          margin: 0 auto;
+          padding: 14px 6px 2px 6px;
+        }
+        #payslipModal<?= $ln ?> .modal-header{
+          background:#fff !important;
+          border-bottom:1px solid #ddd;
+          padding: .6rem .9rem;
+        }
+        #payslipModal<?= $ln ?> .modal-title{
+          font-weight:700; color:#2b2b2b; font-size: 1.05rem;
+        }
+        #payslipModal<?= $ln ?> .close{
+          color:#333 !important; opacity:1 !important; text-shadow:none; font-size:26px; line-height:1;
+        }
 
-        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+        /* Info rows */
+        #payslipModal<?= $ln ?> .info-row{
+          display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
+          margin:3px 0;
+        }
+        #payslipModal<?= $ln ?> .info-row .label{ font-weight:600; min-width:110px; }
+        #payslipModal<?= $ln ?> .info-row .value{ flex:1; text-align:right; }
+
+        /* Section headers & lists */
+        #payslipModal<?= $ln ?> .section-title{
+          font-weight:700; border-bottom:1px solid #e5e7eb; padding-bottom:6px; margin:12px 0 8px;
+          font-size:.95rem;
+        }
+        #payslipModal<?= $ln ?> ul{ list-style:none; padding:0; margin:0; }
+        #payslipModal<?= $ln ?> li{ padding:4px 0; }
+        #payslipModal<?= $ln ?> .line{
+          display:flex; justify-content:space-between; gap:12px; align-items:baseline;
+        }
+        #payslipModal<?= $ln ?> .amt{
+          font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap;
+        }
+        #payslipModal<?= $ln ?> .sublist{
+          margin:4px 0 4px 10px; padding-left:10px; border-left:2px solid #f1f5f9;
+        }
+        #payslipModal<?= $ln ?> .total-line{ border-top:1px solid #e5e7eb; margin-top:6px; padding-top:6px; }
+        #payslipModal<?= $ln ?> .netpay-box{ border-top:2px solid #e5e7eb; margin-top:12px; padding-top:10px; }
+
+        /* Keep the modal compact on small screens */
+        @media (max-width: 575.98px){
+          #payslipModal<?= $ln ?> .modal-dialog{ margin: .5rem; }
+          #payslipModal<?= $ln ?> .payslip-card{ max-width: 100%; }
+        }
+        /* IMPORTANT: no @media print here. Printing uses printPayslip() in a clean window. */
+      </style>
+
+      <div class="modal-header">
+        <h5 class="modal-title">Payslip — <?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
       </div>
 
       <?php
+        // ===== Recompute rates and line items (same logic you already had) =====
         $rateTypeRaw   = (string)($row->rateType ?? '');
         $rateTypeLower = strtolower($rateTypeRaw);
         $rateAmountNum = (float)($row->rateAmount ?? 0);
@@ -1285,23 +1347,21 @@ $totalNet = bcadd($totalNet, $netPay, 2);
 
         $otRate = $hourlyRate * 1.0;
 
-        $regHours = (float)$regFormatted;
+        $regHours = (float)$regFormatted;   // from your row computations above
         $otHours  = (float)$otFormatted;
 
         $regAmount = $regHours * $hourlyRate;
         $otAmount  = $otHours  * $otRate;
 
         $regularHolidayPay = 0.0;
-        if (isset($regular_holiday_pay)) {
-          $regularHolidayPay = (float)$regular_holiday_pay;
-        } elseif (isset($holiday_pay)) {
-          $regularHolidayPay = (float)$holiday_pay;
-        }
+        if (isset($regular_holiday_pay))       $regularHolidayPay = (float)$regular_holiday_pay;
+        elseif (isset($holiday_pay))           $regularHolidayPay = (float)$holiday_pay;
 
         $salary          = (float)($salary ?? 0);
         $cash_advance    = (float)($cash_advance ?? 0);
         $sss             = (float)($sss ?? 0);
         $philhealth      = (float)($philhealth ?? 0);
+        $pagibig         = (float)($pagibig ?? 0);
         $loan            = (float)($loan ?? 0);
         $other_deduction = (float)($other_deduction ?? 0);
         $total_deduction = (float)($total_deduction ?? 0);
@@ -1315,173 +1375,190 @@ $totalNet = bcadd($totalNet, $netPay, 2);
           ($totalDays > 0) ||
           ($salary > 0);
 
-       $hasDeductionsLines =
-  ($cash_advance > 0) ||
-  ($sss > 0) ||
-  ($philhealth > 0) ||
-  ($pagibig > 0) ||
-  ($loan > 0) ||
-  ($other_deduction > 0) ||
-  ($total_deduction > 0);
-
+        $hasDeductionsLines =
+          ($cash_advance > 0) ||
+          ($sss > 0) ||
+          ($philhealth > 0) ||
+          ($pagibig > 0) ||
+          ($loan > 0) ||
+          ($other_deduction > 0) ||
+          ($total_deduction > 0);
 
         $hasAnyData = $hasEarningsLines || $hasDeductionsLines || ($netPay > 0);
       ?>
 
-      <div class="modal-body p-4"<?= $hasAnyData ? '' : ' style="display:none;"' ?>>
-        <div class="row">
-          <div class="col-md-6">
-            <p><strong>Employee:</strong> <?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></p>
-            <p><strong>Position:</strong> <?= htmlspecialchars($row->position) ?></p>
+      <div class="modal-body pt-2 pb-3 px-3"<?= $hasAnyData ? '' : ' style="display:none;"' ?>>
+        <div class="payslip-card">
 
-            <?php if ($rateTypeLower === 'month'): ?>
-              <p><strong>Rate:</strong> ₱<?= number_format($rateAmountNum, 2) ?> / Month</p>
-              <?php if ($dailyRate > 0): ?><p><strong>Daily Rate:</strong> ₱<?= number_format($dailyRate, 2) ?></p><?php endif; ?>
-              <?php if ($hourlyRate > 0): ?><p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p><?php endif; ?>
-              <?php if ($otRate > 0): ?><p><strong>Overtime Rate:</strong> ₱<?= number_format($otRate, 2) ?></p><?php endif; ?>
-            <?php elseif (in_array($rateTypeLower, ['bi-month','bi-monthly','bimonth','bi-month '], true)): ?>
-              <p><strong>Rate:</strong> ₱<?= number_format($rateAmountNum, 2) ?> / Bi-Month</p>
-              <?php if ($dailyRate > 0): ?><p><strong>Assumed Daily Rate (15 days):</strong> ₱<?= number_format($dailyRate, 2) ?></p><?php endif; ?>
-              <?php if ($hourlyRate > 0): ?><p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p><?php endif; ?>
-              <?php if ($otRate > 0): ?><p><strong>Overtime Rate:</strong> ₱<?= number_format($otRate, 2) ?></p><?php endif; ?>
-            <?php elseif ($rateTypeLower === 'day'): ?>
-              <p><strong>Rate:</strong> ₱<?= number_format($rateAmountNum, 2) ?> / Day</p>
-              <?php if ($hourlyRate > 0): ?><p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p><?php endif; ?>
-              <?php if ($otRate > 0): ?><p><strong>Overtime Rate:</strong> ₱<?= number_format($otRate, 2) ?></p><?php endif; ?>
-            <?php else: ?>
-              <p><strong>Rate:</strong> ₱<?= number_format($rateAmountNum, 2) ?> / Hour</p>
-              <?php if ($hourlyRate > 0): ?><p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p><?php endif; ?>
-              <?php if ($otRate > 0): ?><p><strong>Overtime Rate:</strong> ₱<?= number_format($otRate, 2) ?></p><?php endif; ?>
+          <!-- Top info -->
+          <div class="info-row">
+            <div class="label">Employee</div>
+            <div class="value"><?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></div>
+          </div>
+          <div class="info-row">
+            <div class="label">Position</div>
+            <div class="value"><?= htmlspecialchars($row->position) ?></div>
+          </div>
+          <div class="info-row">
+            <div class="label">Period</div>
+            <div class="value"><?= date('F d', strtotime($start)) ?> – <?= date('F d, Y', strtotime($end)) ?></div>
+          </div>
+          <div class="info-row">
+            <div class="label">Printed</div>
+            <div class="value"><?= date('F d, Y') ?></div>
+          </div>
+
+          <!-- Rate block -->
+          <div class="section-title">Rates</div>
+          <ul>
+            <li class="line">
+              <span>Base Rate (<?= htmlspecialchars(ucfirst($rateTypeLower === 'bi-month' ? 'bi-month' : $rateTypeLower)) ?>)</span>
+              <span class="amt">₱<?= number_format($rateAmountNum, 2) ?></span>
+            </li>
+            <?php if ($dailyRate > 0): ?>
+              <li class="line"><span>Daily Rate</span><span class="amt">₱<?= number_format($dailyRate, 2) ?></span></li>
+            <?php endif; ?>
+            <?php if ($hourlyRate > 0): ?>
+              <li class="line"><span>Hourly Rate</span><span class="amt">₱<?= number_format($hourlyRate, 2) ?></span></li>
+            <?php endif; ?>
+            <?php if ($otRate > 0): ?>
+              <li class="line"><span>Overtime Rate</span><span class="amt">₱<?= number_format($otRate, 2) ?></span></li>
+            <?php endif; ?>
+          </ul>
+
+          <!-- Earnings & Deductions -->
+          <div class="row mt-2">
+            <?php if ($hasEarningsLines): ?>
+            <div class="col-12 col-md-6">
+              <div class="section-title">Earnings</div>
+              <ul>
+                <?php if ($regHours > 0 && $regAmount > 0): ?>
+                  <li class="line">
+                    <span>Regular Time (<?= number_format($regHours, 2) ?>h × ₱<?= number_format($hourlyRate, 2) ?>/h)</span>
+                    <span class="amt">₱<?= number_format($regAmount, 2) ?></span>
+                  </li>
+                <?php endif; ?>
+
+                <?php if ($otHours > 0 && $otAmount > 0): ?>
+                  <li class="line">
+                    <span>Overtime (<?= number_format($otHours, 2) ?>h × ₱<?= number_format($otRate, 2) ?>/h)</span>
+                    <span class="amt">₱<?= number_format($otAmount, 2) ?></span>
+                  </li>
+                <?php endif; ?>
+
+                <?php if ($regularHolidayPay > 0): ?>
+                  <li class="line">
+                    <span>Regular Holiday</span>
+                    <span class="amt">₱<?= number_format($regularHolidayPay, 2) ?></span>
+                  </li>
+                <?php endif; ?>
+
+                <?php if ($totalDays > 0): ?>
+                  <li>Total Days: <?= number_format($totalDays, 2) ?></li>
+                <?php endif; ?>
+
+                <?php if ($salary > 0): ?>
+                  <li class="line total-line">
+                    <span><strong>Gross Salary</strong></span>
+                    <span class="amt"><strong>₱<?= number_format($salary, 2) ?></strong></span>
+                  </li>
+                <?php endif; ?>
+              </ul>
+            </div>
             <?php endif; ?>
 
+            <?php if ($hasDeductionsLines): ?>
+            <div class="col-12 col-md-6">
+              <div class="section-title">Deductions</div>
+              <ul>
+                <?php if ($cash_advance > 0): ?>
+                  <li class="line"><span>Cash Advance</span><span class="amt">₱<?= number_format($cash_advance, 2) ?></span></li>
+                <?php endif; ?>
+
+                <?php if ($sss > 0): ?>
+                  <li class="line"><span>SSS (Gov’t)</span><span class="amt">₱<?= number_format($sss, 2) ?></span></li>
+                  <?php if (!empty($gdetail['by']['SSS'])): ?>
+                    <ul class="sublist">
+                      <?php foreach ($gdetail['by']['SSS'] as $it): ?>
+                        <li class="line"><span><?= htmlspecialchars($it->description ?: 'SSS') ?></span><span class="amt">₱<?= number_format((float)$it->amount, 2) ?></span></li>
+                      <?php endforeach; ?>
+                    </ul>
+                  <?php endif; ?>
+                <?php endif; ?>
+
+                <?php if ($philhealth > 0): ?>
+                  <li class="line"><span>PHIC (Gov’t)</span><span class="amt">₱<?= number_format($philhealth, 2) ?></span></li>
+                  <?php if (!empty($gdetail['by']['PhilHealth'])): ?>
+                    <ul class="sublist">
+                      <?php foreach ($gdetail['by']['PhilHealth'] as $it): ?>
+                        <li class="line"><span><?= htmlspecialchars($it->description ?: 'PhilHealth') ?></span><span class="amt">₱<?= number_format((float)$it->amount, 2) ?></span></li>
+                      <?php endforeach; ?>
+                    </ul>
+                  <?php endif; ?>
+                <?php endif; ?>
+
+                <?php if ($pagibig > 0): ?>
+                  <li class="line"><span>Pag-IBIG (Gov’t)</span><span class="amt">₱<?= number_format($pagibig, 2) ?></span></li>
+                  <?php if (!empty($gdetail['by']['Pag-IBIG'])): ?>
+                    <ul class="sublist">
+                      <?php foreach ($gdetail['by']['Pag-IBIG'] as $it): ?>
+                        <li class="line"><span><?= htmlspecialchars($it->description ?: 'Pag-IBIG') ?></span><span class="amt">₱<?= number_format((float)$it->amount, 2) ?></span></li>
+                      <?php endforeach; ?>
+                    </ul>
+                  <?php endif; ?>
+                <?php endif; ?>
+
+                <?php if ($loan > 0): ?>
+                  <li class="line"><span>Loan</span><span class="amt"></li>
+                  <?php if (!empty($ldetail['rows'])): ?>
+                    <ul class="sublist">
+                      <?php foreach ($ldetail['rows'] as $it): ?>
+                        <li class="line"><span><?= htmlspecialchars($it->description ?: 'Loan') ?></span><span class="amt">₱<?= number_format((float)$it->amount, 2) ?></span></li>
+                      <?php endforeach; ?>
+                    </ul>
+                  <?php endif; ?>
+                <?php endif; ?>
+
+                <?php if ($other_deduction > 0): ?>
+                  <li class="line"><span>Other Deduction</span><span class="amt">₱<?= number_format($other_deduction, 2) ?></span></li>
+                <?php endif; ?>
+
+                <?php if (!empty($odetail['rows'])): ?>
+                  <ul class="sublist">
+                    <?php foreach ($odetail['rows'] as $it): ?>
+                      <li class="line"><span><?= htmlspecialchars($it->description) ?></span><span class="amt">₱<?= number_format((float)$it->amount, 2) ?></span></li>
+                    <?php endforeach; ?>
+                  </ul>
+                <?php endif; ?>
+
+                <?php if ($total_deduction > 0): ?>
+                  <li class="line total-line">
+                    <span><strong>Total Deduction</strong></span>
+                    <span class="amt"><strong>₱<?= number_format($total_deduction, 2) ?></strong></span>
+                  </li>
+                <?php endif; ?>
+              </ul>
+            </div>
+            <?php endif; ?>
           </div>
-          <div class="col-md-6 text-right">
-            <p><strong>Period:</strong><br><?= date('F d', strtotime($start)) ?> - <?= date('F d, Y', strtotime($end)) ?></p>
-            <p><strong>Printed:</strong> <?= date('F d, Y') ?></p>
-          </div>
-        </div>
-        <hr>
 
-        <div class="row">
-          <?php if ($hasEarningsLines): ?>
-          <div class="col-md-6">
-            <h6>Earnings</h6>
-            <ul class="list-unstyled">
-              <?php if ($regHours > 0 && $regAmount > 0): ?>
-                <li>
-                  Regular Time: <?= number_format($regHours, 2) ?> hrs × ₱<?= number_format($hourlyRate, 2) ?>/hr
-                  = <strong><?= number_format($regAmount, 2) ?></strong>
-                </li>
-              <?php endif; ?>
-
-              <?php if ($otHours > 0 && $otAmount > 0): ?>
-                <li>
-                  Overtime: <?= number_format($otHours, 2) ?> hrs × ₱<?= number_format($otRate, 2) ?>/hr
-                  = <strong><?= number_format($otAmount, 2) ?></strong>
-                </li>
-              <?php endif; ?>
-
-              <?php if ($regularHolidayPay > 0): ?>
-                <li>Regular Holiday: <strong><?= number_format($regularHolidayPay, 2) ?></strong></li>
-              <?php endif; ?>
-
-              <?php if ($totalDays > 0): ?>
-                <li>Total Days: <?= number_format($totalDays, 2) ?></li>
-              <?php endif; ?>
-
-              <?php if ($salary > 0): ?>
-                <li><strong>Gross Salary: <?= number_format($salary, 2) ?></strong></li>
-              <?php endif; ?>
-            </ul>
-          </div>
+          <?php if ($netPay > 0): ?>
+            <div class="text-right netpay-box">
+              <h5 class="mb-2"><strong>Net Pay: <span class="amt">₱<?= number_format($netPay, 2) ?></span></strong></h5>
+              <button onclick="printPayslip('printablePayslip<?= $ln ?>')" class="btn btn-sm btn-secondary">
+                <i class="fas fa-print"></i> Print this payslip
+              </button>
+            </div>
           <?php endif; ?>
 
-        <div class="col-md-6">
-  <h6>Deductions</h6>
-  <ul class="list-unstyled">
-    <?php if ($cash_advance > 0): ?>
-      <li>Cash Advance: <?= number_format($cash_advance, 2) ?></li>
-    <?php endif; ?>
-
-    <?php if ($sss > 0): ?>
-      <li>SSS (Gov’t): <?= number_format($sss, 2) ?></li>
-      <?php if (!empty($gdetail['by']['SSS'])): ?>
-        <ul class="deduction-sublist list-unstyled" style="margin-left:12px;">
-          <?php foreach ($gdetail['by']['SSS'] as $it): ?>
-            <li><?= htmlspecialchars($it->description ?: 'SSS') ?> — ₱<?= number_format((float)$it->amount, 2) ?></li>
-          <?php endforeach; ?>
-        </ul>
-      <?php endif; ?>
-    <?php endif; ?>
-
-    <?php if ($philhealth > 0): ?>
-      <li>PHIC (Gov’t): <?= number_format($philhealth, 2) ?></li>
-      <?php if (!empty($gdetail['by']['PhilHealth'])): ?>
-        <ul class="deduction-sublist list-unstyled" style="margin-left:12px;">
-          <?php foreach ($gdetail['by']['PhilHealth'] as $it): ?>
-            <li><?= htmlspecialchars($it->description ?: 'PhilHealth') ?> — ₱<?= number_format((float)$it->amount, 2) ?></li>
-          <?php endforeach; ?>
-        </ul>
-      <?php endif; ?>
-    <?php endif; ?>
-<?php if ($pagibig > 0): ?>
-  <li>Pag-IBIG (Gov’t): <?= number_format($pagibig, 2) ?></li>
-  <?php if (!empty($gdetail['by']['Pag-IBIG'])): ?>
-    <ul class="deduction-sublist list-unstyled" style="margin-left:12px;">
-      <?php foreach ($gdetail['by']['Pag-IBIG'] as $it): ?>
-        <li><?= htmlspecialchars($it->description ?: 'Pag-IBIG') ?> — ₱<?= number_format((float)$it->amount, 2) ?></li>
-      <?php endforeach; ?>
-    </ul>
-  <?php endif; ?>
-<?php endif; ?>
-
-    <?php if ($loan > 0): ?>
-      <li>Loan: <?= number_format($loan, 2) ?></li>
-      <?php if (!empty($ldetail['rows'])): ?>
-        <ul class="deduction-sublist list-unstyled" style="margin-left:12px;">
-          <?php foreach ($ldetail['rows'] as $it): ?>
-            <li><?= htmlspecialchars($it->description ?: 'Loan') ?> — ₱<?= number_format((float)$it->amount, 2) ?></li>
-          <?php endforeach; ?>
-        </ul>
-      <?php endif; ?>
-    <?php endif; ?>
-
-    <?php if ($other_deduction > 0): ?>
-      <li>Other Deduction: <?= number_format($other_deduction, 2) ?></li>
-    <?php endif; ?>
-
-    <?php if (!empty($odetail['rows'])): ?>
-      <ul class="deduction-sublist list-unstyled" style="margin-left:12px;">
-        <?php foreach ($odetail['rows'] as $it): ?>
-          <li><?= htmlspecialchars($it->description) ?> — ₱<?= number_format((float)$it->amount, 2) ?></li>
-        <?php endforeach; ?>
-      </ul>
-    <?php endif; ?>
-  </ul>
-</div>
-
-
-
-
-              <?php if ($total_deduction > 0): ?>
-                <li><strong>Total Deduction: <?= number_format($total_deduction, 2) ?></strong></li>
-              <?php endif; ?>
-
-            </ul>
-          </div>
         </div>
-
-        <?php if ($netPay > 0): ?>
-          <hr>
-          <div class="text-right">
-            <h5><strong>Net Pay: <?= number_format($netPay, 2) ?></strong></h5>
-            <button onclick="printPayslip('printablePayslip<?= $ln ?>')" class="btn btn-sm btn-secondary mt-2"><i class="fas fa-print"></i> Print</button>
-          </div>
-        <?php endif; ?>
       </div>
+
     </div>
   </div>
 </div>
+
+
 
 <?php endforeach; ?>
 <tr style="background:#f3f3f3; font-weight:600;">
@@ -1789,14 +1866,127 @@ $totalNet = bcadd($totalNet, $netPay, 2);
 </div>
 <script>
 function printPayslip(elementId) {
-    var printContents = document.getElementById(elementId).innerHTML;
-    var originalContents = document.body.innerHTML;
-    document.body.innerHTML = printContents;
-    window.print();
-    document.body.innerHTML = originalContents;
-    location.reload();
+  const root = document.getElementById(elementId);
+  if (!root) return;
+
+  const title = (root.querySelector('.modal-title')?.textContent || 'Payslip').trim();
+  const card  = root.querySelector('.payslip-card') || root;
+
+  const css = `
+    /* Page setup — A5 portrait, tweak to A4 by changing size */
+    @page { size: A5 portrait; margin: 10mm; }
+    html, body {
+      background: #f3f4f6;
+      color: #111827;
+      font: 12px/1.45 "Segoe UI","Calibri","Arial",sans-serif;
+    }
+
+    .slip {
+      width: 120mm;  
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 12mm;
+      box-sizing: border-box;
+    }
+
+    /* Header */
+    .slip-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 8mm;
+    }
+    .slip-title { font-weight: 700; font-size: 16px; }
+    .slip-date  { color: #6b7280; font-size: 11px; }
+
+    /* Transform your existing markup into a tidy layout */
+    .section-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .02em;
+      color: #374151;
+      margin: 10px 0 6px 0;
+      padding-bottom: 4px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    /* Info rows (Employee, Position, Period, Printed) */
+    .info-row { 
+      display: grid;
+      grid-template-columns: max-content 1fr;
+      gap: 4mm 6mm;
+      margin: 2px 0;
+    }
+    .info-row .label { color:#6b7280; min-width: 90px; }
+    .info-row .value { text-align: right; }
+
+    /* Lists -> clean lines with aligned amounts */
+    ul { list-style: none; padding: 0; margin: 0; }
+    li { padding: 2px 0; }
+    .line {
+      display: grid;
+      grid-template-columns: 1fr max-content;
+      align-items: baseline;
+      gap: 8mm;
+    }
+    .amt {
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+    .sublist {
+      margin: 2mm 0 2mm 0;
+      padding-left: 3mm;
+      border-left: 2px solid #f1f5f9;
+    }
+    .total-line { 
+      border-top: 1px solid #e5e7eb; 
+      margin-top: 3mm; padding-top: 3mm; 
+    }
+    .netpay-box {
+      border-top: 2px solid #111827;
+      margin-top: 6mm; padding-top: 4mm;
+      display: grid; grid-template-columns: 1fr max-content; align-items: baseline;
+    }
+    .netpay-box .label { font-weight: 700; }
+    .netpay-box .value { font-size: 14px; font-weight: 800; }
+    
+    /* Kill any screen-only UI that might slip in */
+    .btn, .modal-backdrop { display: none !important; }
+  `;
+
+  const content = `
+    <div class="slip">
+      <div class="slip-header">
+        <div class="slip-title">${title}</div>
+        <div class="slip-date">${new Date().toLocaleDateString()}</div>
+      </div>
+      ${card.innerHTML}
+    </div>
+  `;
+
+  const win = window.open('', '_blank', 'width=900,height=1000');
+  win.document.open();
+  win.document.write(`
+    <!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>${title}</title>
+        <style>${css}</style>
+      </head>
+      <body>${content}</body>
+    </html>
+  `);
+  win.document.close();
+  win.focus();
+  win.print();
+  win.close();
 }
 </script>
+
 <script>
 function printAllPayslips() {
   const originalContent = document.body.innerHTML;
