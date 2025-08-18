@@ -168,14 +168,23 @@ if ($success || $error):
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
               </div>
               <div class="modal-body">
-                <div class="form-group">
-                  <label>Description</label>
-                  <select name="description" class="form-control" required>
-                    <option value="SSS" <?= $row->description == 'SSS' ? 'selected' : '' ?>>SSS</option>
-                    <option value="PhilHealth" <?= $row->description == 'PhilHealth' ? 'selected' : '' ?>>PhilHealth</option>
-                    <option value="Pag-IBIG" <?= $row->description == 'Pag-IBIG' ? 'selected' : '' ?>>Pag-IBIG</option>
-                  </select>
-                </div>
+<div class="form-group">
+  <label>Description</label>
+  <input type="text"
+         name="description"
+         class="form-control"
+         value="<?= htmlspecialchars($row->description ?? '', ENT_QUOTES, 'UTF-8') ?>"
+         required
+         maxlength="150"
+         list="govt-desc-suggestions-<?= $row->id ?>">
+  <datalist id="govt-desc-suggestions-<?= $row->id ?>">
+    <option value="SSS"></option>
+    <option value="PhilHealth"></option>
+    <option value="Pag-IBIG"></option>
+  </datalist>
+  <small class="form-text text-muted">This exact text will appear in payroll.</small>
+</div>
+
                 <div class="form-row">
                   <div class="form-group col-md-6">
                     <label>Amount</label>
@@ -247,15 +256,23 @@ if ($success || $error):
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Description</label>
-                        <select name="description" class="form-control" required>
-                            <option value="">Select Type</option>
-                            <option value="SSS">SSS</option>
-                            <option value="PhilHealth">PhilHealth</option>
-                            <option value="Pag-IBIG">Pag-IBIG</option>
-                        </select>
-                    </div>
+<div class="form-group">
+  <label>Description</label>
+  <input type="text"
+         name="description"
+         class="form-control"
+         placeholder=""
+         required
+         maxlength="150"
+         list="govt-desc-suggestions">
+  <datalist id="govt-desc-suggestions">
+    <option value="SSS"></option>
+    <option value="PhilHealth"></option>
+    <option value="Pag-IBIG"></option>
+  </datalist>
+  <small class="form-text text-muted">Type any description you want shown in payroll.</small>
+</div>
+
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label>Amount</label>

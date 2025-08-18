@@ -223,24 +223,29 @@ function fetch_gov_deduction_lines($personnelID, $start, $end, $settingsID = nul
     $rows = $db->get()->result();
 
     $by  = ['SSS'=>[], 'Pag-IBIG'=>[], 'PhilHealth'=>[]];
-    $tot = ['SSS'=>0.0, 'Pag-IBIG'=>0.0, 'PhilHealth'=>0.0];
+$tot = ['SSS'=>0.0, 'Pag-IBIG'=>0.0, 'PhilHealth'=>0.0];
 
-    foreach ($rows as $r) {
-        // normalize: remove non-letters, compare upper-case
-        $norm = strtoupper(preg_replace('/[^A-Z]/', '', (string)$r->description));
-        if (strpos($norm, 'SSS') !== false) {
-            $by['SSS'][] = $r;             $tot['SSS'] += (float)$r->amount;
-        } elseif (strpos($norm, 'PAGIBIG') !== false) {
-            $by['Pag-IBIG'][] = $r;        $tot['Pag-IBIG'] += (float)$r->amount;
-        } elseif (
-            strpos($norm, 'PHILHEALTH') !== false ||  // PhilHealth
-            strpos($norm, 'PHIC') !== false           // PHIC
-        ) {
-            $by['PhilHealth'][] = $r;      $tot['PhilHealth'] += (float)$r->amount;
-        }
+foreach ($rows as $r) {
+    $desc = (string)($r->description ?? '');
+
+    $isSSS = (bool)preg_match('/\bSSS\b/i', $desc);
+
+    $isPagibig = (bool)preg_match('/\b(?:PAG\s*[-]?\s*IBIG|PAGIBIG|HDMF)\b/i', $desc);
+
+    $isPhilHealth = (bool)preg_match('/\b(?:PHIL\s*HEALTH|PHILHEALTH|PHIC)\b/i', $desc);
+
+    if ($isSSS) {
+        $by['SSS'][] = $r;            $tot['SSS']       += (float)$r->amount;
+    } elseif ($isPhilHealth) {
+        $by['PhilHealth'][] = $r;     $tot['PhilHealth'] += (float)$r->amount;
+    } elseif ($isPagibig) {
+        $by['Pag-IBIG'][] = $r;       $tot['Pag-IBIG']   += (float)$r->amount;
+    } else {
     }
+}
 
-    return $cache[$key] = ['rows'=>$rows, 'by'=>$by, 'totals'=>$tot];
+
+return $cache[$key] = ['rows'=>$rows, 'by'=>$by, 'totals'=>$tot];
 }
 function fetch_loan_lines($personnelID, $start, $end, $settingsID = null) {
     static $cache = [];
@@ -669,7 +674,7 @@ foreach ($attendance_data as $row) {
 }
 ?>
 <?php
-$showCA = $showSSS = $showPHIC = $showLoan = $showOther = false;
+$showCA = $showSSS = $showPHIC = $showPAGIBIG = $showLoan = $showOther = false;
 
 foreach ($attendance_data as $row) {
     if (!empty($row->ca_cashadvance)) $showCA = true;
@@ -677,23 +682,28 @@ foreach ($attendance_data as $row) {
     if (!empty($row->gov_philhealth)) $showPHIC = true;
     if (!empty($row->loan)) $showLoan = true;
     if (!empty($row->other_deduction)) $showOther = true;
+    if (!empty($row->gov_pagibig)) $showPAGIBIG = true;
+
 }
-if (!$showSSS || !$showPHIC) {
+if (!$showSSS || !$showPHIC || !$showPAGIBIG) {
     $settingsID = isset($project->settingsID) ? $project->settingsID : null;
     foreach ($attendance_data as $r0) {
       $g0 = fetch_gov_deduction_lines($r0->personnelID, $start, $end, $settingsID);
-      if (!$showSSS && !empty($g0['by']['SSS'])) $showSSS = true;
-      if (!$showPHIC && !empty($g0['by']['PhilHealth'])) $showPHIC = true;
-      if ($showSSS && $showPHIC) break;
+      if (!$showSSS && !empty($g0['by']['SSS']))           $showSSS = true;
+      if (!$showPHIC && !empty($g0['by']['PhilHealth']))   $showPHIC = true;
+      if (!$showPAGIBIG && !empty($g0['by']['Pag-IBIG']))  $showPAGIBIG = true;
+      if ($showSSS && $showPHIC && $showPAGIBIG) break;
     }
 }
+
 if (!$showLoan) {
     foreach ($attendance_data as $r0) {
         $ld0 = fetch_loan_lines($r0->personnelID, $start, $end, $settingsID);
         if (!empty($ld0['rows'])) { $showLoan = true; break; }
     }
 }
-$showTotalDeduction = $showCA || $showSSS || $showPHIC || $showLoan || $showOther;
+$showTotalDeduction = $showCA || $showSSS || $showPHIC || $showPAGIBIG || $showLoan || $showOther;
+
 ?>
 
 
@@ -726,6 +736,10 @@ $showTotalDeduction = $showCA || $showSSS || $showPHIC || $showLoan || $showOthe
 <?php if ($showPHIC): ?>
   <th rowspan="3">PHIC (Gov’t)</th>
 <?php endif; ?>
+<?php if ($showPAGIBIG): ?>
+  <th rowspan="3">Pag-IBIG (Gov’t)</th>
+<?php endif; ?>
+
 <?php if ($showLoan): ?>
   <th rowspan="3">Loan</th>
 <?php endif; ?>
@@ -821,10 +835,12 @@ $totalGross = 0;
 $totalCA = 0;
 $totalSSS = 0;
 $totalPHIC = 0;
+$totalPAGIBIG = 0;
 $totalLoan = 0;
 $totalOther = 0;
 $totalDeduction = 0;
 $totalNet = 0;
+
 
 $dateColumnCount = 0;
 $loopDate = strtotime($start);
@@ -1061,9 +1077,12 @@ $loan    = (string) ($loan !== '' ? $loan : $ldetail['total']);
 $g_by_type = $gdetail['by'];
 $g_totals  = $gdetail['totals'];
 
-$sss        = (string) ($sss        !== '' ? $sss        : $g_totals['SSS']);
-$pagibig    = (string) ($pagibig    !== '' ? $pagibig    : $g_totals['Pag-IBIG']);
-$philhealth = (string) ($philhealth !== '' ? $philhealth : $g_totals['PhilHealth']);
+// Use the computed government totals when the legacy per-row fields are blank OR zero
+$sss        = (string)((trim($sss)        !== '' && (float)$sss        > 0) ? $sss        : $g_totals['SSS']);
+$pagibig    = (string)((trim($pagibig)    !== '' && (float)$pagibig    > 0) ? $pagibig    : $g_totals['Pag-IBIG']);
+$philhealth = (string)((trim($philhealth) !== '' && (float)$philhealth > 0) ? $philhealth : $g_totals['PhilHealth']);
+
+
 
 
 $other_deduction = (string) (
@@ -1109,6 +1128,8 @@ $netPay = bcsub($salary, $total_deduction, 2);
 $totalGross = bcadd($totalGross, $salary, 2);
 $totalCA = bcadd($totalCA, $cash_advance, 2);
 $totalSSS = bcadd($totalSSS, $sss, 2);
+$totalPAGIBIG = bcadd($totalPAGIBIG, $pagibig, 2);
+
 $totalPHIC = bcadd($totalPHIC, $philhealth, 2);
 $totalLoan = bcadd($totalLoan, $loan, 2);
 $totalOther = bcadd($totalOther, $other_deduction, 2);
@@ -1166,6 +1187,23 @@ $totalNet = bcadd($totalNet, $netPay, 2);
       </div>
     <?php else: ?>
       <?= displayAmount($philhealth) ?>
+    <?php endif; ?>
+  </td>
+<?php endif; ?>
+<?php if ($showPAGIBIG): ?>
+  <td class="od-cell">
+    <?php if (!empty($g_by_type['Pag-IBIG'])): ?>
+      <div class="od-lines">
+        <?php foreach ($g_by_type['Pag-IBIG'] as $it): ?>
+          <div><?= htmlspecialchars($it->description ?: 'Pag-IBIG') ?> — ₱<?= number_format((float)$it->amount, 2) ?></div>
+        <?php endforeach; ?>
+      </div>
+    <?php elseif ((float)$pagibig > 0): ?>
+      <div class="od-lines">
+        <div>Pag-IBIG — ₱<?= number_format((float)$pagibig, 2) ?></div>
+      </div>
+    <?php else: ?>
+      <?= displayAmount($pagibig) ?>
     <?php endif; ?>
   </td>
 <?php endif; ?>
@@ -1285,13 +1323,15 @@ $totalNet = bcadd($totalNet, $netPay, 2);
           ($totalDays > 0) ||
           ($salary > 0);
 
-        $hasDeductionsLines =
-          ($cash_advance > 0) ||
-          ($sss > 0) ||
-          ($philhealth > 0) ||
-          ($loan > 0) ||
-          ($other_deduction > 0) ||
-          ($total_deduction > 0); 
+       $hasDeductionsLines =
+  ($cash_advance > 0) ||
+  ($sss > 0) ||
+  ($philhealth > 0) ||
+  ($pagibig > 0) ||
+  ($loan > 0) ||
+  ($other_deduction > 0) ||
+  ($total_deduction > 0);
+
 
         $hasAnyData = $hasEarningsLines || $hasDeductionsLines || ($netPay > 0);
       ?>
@@ -1392,6 +1432,16 @@ $totalNet = bcadd($totalNet, $netPay, 2);
         </ul>
       <?php endif; ?>
     <?php endif; ?>
+<?php if ($pagibig > 0): ?>
+  <li>Pag-IBIG (Gov’t): <?= number_format($pagibig, 2) ?></li>
+  <?php if (!empty($gdetail['by']['Pag-IBIG'])): ?>
+    <ul class="deduction-sublist list-unstyled" style="margin-left:12px;">
+      <?php foreach ($gdetail['by']['Pag-IBIG'] as $it): ?>
+        <li><?= htmlspecialchars($it->description ?: 'Pag-IBIG') ?> — ₱<?= number_format((float)$it->amount, 2) ?></li>
+      <?php endforeach; ?>
+    </ul>
+  <?php endif; ?>
+<?php endif; ?>
 
     <?php if ($loan > 0): ?>
       <li>Loan: <?= number_format($loan, 2) ?></li>
@@ -1454,6 +1504,10 @@ $totalNet = bcadd($totalNet, $netPay, 2);
   <?php if ($showPHIC): ?>
     <td><?= number_format((float)$totalPHIC, 2) ?></td>
   <?php endif; ?>
+  <?php if ($showPAGIBIG): ?>
+  <td><?= number_format((float)$totalPAGIBIG, 2) ?></td>
+<?php endif; ?>
+
   <?php if ($showLoan): ?>
     <td><?= number_format((float)$totalLoan, 2) ?></td>
   <?php endif; ?>
@@ -1499,13 +1553,28 @@ $totalNet = bcadd($totalNet, $netPay, 2);
 
     $salary          = (float)$pay['salary'];
     $cash_advance    = (float)$pay['cash_advance'];
-    $sss             = (float)$pay['sss'];
-    $pagibig         = (float)$pay['pagibig'];
-    $philhealth      = (float)$pay['philhealth'];
     $loan            = (float)$pay['loan'];
     $other_deduction = (float)$pay['other_deduction'];
-    $total_deduction = (float)$pay['total_deduction'];
-    $netPay          = (float)$pay['netPay'];
+
+    $g_totals_print = $gdetail_print['totals'] ?? ['SSS'=>0.0,'Pag-IBIG'=>0.0,'PhilHealth'=>0.0];
+
+    $sss        = (float)((isset($pay['sss'])        && (float)$pay['sss']        > 0) ? $pay['sss']        : $g_totals_print['SSS']);
+    $pagibig    = (float)((isset($pay['pagibig'])    && (float)$pay['pagibig']    > 0) ? $pay['pagibig']    : $g_totals_print['Pag-IBIG']);
+    $philhealth = (float)((isset($pay['philhealth']) && (float)$pay['philhealth'] > 0) ? $pay['philhealth'] : $g_totals_print['PhilHealth']);
+
+    if (!isset($pay['loan']) || (float)$pay['loan'] <= 0) {
+        $loan = (float)($ldetail_print['total'] ?? 0);
+    }
+    if (!isset($pay['other_deduction']) || (float)$pay['other_deduction'] <= 0) {
+        $other_deduction = (float)($odetail_print['total'] ?? 0);
+    }
+
+    $total_deduction = (float)bcadd(
+        bcadd(bcadd($cash_advance, $sss, 2), bcadd($pagibig, $philhealth, 2), 2),
+        bcadd($loan, $other_deduction, 2),
+        2
+    );
+    $netPay = (float)bcsub($salary, $total_deduction, 2);
 
     $regularHolidayPay = 0.0;
     if (isset($pay['regular_holiday_pay'])) {
@@ -1523,11 +1592,11 @@ $totalNet = bcadd($totalNet, $netPay, 2);
       $dailyRate  = ($workingDaysInMonth > 0) ? $rateAmount / $workingDaysInMonth : 0;
       $hourlyRate = ($dailyRate > 0) ? $dailyRate / 8 : 0;
     } elseif (in_array($rateTypeLower, ['bi-month','bi-monthly','bimonth','bi-month '], true)) {
-      $dailyRate  = 15 > 0 ? $rateAmount / 15 : 0;
-      $hourlyRate = ($dailyRate > 0) ? $dailyRate / 8 : 0;
+      $dailyRate  = $rateAmount / 15;
+      $hourlyRate = $dailyRate / 8;
     } elseif ($rateTypeLower === 'day') {
       $dailyRate  = $rateAmount;
-      $hourlyRate = ($rateAmount > 0) ? $rateAmount / 8 : 0;
+      $hourlyRate = $rateAmount / 8;
     } else {
       $hourlyRate = $rateAmount;
       $dailyRate  = $hourlyRate * 8;
@@ -1555,7 +1624,8 @@ $totalNet = bcadd($totalNet, $netPay, 2);
 
     $hasAnyData = $hasEarningsLines || $hasDeductionsLines || ($netPay > 0);
     if (!$hasAnyData) continue;
-  ?>
+?>
+
 
   <div class="print-card" style="page-break-inside: avoid; margin-bottom: 30px; padding: 20px; border: 1px solid #ddd;">
     <h4 style="margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 6px;">
@@ -1632,7 +1702,7 @@ $totalNet = bcadd($totalNet, $netPay, 2);
         <?php endif; ?>
 
         <?php if ($pagibig > 0): ?>
-          <p>Pag-IBIG (Gov’t): ₱<?= number_format($pagibig, 2) ?></p>
+          <p>Pag-IBIG (Gov’t):</p>
           <?php if (!empty($gdetail_print['by']['Pag-IBIG'])): ?>
             <div style="margin-left:12px; margin-top:2px;">
               <?php foreach ($gdetail_print['by']['Pag-IBIG'] as $it): ?>
@@ -1643,7 +1713,7 @@ $totalNet = bcadd($totalNet, $netPay, 2);
         <?php endif; ?>
 
         <?php if ($philhealth > 0): ?>
-          <p>PHIC (Gov’t): ₱<?= number_format($philhealth, 2) ?></p>
+          <p>PHIC (Gov’t):</p>
           <?php if (!empty($gdetail_print['by']['PhilHealth'])): ?>
             <div style="margin-left:12px; margin-top:2px;">
               <?php foreach ($gdetail_print['by']['PhilHealth'] as $it): ?>
