@@ -151,7 +151,6 @@ function fetch_other_deduction_lines($personnelID, $start, $end, $settingsID = n
     $CI =& get_instance();
     $db = $CI->db;
 
-    // Build query
     $db->select('description, amount, date, deduct_from, deduct_to')
        ->from('cashadvance')
        ->where('personnelID', $personnelID)
@@ -255,7 +254,6 @@ function fetch_loan_lines($personnelID, $start, $end, $settingsID = null) {
     $CI =& get_instance();
     $db = $CI->db;
 
-    // per-period amount priority
     $db->select("
         loan_description AS description,
         COALESCE(
@@ -268,12 +266,10 @@ function fetch_loan_lines($personnelID, $start, $end, $settingsID = null) {
     ", false)
     ->from('personnelloans')
     ->where('personnelID', $personnelID)
-    ->where('status', 1); // adjust if you use another active flag
+    ->where('status', 1);
 
-    // ---- DATE WINDOW LOGIC (all closed with group_end()) ----
     $db->group_start()
 
-        // A) start_date/end_date overlap
         ->group_start()
             ->where("(start_date IS NOT NULL AND start_date <> '0000-00-00')", null, false)
             ->where("(end_date   IS NOT NULL AND end_date   <> '0000-00-00')",   null, false)
@@ -281,7 +277,6 @@ function fetch_loan_lines($personnelID, $start, $end, $settingsID = null) {
             ->where('end_date   >=', $start)
         ->group_end()
 
-        // B) OR deduct_from/deduct_to overlap (when start/end are blank)
         ->or_group_start()
             ->where("(start_date IS NULL OR start_date = '0000-00-00')", null, false)
             ->where("(end_date   IS NULL OR end_date   = '0000-00-00')", null, false)
@@ -291,7 +286,6 @@ function fetch_loan_lines($personnelID, $start, $end, $settingsID = null) {
             ->where('deduct_to   >=', $start)
         ->group_end()
 
-        // C) OR no ranges at all but has a positive per-cutoff deduction (include to show description)
         ->or_group_start()
             ->where("(start_date IS NULL OR start_date = '0000-00-00')", null, false)
             ->where("(end_date   IS NULL OR end_date   = '0000-00-00')", null, false)
@@ -301,8 +295,6 @@ function fetch_loan_lines($personnelID, $start, $end, $settingsID = null) {
                 ->where("COALESCE(monthly_deduction,0) >", 0)
                 ->or_where("COALESCE(deduction_amount,0) >", 0)
             ->group_end()
-            // optionally ensure not fully paid:
-            // ->where("(is_paid = 0 OR is_paid IS NULL)", null, false)
         ->group_end()
 
     ->group_end();
@@ -593,6 +585,7 @@ th { background-color: #d9d9d9; font-weight: bold; }
   }
   
 }
+
 </style>
 
 

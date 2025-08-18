@@ -527,130 +527,199 @@ $data['attendance_data'] = $payroll;
 }
 public function view_payroll_batch()
 {
+    $this->load->model('Project_model');
     $this->load->model('SettingsModel');
+    $this->load->model('PayrollModel');
 
-    $batch_id = $this->input->get('batch_id');
-    list($projectID, $start, $end) = explode('|', $batch_id);
+    $batch_id  = (string)$this->input->get('batch_id');
+    $parts     = explode('|', $batch_id);
+    if (count($parts) !== 3) {
+        $this->session->set_flashdata('error', 'Invalid batch id.');
+        redirect('project/project_view');
+        return;
+    }
+
+    list($projectID, $start, $end) = $parts;
     $settingsID = $this->session->userdata('settingsID');
 
-    $data['project'] = $this->Project_model->getProjectDetails($projectID);
-    $data['start'] = $start;
-    $data['end'] = $end;
-    $data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
-    $data['show_signatories'] = true;
+    if (empty($projectID) || empty($start) || empty($end)) {
+        $this->session->set_flashdata('error', 'Missing project or date range.');
+        redirect('project/project_view');
+        return;
+    }
 
-    // ✅ Get saved payroll summary
-    $data['attendance_data'] = $this->Project_model->getSavedPayrollData($projectID, $start, $end, $settingsID);
-    usort($data['attendance_data'], function ($a, $b) {
-        $nameA = strtolower($a->last_name . ', ' . $a->first_name);
-        $nameB = strtolower($b->last_name . ', ' . $b->first_name);
-        return strcmp($nameA, $nameB);
-    });
+    $data['project']         = $this->Project_model->getProjectDetails($projectID);
+    $data['start']           = $start;
+    $data['end']             = $end;
+    $data['signatories']     = $this->SettingsModel->get_signatories($settingsID);
+    $data['show_signatories']= true;
 
-    // ✅ Get attendance logs per personnel/date
+    $payroll = $this->Project_model->getPayrollData($settingsID, $projectID, $start, $end);
+
     $this->db->select('personnelID, date, status, work_duration, overtime_hours');
     $this->db->from('attendance');
     $this->db->where('projectID', $projectID);
-    $this->db->where('DATE(date) >=', $start);
-    $this->db->where('DATE(date) <=', $end);
+    $this->db->where('date >=', $start);
+    $this->db->where('date <=', $end);
     $this->db->where('settingsID', $settingsID);
-    $logs_result = $this->db->get()->result();
+    $daily_logs = $this->db->get()->result();
 
     $logs = [];
-    $dates = [];
-
-    foreach ($logs_result as $log) {
-        $pid = (int)$log->personnelID;
-        $date = $log->date;
+    $dateList = [];
+    foreach ($daily_logs as $log) {
+        $pid  = (int)$log->personnelID;
+        $date = date('Y-m-d', strtotime($log->date));
         $logs[$pid][$date] = [
-            'status' => $log->status,
-            'hours' => floatval($log->work_duration ?? 0),
-            'overtime_hours' => floatval($log->overtime_hours ?? 0)
+            'status'          => (string)($log->status ?? ''),
+            'hours'           => (float)($log->work_duration ?? 0),
+            'overtime_hours'  => (float)($log->overtime_hours ?? 0),
         ];
-        $dates[$date] = true;
+        $dateList[$date] = true;
     }
+    ksort($dateList);
+    $data['dates'] = array_keys($dateList);
+    $data['logs']  = $logs;
 
-    ksort($dates);
-    $data['dates'] = array_keys($dates);
+    $normalize = function($s){
+        return preg_replace('/[^a-z]/', '', strtolower(trim((string)$s)));
+    };
 
-    // ✅ Prepare data per person per date
-    foreach ($data['attendance_data'] as &$row) {
-        $pid = (string)$row->personnelID;
+    $hourlyFrom = function($rateType, $rateAmount){
+        $rt = strtolower((string)$rateType);
+        $rate = (float)$rateAmount;
+        switch ($rt) {
+            case 'hour':     return $rate;
+            case 'day':      return $rate / 8;
+            case 'month':    return $rate / 240;
+            case 'bi-month':
+            case 'bi-monthly':
+            case 'bimonth':  return $rate / 120;
+            default:         return 0.0;
+        }
+    };
+
+    $batchInsert = [];
+    foreach ($payroll as &$row) {
+        $pid = (int)$row->personnelID;
+
+        $gov = $this->PayrollModel->getGovDeduction($pid, $start, $end, $settingsID);
+        $row->gov_sss        = $gov['SSS']        ?? 0;
+        $row->gov_pagibig    = $gov['PAGIBIG']    ?? 0;
+        $row->gov_philhealth = $gov['PHILHEALTH'] ?? 0;
 
         $row->reg_hours_per_day = [];
+        $row->present_days      = 0;
+        $row->total_reg_hours   = 0.0;
+        $row->total_ot_hours    = 0.0;
 
-        // ✅ Inject holiday totals (if already saved in summary)
-        $row->holiday_hours = floatval($row->holiday_hours ?? 0);
-        $row->holiday_pay = floatval($row->holiday_pay ?? 0);
+        foreach ($data['dates'] as $d) {
+            $day = $logs[$pid][$d] ?? null;
+            if (!$day) { $row->reg_hours_per_day[$d] = '-'; continue; }
 
-        // ✅ Government deductions
-        $govDeduction = $this->PayrollModel->getGovDeduction($pid, $start, $end, $settingsID);
-        $row->gov_sss = $govDeduction['SSS'] ?? 0;
-        $row->gov_pagibig = $govDeduction['PAGIBIG'] ?? 0;
-        $row->gov_philhealth = $govDeduction['PHILHEALTH'] ?? 0;
+            $statusRaw = $day['status'] ?? '';
+            $status    = $normalize($statusRaw);
 
-        // ✅ Accepted statuses including holidays
-        $validStatuses = [
-            'present',
-            'regularho',
-            'regularholiday',
-            'legalholiday',
-            'specialholiday',
-            'specialnonworkingholiday',
-            'specialnon',
-            'holiday'
-        ];
-
-       foreach ($data['dates'] as $d) {
-    if (isset($logs[$pid][$d])) {
-        $status = strtolower(trim($logs[$pid][$d]['status']));
-        $normalizedStatus = preg_replace('/[^a-z]/', '', $status);
-
-        $validStatuses = [
-            'present',
-            'regularho',
-            'regularholiday',
-            'legalholiday',
-            'specialholiday',
-            'specialnonworkingholiday',
-            'specialnonworking',
-            'specialnon',
-            'specialno',
-            'holiday'
-        ];
-
-        if (in_array($normalizedStatus, $validStatuses)) {
-            $row->reg_hours_per_day[$d] = [
-                'hours' => $logs[$pid][$d]['hours'],
-                'overtime_hours' => $logs[$pid][$d]['overtime_hours'],
-                'status' => $status
+            $valid = [
+                'present','regularho','regularholiday','legalholiday',
+                'specialholiday','specialnonworkingholiday','specialnonworking',
+                'specialnon','specialno','holiday'
             ];
-        } elseif ($normalizedStatus === 'dayoff') {
-            $row->reg_hours_per_day[$d] = 'Day Off';
-        } else {
-            // ✅ Absent with OT hours fallback
-            $hours = $logs[$pid][$d]['hours'] ?? 0;
-            $ot = $logs[$pid][$d]['overtime_hours'] ?? 0;
 
-            if ($ot > 0 || $hours > 0) {
+            if (in_array($status, $valid, true)) {
                 $row->reg_hours_per_day[$d] = [
-                    'hours' => $hours,
-                    'overtime_hours' => $ot,
-                    'status' => $status
+                    'hours'          => (float)$day['hours'],
+                    'overtime_hours' => (float)$day['overtime_hours'],
+                    'status'         => $statusRaw
                 ];
+                if ($status === 'present' || $status === 'regularho') {
+                    $row->total_reg_hours += (float)$day['hours'];
+                    $row->total_ot_hours  += (float)$day['overtime_hours'];
+                    $row->present_days++;
+                } else {
+                    $row->total_ot_hours += (float)$day['overtime_hours'];
+                }
+            } elseif ($status === 'dayoff') {
+                $row->reg_hours_per_day[$d] = 'Day Off';
             } else {
-                $row->reg_hours_per_day[$d] = '-';
+                $hours = (float)($day['hours'] ?? 0);
+                $ot    = (float)($day['overtime_hours'] ?? 0);
+                if ($hours > 0 || $ot > 0) {
+                    $row->reg_hours_per_day[$d] = [
+                        'hours'          => $hours,
+                        'overtime_hours' => $ot,
+                        'status'         => $statusRaw
+                    ];
+                } else {
+                    $row->reg_hours_per_day[$d] = '-';
+                }
+                if ($ot > 0) $row->total_ot_hours += $ot;
             }
         }
-    } else {
-        $row->reg_hours_per_day[$d] = '-';
+
+        $hourly      = $hourlyFrom($row->rateType, $row->rateAmount);
+        $reg_pay     = $row->total_reg_hours * $hourly;
+        $ot_pay      = $row->total_ot_hours  * $hourly;
+        $gross       = round($reg_pay + $ot_pay, 2);
+        $row->gross  = $gross;
+
+        $row->total_deduction =
+            (float)$row->sss +
+            (float)$row->philhealth +
+            (float)$row->pagibig +
+            (float)$row->ca_cashadvance +
+            (float)$row->loan +
+            (float)$row->other_deduction;
+
+        $row->take_home = $gross - $row->total_deduction;
+
+        $exists = $this->db->get_where('payroll_summary', [
+            'personnelID' => $pid,
+            'projectID'   => $projectID,
+            'start_date'  => $start,
+            'end_date'    => $end,
+        ])->row();
+
+        if (!$exists) {
+            $batchInsert[] = [
+                'personnelID'        => $pid,
+                'projectID'          => $projectID,
+                'settingsID'         => $settingsID,
+                'start_date'         => $start,
+                'end_date'           => $end,
+                'reg_hours'          => $row->total_reg_hours,
+                'ot_hours'           => $row->total_ot_hours,
+                'reg_pay'            => round($reg_pay, 2),
+                'ot_pay'             => round($ot_pay, 2),
+                'gross_pay'          => $gross,
+                'ca_deduction'       => (float)$row->ca_cashadvance,
+                'sss_deduction'      => (float)$row->sss,
+                'pagibig_deduction'  => (float)$row->pagibig,
+                'philhealth_deduction'=> (float)$row->philhealth,
+                'loan_deduction'     => (float)$row->loan,
+                'other_deduction'    => (float)$row->other_deduction,
+                'total_deduction'    => $row->total_deduction,
+                'net_pay'            => $row->take_home,
+                'created_at'         => date('Y-m-d H:i:s'),
+            ];
+        }
     }
-}
+    unset($row);
+
+    if (!empty($batchInsert)) {
+        $this->db->insert_batch('payroll_summary', $batchInsert);
     }
 
-    // ✅ Load payroll view (already working)
+    usort($payroll, function ($a, $b) {
+        $ln = strcmp($a->last_name, $b->last_name);
+        return $ln === 0 ? strcmp($a->first_name, $b->first_name) : $ln;
+    });
+
+    $data['attendance_data']  = $payroll;
+    $data['personnel_loans']  = $this->Project_model->getPersonnelLoans($settingsID);
+
     $this->load->view('payroll_report_view', $data);
 }
+
 
 
 
