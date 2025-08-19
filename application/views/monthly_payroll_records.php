@@ -120,10 +120,13 @@ tbody tr td {
             $total_reg = 0;
             $total_ot = 0;
             foreach ($records['dates'] as $d):
-                $day = date('d', strtotime($d));
-                $rec = isset($records['attendance'][$person->personnelID][$day])
-                    ? $records['attendance'][$person->personnelID][$day]
-                    : null;
+             $fullKey = $d; 
+$dayKey  = date('d', strtotime($d));
+
+$rec = $records['attendance'][$person->personnelID][$fullKey]
+    ?? $records['attendance'][$person->personnelID][$dayKey]
+    ?? null;
+
                 $status = $rec ? $rec['status'] : 'Absent';
                 $reg = $rec ? (float)$rec['reg'] : 0;
                 $ot  = $rec ? (float)$rec['ot'] : 0;
@@ -156,7 +159,9 @@ tbody tr td {
    data-toggle="modal"
    data-target="#editAttendanceModal"
    data-personnel="<?= $person->personnelID ?>"
-   data-day="<?= $day ?>"
+  data-date="<?= $d ?>"
+data-day="<?= date('d', strtotime($d)) ?>"
+
    data-status="<?= $status ?>"
    data-reg="<?= $reg ?>"
    data-ot="<?= $ot ?>"
@@ -190,6 +195,7 @@ tbody tr td {
       <input type="hidden" name="payroll_month" id="editPayrollMonth" value="<?= $month ?>">
       <input type="hidden" name="personnelID" id="editPersonnelID">
       <input type="hidden" name="day" id="editDay">
+      <input type="hidden" name="date" id="editDate"> 
       <div class="modal-content">
         <div class="modal-header bg-primary text-white">
           <h5 class="modal-title" id="editAttendanceModalLabel">Edit Attendance</h5>
@@ -247,21 +253,26 @@ $('#editReg').on('input', function () {
         $(this).val(8);
     }
 });
-    $('.edit-pen').click(function() {
-        const personnel = $(this).data('personnel');
-        const day = $(this).data('day');
-        const status = $(this).data('status');
-        const reg = parseFloat($(this).data('reg')) || 0;
-        const ot = parseFloat($(this).data('ot')) || 0;
+   $('.edit-pen').click(function() {
+    const personnel = $(this).data('personnel');
+    const fullDate  = $(this).data('date');  // e.g. 2025-07-26
+    const day       = $(this).data('day');   // legacy support
+    const status    = $(this).data('status');
+    const reg       = parseFloat($(this).data('reg')) || 0;
+    const ot        = parseFloat($(this).data('ot'))  || 0;
 
-        $('#editPersonnelID').val(personnel);
-        $('#editDay').val(day);
-        $('#editStatus').val(status);
-        $('#editReg').val(reg);
-        $('#editOT').val(ot);
+    // ✅ populate hidden fields & inputs
+    $('#editPersonnelID').val(personnel);
+    $('#editDate').val(fullDate);
+    $('#editDay').val(day);
+    $('#editStatus').val(status);
+    $('#editReg').val(reg);
+    $('#editOT').val(ot);
 
-        toggleRegField(status);
-    });
+    // keep the regular-hours enable/disable behavior
+    toggleRegField(status);
+});
+
 
     $('#editStatus').on('change', function() {
         toggleRegField($(this).val());

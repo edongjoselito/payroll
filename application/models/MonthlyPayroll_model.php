@@ -33,7 +33,6 @@ public function save_payroll_monthly($personnelID, $month, $newDetails)
 {
     $settingsID = $this->session->userdata('settingsID');
 
-    // Prepare initial structure
     $data = [
         'personnelID'    => $personnelID,
         'payroll_month'  => $month,
@@ -41,7 +40,6 @@ public function save_payroll_monthly($personnelID, $month, $newDetails)
         'settingsID'     => $settingsID
     ];
 
-    // Check if record exists
     $this->db->where('personnelID', $personnelID);
     $this->db->where('payroll_month', $month);
     $this->db->where('settingsID', $settingsID);
@@ -51,24 +49,20 @@ public function save_payroll_monthly($personnelID, $month, $newDetails)
         $existingDetails = json_decode($existing->details_json, true);
         if (!is_array($existingDetails)) $existingDetails = [];
 
-        // ✅ Merge new entries by day (skip _range)
         foreach ($newDetails as $day => $entry) {
             if ($day === '_range') continue;
             $existingDetails[$day] = $entry;
         }
 
-        // ✅ Optionally update _range to reflect the latest submitted range
         $existingDetails['_range'] = $newDetails['_range'] ?? [];
 
         $data['details_json'] = json_encode($existingDetails);
 
-        // Update
         $this->db->where('personnelID', $personnelID);
         $this->db->where('payroll_month', $month);
         $this->db->where('settingsID', $settingsID);
         $this->db->update('payroll_attendance_monthly', $data);
     } else {
-        // Insert
         $data['details_json'] = json_encode($newDetails);
         $this->db->insert('payroll_attendance_monthly', $data);
     }
@@ -99,150 +93,124 @@ public function get_saved_months()
     $this->db->order_by('payroll_month', 'DESC');
 
     $query = $this->db->get();
-    return $query->result();  // returns array of objects with ->payroll_month
+    return $query->result();
 }
 
 
 
 public function get_monthly_payroll_records($month, $filterFrom = null, $filterTo = null)
 {
-    // Get all personnel
-    $this->db->from('personnel');
-    $this->db->where_in('rateType', ['Month', 'Bi-Month']);
-    $this->db->order_by('last_name, first_name');
-    $personnel = $this->db->get()->result();
+    $settingsID = $this->session->userdata('settingsID');
 
-    // Get all payroll monthly records for the selected month
-    $rows = $this->db->get_where('payroll_attendance_monthly', ['payroll_month' => $month])->result();
+    $personnel = $this->get_all_personnel($settingsID, ['Bi-Month', 'Month']);
+
+    $seen = [];
+    $unique = [];
+    foreach ($personnel as $p) {
+        if (!isset($seen[$p->personnelID])) {
+            $seen[$p->personnelID] = true;
+            $unique[] = $p;
+        }
+    }
+    $personnel = $unique;
+
+    $rows = $this->db->from('payroll_attendance_monthly')
+                     ->where('payroll_month', $month)
+                     ->where('settingsID', $settingsID)
+                     ->get()
+                     ->result();
 
     $year = (int)substr($month, 0, 4);
     $monthNum = (int)substr($month, 5, 2);
 
-    // Collect actual days from details_json
     $dateSet = [];
-
     foreach ($rows as $row) {
         $details = json_decode($row->details_json, true);
-        if (is_array($details)) {
-            foreach ($details as $day => $entry) {
-                if ($day === '_range') continue;
+        if (!is_array($details)) continue;
 
-               $date = sprintf('%04d-%02d-%s', $year, $monthNum, str_pad($day, 2, '0', STR_PAD_LEFT));
+        foreach ($details as $k => $entry) {
+            if ($k === '_range') continue;
 
-
-                // ✅ Filter by from/to if given
-                if ($filterFrom && $filterTo && ($date < $filterFrom || $date > $filterTo)) {
-                    continue;
-                }
-
-                $dateSet[$date] = true;
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $k)) {
+                $date = $k; 
+            } else {
+                $day  = str_pad($k, 2, '0', STR_PAD_LEFT);
+                $date = sprintf('%s-%s-%s', substr($month,0,4), substr($month,5,2), $day);
             }
+
+            if ($filterFrom && $filterTo && ($date < $filterFrom || $date > $filterTo)) continue;
+            $dateSet[$date] = true;
         }
     }
 
-    // Sort and reindex dates
     $dates = array_keys($dateSet);
     sort($dates);
 
-    // Map personnelID => [date => [...]]
     $attendance = [];
     foreach ($rows as $row) {
-        $details = json_decode($row->details_json, true);
-        if (!$details) $details = [];
-
+        $details = json_decode($row->details_json, true) ?: [];
         $personnelID = $row->personnelID;
-        foreach ($details as $day => $entry) {
-            if ($day === '_range') continue;
 
-          $date = sprintf('%04d-%02d-%s', $year, $monthNum, str_pad($day, 2, '0', STR_PAD_LEFT));
+        foreach ($details as $k => $entry) {
+            if ($k === '_range') continue;
 
-
-            if ($filterFrom && $filterTo && ($date < $filterFrom || $date > $filterTo)) {
-                continue;
+            if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $k)) {
+                $date = $k;
+            } else {
+                $day  = str_pad($k, 2, '0', STR_PAD_LEFT);
+                $date = sprintf('%s-%s-%s', substr($month,0,4), substr($month,5,2), $day);
             }
 
-           $attendance[$personnelID][str_pad($day, 2, '0', STR_PAD_LEFT)] = $entry;
+            if ($filterFrom && $filterTo && ($date < $filterFrom || $date > $filterTo)) continue;
 
+            $attendance[$personnelID][$date] = $entry; 
         }
     }
 
-    // Date range for the month (used for deductions)
     $start = date('Y-m-01', strtotime($month));
-    $end = date('Y-m-t', strtotime($month));
+    $end   = date('Y-m-t', strtotime($month));
 
-    // Append deductions for each personnel
     foreach ($personnel as &$p) {
         $personnelID = $p->personnelID;
 
-        // Cash Advance (type = 'cash')
-        $cash = $this->db
-            ->select_sum('amount')
-            ->from('cashadvance')
-            ->where('personnelID', $personnelID)
-            ->where('type', 'cash')
+        $cash = $this->db->select_sum('amount')->from('cashadvance')
+            ->where('personnelID', $personnelID)->where('type', 'cash')
             ->where("(deduct_from IS NULL OR deduct_from <= '$end')", null, false)
-            ->where("(deduct_to IS NULL OR deduct_to >= '$start')", null, false)
+            ->where("(deduct_to IS NULL OR deduct_to >= '$start')",   null, false)
             ->get()->row();
         $p->cash_advance = $cash && $cash->amount !== null ? (float)$cash->amount : 0;
 
-        // Other Deduction (type = 'Others')
-        $other = $this->db
-            ->select_sum('amount')
-            ->from('cashadvance')
-            ->where('personnelID', $personnelID)
-            ->where('type', 'Others')
+        $other = $this->db->select_sum('amount')->from('cashadvance')
+            ->where('personnelID', $personnelID)->where('type', 'Others')
             ->where("(deduct_from IS NULL OR deduct_from <= '$end')", null, false)
-            ->where("(deduct_to IS NULL OR deduct_to >= '$start')", null, false)
+            ->where("(deduct_to IS NULL OR deduct_to >= '$start')",   null, false)
             ->get()->row();
         $p->other_deduction = $other && $other->amount !== null ? (float)$other->amount : 0;
 
-        // Loans
-        $loan = $this->db
-            ->select_sum('monthly_deduction')
-            ->from('personnelloans')
-            ->where('personnelID', $personnelID)
-            ->where('status', 1)
-            ->where('is_paid', 0)
+        $loan = $this->db->select_sum('monthly_deduction')->from('personnelloans')
+            ->where('personnelID', $personnelID)->where('status', 1)->where('is_paid', 0)
             ->where("(deduct_from IS NULL OR deduct_from <= '$end')", null, false)
-            ->where("(deduct_to IS NULL OR deduct_to >= '$start')", null, false)
+            ->where("(deduct_to IS NULL OR deduct_to >= '$start')",   null, false)
             ->get()->row();
         $p->loan = $loan && $loan->monthly_deduction !== null ? (float)$loan->monthly_deduction : 0;
 
-        // Government Deductions
-        $p->gov_sss = 0;
-        $p->gov_pagibig = 0;
-        $p->gov_philhealth = 0;
-
-        $govt = $this->db
-            ->select('description, SUM(amount) AS amount')
-            ->from('government_deductions')
+        $p->gov_sss = 0; $p->gov_pagibig = 0; $p->gov_philhealth = 0;
+        $govt = $this->db->select('description, SUM(amount) AS amount')->from('government_deductions')
             ->where('personnelID', $personnelID)
             ->where("(deduct_from IS NULL OR deduct_from <= '$end')", null, false)
-            ->where("(deduct_to IS NULL OR deduct_to >= '$start')", null, false)
-            ->group_by('description')
-            ->get()->result();
+            ->where("(deduct_to IS NULL OR deduct_to >= '$start')",   null, false)
+            ->group_by('description')->get()->result();
 
         foreach ($govt as $g) {
             $desc = strtolower(trim($g->description));
-            if ($desc === 'sss') {
-                $p->gov_sss = (float)$g->amount;
-            } elseif ($desc === 'pagibig' || $desc === 'pag-ibig') {
-                $p->gov_pagibig = (float)$g->amount;
-            } elseif ($desc === 'philhealth' || $desc === 'phic') {
-                $p->gov_philhealth = (float)$g->amount;
-            } else {
-                $p->other_deduction += (float)$g->amount;
-            }
+            if ($desc === 'sss')                       $p->gov_sss       = (float)$g->amount;
+            elseif ($desc === 'pagibig' || $desc === 'pag-ibig') $p->gov_pagibig   = (float)$g->amount;
+            elseif ($desc === 'philhealth' || $desc === 'phic') $p->gov_philhealth = (float)$g->amount;
+            else $p->other_deduction += (float)$g->amount;
         }
 
-        // Final total deduction
         $p->total_deduction = $p->cash_advance + $p->loan + $p->gov_sss + $p->gov_pagibig + $p->gov_philhealth + $p->other_deduction;
-
-        // Mapping for manual payroll compatibility
-        $p->ca_cashadvance = $p->cash_advance;
-        $p->sss = $p->gov_sss;
-        $p->pagibig = $p->gov_pagibig;
-        $p->philhealth = $p->gov_philhealth;
+        $p->ca_cashadvance = $p->cash_advance; $p->sss = $p->gov_sss; $p->pagibig = $p->gov_pagibig; $p->philhealth = $p->gov_philhealth;
     }
 
     return [
@@ -256,23 +224,36 @@ public function get_monthly_payroll_records($month, $filterFrom = null, $filterT
 
 
 
-// Get one record for a person/month
+
 public function get_payroll_record($personnelID, $month)
 {
     $this->db->where('personnelID', $personnelID);
     $this->db->where('payroll_month', $month);
+    $this->db->where('settingsID', $this->session->userdata('settingsID'));
     return $this->db->get('payroll_attendance_monthly')->row();
 }
 
-// Update the details_json for a person/month
 public function update_payroll_details($personnelID, $month, $details)
 {
+    $settingsID = $this->session->userdata('settingsID');
+
     $this->db->where('personnelID', $personnelID);
     $this->db->where('payroll_month', $month);
+    $this->db->where('settingsID', $settingsID);
     $this->db->update('payroll_attendance_monthly', [
-        'details_json' => json_encode($details),
+        'details_json'   => json_encode($details),
         'date_generated' => date('Y-m-d H:i:s')
     ]);
+
+    if ($this->db->affected_rows() === 0) {
+        $this->db->insert('payroll_attendance_monthly', [
+            'personnelID'    => $personnelID,
+            'payroll_month'  => $month,
+            'settingsID'     => $settingsID,
+            'details_json'   => json_encode($details),
+            'date_generated' => date('Y-m-d H:i:s')
+        ]);
+    }
 }
 public function get_cash_advance($pid, $month)
 {

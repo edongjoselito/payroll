@@ -130,11 +130,11 @@ public function save()
         if (isset($attendance_status[$personnelID])) {
             foreach ($attendance_status[$personnelID] as $date => $status) {
                 $day = date('d', strtotime($date)); // '01'...'31'
-                $details[$day] = [
-                    'status' => $status,
-                    'reg'    => isset($regular_hours[$personnelID][$date]) ? (float)$regular_hours[$personnelID][$date] : 0,
-                    'ot'     => isset($overtime_hours[$personnelID][$date]) ? (float)$overtime_hours[$personnelID][$date] : 0,
-                ];
+               $details[$date] = [
+    'status' => $status,
+    'reg'    => isset($regular_hours[$personnelID][$date]) ? (float)$regular_hours[$personnelID][$date] : 0,
+    'ot'     => isset($overtime_hours[$personnelID][$date]) ? (float)$overtime_hours[$personnelID][$date] : 0,
+];
             }
         }
 
@@ -203,31 +203,47 @@ if (!$from || !$to) {
 public function update_attendance()
 {
     $personnelID   = $this->input->post('personnelID');
-    $payroll_month = $this->input->post('payroll_month');
-    $day           = $this->input->post('day'); // '01', '02', etc.
+    $payroll_month = $this->input->post('payroll_month'); // YYYY-MM
+    $dayParam      = $this->input->post('day');  // '01'..'31' (legacy)
+    $dateParam     = $this->input->post('date'); // 'YYYY-MM-DD' (new)
     $status        = $this->input->post('status');
     $reg           = (float)$this->input->post('reg');
     $ot            = (float)$this->input->post('ot');
 
-    // Get existing details_json
+    // Resolve a full date key (prefer 'date', else derive from month+day)
+    if ($dateParam && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateParam)) {
+        $fullDate = $dateParam;
+        $dayKey   = date('d', strtotime($fullDate)); // '01'..'31'
+    } else {
+        // fallback: build from month + day (legacy)
+        $ym = $payroll_month ?: date('Y-m');
+        $dayKey = str_pad($dayParam ?: '01', 2, '0', STR_PAD_LEFT);
+        $fullDate = $ym . '-' . $dayKey; // YYYY-MM-DD
+    }
+
+    // Fetch existing details
     $row = $this->MonthlyPayroll_model->get_payroll_record($personnelID, $payroll_month);
     if ($row) {
         $details = json_decode($row->details_json, true);
-        if (!$details) $details = [];
-        $details[$day] = [
-            'status' => $status,
-            'reg'    => $reg,
-            'ot'     => $ot
-        ];
-        $this->MonthlyPayroll_model->update_payroll_details($personnelID, $payroll_month, $details);
-        $this->session->set_flashdata('msg', 'Attendance updated!');
+        if (!is_array($details)) $details = [];
     } else {
-        $this->session->set_flashdata('msg', 'Record not found.');
+        $details = [];
     }
 
-  redirect($_SERVER['HTTP_REFERER']);
+    // Write both keys: full-date (new) and day-only (legacy) to avoid breaking anything
+    $payload = ['status' => $status, 'reg' => $reg, 'ot' => $ot];
 
+    $details[$fullDate] = $payload; // new canonical key
+    $details[ltrim($dayKey, '0')] = $payload; // '1'..'31' legacy loose
+    $details[$dayKey] = $payload;             // '01'..'31' legacy strict
+
+    // Save back
+    $this->MonthlyPayroll_model->update_payroll_details($personnelID, $payroll_month, $details);
+    $this->session->set_flashdata('msg', 'Attendance updated!');
+
+    redirect($_SERVER['HTTP_REFERER']);
 }
+
 public function view_formatted()
 {
     $from = $this->input->get('start'); // YYYY-MM-DD
@@ -277,9 +293,8 @@ public function view_formatted()
         $total_days = 0; // ✅ Added for fractional day computation
 
         foreach ($data['dates'] as $d) {
-            $dayKey = date('d', strtotime($d));  // keep '01', '02', etc.
+           $attn = $data['attendance'][$pid][$d] ?? ['status' => '', 'reg' => 0, 'ot' => 0];
 
-            $attn = $data['attendance'][$pid][$dayKey] ?? ['status' => '', 'reg' => 0, 'ot' => 0];
 
             $status = $attn['status'];
             $reg = $attn['reg'];
