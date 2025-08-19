@@ -1261,9 +1261,7 @@ $totalNet = bcadd($totalNet, $netPay, 2);
   <div class="modal-dialog modal-dialog-centered modal-md">
     <div class="modal-content" id="printablePayslip<?= $ln ?>">
 
-      <!-- SCREEN-ONLY styles scoped to this modal -->
       <style>
-        /* Wrap everything in the modal ID to avoid leaking styles */
         #payslipModal<?= $ln ?> .payslip-card{
           max-width: 520px;
           margin: 0 auto;
@@ -1391,10 +1389,7 @@ $totalNet = bcadd($totalNet, $netPay, 2);
         <div class="payslip-card">
 
           <!-- Top info -->
-          <div class="info-row">
-            <div class="label">Employee</div>
-            <div class="value"><?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></div>
-          </div>
+        
           <div class="info-row">
             <div class="label">Position</div>
             <div class="value"><?= htmlspecialchars($row->position) ?></div>
@@ -1403,10 +1398,7 @@ $totalNet = bcadd($totalNet, $netPay, 2);
             <div class="label">Period</div>
             <div class="value"><?= date('F d', strtotime($start)) ?> – <?= date('F d, Y', strtotime($end)) ?></div>
           </div>
-          <div class="info-row">
-            <div class="label">Printed</div>
-            <div class="value"><?= date('F d, Y') ?></div>
-          </div>
+        
 
           <!-- Rate block -->
           <div class="section-title">Rates</div>
