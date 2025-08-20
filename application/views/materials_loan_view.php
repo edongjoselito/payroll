@@ -68,6 +68,76 @@
 .toast .btn-close:hover {
     opacity: 1;
 }
+@media print {
+  .no-print,
+  .page-title-box,
+  .toast, #sessionToast,
+  .modal,
+  .btn,
+  .dataTables_length,
+  .dataTables_filter,
+  .dataTables_info,
+  .dataTables_paginate,
+  .dataTables_wrapper .dt-buttons { display: none !important; }
+
+  .left-side-menu, .navbar-custom, .footer, .card-header { display: none !important; }
+
+  .content-page, .content, .container-fluid, .card, .card-body {
+    padding: 0 !important; margin: 0 !important; box-shadow: none !important; border: 0 !important;
+  }
+
+  table { width: 100% !important; border-collapse: collapse !important; }
+  th, td { white-space: nowrap; } 
+}
+.print-header,
+.print-footer,
+.print-header-space,
+.print-footer-space { display: none; }
+
+@media print {
+  .no-print,
+  .page-title-box,
+  .toast, #sessionToast,
+  .modal,
+  .btn,
+  .dataTables_length,
+  .dataTables_filter,
+  .dataTables_info,
+  .dataTables_paginate,
+  .dataTables_wrapper .dt-buttons { display: none !important; }
+
+  .left-side-menu, .navbar-custom, .footer, .card-header { display: none !important; }
+
+  .content-page, .content, .container-fluid, .card, .card-body {
+    padding: 0 !important; margin: 0 !important; box-shadow: none !important; border: 0 !important;
+  }
+
+  .print-header,
+  .print-footer { display: block; position: fixed; left: 0; right: 0; color: #000; }
+  .print-header { top: 0; padding: 8px 0; }
+  .print-footer { bottom: 0; font-size: 12px; text-align: right; padding: 6px 12px; }
+
+  .print-header-space { height: 110px; display: block; }
+  .print-footer-space { height: 40px; display: block; }
+
+  .lh-wrap { display: flex; align-items: center; gap: 12px; padding: 0 12px; }
+  .lh-logo { height: 60px; width: auto; }
+  .lh-text h2 { font-size: 18px; margin: 0; }
+  .lh-text .sub { font-size: 12px; margin: 2px 0 0; }
+  .lh-meta { font-size: 12px; margin-top: 4px; }
+  .lh-line { height: 2px; background: #000; margin: 6px 12px 0; }
+
+  table { width: 100% !important; border-collapse: collapse !important; }
+  thead { display: table-header-group; } 
+  tfoot { display: table-footer-group; }
+  tr, img { page-break-inside: avoid; }
+  th, td { white-space: nowrap; }
+  
+  body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  
+}
+
+@page { size: A4 portrait; margin: 15mm; }
 
 </style>
 
@@ -85,8 +155,14 @@
 <div class="container-fluid">
 
     <div class="page-title-box d-flex justify-content-between align-items-center">
-        <button class="btn btn-primary btn-md" data-toggle="modal" data-target="#addMaterialModal">+ Add Other Deduction</button>
-    </div>
+  <div>
+    <button class="btn btn-primary btn-md no-print" data-toggle="modal" data-target="#addMaterialModal">+ Add Other Deduction</button>
+    <button id="printBtn" class="btn btn-outline-secondary btn-md no-print" type="button">
+      <i class="fas fa-print"></i> Print
+    </button>
+  </div>
+</div>
+
 
   <?php
 $success = $this->session->flashdata('success');
@@ -114,6 +190,23 @@ if ($success || $error):
     </div>
 </div>
 <?php endif; ?>
+<!-- PRINT HEADER (print only) -->
+<div class="print-header">
+  <div class="lh-wrap">
+    <img class="lh-logo" src="<?= base_url('assets/images/pms-logo1.png') ?>" alt="PMS Logo">
+    <div class="lh-text">
+      <h2>Payroll Management System</h2>
+      <div class="sub">Other Deductions Report</div>
+      <div class="lh-meta">
+        Printed on: <span id="printTimestamp"></span>
+      </div>
+    </div>
+  </div>
+  <div class="lh-line"></div>
+</div>
+<div class="print-header-space"></div>
+
+
 
 
     <div class="card">
@@ -128,7 +221,8 @@ if ($success || $error):
                             <th>Date</th>
                             <th>Deduct From</th>
                                 <th>Deduct To</th>
-                            <th>Manage</th>
+                           <th class="no-print">Manage</th>
+
                         </tr>
                     </thead>
                    <tbody>
@@ -144,7 +238,7 @@ if ($success || $error):
 
       <td><?= $row->deduct_from ? date('Y-m-d', strtotime($row->deduct_from)) : '' ?></td>
       <td><?= $row->deduct_to ? date('Y-m-d', strtotime($row->deduct_to)) : '' ?></td>
-      <td>
+      <td class="no-print">
         <!-- EDIT Button -->
         <button class="btn btn-outline-info btn-sm me-1" data-toggle="modal" data-target="#editMaterialModal<?= $row->id ?>">
           <i class="fas fa-edit" data-toggle="tooltip" title="Edit Deduction"></i>
@@ -308,18 +402,52 @@ if ($success || $error):
 <script src="<?= base_url(); ?>assets/js/pages/datatables.init.js"></script>
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
 <script>
-<script>
 $(function () {
+  // Avoid double init if datatables.init.js also runs
   if ($.fn.DataTable.isDataTable('#datatable')) {
     $('#datatable').DataTable().destroy();
   }
 
-  $('#datatable').DataTable({
+  var table = $('#datatable').DataTable({
     // 0 Name | 1 Desc | 2 Amount | 3 Date | 4 From | 5 To | 6 Manage
-    order: [[3, 'asc'], [0, 'asc']],     // Date ASC, then Name ASC
-    columnDefs: [{ targets: [3,4,5], type: 'date' }]
+    order: [[3, 'asc'], [0, 'asc']],
+    columnDefs: [
+      { targets: [3,4,5], type: 'date' },
+      { targets: [6], orderable: false }
+    ],
+    pageLength: 10
   });
 
+  // PRINT handler
+  $('#printBtn').on('click', function () {
+    // 1) Fill timestamp on header
+    var ts = new Date().toLocaleString();
+    $('#printTimestamp').text(ts);
+
+    // 2) Remember current page length, then show ALL rows
+    var previousLength = table.page.len();
+    table.page.len(-1).draw();
+
+    // 3) Also hide Manage column in DataTables (extra safety)
+    var manageCol = 6;
+    var manageWasVisible = table.column(manageCol).visible();
+    table.column(manageCol).visible(false, false);
+
+    // 4) Restore after printing
+    var restore = function () {
+      table.page.len(previousLength).draw(false);
+      table.column(manageCol).visible(manageWasVisible, false);
+      window.removeEventListener('afterprint', restore);
+      $(window).off('focus.printRestore');
+    };
+    window.addEventListener('afterprint', restore);
+    $(window).on('focus.printRestore', restore);
+
+    // 5) Trigger native print
+    window.print();
+  });
+
+  // Other UI
   $('#sessionToast').toast('show');
   $('[data-toggle="tooltip"]').tooltip();
 });
