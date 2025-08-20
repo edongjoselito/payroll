@@ -15,33 +15,31 @@
       display: flex;
       align-items: center;
     }
-    .select2-results__option {
-      padding: 10px;
-      font-size: 14px;
-    }
+    .select2-results__option { padding: 10px; font-size: 14px; }
     .select2-selection--single {
-  height: 38px !important;
-  padding: 6px 12px !important;
-  font-size: 14px;
-  border: 1px solid #ced4da !important;
-  border-radius: 0.25rem !important;
-  display: flex !important;
-  align-items: center !important;
-}
- .btn-sm-custom {
-    font-size: 13px;
-    padding: 8px 16px;
-    border-radius: 0.25rem;
-    transition: all 0.2s ease-in-out;
-  }
-
-  .btn-sm-custom:hover {
-    transform: scale(1.05);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-  }
+      height: 38px !important;
+      padding: 6px 12px !important;
+      font-size: 14px;
+      border: 1px solid #ced4da !important;
+      border-radius: 0.25rem !important;
+      display: flex !important;
+      align-items: center !important;
+    }
+    .btn-sm-custom {
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 0.25rem;
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-sm-custom:hover { transform: scale(1.05); box-shadow: 0 2px 6px rgba(0,0,0,.15); }
   </style>
 </head>
 <body>
+
+<?php
+  // 🔐 role for this view
+  $role = $this->session->userdata('position') ?: $this->session->userdata('level');
+?>
 
 <div id="wrapper">
   <?php include('includes/top-nav-bar.php'); ?>
@@ -50,21 +48,27 @@
   <div class="content-page">
     <div class="content">
       <div class="container-fluid">
+
 <!-- Payroll Generation Card -->
 <div class="card shadow-sm border-0 mb-3">
   <div class="card-body">
     <h4 class="page-title mb-3">Payroll Generation</h4>
 
     <div class="d-flex flex-wrap">
+      <?php if ($role !== 'Payroll User'): ?>
       <button type="button" class="btn btn-primary btn-sm-custom mr-2 mt-2" data-toggle="modal" data-target="#generatePayrollModal">
         <i class="mdi mdi-calculator-variant"></i> Generate Payroll
       </button>
+      <?php endif; ?>
+
       <button type="button" class="btn btn-dark btn-sm-custom mr-2 mt-2" data-toggle="modal" data-target="#monthlyPayrollModal">
         <i class="mdi mdi-calendar-clock"></i> Bi-Month Payroll
       </button>
+
       <button type="button" class="btn btn-info btn-sm-custom mr-2 mt-2" data-toggle="modal" data-target="#viewSavedPayrollModal">
         <i class="mdi mdi-eye"></i> View Saved Payroll
       </button>
+
       <button type="button" class="btn btn-success btn-sm-custom mt-2" data-toggle="modal" data-target="#payrollSummaryModal">
         <i class="mdi mdi-chart-bar"></i> Payroll Summary
       </button>
@@ -72,102 +76,93 @@
   </div>
 </div>
 
-                    <!-- Monthly/Bi-Month Payroll Modal -->
-                    <div class="modal fade" id="monthlyPayrollModal" tabindex="-1" role="dialog" aria-labelledby="monthlyPayrollModalLabel" aria-hidden="true">
-                      <div class="modal-dialog modal-dialog-centered modal-md" role="document">
-                        <form method="get" action="<?= base_url('MonthlyPayroll/view_formatted') ?>" target="_blank">
-                          <div class="modal-content border-0 shadow-sm">
-                            <div class="modal-header bg-white text-black">
-                              <h5 class="modal-title" id="monthlyPayrollModalLabel">
-                                <i class="mdi mdi-calendar-clock"></i> Generate Bi-Month Payroll
-                              </h5>
-                              <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                                <span>&times;</span>
-                              </button>
-                            </div>
-
-                            <div class="modal-body">
-                              <div class="form-group">
-                                <label class="font-weight-bold">From (Start Date)</label>
-                                <input type="date" name="start" class="form-control" required>
-                              </div>
-
-                              <div class="form-group">
-                                <label class="font-weight-bold">To (End Date)</label>
-                                <input type="date" name="end" class="form-control" required>
-                              </div>
-                            </div>
-
-                            <div class="modal-footer">
-                              <button type="submit" class="btn btn-dark">
-                                <i class="mdi mdi-check"></i> Generate
-                              </button>
-                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                            </div>
-                          </div>
-                        </form>
-                      </div>
-                    </div>
-        <!-- Modal Section -->
-        <div class="modal fade" id="generatePayrollModal" tabindex="-1" role="dialog" aria-labelledby="generatePayrollLabel" aria-hidden="true">
-          <div class="modal-dialog modal-dialog-centered modal-md" role="document">
-            <form method="get" action="<?= base_url('project/payroll_report') ?>" target="_blank" id="payrollForm">
-              <div class="modal-content border-0 shadow-sm">
-                <div class="modal-header bg-white text-black">
-                  <h5 class="modal-title" id="generatePayrollLabel">
-                    <i class="mdi mdi-file-document-box"></i> Generate Payroll Report
-                  </h5>
-                  <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                    <span>&times;</span>
-                  </button>
-                </div>
-                
-                <div class="modal-body">
-                  <div class="form-row">
-                    <div class="form-group col-md-12">
-                      <label for="pid" class="font-weight-bold">Project</label>
-                      <select name="pid" id="pid" class="form-control select2" required>
-                        <option value="" disabled selected>Select project</option>
-                        <?php foreach ($projects as $proj): ?>
-                          <option value="<?= $proj->projectID ?>"><?= $proj->projectTitle ?></option>
-                        <?php endforeach; ?>
-                      </select>
-                    </div>
-                  </div>
-                  
-                  <div class="form-row">
-                    <div class="form-group col-md-12">
-                      <label for="attendanceBatch" class="font-weight-bold">Attendance Records</label>
-                      <select name="attendanceID" id="attendanceBatch" class="form-control select2" required>
-                        <option value="" disabled selected>Select Saved Attendance</option>
-                        <?php foreach ($attendance_periods as $batch): ?>
-                          <option 
-                            value="<?= $batch->projectID ?>-<?= $batch->start ?>-<?= $batch->end ?>"
-                            data-project="<?= $batch->projectID ?>"
-                            data-start="<?= $batch->start ?>"
-                            data-end="<?= $batch->end ?>">
-                            <?= date('F d', strtotime($batch->start)) ?> to <?= date('F d, Y', strtotime($batch->end)) ?>
-                          </option>
-                        <?php endforeach; ?>
-                      </select>
-                    </div>
-                  </div>
-                  
-                  <input type="hidden" name="start" id="start">
-                  <input type="hidden" name="end" id="end">
-                </div>
-                
-                <div class="modal-footer">
-                  <button type="submit" class="btn btn-primary">
-                    <i class="mdi mdi-check"></i> Generate
-                  </button>
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                </div>
-              </div>
-            </form>
+<!-- Monthly/Bi-Month Payroll Modal (always available) -->
+<div class="modal fade" id="monthlyPayrollModal" tabindex="-1" role="dialog" aria-labelledby="monthlyPayrollModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+    <form method="get" action="<?= base_url('MonthlyPayroll/view_formatted') ?>" target="_blank">
+      <div class="modal-content border-0 shadow-sm">
+        <div class="modal-header bg-white text-black">
+          <h5 class="modal-title" id="monthlyPayrollModalLabel">
+            <i class="mdi mdi-calendar-clock"></i> Generate Bi-Month Payroll
+          </h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="font-weight-bold">From (Start Date)</label>
+            <input type="date" name="start" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label class="font-weight-bold">To (End Date)</label>
+            <input type="date" name="end" class="form-control" required>
           </div>
         </div>
-        <!-- End Modal Section -->
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-dark"><i class="mdi mdi-check"></i> Generate</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<?php if ($role !== 'Payroll User'): ?>
+<!-- Generate Payroll Modal (hidden from Payroll User) -->
+<div class="modal fade" id="generatePayrollModal" tabindex="-1" role="dialog" aria-labelledby="generatePayrollLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+    <form method="get" action="<?= base_url('project/payroll_report') ?>" target="_blank" id="payrollForm">
+      <div class="modal-content border-0 shadow-sm">
+        <div class="modal-header bg-white text-black">
+          <h5 class="modal-title" id="generatePayrollLabel">
+            <i class="mdi mdi-file-document-box"></i> Generate Payroll Report
+          </h5>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
+        </div>
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group col-md-12">
+              <label for="pid" class="font-weight-bold">Project</label>
+              <select name="pid" id="pid" class="form-control select2" required>
+                <option value="" disabled selected>Select project</option>
+                <?php foreach ($projects as $proj): ?>
+                  <option value="<?= $proj->projectID ?>"><?= $proj->projectTitle ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-12">
+              <label for="attendanceBatch" class="font-weight-bold">Attendance Records</label>
+              <select name="attendanceID" id="attendanceBatch" class="form-control select2" required>
+                <option value="" disabled selected>Select Saved Attendance</option>
+                <?php foreach ($attendance_periods as $batch): ?>
+                  <option
+                    value="<?= $batch->projectID ?>-<?= $batch->start ?>-<?= $batch->end ?>"
+                    data-project="<?= $batch->projectID ?>"
+                    data-start="<?= $batch->start ?>"
+                    data-end="<?= $batch->end ?>">
+                    <?= date('F d', strtotime($batch->start)) ?> to <?= date('F d, Y', strtotime($batch->end)) ?>
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+          </div>
+
+          <input type="hidden" name="start" id="start">
+          <input type="hidden" name="end" id="end">
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary"><i class="mdi mdi-check"></i> Generate</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<?php endif; ?>
+<!-- End Modal Section -->
+
 <!-- View Saved Payroll Modal -->
 <div class="modal fade" id="viewSavedPayrollModal" tabindex="-1" role="dialog" aria-labelledby="viewSavedPayrollModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-md" role="document">
@@ -177,11 +172,8 @@
           <h5 class="modal-title" id="viewSavedPayrollModalLabel">
             <i class="mdi mdi-clipboard-text"></i> View Saved Payroll Batch
           </h5>
-          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-            <span>&times;</span>
-          </button>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
         </div>
-
         <div class="modal-body">
           <div class="form-group">
             <label for="savedProjectSelect" class="font-weight-bold">Project</label>
@@ -193,36 +185,30 @@
             </select>
             <div class="invalid-feedback">Please select a project.</div>
           </div>
-
           <div class="form-group mt-3">
             <label for="savedBatchSelect" class="font-weight-bold">Saved Payroll</label>
-           <select name="batch_id" id="savedBatchSelect" class="form-control select2" required>
-  <option disabled selected>Choose saved payroll</option>
-  <?php foreach ($batches as $batch): ?>
-    <option 
-      value="<?= $batch->projectID . '|' . $batch->start_date . '|' . $batch->end_date ?>"
-      data-project="<?= $batch->projectID ?>">
-      <?= date('M d, Y', strtotime($batch->start_date)) ?> - <?= date('M d, Y', strtotime($batch->end_date)) ?>
-    </option>
-  <?php endforeach; ?>
-</select>
-
+            <select name="batch_id" id="savedBatchSelect" class="form-control select2" required>
+              <option disabled selected>Choose saved payroll</option>
+              <?php foreach ($batches as $batch): ?>
+                <option
+                  value="<?= $batch->projectID . '|' . $batch->start_date . '|' . $batch->end_date ?>"
+                  data-project="<?= $batch->projectID ?>">
+                  <?= date('M d, Y', strtotime($batch->start_date)) ?> - <?= date('M d, Y', strtotime($batch->end_date)) ?>
+                </option>
+              <?php endforeach; ?>
+            </select>
             <div class="invalid-feedback">Please select.</div>
           </div>
         </div>
-
         <div class="modal-footer">
-          <button type="submit" class="btn btn-info">
-            <i class="mdi mdi-eye"></i> View Payroll
-          </button>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">
-            Cancel
-          </button>
+          <button type="submit" class="btn btn-info"><i class="mdi mdi-eye"></i> View Payroll</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
         </div>
       </div>
     </form>
   </div>
 </div>
+
 <!-- Payroll Summary Modal -->
 <div class="modal fade" id="payrollSummaryModal" tabindex="-1" role="dialog" aria-labelledby="payrollSummaryModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-md" role="document">
@@ -232,11 +218,8 @@
           <h5 class="modal-title" id="payrollSummaryModalLabel">
             <i class="mdi mdi-chart-bar"></i> Select Project for Payroll Summary
           </h5>
-          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-            <span>&times;</span>
-          </button>
+          <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
         </div>
-
         <div class="modal-body">
           <div class="form-group">
             <label for="summary_project_id" class="font-weight-bold">Project</label>
@@ -248,19 +231,14 @@
             </select>
           </div>
         </div>
-
         <div class="modal-footer">
-          <button type="submit" class="btn btn-success">
-            <i class="mdi mdi-eye"></i> View Summary
-          </button>
+          <button type="submit" class="btn btn-success"><i class="mdi mdi-eye"></i> View Summary</button>
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
         </div>
       </div>
     </form>
   </div>
 </div>
-
-
 
       </div>
     </div>
@@ -271,71 +249,54 @@
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   // === GENERATE PAYROLL MODAL ===
-  const pidSelect = document.getElementById('pid');
-  const batchSelect = document.getElementById('attendanceBatch');
+  // These elements only exist when the modal is rendered (i.e., NOT Payroll User)
+  const pidSelect    = document.getElementById('pid');
+  const batchSelect  = document.getElementById('attendanceBatch');
 
-  if (batchSelect) {
+  if (batchSelect && pidSelect) {
     // Hide all batch options initially
-    batchSelect.querySelectorAll('option').forEach(opt => {
-      if (opt.value !== '') opt.style.display = 'none';
-    });
+    batchSelect.querySelectorAll('option').forEach(opt => { if (opt.value !== '') opt.style.display = 'none'; });
 
     pidSelect.addEventListener('change', function () {
       const selectedProjectID = this.value;
       batchSelect.value = '';
-
       batchSelect.querySelectorAll('option').forEach(option => {
         const project = option.getAttribute('data-project');
-        if (!project || project === selectedProjectID) {
-          option.style.display = 'block';
-        } else {
-          option.style.display = 'none';
-        }
+        if (!project || project === selectedProjectID) option.style.display = 'block';
+        else option.style.display = 'none';
       });
     });
 
     batchSelect.addEventListener('change', function () {
       const selected = this.options[this.selectedIndex];
       document.getElementById('start').value = selected.getAttribute('data-start');
-      document.getElementById('end').value = selected.getAttribute('data-end');
+      document.getElementById('end').value   = selected.getAttribute('data-end');
     });
   }
 
   // === VIEW SAVED PAYROLL MODAL ===
   const savedProject = document.getElementById('savedProjectSelect');
-  const savedBatch = document.getElementById('savedBatchSelect');
-  const submitBtn = document.querySelector('#viewSavedPayrollModal button[type="submit"]');
+  const savedBatch   = document.getElementById('savedBatchSelect');
+  const submitBtn    = document.querySelector('#viewSavedPayrollModal button[type="submit"]');
 
-  if (savedBatch) {
-    // Hide all saved batches initially
-    savedBatch.querySelectorAll('option').forEach(opt => {
-      if (opt.value !== '') opt.style.display = 'none';
-    });
+  if (savedBatch && savedProject && submitBtn) {
+    savedBatch.querySelectorAll('option').forEach(opt => { if (opt.value !== '') opt.style.display = 'none'; });
 
     savedProject.addEventListener('change', function () {
       const selectedPID = this.value;
       savedBatch.value = '';
       submitBtn.disabled = true;
-
       savedBatch.querySelectorAll('option').forEach(opt => {
         const project = opt.getAttribute('data-project');
-        if (!project || project === selectedPID) {
-          opt.style.display = 'block';
-        } else {
-          opt.style.display = 'none';
-        }
+        opt.style.display = (!project || project === selectedPID) ? 'block' : 'none';
       });
     });
 
-    // Enable View button only when a batch is selected
-    savedBatch.addEventListener('change', function () {
-      submitBtn.disabled = !this.value;
-    });
-
-    // Start with disabled button
+    savedBatch.addEventListener('change', function () { submitBtn.disabled = !this.value; });
     submitBtn.disabled = true;
   }
 });
@@ -343,21 +304,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
 <script>
 $(document).ready(function () {
-  $('.select2').select2({
-    width: '100%',
-    dropdownParent: $('.modal') 
-  });
+  $('.select2').select2({ width: '100%', dropdownParent: $('.modal') });
 });
 </script>
-<script>// === MONTHLY PAYROLL FILTER ===
+
+<script>
+// === MONTHLY PAYROLL FILTER ===
 const monthlyProject = document.getElementById('monthly_project_id');
-const monthlyBatch = document.getElementById('monthly_batch');
+const monthlyBatch   = document.getElementById('monthly_batch');
 
 if (monthlyBatch && monthlyProject) {
-  monthlyBatch.querySelectorAll('option').forEach(opt => {
-    if (opt.value !== '') opt.style.display = 'none';
-  });
-
+  monthlyBatch.querySelectorAll('option').forEach(opt => { if (opt.value !== '') opt.style.display = 'none'; });
   monthlyProject.addEventListener('change', function () {
     const selectedPID = this.value;
     monthlyBatch.value = '';
@@ -368,20 +325,21 @@ if (monthlyBatch && monthlyProject) {
   });
 }
 </script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   const batchSelect = document.getElementById('monthly_batch');
-  const monthInput = document.getElementById('hidden_month');
+  const monthInput  = document.getElementById('hidden_month');
+  if (!batchSelect || !monthInput) return;
 
   batchSelect.addEventListener('change', function () {
-    const value = this.value; // format: projectID|YYYY-MM-DD|YYYY-MM-DD
-    if (value) {
-      const parts = value.split('|');
-      if (parts.length >= 2) {
-        const startDate = parts[1]; // e.g., "2025-07-01"
-        const month = startDate.substring(0, 7); // "2025-07"
-        monthInput.value = month;
-      }
+    const value = this.value; // projectID|YYYY-MM-DD|YYYY-MM-DD
+    if (!value) return;
+    const parts = value.split('|');
+    if (parts.length >= 2) {
+      const startDate = parts[1];       // e.g., "2025-07-01"
+      const month = startDate.substring(0, 7); // "2025-07"
+      monthInput.value = month;
     }
   });
 });
