@@ -229,21 +229,23 @@ class Login extends CI_Controller
         // ✅ Valid password — continue login
         $acctStat = $user->acctStat;
         if (strtolower($acctStat) === 'active') {
-            $user_data = array(
-                'username' => $user->username,
-                'fname' => $user->fName,
-                'mname' => $user->mName,
-                'lname' => $user->lName,
-                'avatar' => $user->avatar,
-                'email' => $user->email,
-                'level' => $user->position,
-                'IDNumber' => $user->IDNumber,
-                'sy' => $sy,
-                'semester' => $semester,
-                'settingsID' => $user->settingsID,
-                'logged_in' => TRUE
-            );
-            $this->session->set_userdata($user_data);
+          $user_data = array(
+    'username'   => $user->username,
+    'fname'      => $user->fName,
+    'mname'      => $user->mName,
+    'lname'      => $user->lName,
+    'avatar'     => $user->avatar,
+    'email'      => $user->email,
+    'position'   => $user->position,   // NEW: primary role key
+    'level'      => $user->position,   // BACKWARD-COMPAT for existing checks
+    'IDNumber'   => $user->IDNumber,
+    'sy'         => $sy,
+    'semester'   => $semester,
+    'settingsID' => $user->settingsID,
+    'logged_in'  => TRUE
+);
+$this->session->set_userdata($user_data);
+
 
             // Role-based redirection
             switch ($user->position) {
@@ -264,6 +266,8 @@ class Login extends CI_Controller
                 case 'IT': redirect('page/IT'); break;
                 case 'Librarian': redirect('page/library'); break;
                 case 'Principal': redirect('page/s_principal'); break;
+                  case 'Payroll User': redirect('WeeklyAttendance'); break;
+
                 default:
                     $this->session->set_flashdata('danger', 'Unauthorized access.');
                     redirect('login');

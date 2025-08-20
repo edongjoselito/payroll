@@ -9,6 +9,11 @@ class MonthlyPayroll extends CI_Controller
         $this->load->model('MonthlyPayroll_model');
         $this->load->helper(['form', 'url']);
         $this->load->library('session');
+          if (!in_array($this->session->userdata('level'), ['Admin','Payroll User'], true)) {
+        $this->session->set_flashdata('error', 'Unauthorized access.');
+        redirect('login');
+        return;
+    }
     }
 
     // Landing page: shows the Generate Payroll button/modal only

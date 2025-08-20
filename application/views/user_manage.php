@@ -149,10 +149,11 @@
                         </div>
                         <div class="form-group col-md-6">
                             <label>Position</label>
-                            <select name="position" class="form-control" required>
-                                <option value="Admin" <?= $u->position == 'Admin' ? 'selected' : '' ?>>Admin</option>
-                               
-                            </select>
+                           <select name="position" class="form-control" required>
+    <option value="Admin" <?= $u->position == 'Admin' ? 'selected' : '' ?>>Admin</option>
+    <option value="Payroll User" <?= $u->position == 'Payroll User' ? 'selected' : '' ?>>Payroll User</option>
+</select>
+
                         </div>
                     </div>
 
@@ -244,10 +245,11 @@
                     <div class="form-row">
                         <div class="form-group col-md-6">
                             <label>Position <span class="text-danger">*</span></label>
-                            <select name="position" class="form-control" required>
-                                <option value="Admin">Admin</option>
-                               
-                            </select>
+                           <select name="position" class="form-control" required>
+    <option value="Admin">Admin</option>
+    <option value="Payroll User">Payroll User</option>
+</select>
+
                         </div>
                         <div class="form-group col-md-6">
                             <label>Status</label>

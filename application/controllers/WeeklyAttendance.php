@@ -7,6 +7,11 @@ class WeeklyAttendance extends CI_Controller {
         parent::__construct();
         $this->load->model('WeeklyAttendance_model');
         $this->load->helper(['form', 'url']);
+          if (!in_array($this->session->userdata('level'), ['Admin','Payroll User'], true)) {
+        $this->session->set_flashdata('error', 'Unauthorized access.');
+        redirect('login');
+        return;
+    }
     }
 
     public function index() {
