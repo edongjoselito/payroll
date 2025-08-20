@@ -98,25 +98,68 @@ public function get_deductions_by_date_range($from, $to, $settingsID)
 }
 
 public function get_all_deductions($settingsID)
-    {
-        $this->db->select("
+{
+    $sql = "
+        SELECT 
             p.personnelID,
             CONCAT(
                 p.last_name, ', ', p.first_name,
                 IF(p.middle_name != '', CONCAT(' ', LEFT(p.middle_name, 1), '.'), ''),
-                IF(p.name_ext != '', CONCAT(' ', p.name_ext), '')
+                IF(p.name_ext  != '', CONCAT(' ', p.name_ext), '')
             ) AS full_name,
-            ca.description AS ca_desc, ca.amount AS ca_amount, ca.date AS ca_date,
-            gd.description AS gd_desc, gd.amount AS gd_amount, gd.date AS gd_date
-        ");
-        $this->db->from('personnel p');
-        $this->db->join('cashadvance ca', 'ca.personnelID = p.personnelID AND ca.settingsID = p.settingsID', 'left');
-        $this->db->join('government_deductions gd', 'gd.personnelID = p.personnelID AND gd.settingsID = p.settingsID', 'left');
-        $this->db->where('p.settingsID', $settingsID);
-        $this->db->order_by('p.last_name');
+            'Cash Advance'   AS d_type,
+            ca.description   AS description,
+            ca.amount        AS amount,
+            ca.date          AS `date`
+        FROM cashadvance ca
+        JOIN personnel p 
+          ON p.personnelID = ca.personnelID AND p.settingsID = ca.settingsID
+        WHERE ca.settingsID = ? AND ca.type = 'Cash Advance'
 
-        return $this->db->get()->result();
-    }
+        UNION ALL
+
+        /* Other Deductions (from the same cashadvance table, type='Others') */
+        SELECT 
+            p.personnelID,
+            CONCAT(
+                p.last_name, ', ', p.first_name,
+                IF(p.middle_name != '', CONCAT(' ', LEFT(p.middle_name, 1), '.'), ''),
+                IF(p.name_ext  != '', CONCAT(' ', p.name_ext), '')
+            ) AS full_name,
+            'Other Deduction' AS d_type,
+            ca.description     AS description,
+            ca.amount          AS amount,
+            ca.date            AS `date`
+        FROM cashadvance ca
+        JOIN personnel p 
+          ON p.personnelID = ca.personnelID AND p.settingsID = ca.settingsID
+        WHERE ca.settingsID = ? AND ca.type = 'Others'
+
+        UNION ALL
+
+        /* Government Deductions */
+        SELECT 
+            p.personnelID,
+            CONCAT(
+                p.last_name, ', ', p.first_name,
+                IF(p.middle_name != '', CONCAT(' ', LEFT(p.middle_name, 1), '.'), ''),
+                IF(p.name_ext  != '', CONCAT(' ', p.name_ext), '')
+            ) AS full_name,
+            'Gov''t Deduction' AS d_type,
+            gd.description      AS description,
+            gd.amount           AS amount,
+            gd.date             AS `date`
+        FROM government_deductions gd
+        JOIN personnel p 
+          ON p.personnelID = gd.personnelID AND p.settingsID = gd.settingsID
+        WHERE gd.settingsID = ?
+
+        ORDER BY `date` ASC, full_name ASC
+    ";
+
+    return $this->db->query($sql, [$settingsID, $settingsID, $settingsID])->result();
+}
+
 public function get_loan_summary($settingsID)
 {
     $this->db->select("

@@ -64,86 +64,78 @@
         <div class="collapse show" id="deductionTable">
             <div class="card-body">
                 <div class="table-responsive">
-                    <table id="datatable" class="table table-bordered table-hover dt-responsive nowrap" style="width:100%">
-                        <thead class="thead-light">
-                            <tr>
-                                <th>Personnel Name</th>
-                                <?php if ($has_ca): ?>
-                                    <th>Cash Advance Desc</th>
-                                    <th>CA Amount</th>
-                                    <th>CA Date</th>
-                                <?php endif; ?>
-                                <?php if ($has_gd): ?>
-                                    <th>Gov't Deduction Desc</th>
-                                    <th>GD Amount</th>
-                                    <th>GD Date</th>
-                                <?php endif; ?>
-                            </tr>
-                        </thead>
-                     <tbody>
-<?php 
-$total_ca = 0;
-$total_gd = 0;
-$hasData = false;
-
-foreach ($summary as $row): 
-    if (
-        (!empty($row->ca_amount) && $row->ca_amount > 0) ||
-        (!empty($row->gd_amount) && $row->gd_amount > 0)
-    ) {
-        $hasData = true;
-        $total_ca += $row->ca_amount ?? 0;
-        $total_gd += $row->gd_amount ?? 0;
-?>
+                   <table id="datatable" class="table table-bordered table-hover dt-responsive nowrap" style="width:100%">
+  <thead class="thead-light">
     <tr>
-        <td><?= $row->full_name ?></td>
-        <?php if ($has_ca): ?>
-            <td><?= $row->ca_desc ?? '-' ?></td>
-            <td><?= $row->ca_amount ? '₱' . number_format($row->ca_amount, 2) : '-' ?></td>
-            <td><?= $row->ca_date ?? '-' ?></td>
-        <?php endif; ?>
-        <?php if ($has_gd): ?>
-            <td><?= $row->gd_desc ?? '-' ?></td>
-            <td><?= $row->gd_amount ? '₱' . number_format($row->gd_amount, 2) : '-' ?></td>
-            <td><?= $row->gd_date ?? '-' ?></td>
-        <?php endif; ?>
+      <th style="width:120px;">Date</th>
+      <th>Personnel Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th class="text-right" style="width:140px;">Amount</th>
     </tr>
-<?php 
-    }
-endforeach;
-?>
+  </thead>
 
-<?php if (!$hasData): ?>
-    <tr>
-        <td colspan="<?= 1 + ($has_ca ? 3 : 0) + ($has_gd ? 3 : 0) ?>" class="text-center">
-            <img src="https://em-content.zobj.net/source/apple/391/thinking-face_1f914.png" alt="Thinking Emoji" class="emoji-bounce"><br>
-            <span class="text-muted" style="font-size: 1.2rem;">
-                That’s weird, they don’t have any Deductions?
-            </span>
+  <tbody>
+    <?php
+      $hasData  = !empty($summary);
+      $total_ca = 0.0;
+      $total_od = 0.0; // Other Deduction
+      $total_gd = 0.0;
+
+      if ($hasData):
+        foreach ($summary as $row):
+          $amt = (float)$row->amount;
+
+          if ($row->d_type === 'Cash Advance') {
+            $total_ca += $amt;
+          } elseif ($row->d_type === 'Other Deduction') {
+            $total_od += $amt;
+          } elseif ($row->d_type === "Gov't Deduction") {
+            $total_gd += $amt;
+          }
+    ?>
+      <tr>
+        <!-- sort strictly by DATE (oldest -> newest) -->
+        <td data-order="<?= date('Y-m-d', strtotime($row->date)) ?>">
+          <?= date('Y-m-d', strtotime($row->date)) ?>
         </td>
-    </tr>
-<?php endif; ?>
-</tbody>
+        <td><?= $row->full_name ?></td>
+        <td><?= $row->d_type ?></td>
+        <td><?= $row->description ?></td>
+        <td class="text-right">₱<?= number_format($amt, 2) ?></td>
+      </tr>
+    <?php
+        endforeach;
+      else:
+    ?>
+      <tr>
+        <td colspan="5" class="text-center text-muted">No deductions found.</td>
+      </tr>
+    <?php endif; ?>
+  </tbody>
 
-                      <?php if ($hasData): ?>
-<tfoot>
+  <?php if ($hasData): ?>
+  <tfoot>
     <tr class="font-weight-bold bg-white border-top">
-        <td class="text-right"><?= $has_ca && $has_gd ? 'TOTAL CA:' : 'TOTAL:' ?></td>
-        <?php if ($has_ca): ?>
-            <td></td>
-            <td>₱<?= number_format($total_ca, 2) ?></td>
-            <td></td>
-        <?php endif; ?>
-        <?php if ($has_gd): ?>
-            <td class="text-right"><?= $has_ca ? 'TOTAL GD:' : '' ?></td>
-            <td>₱<?= number_format($total_gd, 2) ?></td>
-            <td></td>
-        <?php endif; ?>
+      <td colspan="4" class="text-right">TOTAL CASH ADVANCE:</td>
+      <td class="text-right">₱<?= number_format($total_ca, 2) ?></td>
     </tr>
-</tfoot>
-<?php endif; ?>
+    <tr class="font-weight-bold bg-white">
+      <td colspan="4" class="text-right">TOTAL OTHER DEDUCTIONS:</td>
+      <td class="text-right">₱<?= number_format($total_od, 2) ?></td>
+    </tr>
+    <tr class="font-weight-bold bg-white">
+      <td colspan="4" class="text-right">TOTAL GOV’T DEDUCTIONS:</td>
+      <td class="text-right">₱<?= number_format($total_gd, 2) ?></td>
+    </tr>
+    <tr class="font-weight-bold bg-light">
+      <td colspan="4" class="text-right">GRAND TOTAL:</td>
+      <td class="text-right">₱<?= number_format($total_ca + $total_od + $total_gd, 2) ?></td>
+    </tr>
+  </tfoot>
+  <?php endif; ?>
+</table>
 
-                    </table>
                 </div>
             </div>
         </div>
@@ -163,5 +155,22 @@ endforeach;
 <script src="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.js"></script>
 <script src="<?= base_url(); ?>assets/js/pages/datatables.init.js"></script>
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
+<script>
+$(function () {
+  if ($.fn.DataTable.isDataTable('#datatable')) {
+    $('#datatable').DataTable().destroy();
+  }
+  $('#datatable').DataTable({
+    // 0 Date | 1 Name | 2 Type | 3 Description | 4 Amount
+    order: [[0, 'asc'], [1, 'asc']],     // Date ASC, then Name ASC
+    columnDefs: [
+      { targets: 0, type: 'date' },
+      { targets: 4, className: 'text-right' }
+    ],
+    pageLength: 25
+  });
+});
+</script>
+
 </body>
 </html>
