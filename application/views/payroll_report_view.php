@@ -594,6 +594,10 @@ th { background-color: #d9d9d9; font-weight: bold; }
     display: none !important;
   }
 }
+.print-letterhead { display:none; text-align:center; margin-bottom:10px; }
+.print-letterhead img { height: 42px; }
+@media print { .print-letterhead { display:block !important; } }
+
 </style>
 
 
@@ -601,6 +605,9 @@ th { background-color: #d9d9d9; font-weight: bold; }
 </head>
 <body>
  <div class="print-container">
+<div class="print-letterhead">
+  <img src="<?= base_url('assets/images/pms-logo1.png') ?>" alt="PMS Logo">
+</div>
 
 <div class="header-box">
   <div class="box-content">
@@ -1590,6 +1597,7 @@ $totalNet = bcadd($totalNet, $netPay, 2);
 
 <!-- === PRINTABLE ALL PAYSLIPS SECTION (hidden by default) === -->
 <div id="allPayslips" class="no-print-payroll d-none">
+  
   <div id="print-all-payslips-container">
 <?php foreach ($attendance_data as $ln => $row): ?>
 <?php if ($row->rateType === 'Month' || $row->rateType === 'Bi-Month') continue; ?>
@@ -1865,33 +1873,13 @@ function printPayslip(elementId) {
   const card  = root.querySelector('.payslip-card') || root;
 
   const css = `
-    /* Page setup — A5 portrait, tweak to A4 by changing size */
-    @page { size: A5 portrait; margin: 10mm; }
-    html, body {
-      background: #f3f4f6;
-      color: #111827;
-      font: 12px/1.45 "Segoe UI","Calibri","Arial",sans-serif;
-    }
-
-    .slip {
-      width: 120mm;  
-      margin: 0 auto;
-      background: #fff;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      padding: 12mm;
-      box-sizing: border-box;
-    }
-
-    /* Header */
-    .slip-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      margin-bottom: 8mm;
-    }
-    .slip-title { font-weight: 700; font-size: 16px; }
-    .slip-date  { color: #6b7280; font-size: 11px; }
+  @page { size: A5 portrait; margin: 10mm; }
+  html, body { background:#f3f4f6; color:#111827; font: 12px/1.45 "Segoe UI","Calibri","Arial",sans-serif; }
+  .slip { width: 120mm; margin: 0 auto; background:#fff; border:1px solid #d1d5db; border-radius:8px; padding:12mm; box-sizing:border-box; }
+  .slip-header { display:flex; align-items:center; justify-content:space-between; gap: 8mm; margin-bottom: 8mm; }
+  .slip-brand img { height: 28px; }
+  .slip-title { font-weight:700; font-size:16px; }
+  .slip-date  { color:#6b7280; font-size:11px; }
 
     /* Transform your existing markup into a tidy layout */
     .section-title {
@@ -1949,15 +1937,19 @@ function printPayslip(elementId) {
     .btn, .modal-backdrop { display: none !important; }
   `;
 
-  const content = `
-    <div class="slip">
-      <div class="slip-header">
-        <div class="slip-title">${title}</div>
-        <div class="slip-date">${new Date().toLocaleDateString()}</div>
+ const content = `
+  <div class="slip">
+    <div class="slip-header">
+      <div class="slip-brand">
+        <img src="<?= base_url('assets/images/pms-logo1.png') ?>" alt="PMS Logo">
       </div>
-      ${card.innerHTML}
+      <div class="slip-title">${title}</div>
+      <div class="slip-date">${new Date().toLocaleDateString()}</div>
     </div>
-  `;
+    ${card.innerHTML}
+  </div>
+`;
+
 
   const win = window.open('', '_blank', 'width=900,height=1000');
   win.document.open();
