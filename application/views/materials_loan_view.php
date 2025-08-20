@@ -138,7 +138,10 @@ if ($success || $error):
       <td><?= $row->fullname ?></td>
       <td><?= $row->description ?></td>
       <td>₱<?= number_format($row->amount, 2) ?></td>
-      <td><?= date('Y-m-d', strtotime($row->date)) ?></td>
+<td data-order="<?= date('Y-m-d', strtotime($row->date)) ?>">
+  <?= date('Y-m-d', strtotime($row->date)) ?>
+</td>
+
       <td><?= $row->deduct_from ? date('Y-m-d', strtotime($row->deduct_from)) : '' ?></td>
       <td><?= $row->deduct_to ? date('Y-m-d', strtotime($row->deduct_to)) : '' ?></td>
       <td>
@@ -156,55 +159,66 @@ if ($success || $error):
       </td>
     </tr>
 
-    <!-- Edit Modal -->
-    <div class="modal fade" id="editMaterialModal<?= $row->id ?>" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <form method="post" action="<?= base_url('Borrow/save_material'); ?>">
-            <div class="modal-header">
-              <h5 class="modal-title">Edit Other Deduction</h5>
-              <button type="button" class="close" data-dismiss="modal">&times;</button>
-            </div>
-            <div class="modal-body">
-              <input type="hidden" name="id" value="<?= $row->id ?>">
-              <div class="form-group">
-                <label>Personnel</label>
-                <input class="form-control" value="<?= $row->fullname ?>" readonly>
-                <input type="hidden" name="personnelID" value="<?= $row->personnelID ?>">
-              </div>
-              <div class="form-group">
-                <label>Description</label>
-                <input type="text" name="description" class="form-control" value="<?= $row->description ?>" required>
-              </div>
-              <div class="form-row">
-                <div class="form-group col-md-6">
-                  <label>Amount</label>
-                  <input type="number" name="amount" class="form-control" value="<?= $row->amount ?>" required>
-                </div>
-                <div class="form-group col-md-6">
-                  <label>Date</label>
-                  <input type="date" name="date" class="form-control" value="<?= $row->date ?>" required>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group col-md-6">
-                  <label>Deduct From</label>
-                  <input type="date" name="deduct_from" class="form-control" value="<?= $row->deduct_from ?? '' ?>">
-                </div>
-                <div class="form-group col-md-6">
-                  <label>Deduct To</label>
-                  <input type="date" name="deduct_to" class="form-control" value="<?= $row->deduct_to ?? '' ?>">
-                </div>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="submit" class="btn btn-primary">Update</button>
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-          </form>
+  <!-- Edit Modal -->
+<div class="modal fade" id="editMaterialModal<?= $row->id ?>" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="post" action="<?= base_url('Borrow/update_material'); ?>">
+        <div class="modal-header">
+          <h5 class="modal-title">Edit Other Deduction</h5>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
         </div>
-      </div>
+        <div class="modal-body">
+          <input type="hidden" name="id" value="<?= $row->id ?>">
+          <input type="hidden" name="personnelID" value="<?= $row->personnelID ?>">
+
+          <div class="form-group">
+            <label>Personnel</label>
+            <input class="form-control" value="<?= $row->fullname ?>" readonly>
+          </div>
+
+          <div class="form-group">
+            <label>Description</label>
+            <input type="text" name="description" class="form-control" 
+                   value="<?= $row->description ?>" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label>Amount</label>
+              <input type="number" name="amount" class="form-control" 
+                     value="<?= $row->amount ?>" required>
+            </div>
+            <div class="form-group col-md-6">
+              <label>Date</label>
+              <!-- ensure correct Y-m-d format for HTML5 date -->
+              <input type="date" name="date" class="form-control" 
+                     value="<?= date('Y-m-d', strtotime($row->date)) ?>" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label>Deduct From</label>
+              <input type="date" name="deduct_from" class="form-control" 
+                     value="<?= $row->deduct_from ? date('Y-m-d', strtotime($row->deduct_from)) : '' ?>">
+            </div>
+            <div class="form-group col-md-6">
+              <label>Deduct To</label>
+              <input type="date" name="deduct_to" class="form-control" 
+                     value="<?= $row->deduct_to ? date('Y-m-d', strtotime($row->deduct_to)) : '' ?>">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Update</button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </form>
     </div>
+  </div>
+</div>
+
     <?php endforeach; ?>
   <?php else: ?>
     <tr>
@@ -294,9 +308,20 @@ if ($success || $error):
 <script src="<?= base_url(); ?>assets/js/pages/datatables.init.js"></script>
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
 <script>
-$(document).ready(function () {
-    $('#sessionToast').toast('show');
-    $('[data-toggle="tooltip"]').tooltip();
+<script>
+$(function () {
+  if ($.fn.DataTable.isDataTable('#datatable')) {
+    $('#datatable').DataTable().destroy();
+  }
+
+  $('#datatable').DataTable({
+    // 0 Name | 1 Desc | 2 Amount | 3 Date | 4 From | 5 To | 6 Manage
+    order: [[3, 'asc'], [0, 'asc']],     // Date ASC, then Name ASC
+    columnDefs: [{ targets: [3,4,5], type: 'date' }]
+  });
+
+  $('#sessionToast').toast('show');
+  $('[data-toggle="tooltip"]').tooltip();
 });
 </script>
 

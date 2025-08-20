@@ -19,7 +19,10 @@ public function get_other_deductions($settingsID) {
     $this->db->join('personnel p', 'p.personnelID = ca.personnelID');
     $this->db->where('ca.settingsID', $settingsID);
     $this->db->where('ca.type', 'Others');
-    $this->db->order_by('ca.date', 'DESC');
+$this->db->order_by('ca.`date`', 'ASC');
+$this->db->order_by('p.last_name', 'ASC');
+$this->db->order_by('p.first_name', 'ASC');
+
     return $this->db->get()->result();
 }
 
@@ -57,21 +60,24 @@ public function get_other_deductions($settingsID) {
     }
 
     public function update_other_deduction($data) {
-        if (!isset($data['id'])) {
-            return false;
-        }
-
-        $updateData = [
-            'personnelID' => $data['personnelID'],
-            'description' => $data['description'],
-            'amount' => $data['amount'],
-            'date' => $data['date'],
-            'type' => 'Others'
-        ];
-
-        $this->db->where('id', $data['id']);
-        return $this->db->update('cashadvance', $updateData);
+    if (!isset($data['id'])) {
+        return false;
     }
+
+    $updateData = [
+        'personnelID' => $data['personnelID'],
+        'description' => $data['description'],
+        'amount'      => $data['amount'],
+        'date'        => $data['date'],
+        'deduct_from' => isset($data['deduct_from']) && $data['deduct_from'] !== '' ? $data['deduct_from'] : null,
+        'deduct_to'   => isset($data['deduct_to'])   && $data['deduct_to']   !== '' ? $data['deduct_to']   : null,
+        'type'        => 'Others'
+    ];
+
+    $this->db->where('id', $data['id']);
+    return $this->db->update('cashadvance', $updateData);
+}
+
 
     public function insert_other_deduction($data) {
         $data['type'] = 'Others';
