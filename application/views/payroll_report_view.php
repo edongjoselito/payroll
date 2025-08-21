@@ -599,6 +599,10 @@ th { background-color: #d9d9d9; font-weight: bold; }
 @media print { .print-letterhead { display:block !important; } }
 
 </style>
+<style>
+  .neg { color:#b00020 !important; font-weight:700 !important; } /* red text */
+  @media print { .neg { color:#b00020 !important; } } /* ensure it prints red */
+</style>
 
 
 
@@ -1142,7 +1146,10 @@ $totalPHIC = bcadd($totalPHIC, $philhealth, 2);
 $totalLoan = bcadd($totalLoan, $loan, 2);
 $totalOther = bcadd($totalOther, $other_deduction, 2);
 $totalDeduction = bcadd($totalDeduction, $total_deduction, 2);
-$totalNet = bcadd($totalNet, $netPay, 2);
+// $totalNet = bcadd($totalNet, $netPay, 2);
+if (bccomp($netPay, '0', 2) > 0) {
+    $totalNet = bcadd($totalNet, $netPay, 2);
+}
 
 ?>
 
@@ -1252,12 +1259,22 @@ $totalNet = bcadd($totalNet, $netPay, 2);
 <?php if ($showTotalDeduction): ?>
   <td><?= displayAmount($total_deduction) ?></td>
 <?php endif; ?>
+<?php
+  $isNeg  = (bccomp($netPay, '0', 2) < 0);
+  $netFmt = number_format($netPay, 2);
+?>
 <td>
-  <span class="d-print-block d-none"><?= number_format($netPay, 2) ?></span>
-  <a href="#" class="btn btn-link btn-sm d-print-none" data-toggle="modal" data-target="#payslipModal<?= $ln ?>">
-    <?= number_format($netPay, 2) ?>
+  <!-- print view ONLY (hide on screen) -->
+  <span class="d-none d-print-inline <?= $isNeg ? 'neg' : '' ?>"><?= $netFmt ?></span>
+
+  <!-- screen view ONLY -->
+  <a href="#" class="btn btn-link btn-sm d-print-none <?= $isNeg ? 'neg' : '' ?>"
+     data-toggle="modal" data-target="#payslipModal<?= $ln ?>">
+    <?= $netFmt ?>
   </a>
 </td>
+
+
 
 <?php if (empty($is_summary)): ?>
   <td colspan="3"></td>
@@ -1541,14 +1558,18 @@ $totalNet = bcadd($totalNet, $netPay, 2);
             <?php endif; ?>
           </div>
 
-          <?php if ($netPay > 0): ?>
-            <div class="text-right netpay-box">
-              <h5 class="mb-2"><strong>Net Pay: <span class="amt">₱<?= number_format($netPay, 2) ?></span></strong></h5>
-              <button onclick="printPayslip('printablePayslip<?= $ln ?>')" class="btn btn-sm btn-secondary">
-                <i class="fas fa-print"></i> Print this payslip
-              </button>
-            </div>
-          <?php endif; ?>
+          <?php $netClass = (bccomp((string)$netPay, '0', 2) < 0) ? 'neg' : ''; ?>
+<div class="text-right netpay-box">
+  <h5 class="mb-2">
+    <strong>Net Pay:
+      <span class="amt <?= $netClass ?>">₱<?= number_format((float)$netPay, 2) ?></span>
+    </strong>
+  </h5>
+  <button onclick="printPayslip('printablePayslip<?= $ln ?>')" class="btn btn-sm btn-secondary">
+    <i class="fas fa-print"></i> Print this payslip
+  </button>
+</div>
+
 
         </div>
       </div>
@@ -1585,7 +1606,10 @@ $totalNet = bcadd($totalNet, $netPay, 2);
   <?php if ($showTotalDeduction): ?>
     <td><?= number_format((float)$totalDeduction, 2) ?></td>
   <?php endif; ?>
-  <td><?= number_format((float)$totalNet, 2) ?></td>
+<?php $isTotalNeg = (bccomp($totalNet, '0', 2) < 0); ?>
+<td class="<?= $isTotalNeg ? 'neg' : '' ?>">
+  <?= number_format((float)$totalNet, 2) ?>
+</td>
   <?php if (empty($is_summary)): ?>
     <td colspan="3"></td>
   <?php endif; ?>
@@ -1822,11 +1846,13 @@ $totalNet = bcadd($totalNet, $netPay, 2);
       <?php endif; ?>
     </div>
 
-    <?php if ($netPay > 0): ?>
-    <div style="margin-top: 10px; text-align: right;">
-      <h4><strong>Net Pay: ₱<?= number_format($netPay, 2) ?></strong></h4>
-    </div>
-    <?php endif; ?>
+  <?php $netClassCard = (bccomp((string)$netPay, '0', 2) < 0) ? 'neg' : ''; ?>
+<div style="margin-top: 10px; text-align: right;">
+  <h4><strong>Net Pay:
+    <span class="<?= $netClassCard ?>">₱<?= number_format($netPay, 2) ?></span>
+  </strong></h4>
+</div>
+
   </div>
 <?php endforeach; ?>
 
