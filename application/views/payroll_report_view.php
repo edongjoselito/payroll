@@ -330,6 +330,8 @@ body, html {
   background: #fff;
   height: 100%;
 }
+.num { text-align:right !important; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.center { text-align:center !important; }
 
 .print-container {
   display: flex;
@@ -471,24 +473,32 @@ th { background-color: #d9d9d9; font-weight: bold; }
 .modal-header { background: #fff !important; color: #000 !important; border-bottom: 1px solid #ddd; }
 .modal-body h6 { font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 10px; }
 
+/* compact deduction cells but KEEP descriptions */
 .od-cell{
- 
-  min-width:160px;  
-  white-space:normal; 
+  min-width:120px;              /* was 160px */
+  white-space:normal;
+  word-break:break-word;
 }
 
 .od-lines{
-  font-size:12px;
-  line-height:2.50;
-  color: #000;;
-
-  word-break:normal; 
+  font-size:10px;               /* was 12px */
+  line-height:1.25;             /* was 2.50 */
+  color:#000;
   overflow-wrap:anywhere;
   hyphens:auto;
+  margin:0;                     /* tighter */
 }
 
-.od-lines > div{ position:relative; padding-left:12px; }
-.od-lines > div::before{ position:absolute; left:0; }
+.od-lines > div{
+  position:relative;
+  padding-left:10px;            /* slightly smaller bullet indent */
+  margin:1px 0;                 /* tiny vertical gap per line */
+}
+.od-lines > div::before{
+  content:"—";                  /* keep the em dash bullet you use */
+  position:absolute;
+  left:0;
+}
 
 
 
@@ -558,13 +568,16 @@ th { background-color: #d9d9d9; font-weight: bold; }
     font-size: 10px !important;
     word-wrap: break-word !important;
   }
-  .payroll-table th, .payroll-table td{
-    padding: 4px !important;
+    .payroll-table th, .payroll-table td{
+    padding: 3px 4px !important;  /* slightly tighter */
     font-size: 10px !important;
+    line-height: 1.2 !important;  /* make rows shorter */
+    vertical-align: middle !important;
     page-break-inside: avoid !important;
     break-inside: avoid;
     word-break: break-word;
   }
+
   .payroll-table th:first-child, .payroll-table td:first-child{ min-width: 25px; max-width: 30px; }
 
   thead { display: table-header-group; font-size: 14px !important; }
@@ -720,6 +733,27 @@ $showTotalDeduction = $showCA || $showSSS || $showPHIC || $showPAGIBIG || $showL
 
 
 <table class="payroll-table">
+  <colgroup>
+    <col style="width:28px"><!-- L/N -->
+    <col style="width:180px"><!-- NAME -->
+    <col style="width:120px"><!-- POSITION -->
+    <col style="width:90px"><!-- RATE -->
+    <col style="width:70px"><!-- Rate/Hour -->
+    <?php $d=strtotime($start); while($d<=strtotime($end)){ echo '<col style="width:34px"><col style="width:34px">'; $d=strtotime('+1 day',$d);} ?>
+    <col style="width:46px"><col style="width:46px"><col style="width:46px"><!-- totals -->
+    <col style="width:70px"><col style="width:70px"><?php if($hasRegularHoliday):?><col style="width:70px"><?php endif; ?><?php if($hasSpecialHoliday):?><col style="width:70px"><?php endif; ?>
+    <col style="width:80px"><!-- Gross -->
+    <?php if ($showCA): ?><col style="width:80px"><?php endif; ?>
+    <?php if ($showSSS): ?><col style="width:110px"><?php endif; ?>
+    <?php if ($showPHIC): ?><col style="width:110px"><?php endif; ?>
+    <?php if ($showPAGIBIG): ?><col style="width:110px"><?php endif; ?>
+    <?php if ($showLoan): ?><col style="width:110px"><?php endif; ?>
+    <?php if ($showOther): ?><col style="width:110px"><?php endif; ?>
+    <?php if ($showTotalDeduction): ?><col style="width:90px"><?php endif; ?>
+    <col style="width:90px"><!-- Take Home -->
+<?php if (empty($is_summary)): ?><col style="width:120px"><?php endif; ?>
+  </colgroup>
+
 <thead>
 <tr>
     <th rowspan="3">L/N</th>
@@ -773,7 +807,7 @@ $showTotalDeduction = $showCA || $showSSS || $showPHIC || $showPAGIBIG || $showL
     $startDate = strtotime($start);
     $endDate = strtotime($end);
     while ($startDate <= $endDate):
-        echo '<th colspan="2">' . date('l', $startDate) . '</th>';
+echo '<th colspan="2" class="center">' . date('D', $startDate) . '</th>';
         $startDate = strtotime('+1 day', $startDate);
     endwhile;
     ?>
@@ -1011,8 +1045,9 @@ while ($loopDate <= $endDate):
             } elseif ($regHours <= 0 && $otHours <= 0 && in_array($status, ['absent', 'absentee'])) {
                 echo "<td colspan='2' class='absent text-center' style='background-color: #f8d7da; color: red;'>Absent</td>";
             } else {
-                echo "<td>" . displayAmount($regHours) . "</td>";
-                echo "<td>" . displayAmount($otHours) . "</td>";
+               echo '<td class="num">' . displayAmount($regHours) . '</td>';
+echo '<td class="num">' . displayAmount($otHours) . '</td>';
+
             }
 
             $regAmount += $regHours * $base;
@@ -1153,22 +1188,22 @@ if (bccomp($netPay, '0', 2) > 0) {
 
 ?>
 
-<td><?= displayAmount($regTotalMinutes / 60) ?></td>
-<td><?= number_format($otTotalMinutes / 60, 2) ?></td>  
-<td><?= number_format($totalDays, 2) ?></td>
+<td class="num"><?= displayAmount($regTotalMinutes / 60) ?></td>
+<td class="num"><?= number_format($otTotalMinutes / 60, 2) ?></td>
+<td class="num"><?= number_format($totalDays, 2) ?></td>
 
 
-<td><?= displayAmount($regAmount) ?></td>
-<td><?= displayAmount($otAmount) ?></td>
+
+<td class="num"><?= displayAmount($regAmount) ?></td>
+<td class="num"><?= displayAmount($otAmount) ?></td>
 <?php if ($hasRegularHoliday): ?>
-  <td><?= displayAmount($amountRegularHoliday) ?></td>
+  <td class="num"><?= displayAmount($amountRegularHoliday) ?></td>
 <?php endif; ?>
 <?php if ($hasSpecialHoliday): ?>
-  <td><?= displayAmount($amountSpecialHoliday) ?></td>
+  <td class="num"><?= displayAmount($amountSpecialHoliday) ?></td>
 <?php endif; ?>
+<td class="num"><?= number_format($regAmount + $otAmount + $amountRegularHoliday + $amountSpecialHoliday, 2) ?></td>
 
-
-<td><?= number_format($regAmount + $otAmount + $amountRegularHoliday + $amountSpecialHoliday, 2) ?></td>
 
 
 <?php if ($showCA): ?>
@@ -1263,16 +1298,15 @@ if (bccomp($netPay, '0', 2) > 0) {
   $isNeg  = (bccomp($netPay, '0', 2) < 0);
   $netFmt = number_format($netPay, 2);
 ?>
-<td>
-  <!-- print view ONLY (hide on screen) -->
+<td class="num">
   <span class="d-none d-print-inline <?= $isNeg ? 'neg' : '' ?>"><?= $netFmt ?></span>
-
-  <!-- screen view ONLY -->
   <a href="#" class="btn btn-link btn-sm d-print-none <?= $isNeg ? 'neg' : '' ?>"
      data-toggle="modal" data-target="#payslipModal<?= $ln ?>">
     <?= $netFmt ?>
   </a>
 </td>
+
+
 
 
 
@@ -1607,9 +1641,10 @@ if (bccomp($netPay, '0', 2) > 0) {
     <td><?= number_format((float)$totalDeduction, 2) ?></td>
   <?php endif; ?>
 <?php $isTotalNeg = (bccomp($totalNet, '0', 2) < 0); ?>
-<td class="<?= $isTotalNeg ? 'neg' : '' ?>">
+<td class="num <?= $isTotalNeg ? 'neg' : '' ?>">
   <?= number_format((float)$totalNet, 2) ?>
 </td>
+
   <?php if (empty($is_summary)): ?>
     <td colspan="3"></td>
   <?php endif; ?>
