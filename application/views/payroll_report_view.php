@@ -140,6 +140,42 @@ function computePayroll($row, $start, $end) {
         'netPay' => $netPay
     ];
 }
+function getPrintSlices($start, $end) {
+    // We assume $start / $end are in the same month for a standard cut.
+    $ym  = date('Y-m-01', strtotime($start));         // first day of month
+    $y   = date('Y', strtotime($start));
+    $m   = date('m', strtotime($start));
+    $eom = cal_days_in_month(CAL_GREGORIAN, (int)$m, (int)$y);
+
+    $d1s = max(strtotime("$y-$m-01"), strtotime($start));
+    $d1e = min(strtotime("$y-$m-10"), strtotime($end));
+
+    $d2s = max(strtotime("$y-$m-11"), strtotime($start));
+    $d2e = min(strtotime("$y-$m-20"), strtotime($end));
+
+    $d3s = max(strtotime("$y-$m-21"), strtotime($start));
+    $d3e = min(strtotime("$y-$m-$eom"), strtotime($end));
+
+    $out = [];
+
+    if ($d1s <= $d1e) $out[] = [
+        'label' => date('M d', $d1s) . ' – ' . date('M d, Y', $d1e),
+        'start' => date('Y-m-d', $d1s),
+        'end'   => date('Y-m-d', $d1e),
+    ];
+    if ($d2s <= $d2e) $out[] = [
+        'label' => date('M d', $d2s) . ' – ' . date('M d, Y', $d2e),
+        'start' => date('Y-m-d', $d2s),
+        'end'   => date('Y-m-d', $d2e),
+    ];
+    if ($d3s <= $d3e) $out[] = [
+        'label' => date('M d', $d3s) . ' – ' . date('M d, Y', $d3e),
+        'start' => date('Y-m-d', $d3s),
+        'end'   => date('Y-m-d', $d3e),
+    ];
+
+    return $out;
+}
 ?>
 
 <?php
@@ -615,6 +651,56 @@ th { background-color: #d9d9d9; font-weight: bold; }
 <style>
   .neg { color:#b00020 !important; font-weight:700 !important; } /* red text */
   @media print { .neg { color:#b00020 !important; } } /* ensure it prints red */
+  @media screen {
+  #print-sliced { display: none; }
+  #mainUnsliced { display: block; }
+}
+@media print {
+  #print-sliced { display: block !important; }
+  #mainUnsliced { display: none !important; }
+}
+/* === Center numbers in PRINT-SLICED tables only === */
+@media print {
+  /* default: center everything in slice & summary tables */
+  #print-sliced .slice-table th,
+  #print-sliced .slice-table td,
+  #print-sliced .summary-table th,
+  #print-sliced .summary-table td {
+    text-align: center !important;
+    vertical-align: middle !important;
+  }
+
+  /* keep NAME (and POSITION in slice tables) left-aligned */
+  #print-sliced .slice-table th:nth-child(2),
+  #print-sliced .slice-table td:nth-child(2),  /* NAME */
+  #print-sliced .slice-table th:nth-child(3),
+  #print-sliced .slice-table td:nth-child(3),  /* POSITION */
+  #print-sliced .summary-table th:nth-child(2),
+  #print-sliced .summary-table td:nth-child(2) /* NAME */
+  {
+    text-align: left !important;
+  }
+
+  /* override your global .num (right-aligned) inside print-sliced only */
+  #print-sliced .slice-table .num,
+  #print-sliced .summary-table .num {
+    text-align: center !important;
+  }
+
+  /* optional: nicer signature line height */
+  #print-sliced .summary-table td.signature-cell {
+    height: 24px;
+    border-bottom: 1px solid #000 !important;
+  }
+
+  /* optional: allow long names to wrap instead of cut */
+  #print-sliced .slice-table td:nth-child(2),
+  #print-sliced .summary-table td:nth-child(2) {
+    white-space: normal !important;
+    word-break: break-word;
+  }
+}
+
 </style>
 
 
@@ -666,6 +752,7 @@ th { background-color: #d9d9d9; font-weight: bold; }
 
 
 <div class="scrollable-wrapper" id="mainScroll">
+  <div id="mainUnsliced">
 
   <?php
 $hasRegularHoliday = false;
@@ -1653,6 +1740,200 @@ if (bccomp($netPay, '0', 2) > 0) {
 
 </tbody>
 </table>
+  </div>
+  <!-- === PRINT-ONLY SLICED PAYROLL (EARNINGS PER SLICE) === -->
+<div id="print-sliced">
+<?php
+  $slices = getPrintSlices($start, $end);
+  $showCA = $showSSS = $showPHIC = $showPAGIBIG = $showLoan = $showOther = false;
+
+  // We’ll reuse your existing detection so the final summary knows which columns to show
+  foreach ($attendance_data as $row) {
+      if (!empty($row->ca_cashadvance)) $showCA = true;
+      if (!empty($row->gov_sss)) $showSSS = true;
+      if (!empty($row->gov_philhealth)) $showPHIC = true;
+      if (!empty($row->gov_pagibig)) $showPAGIBIG = true;
+      if (!empty($row->loan)) $showLoan = true;
+      if (!empty($row->other_deduction)) $showOther = true;
+  }
+  if (!$showSSS || !$showPHIC || !$showPAGIBIG || !$showLoan || !$showOther) {
+      $settingsID = isset($project->settingsID) ? $project->settingsID : null;
+      foreach ($attendance_data as $r0) {
+          if (!$showSSS || !$showPHIC || !$showPAGIBIG) {
+              $g0 = fetch_gov_deduction_lines($r0->personnelID, $start, $end, $settingsID);
+              if (!$showSSS && !empty($g0['by']['SSS']))           $showSSS = true;
+              if (!$showPHIC && !empty($g0['by']['PhilHealth']))   $showPHIC = true;
+              if (!$showPAGIBIG && !empty($g0['by']['Pag-IBIG']))  $showPAGIBIG = true;
+          }
+          if (!$showLoan) {
+              $ld0 = fetch_loan_lines($r0->personnelID, $start, $end, $settingsID);
+              if (!empty($ld0['rows'])) $showLoan = true;
+          }
+          if (!$showOther) {
+              $od0 = fetch_other_deduction_lines($r0->personnelID, $start, $end, $settingsID);
+              if (!empty($od0['rows'])) $showOther = true;
+          }
+      }
+  }
+  $showTotalDeduction = $showCA || $showSSS || $showPHIC || $showPAGIBIG || $showLoan || $showOther;
+?>
+
+<?php foreach ($slices as $idx => $sl): ?>
+  <div style="page-break-inside: avoid; margin-bottom: 18px;">
+    <h4 style="margin:6px 0 8px;"><?= htmlspecialchars($project->projectTitle ?? 'Payroll') ?> — <?= $sl['label'] ?></h4>
+<table class="payroll-table slice-table" style="font-size:11px;">
+      <thead>
+        <tr>
+          <th style="width:35px;">L/N</th>
+          <th style="width:200px;">NAME</th>
+          <th style="width:140px;">POSITION</th>
+          <th style="width:75px;">Reg. Hrs</th>
+          <th style="width:75px;">OT Hrs</th>
+          <th style="width:65px;">Days</th>
+          <th style="width:90px;">Reg. Amt</th>
+          <th style="width:90px;">OT Amt</th>
+          <th style="width:110px;">Regular Holiday</th>
+          <th style="width:110px;">Special Holiday</th>
+        </tr>
+      </thead>
+      <tbody>
+      <?php
+        $ln = 1;
+        $sliceTotalGross = '0.00';
+        foreach ($attendance_data as $row):
+          // Skip monthly/bi-month if you also skip them in the main table
+          if ($row->rateType === 'Month' || $row->rateType === 'Bi-Month') continue;
+
+          $p = computePayroll($row, $sl['start'], $sl['end']);
+
+          // Skip fully empty lines
+          $hasAny = ($p['regTotalMinutes'] + $p['otTotalMinutes'] + $p['regAmount'] + $p['otAmount']
+                     + $p['amountRegularHoliday'] + $p['amountSpecialHoliday'] + $p['salary']) > 0;
+          if (!$hasAny) continue;
+
+          $sliceTotalGross = bcadd($sliceTotalGross, $p['salary'], 2);
+      ?>
+        <tr>
+          <td><?= $ln++ ?></td>
+          <td><?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></td>
+          <td><?= htmlspecialchars($row->position) ?></td>
+          <td class="num"><?= number_format($p['regTotalMinutes']/60, 2) ?></td>
+          <td class="num"><?= number_format($p['otTotalMinutes']/60, 2) ?></td>
+          <td class="num"><?= number_format($p['totalDays'], 2) ?></td>
+          <td class="num"><?= displayAmount($p['regAmount']) ?></td>
+          <td class="num"><?= displayAmount($p['otAmount']) ?></td>
+          <td class="num"><?= displayAmount($p['amountRegularHoliday']) ?></td>
+          <td class="num"><?= displayAmount($p['amountSpecialHoliday']) ?></td>
+        </tr>
+      <?php endforeach; ?>
+     
+
+      </tbody>
+    </table>
+  </div>
+<?php endforeach; ?>
+
+<!-- === One final "Deductions & Net Pay" summary for the whole period === -->
+<div style="page-break-inside: avoid; margin-top: 6px;">
+  <h4 style="margin:10px 0 8px;">Deductions & Net Pay — <?= date('M d', strtotime($start)) ?> – <?= date('M d, Y', strtotime($end)) ?></h4>
+<table class="payroll-table summary-table" style="font-size:11px;">
+    <thead>
+      <tr>
+        <th style="width:35px;">L/N</th>
+        <th style="width:200px;">NAME</th>
+        <th style="width:90px;">Gross</th>
+        <?php if ($showCA): ?><th style="width:90px;">Cash Advance</th><?php endif; ?>
+        <?php if ($showSSS): ?><th style="width:100px;">SSS (Gov’t)</th><?php endif; ?>
+        <?php if ($showPHIC): ?><th style="width:100px;">PHIC (Gov’t)</th><?php endif; ?>
+        <?php if ($showPAGIBIG): ?><th style="width:100px;">Pag-IBIG (Gov’t)</th><?php endif; ?>
+        <?php if ($showLoan): ?><th style="width:100px;">Loan</th><?php endif; ?>
+        <?php if ($showOther): ?><th style="width:120px;">Other Deduction</th><?php endif; ?>
+        <?php if ($showCA || $showSSS || $showPHIC || $showPAGIBIG || $showLoan || $showOther): ?>
+          <th style="width:95px;">Total Deduction</th>
+        <?php endif; ?>
+        <th style="width:95px;">Net Pay</th>
+        <th style="width:120px;">Signature</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      <?php
+        $gTot='0.00'; $caTot='0.00'; $sssTot='0.00'; $phicTot='0.00'; $piTot='0.00'; $loanTot='0.00'; $odTot='0.00'; $dedTot='0.00'; $netTot='0.00';
+        $ln=1;
+        $settingsID = isset($project->settingsID) ? $project->settingsID : null;
+
+        foreach ($attendance_data as $row):
+          if ($row->rateType === 'Month' || $row->rateType === 'Bi-Month') continue;
+
+          $p       = computePayroll($row, $start, $end);
+          $odetail = fetch_other_deduction_lines($row->personnelID, $start, $end, $settingsID);
+          $gdetail = fetch_gov_deduction_lines($row->personnelID, $start, $end, $settingsID);
+          $ldetail = fetch_loan_lines($row->personnelID, $start, $end, $settingsID);
+
+          $salary = (float)$p['salary'];
+
+          $sss = (float)((float)$p['sss']        ?: ($gdetail['totals']['SSS']       ?? 0));
+          $pi  = (float)((float)$p['pagibig']    ?: ($gdetail['totals']['Pag-IBIG']  ?? 0));
+          $ph  = (float)((float)$p['philhealth'] ?: ($gdetail['totals']['PhilHealth']?? 0));
+          $loan= (float)((float)$p['loan']       ?: ($ldetail['total']               ?? 0));
+          $od  = (float)((float)$p['other_deduction'] ?: ($odetail['total'] ?? 0));
+          $ca  = (float)($p['cash_advance'] ?? 0);
+
+          $tded = (float)bcadd(
+                    bcadd(bcadd($ca, $sss, 2), bcadd($pi, $ph, 2), 2),
+                    bcadd($loan, $od, 2),
+                  2);
+          $net  = (float)bcsub($salary, $tded, 2);
+
+          $gTot   = bcadd($gTot,   $salary, 2);
+          $caTot  = bcadd($caTot,  $ca, 2);
+          $sssTot = bcadd($sssTot, $sss, 2);
+          $phicTot= bcadd($phicTot,$ph, 2);
+          $piTot  = bcadd($piTot,  $pi, 2);
+          $loanTot= bcadd($loanTot,$loan, 2);
+          $odTot  = bcadd($odTot,  $od, 2);
+          $dedTot = bcadd($dedTot, $tded, 2);
+          $netTot = (bccomp($net, '0', 2) > 0) ? bcadd($netTot, $net, 2) : $netTot;
+      ?>
+        <tr>
+          <td><?= $ln++ ?></td>
+          <td><?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></td>
+          <td class="num"><?= number_format($salary, 2) ?></td>
+          <?php if ($showCA): ?><td class="num"><?= displayAmount($ca) ?></td><?php endif; ?>
+          <?php if ($showSSS): ?><td class="num"><?= displayAmount($sss) ?></td><?php endif; ?>
+          <?php if ($showPHIC): ?><td class="num"><?= displayAmount($ph) ?></td><?php endif; ?>
+          <?php if ($showPAGIBIG): ?><td class="num"><?= displayAmount($pi) ?></td><?php endif; ?>
+          <?php if ($showLoan): ?><td class="num"><?= displayAmount($loan) ?></td><?php endif; ?>
+          <?php if ($showOther): ?><td class="num"><?= displayAmount($od) ?></td><?php endif; ?>
+          <?php if ($showTotalDeduction): ?><td class="num"><?= number_format($tded, 2) ?></td><?php endif; ?>
+          <?php $isNeg = (bccomp((string)$net,'0',2) < 0); ?>
+          <td class="num <?= $isNeg ? 'neg' : '' ?>"><?= number_format($net, 2) ?></td>
+          <td class="signature-cell"></td> 
+          <td style="border-bottom:1px solid #000;"></td>
+
+        </tr>
+      <?php endforeach; ?>
+
+      <tr style="background:#f3f3f3; font-weight:600;">
+
+        <td colspan="2" class="text-right">TOTAL</td>
+        <td class="num"><?= number_format((float)$gTot, 2) ?></td>
+        <?php if ($showCA): ?><td class="num"><?= number_format((float)$caTot, 2) ?></td><?php endif; ?>
+        <?php if ($showSSS): ?><td class="num"><?= number_format((float)$sssTot, 2) ?></td><?php endif; ?>
+        <?php if ($showPHIC): ?><td class="num"><?= number_format((float)$phicTot, 2) ?></td><?php endif; ?>
+        <?php if ($showPAGIBIG): ?><td class="num"><?= number_format((float)$piTot, 2) ?></td><?php endif; ?>
+        <?php if ($showLoan): ?><td class="num"><?= number_format((float)$loanTot, 2) ?></td><?php endif; ?>
+        <?php if ($showOther): ?><td class="num"><?= number_format((float)$odTot, 2) ?></td><?php endif; ?>
+        <?php if ($showTotalDeduction): ?><td class="num"><?= number_format((float)$dedTot, 2) ?></td><?php endif; ?>
+        <?php $isTNeg = (bccomp((string)$netTot,'0',2) < 0); ?>
+        <td class="num <?= $isTNeg ? 'neg' : '' ?>"><?= number_format((float)$netTot, 2) ?></td>
+        <td></td>
+
+      </tr>
+    </tbody>
+  </table>
+</div>
+</div>
 
 <!-- === PRINTABLE ALL PAYSLIPS SECTION (hidden by default) === -->
 <div id="allPayslips" class="no-print-payroll d-none">
