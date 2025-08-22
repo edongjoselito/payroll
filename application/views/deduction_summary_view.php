@@ -160,15 +160,16 @@ $(function () {
   if ($.fn.DataTable.isDataTable('#datatable')) {
     $('#datatable').DataTable().destroy();
   }
-  $('#datatable').DataTable({
-    // 0 Date | 1 Name | 2 Type | 3 Description | 4 Amount
-    order: [[0, 'asc'], [1, 'asc']],     // Date ASC, then Name ASC
-    columnDefs: [
-      { targets: 0, type: 'date' },
-      { targets: 4, className: 'text-right' }
-    ],
-    pageLength: 25
-  });
+ $('#datatable').DataTable({
+  // 0 Date | 1 Name | 2 Type | 3 Description | 4 Amount
+  order: [[1, 'asc'], [0, 'asc']],   // Name first, then Date
+  columnDefs: [
+    { targets: 0, type: 'date' },
+    { targets: 4, className: 'text-right' }
+  ],
+  pageLength: 25
+});
+
 });
 </script>
 

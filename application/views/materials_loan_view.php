@@ -409,14 +409,15 @@ $(function () {
   }
 
   var table = $('#datatable').DataTable({
-    // 0 Name | 1 Desc | 2 Amount | 3 Date | 4 From | 5 To | 6 Manage
-    order: [[3, 'asc'], [0, 'asc']],
-    columnDefs: [
-      { targets: [3,4,5], type: 'date' },
-      { targets: [6], orderable: false }
-    ],
-    pageLength: 10
-  });
+  // 0 = Personnel Name | 1 = Desc | 2 = Amount | 3 = Date | 4 From | 5 To | 6 Manage
+  order: [[0, 'asc'], [3, 'asc']],
+  columnDefs: [
+    { targets: [3,4,5], type: 'date' },
+    { targets: [6], orderable: false }
+  ],
+  pageLength: 10
+});
+
 
   // PRINT handler
   $('#printBtn').on('click', function () {
