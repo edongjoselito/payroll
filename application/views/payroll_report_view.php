@@ -141,41 +141,52 @@ function computePayroll($row, $start, $end) {
     ];
 }
 function getPrintSlices($start, $end) {
-    // We assume $start / $end are in the same month for a standard cut.
-    $ym  = date('Y-m-01', strtotime($start));         // first day of month
-    $y   = date('Y', strtotime($start));
-    $m   = date('m', strtotime($start));
-    $eom = cal_days_in_month(CAL_GREGORIAN, (int)$m, (int)$y);
+    $startTs = strtotime($start);
+    $endTs   = strtotime($end);
+    if ($startTs === false || $endTs === false || $startTs > $endTs) return [];
 
-    $d1s = max(strtotime("$y-$m-01"), strtotime($start));
-    $d1e = min(strtotime("$y-$m-10"), strtotime($end));
-
-    $d2s = max(strtotime("$y-$m-11"), strtotime($start));
-    $d2e = min(strtotime("$y-$m-20"), strtotime($end));
-
-    $d3s = max(strtotime("$y-$m-21"), strtotime($start));
-    $d3e = min(strtotime("$y-$m-$eom"), strtotime($end));
+    // month cursor at the 1st day of the start month
+    $monthCur = strtotime(date('Y-m-01', $startTs));
+    $lastMon  = strtotime(date('Y-m-01', $endTs));
 
     $out = [];
 
-    if ($d1s <= $d1e) $out[] = [
-        'label' => date('M d', $d1s) . ' – ' . date('M d, Y', $d1e),
-        'start' => date('Y-m-d', $d1s),
-        'end'   => date('Y-m-d', $d1e),
-    ];
-    if ($d2s <= $d2e) $out[] = [
-        'label' => date('M d', $d2s) . ' – ' . date('M d, Y', $d2e),
-        'start' => date('Y-m-d', $d2s),
-        'end'   => date('Y-m-d', $d2e),
-    ];
-    if ($d3s <= $d3e) $out[] = [
-        'label' => date('M d', $d3s) . ' – ' . date('M d, Y', $d3e),
-        'start' => date('Y-m-d', $d3s),
-        'end'   => date('Y-m-d', $d3e),
-    ];
+    while ($monthCur <= $lastMon) {
+        $y = (int)date('Y', $monthCur);
+        $m = (int)date('m', $monthCur);
+        $eom = cal_days_in_month(CAL_GREGORIAN, $m, $y);
+
+        // three standard slices for this month
+        $ranges = [
+            ["$y-$m-01", "$y-$m-10"],
+            ["$y-$m-11", "$y-$m-20"],
+            ["$y-$m-21", "$y-$m-$eom"],
+        ];
+
+        foreach ($ranges as [$rs, $re]) {
+            $rsTs = strtotime($rs);
+            $reTs = strtotime($re);
+
+            // clip to overall period
+            $s = max($rsTs, $startTs);
+            $e = min($reTs, $endTs);
+
+            if ($s <= $e) {
+                $out[] = [
+                    'label' => date('M d', $s) . ' – ' . date('M d, Y', $e),
+                    'start' => date('Y-m-d', $s),
+                    'end'   => date('Y-m-d', $e),
+                ];
+            }
+        }
+
+        // next month
+        $monthCur = strtotime('+1 month', $monthCur);
+    }
 
     return $out;
 }
+
 ?>
 
 <?php
@@ -700,6 +711,11 @@ th { background-color: #d9d9d9; font-weight: bold; }
     word-break: break-word;
   }
 }
+@media print {
+  tr.no-data-print { 
+    display: none !important; 
+  }
+}
 
 </style>
 
@@ -995,8 +1011,29 @@ $totalPrefixCols = $fixedColsBeforeDays + $dateColumnCount + $totalTimeCols + $a
 <?php $ln = 1; foreach ($attendance_data as $row): ?>
 <?php if ($row->rateType === 'Month' || $row->rateType === 'Bi-Month') continue; ?>
 
+<?php
+  // Pre-check if this personnel has any attendance or deduction data
+  $p_pre = computePayroll($row, $start, $end);
+  $rowHasAny = (
+      // ⏱ Has work/attendance or earnings
+      ($p_pre['regTotalMinutes'] + $p_pre['otTotalMinutes']) > 0 ||
+      ((float)$p_pre['regAmount'] + (float)$p_pre['otAmount'] +
+       (float)$p_pre['amountRegularHoliday'] + (float)$p_pre['amountSpecialHoliday']) > 0 ||
+      (float)$p_pre['salary'] > 0 ||
+      // 💸 Has any deductions
+      (float)$p_pre['cash_advance'] > 0 ||
+      (float)$p_pre['sss'] > 0 ||
+      (float)$p_pre['pagibig'] > 0 ||
+      (float)$p_pre['philhealth'] > 0 ||
+      (float)$p_pre['loan'] > 0 ||
+      (float)$p_pre['other_deduction'] > 0 ||
+      // ✅ Has net pay
+      (float)$p_pre['netPay'] > 0
+  );
+?>
 
-<tr>
+<tr class="<?= $rowHasAny ? '' : 'no-data-print' ?>">
+
 <?php
 
 $regAmount = 0;
@@ -1779,55 +1816,80 @@ if (bccomp($netPay, '0', 2) > 0) {
 ?>
 
 <?php foreach ($slices as $idx => $sl): ?>
+  <?php
+    // --- decide which columns to show for THIS slice ---
+    $showOTHrs = false;
+    $showOTAmt = false;
+    $showRegHol = false;
+    $showSpecHol = false;
+
+    foreach ($attendance_data as $row) {
+      if ($row->rateType === 'Month' || $row->rateType === 'Bi-Month') continue;
+      $p = computePayroll($row, $sl['start'], $sl['end']);
+      if (($p['otTotalMinutes'] ?? 0) > 0) $showOTHrs = true;
+      if ((float)($p['otAmount'] ?? 0) > 0) $showOTAmt = true;
+      if ((float)($p['amountRegularHoliday'] ?? 0) > 0) $showRegHol = true;
+      if ((float)($p['amountSpecialHoliday'] ?? 0) > 0) $showSpecHol = true;
+      if ($showOTHrs && $showOTAmt && $showRegHol && $showSpecHol) break;
+    }
+  ?>
   <div style="page-break-inside: avoid; margin-bottom: 18px;">
     <h4 style="margin:6px 0 8px;"><?= htmlspecialchars($project->projectTitle ?? 'Payroll') ?> — <?= $sl['label'] ?></h4>
-<table class="payroll-table slice-table" style="font-size:11px;">
+    <table class="payroll-table slice-table" style="font-size:11px;">
       <thead>
         <tr>
           <th style="width:35px;">L/N</th>
           <th style="width:200px;">NAME</th>
           <th style="width:140px;">POSITION</th>
           <th style="width:75px;">Reg. Hrs</th>
-          <th style="width:75px;">OT Hrs</th>
+          <?php if ($showOTHrs): ?><th style="width:75px;">OT Hrs</th><?php endif; ?>
           <th style="width:65px;">Days</th>
           <th style="width:90px;">Reg. Amt</th>
-          <th style="width:90px;">OT Amt</th>
-          <th style="width:110px;">Regular Holiday</th>
-          <th style="width:110px;">Special Holiday</th>
+          <?php if ($showOTAmt): ?><th style="width:90px;">OT Amt</th><?php endif; ?>
+          <?php if ($showRegHol): ?><th style="width:110px;">Regular Holiday</th><?php endif; ?>
+          <?php if ($showSpecHol): ?><th style="width:110px;">Special Holiday</th><?php endif; ?>
         </tr>
       </thead>
       <tbody>
-      <?php
-        $ln = 1;
-        $sliceTotalGross = '0.00';
-        foreach ($attendance_data as $row):
-          // Skip monthly/bi-month if you also skip them in the main table
-          if ($row->rateType === 'Month' || $row->rateType === 'Bi-Month') continue;
+        <?php
+          $ln = 1;
+          foreach ($attendance_data as $row):
+            // mirror your main table’s skip
+            if ($row->rateType === 'Month' || $row->rateType === 'Bi-Month') continue;
 
-          $p = computePayroll($row, $sl['start'], $sl['end']);
+            $p = computePayroll($row, $sl['start'], $sl['end']);
 
-          // Skip fully empty lines
-          $hasAny = ($p['regTotalMinutes'] + $p['otTotalMinutes'] + $p['regAmount'] + $p['otAmount']
-                     + $p['amountRegularHoliday'] + $p['amountSpecialHoliday'] + $p['salary']) > 0;
-          if (!$hasAny) continue;
-
-          $sliceTotalGross = bcadd($sliceTotalGross, $p['salary'], 2);
-      ?>
-        <tr>
-          <td><?= $ln++ ?></td>
-          <td><?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></td>
-          <td><?= htmlspecialchars($row->position) ?></td>
-          <td class="num"><?= number_format($p['regTotalMinutes']/60, 2) ?></td>
-          <td class="num"><?= number_format($p['otTotalMinutes']/60, 2) ?></td>
-          <td class="num"><?= number_format($p['totalDays'], 2) ?></td>
-          <td class="num"><?= displayAmount($p['regAmount']) ?></td>
-          <td class="num"><?= displayAmount($p['otAmount']) ?></td>
-          <td class="num"><?= displayAmount($p['amountRegularHoliday']) ?></td>
-          <td class="num"><?= displayAmount($p['amountSpecialHoliday']) ?></td>
-        </tr>
-      <?php endforeach; ?>
-     
-
+            // hide personnel with no slice data at all
+            $hasAny = (
+              ($p['regTotalMinutes'] + $p['otTotalMinutes']) > 0 ||
+              (float)$p['regAmount'] > 0 ||
+              (float)$p['otAmount'] > 0 ||
+              (float)$p['amountRegularHoliday'] > 0 ||
+              (float)$p['amountSpecialHoliday'] > 0
+            );
+            if (!$hasAny) continue;
+        ?>
+          <tr>
+            <td><?= $ln++ ?></td>
+            <td><?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></td>
+            <td><?= htmlspecialchars($row->position) ?></td>
+            <td class="num"><?= number_format($p['regTotalMinutes']/60, 2) ?></td>
+            <?php if ($showOTHrs): ?>
+              <td class="num"><?= number_format($p['otTotalMinutes']/60, 2) ?></td>
+            <?php endif; ?>
+            <td class="num"><?= number_format($p['totalDays'], 2) ?></td>
+            <td class="num"><?= displayAmount($p['regAmount']) ?></td>
+            <?php if ($showOTAmt): ?>
+              <td class="num"><?= displayAmount($p['otAmount']) ?></td>
+            <?php endif; ?>
+            <?php if ($showRegHol): ?>
+              <td class="num"><?= displayAmount($p['amountRegularHoliday']) ?></td>
+            <?php endif; ?>
+            <?php if ($showSpecHol): ?>
+              <td class="num"><?= displayAmount($p['amountSpecialHoliday']) ?></td>
+            <?php endif; ?>
+          </tr>
+        <?php endforeach; ?>
       </tbody>
     </table>
   </div>
@@ -1836,7 +1898,7 @@ if (bccomp($netPay, '0', 2) > 0) {
 <!-- === One final "Deductions & Net Pay" summary for the whole period === -->
 <div style="page-break-inside: avoid; margin-top: 6px;">
   <h4 style="margin:10px 0 8px;">Deductions & Net Pay — <?= date('M d', strtotime($start)) ?> – <?= date('M d, Y', strtotime($end)) ?></h4>
-<table class="payroll-table summary-table" style="font-size:11px;">
+  <table class="payroll-table summary-table" style="font-size:11px;">
     <thead>
       <tr>
         <th style="width:35px;">L/N</th>
@@ -1853,7 +1915,6 @@ if (bccomp($netPay, '0', 2) > 0) {
         <?php endif; ?>
         <th style="width:95px;">Net Pay</th>
         <th style="width:120px;">Signature</th>
-
       </tr>
     </thead>
     <tbody>
@@ -1885,6 +1946,17 @@ if (bccomp($netPay, '0', 2) > 0) {
                   2);
           $net  = (float)bcsub($salary, $tded, 2);
 
+          // hide people with no totals/deductions/net in the final summary
+          $hasAnyPrint = (
+              ($p['regTotalMinutes'] + $p['otTotalMinutes']) > 0 ||
+              (float)$p['regAmount'] > 0 || (float)$p['otAmount'] > 0 ||
+              (float)$p['amountRegularHoliday'] > 0 || (float)$p['amountSpecialHoliday'] > 0 ||
+              $salary > 0 ||
+              $ca > 0 || $sss > 0 || $pi > 0 || $ph > 0 || $loan > 0 || $od > 0 ||
+              $tded > 0 || $net > 0
+          );
+          if (!$hasAnyPrint) continue;
+
           $gTot   = bcadd($gTot,   $salary, 2);
           $caTot  = bcadd($caTot,  $ca, 2);
           $sssTot = bcadd($sssTot, $sss, 2);
@@ -1908,14 +1980,11 @@ if (bccomp($netPay, '0', 2) > 0) {
           <?php if ($showTotalDeduction): ?><td class="num"><?= number_format($tded, 2) ?></td><?php endif; ?>
           <?php $isNeg = (bccomp((string)$net,'0',2) < 0); ?>
           <td class="num <?= $isNeg ? 'neg' : '' ?>"><?= number_format($net, 2) ?></td>
-          <td class="signature-cell"></td> 
-          <td style="border-bottom:1px solid #000;"></td>
-
+          <td class="signature-cell"></td>
         </tr>
       <?php endforeach; ?>
 
       <tr style="background:#f3f3f3; font-weight:600;">
-
         <td colspan="2" class="text-right">TOTAL</td>
         <td class="num"><?= number_format((float)$gTot, 2) ?></td>
         <?php if ($showCA): ?><td class="num"><?= number_format((float)$caTot, 2) ?></td><?php endif; ?>
@@ -1927,8 +1996,7 @@ if (bccomp($netPay, '0', 2) > 0) {
         <?php if ($showTotalDeduction): ?><td class="num"><?= number_format((float)$dedTot, 2) ?></td><?php endif; ?>
         <?php $isTNeg = (bccomp((string)$netTot,'0',2) < 0); ?>
         <td class="num <?= $isTNeg ? 'neg' : '' ?>"><?= number_format((float)$netTot, 2) ?></td>
-        <td></td>
-
+        <td class="signature-cell"></td>
       </tr>
     </tbody>
   </table>
@@ -2034,8 +2102,6 @@ if (bccomp($netPay, '0', 2) > 0) {
     $hasAnyData = $hasEarningsLines || $hasDeductionsLines || ($netPay > 0);
     if (!$hasAnyData) continue;
 ?>
-
-
   <div class="print-card" style="page-break-inside: avoid; margin-bottom: 30px; padding: 20px; border: 1px solid #ddd;">
     <h4 style="margin-bottom: 10px; border-bottom: 1px solid #ccc; padding-bottom: 6px;">
       Payslip - <?= $fullName ?>
@@ -2062,29 +2128,20 @@ if (bccomp($netPay, '0', 2) > 0) {
       <?php if ($hasEarningsLines): ?>
       <div style="width: 48%;">
         <h5 style="border-bottom: 1px solid #ccc;">Earnings</h5>
-
         <?php if ($regHoursRaw > 0 && $regAmount > 0): ?>
-          <p>
-            Regular Time: <?= number_format($regHoursRaw, 2) ?> hrs × ₱<?= number_format($hourlyRate, 2) ?>/hr
-            = <strong><?= number_format($regAmount, 2) ?></strong>
-          </p>
+          <p>Regular Time: <?= number_format($regHoursRaw, 2) ?> hrs × ₱<?= number_format($hourlyRate, 2) ?>/hr
+            = <strong><?= number_format($regAmount, 2) ?></strong></p>
         <?php endif; ?>
-
         <?php if ($otHoursRaw > 0 && $otAmount > 0): ?>
-          <p>
-            Overtime: <?= number_format($otHoursRaw, 2) ?> hrs × ₱<?= number_format($otRate, 2) ?>/hr
-            = <strong><?= number_format($otAmount, 2) ?></strong>
-          </p>
+          <p>Overtime: <?= number_format($otHoursRaw, 2) ?> hrs × ₱<?= number_format($otRate, 2) ?>/hr
+            = <strong><?= number_format($otAmount, 2) ?></strong></p>
         <?php endif; ?>
-
         <?php if ($regularHolidayPay > 0): ?>
           <p>Regular Holiday: <strong><?= number_format($regularHolidayPay, 2) ?></strong></p>
         <?php endif; ?>
-
         <?php if ($totalDays > 0): ?>
           <p>Total Days: <?= number_format($totalDays, 2) ?></p>
         <?php endif; ?>
-
         <?php if ($salary > 0): ?>
           <p><strong>Gross Salary: ₱<?= number_format($salary, 2) ?></strong></p>
         <?php endif; ?>
@@ -2094,11 +2151,9 @@ if (bccomp($netPay, '0', 2) > 0) {
       <?php if ($hasDeductionsLines): ?>
       <div style="width: 48%;">
         <h5 style="border-bottom: 1px solid #ccc;">Deductions</h5>
-
         <?php if ($cash_advance > 0): ?>
           <p>Cash Advance: ₱<?= number_format($cash_advance, 2) ?></p>
         <?php endif; ?>
-
         <?php if ($sss > 0): ?>
           <p>SSS (Gov’t):</p>
           <?php if (!empty($gdetail_print['by']['SSS'])): ?>
@@ -2109,7 +2164,6 @@ if (bccomp($netPay, '0', 2) > 0) {
             </div>
           <?php endif; ?>
         <?php endif; ?>
-
         <?php if ($pagibig > 0): ?>
           <p>Pag-IBIG (Gov’t):</p>
           <?php if (!empty($gdetail_print['by']['Pag-IBIG'])): ?>
@@ -2120,7 +2174,6 @@ if (bccomp($netPay, '0', 2) > 0) {
             </div>
           <?php endif; ?>
         <?php endif; ?>
-
         <?php if ($philhealth > 0): ?>
           <p>PHIC (Gov’t):</p>
           <?php if (!empty($gdetail_print['by']['PhilHealth'])): ?>
@@ -2131,7 +2184,6 @@ if (bccomp($netPay, '0', 2) > 0) {
             </div>
           <?php endif; ?>
         <?php endif; ?>
-
         <?php if ($loan > 0): ?>
           <p>Personnel Loan/s:</p>
           <?php if (!empty($ldetail_print['rows'])): ?>
@@ -2142,11 +2194,9 @@ if (bccomp($netPay, '0', 2) > 0) {
             </div>
           <?php endif; ?>
         <?php endif; ?>
-
         <?php if ($other_deduction > 0): ?>
           <p>Other Deduction:</p>
         <?php endif; ?>
-
         <?php if (!empty($odetail_print['rows'])): ?>
           <div style="margin-left:12px; margin-top:2px;">
             <?php foreach ($odetail_print['rows'] as $it): ?>
@@ -2154,7 +2204,6 @@ if (bccomp($netPay, '0', 2) > 0) {
             <?php endforeach; ?>
           </div>
         <?php endif; ?>
-
         <?php if ($total_deduction > 0): ?>
           <p><strong>Total Deduction: ₱<?= number_format($total_deduction, 2) ?></strong></p>
         <?php endif; ?>
@@ -2162,13 +2211,12 @@ if (bccomp($netPay, '0', 2) > 0) {
       <?php endif; ?>
     </div>
 
-  <?php $netClassCard = (bccomp((string)$netPay, '0', 2) < 0) ? 'neg' : ''; ?>
-<div style="margin-top: 10px; text-align: right;">
-  <h4><strong>Net Pay:
-    <span class="<?= $netClassCard ?>">₱<?= number_format($netPay, 2) ?></span>
-  </strong></h4>
-</div>
-
+    <?php $netClassCard = (bccomp((string)$netPay, '0', 2) < 0) ? 'neg' : ''; ?>
+    <div style="margin-top: 10px; text-align: right;">
+      <h4><strong>Net Pay:
+        <span class="<?= $netClassCard ?>">₱<?= number_format($netPay, 2) ?></span>
+      </strong></h4>
+    </div>
   </div>
 <?php endforeach; ?>
 
