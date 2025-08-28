@@ -36,22 +36,19 @@ public function save_cash_advance()
 
     $data = [
         'personnelID' => $this->input->post('personnelID'),
-        'amount' => $this->input->post('amount'),
+        'amount'      => $this->input->post('amount'),
         'description' => 'Cash Advance',
-        'date' => $this->input->post('date'),
-        'settingsID' => $this->session->userdata('settingsID')
+        'type'        => 'Cash Advance',          // ✅ add this
+        'date'        => $this->input->post('date'),
+        'settingsID'  => $this->session->userdata('settingsID')
     ];
 
     $inserted = $this->Loan_model->insert_cash_advance($data);
 
-    if ($inserted) {
-        $this->session->set_flashdata('success', 'Cash advance saved.');
-    } else {
-        $this->session->set_flashdata('error', 'Failed to save cash advance.');
-    }
-
+    $this->session->set_flashdata($inserted ? 'success' : 'error',
+        $inserted ? 'Cash advance saved.' : 'Failed to save cash advance.'
+    );
     redirect('Borrow/cash_advance');
-
 }
 
 

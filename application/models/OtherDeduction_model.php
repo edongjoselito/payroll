@@ -92,73 +92,89 @@ public function get_deductions_by_date_range($from, $to, $settingsID)
         ->where('date >=', $from)
         ->where('date <=', $to)
         ->where('settingsID', $settingsID)
-        ->where('type', 'Others') // ✅ THIS is critical
+        ->where('type', 'Others')
         ->get()
         ->result();
 }
 
 public function get_all_deductions($settingsID)
 {
+    $sid = $this->db->escape($settingsID);
+
     $sql = "
+        /* CASH ADVANCE */
         SELECT 
             p.personnelID,
             CONCAT(
                 p.last_name, ', ', p.first_name,
-                IF(p.middle_name != '', CONCAT(' ', LEFT(p.middle_name, 1), '.'), ''),
-                IF(p.name_ext  != '', CONCAT(' ', p.name_ext), '')
+                IF(COALESCE(p.middle_name,'') <> '', CONCAT(' ', LEFT(p.middle_name, 1), '.'), ''),
+                IF(COALESCE(p.name_ext,'')    <> '', CONCAT(' ', p.name_ext), '')
             ) AS full_name,
-            'Cash Advance'   AS d_type,
-            ca.description   AS description,
-            ca.amount        AS amount,
-            ca.date          AS `date`
+            'Cash Advance' AS d_type,
+            COALESCE(NULLIF(ca.description,''), 'Cash Advance') AS description,
+            ca.amount AS amount,
+            ca.date   AS `date`
         FROM cashadvance ca
-        JOIN personnel p 
-          ON p.personnelID = ca.personnelID AND p.settingsID = ca.settingsID
-        WHERE ca.settingsID = ? AND ca.type = 'Cash Advance'
+        LEFT JOIN personnel p 
+               ON p.personnelID = ca.personnelID
+              AND (p.settingsID = ca.settingsID OR ca.settingsID IS NULL)
+        WHERE (ca.settingsID = {$sid} OR ca.settingsID IS NULL)
+          AND (
+                /* accept common variants coming from Borrow_model etc. */
+                LOWER(ca.type) IN ('cash advance','cash','ca','c/a')
+             OR LOWER(ca.description) = 'cash advance'
+          )
 
         UNION ALL
 
-        /* Other Deductions (from the same cashadvance table, type='Others') */
+        /* OTHER DEDUCTIONS (same table, type='Others' variants) */
         SELECT 
             p.personnelID,
             CONCAT(
                 p.last_name, ', ', p.first_name,
-                IF(p.middle_name != '', CONCAT(' ', LEFT(p.middle_name, 1), '.'), ''),
-                IF(p.name_ext  != '', CONCAT(' ', p.name_ext), '')
+                IF(COALESCE(p.middle_name,'') <> '', CONCAT(' ', LEFT(p.middle_name, 1), '.'), ''),
+                IF(COALESCE(p.name_ext,'')    <> '', CONCAT(' ', p.name_ext), '')
             ) AS full_name,
             'Other Deduction' AS d_type,
-            ca.description     AS description,
-            ca.amount          AS amount,
-            ca.date            AS `date`
+            ca.description AS description,
+            ca.amount      AS amount,
+            ca.date        AS `date`
         FROM cashadvance ca
-        JOIN personnel p 
-          ON p.personnelID = ca.personnelID AND p.settingsID = ca.settingsID
-        WHERE ca.settingsID = ? AND ca.type = 'Others'
+        LEFT JOIN personnel p 
+               ON p.personnelID = ca.personnelID
+              AND (p.settingsID = ca.settingsID OR ca.settingsID IS NULL)
+        WHERE (ca.settingsID = {$sid} OR ca.settingsID IS NULL)
+          AND (
+                LOWER(ca.type) IN ('others','other','od')
+             OR LOWER(ca.description) IN ('others','other')
+          )
 
         UNION ALL
 
-        /* Government Deductions */
+        /* GOV'T DEDUCTIONS */
         SELECT 
             p.personnelID,
             CONCAT(
                 p.last_name, ', ', p.first_name,
-                IF(p.middle_name != '', CONCAT(' ', LEFT(p.middle_name, 1), '.'), ''),
-                IF(p.name_ext  != '', CONCAT(' ', p.name_ext), '')
+                IF(COALESCE(p.middle_name,'') <> '', CONCAT(' ', LEFT(p.middle_name, 1), '.'), ''),
+                IF(COALESCE(p.name_ext,'')    <> '', CONCAT(' ', p.name_ext), '')
             ) AS full_name,
             'Gov''t Deduction' AS d_type,
-            gd.description      AS description,
-            gd.amount           AS amount,
-            gd.date             AS `date`
+            gd.description AS description,
+            gd.amount      AS amount,
+            gd.date        AS `date`
         FROM government_deductions gd
-        JOIN personnel p 
-          ON p.personnelID = gd.personnelID AND p.settingsID = gd.settingsID
-        WHERE gd.settingsID = ?
+        LEFT JOIN personnel p 
+               ON p.personnelID = gd.personnelID
+              AND (p.settingsID = gd.settingsID OR gd.settingsID IS NULL)
+        WHERE (gd.settingsID = {$sid} OR gd.settingsID IS NULL)
 
         ORDER BY `date` ASC, full_name ASC
     ";
 
-    return $this->db->query($sql, [$settingsID, $settingsID, $settingsID])->result();
+    return $this->db->query($sql)->result();
 }
+
 
 public function get_loan_summary($settingsID)
 {
