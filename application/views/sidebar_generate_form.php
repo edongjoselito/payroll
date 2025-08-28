@@ -64,7 +64,11 @@
       <button type="button" class="btn btn-dark btn-sm-custom mr-2 mt-2" data-toggle="modal" data-target="#monthlyPayrollModal">
         <i class="mdi mdi-calendar-clock"></i> Bi-Month Payroll
       </button>
-
+<button type="button"
+        class="btn btn-outline-secondary btn-sm-custom mr-2 mt-2"
+        onclick="location.href='<?= base_url('MonthlyPayroll/list_bimonth_batches') ?>'">
+  <i class="mdi mdi-archive"></i> Saved Bi-Month Payroll
+</button>
       <button type="button" class="btn btn-info btn-sm-custom mr-2 mt-2" data-toggle="modal" data-target="#viewSavedPayrollModal">
         <i class="mdi mdi-eye"></i> View Saved Payroll
       </button>
@@ -77,9 +81,11 @@
 </div>
 
 <!-- Monthly/Bi-Month Payroll Modal (always available) -->
+<!-- Monthly/Bi-Month Payroll Modal (always available) -->
 <div class="modal fade" id="monthlyPayrollModal" tabindex="-1" role="dialog" aria-labelledby="monthlyPayrollModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-md" role="document">
-    <form method="get" action="<?= base_url('MonthlyPayroll/view_formatted') ?>" target="_blank">
+    <!-- NOTE: now POSTs to generate_bimonth which auto-saves, still opens printable view -->
+    <form method="post" action="<?= base_url('MonthlyPayroll/generate_bimonth') ?>" target="_blank">
       <div class="modal-content border-0 shadow-sm">
         <div class="modal-header bg-white text-black">
           <h5 class="modal-title" id="monthlyPayrollModalLabel">
@@ -88,6 +94,7 @@
           <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
         </div>
         <div class="modal-body">
+         
           <div class="form-group">
             <label class="font-weight-bold">From (Start Date)</label>
             <input type="date" name="start" class="form-control" required>
@@ -98,13 +105,15 @@
           </div>
         </div>
         <div class="modal-footer">
-          <button type="submit" class="btn btn-dark"><i class="mdi mdi-check"></i> Generate</button>
+          <!-- Text changed to indicate it persists -->
+          <button type="submit" class="btn btn-dark"><i class="mdi mdi-check"></i> Generate &amp; Save</button>
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
         </div>
       </div>
     </form>
   </div>
 </div>
+
 
 <?php if ($role !== 'Payroll User'): ?>
 <!-- Generate Payroll Modal (hidden from Payroll User) -->

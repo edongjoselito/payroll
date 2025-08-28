@@ -7,7 +7,10 @@ class MonthlyPayroll extends CI_Controller
     {
         parent::__construct();
         $this->load->model('MonthlyPayroll_model');
+        $this->load->model('SettingsModel');
+
         $this->load->helper(['form', 'url']);
+        
         $this->load->library('session');
           if (!in_array($this->session->userdata('level'), ['Admin','Payroll User'], true)) {
         $this->session->set_flashdata('error', 'Unauthorized access.');
@@ -252,7 +255,7 @@ public function update_attendance()
 public function view_formatted()
 {
     $from = $this->input->get('start'); // YYYY-MM-DD
-    $to = $this->input->get('end');     // YYYY-MM-DD
+    $to   = $this->input->get('end');   // YYYY-MM-DD
 
     if (!$from || !$to) {
         $this->session->set_flashdata('msg', 'Start and End date are required.');
@@ -260,50 +263,39 @@ public function view_formatted()
         return;
     }
 
-    $month = date('Y-m', strtotime($from)); // Extract just '2025-07'
-    $data = $this->MonthlyPayroll_model->get_monthly_payroll_records($month, $from, $to);
+    $month = date('Y-m', strtotime($from));
+    $data  = $this->MonthlyPayroll_model->get_monthly_payroll_records($month, $from, $to);
 
     $data['start'] = $from;
-    $data['end'] = $to;
+    $data['end']   = $to;
 
+    // You said there's no project model—treat project as optional
     $projectID = $this->input->get('project_id');
+    $data['project'] = null; // keep view happy; your view already checks isset/null
 
-    $this->load->model('Project_model');
-    $this->load->model('SettingsModel');
-
-    $project = $this->Project_model->get_project_by_id($projectID);
-    $data['project'] = $project;
-
+    // signatories (keep if you have SettingsModel)
     $settingsID = $this->session->userdata('settingsID');
-    $data['signatories'] = $this->SettingsModel->get_signatories($settingsID);
+    $data['signatories']      = $this->SettingsModel->get_signatories($settingsID);
     $data['show_signatories'] = true;
 
     $data['is_summary'] = false;
 
-    // Send to view
     if (!isset($data['personnel']) || !isset($data['dates']) || !isset($data['attendance'])) {
         $this->session->set_flashdata('msg', 'Missing data for view.');
         redirect('MonthlyPayroll');
         return;
     }
 
+    // Build attendance_data (same logic you had)
     $attendance_data = [];
-    $this->load->database();
-
     foreach ($data['personnel'] as $p) {
         $pid = $p->personnelID;
         $p->reg_hours_per_day = [];
-        $total_hours = 0;
-        $total_ot = 0;
-        $total_days = 0; // ✅ Added for fractional day computation
+        $total_hours = 0; $total_ot = 0; $total_days = 0;
 
         foreach ($data['dates'] as $d) {
-           $attn = $data['attendance'][$pid][$d] ?? ['status' => '', 'reg' => 0, 'ot' => 0];
-
-
-            $status = $attn['status'];
-            $reg = $attn['reg'];
-            $ot  = $attn['ot'];
+            $attn = $data['attendance'][$pid][$d] ?? ['status' => '', 'reg' => 0, 'ot' => 0];
+            $status = $attn['status']; $reg = $attn['reg']; $ot = $attn['ot'];
 
             $p->reg_hours_per_day[$d] = [
                 'status' => $status,
@@ -313,66 +305,40 @@ public function view_formatted()
             ];
 
             $total_hours += $reg;
-            $total_ot += $ot;
-
-            // ✅ Add fractional day logic
-            if ($reg > 0) {
-                $total_days += $reg / 8;
-            }
+            $total_ot    += $ot;
+            if ($reg > 0) $total_days += $reg / 8;
         }
 
-        $rateType = strtolower($p->rateType ?? '');
-        $rateAmount = floatval($p->rateAmount ?? 0);
+        $rateTypeNorm = strtolower(trim($p->rateType ?? ''));
+        $rateAmount   = (float)($p->rateAmount ?? 0);
+        $perHour      = ($rateTypeNorm === 'hour') ? $rateAmount : ($rateAmount / 8.0);
 
-        $actual_hours = $total_hours;
-        $actual_ot = $total_ot;
+        $amount_reg = $total_hours * $perHour;
+        $amount_ot  = $total_ot    * $perHour * 1.25;
 
-       // (You can keep working_days/total_working_hours if you use them elsewhere,
-// but they are NOT needed for Month/Bi-Month per-day logic.)
+        // deductions (month derived from $from)
+        $monthKey = date('Y-m', strtotime($from));
+        $cashadvance    = (float)$this->MonthlyPayroll_model->get_cash_advance($pid, $monthKey);
+        $gov            = (array)$this->MonthlyPayroll_model->get_government_deductions($pid, $monthKey);
+        $loan           = (float)$this->MonthlyPayroll_model->get_loan_deduction($pid, $monthKey);
+        $sss = (float)($gov['sss'] ?? 0);
+        $pagibig = (float)($gov['pagibig'] ?? 0);
+        $philhealth = (float)($gov['philhealth'] ?? 0);
 
-// Normalize rate type once
-$rateTypeNorm = strtolower(trim($p->rateType ?? ''));
+        $total_deductions = $cashadvance + $sss + $pagibig + $philhealth + $loan;
 
-// Per-hour logic:
-// - Hour: per-hour is the rateAmount
-// - Day, Bi-Month, Month: treat rateAmount as PER-DAY -> per-hour = per-day / 8
-if ($rateTypeNorm === 'hour') {
-    $perHour = (float)$rateAmount;
-} else {
-    // day / bi-month / month are all per-day in your requirement
-    $perHour = ((float)$rateAmount) / 8.0;
-}
-
-$amount_reg = $actual_hours * $perHour;        // = perDay * daysWorked
-$amount_ot  = $actual_ot    * $perHour * 1.25; // OT at 25%
-
-$p->rate_per_hour = number_format($perHour, 2);
-$p->amount_reg    = number_format($amount_reg, 2);
-$p->amount_ot     = number_format($amount_ot, 2);
-$p->gross         = number_format($amount_reg + $amount_ot, 2);
-
-
-
-        // ✅ Add total days to the personnel object
-        $p->total_days = number_format($total_days, 2);
-
-        // Load deductions using month part of $from
-        $month = date('Y-m', strtotime($from));
-
-        $this->load->model('MonthlyPayroll_model');
-        $cashadvance = $this->MonthlyPayroll_model->get_cash_advance($pid, $month);
-        $gov_deductions = $this->MonthlyPayroll_model->get_government_deductions($pid, $month);
-        $loan = $this->MonthlyPayroll_model->get_loan_deduction($pid, $month);
-
-        $p->cashadvance = number_format($cashadvance, 2);
-        $p->sss = number_format($gov_deductions['sss'], 2);
-        $p->pagibig = number_format($gov_deductions['pagibig'], 2);
-        $p->philhealth = number_format($gov_deductions['philhealth'], 2);
-        $p->loan = number_format($loan, 2);
-
-        $total_deductions = $cashadvance + $gov_deductions['sss'] + $gov_deductions['pagibig'] + $gov_deductions['philhealth'] + $loan;
+        $p->rate_per_hour   = number_format($perHour, 2);
+        $p->amount_reg      = number_format($amount_reg, 2);
+        $p->amount_ot       = number_format($amount_ot, 2);
+        $p->gross           = number_format($amount_reg + $amount_ot, 2);
+        $p->total_days      = number_format($total_days, 2);
+        $p->cashadvance     = number_format($cashadvance, 2);
+        $p->sss             = number_format($sss, 2);
+        $p->pagibig         = number_format($pagibig, 2);
+        $p->philhealth      = number_format($philhealth, 2);
+        $p->loan            = number_format($loan, 2);
         $p->total_deduction = number_format($total_deductions, 2);
-        $p->takehome = number_format(floatval($p->gross) - $total_deductions, 2);
+        $p->takehome        = number_format(($amount_reg + $amount_ot) - $total_deductions, 2);
 
         $attendance_data[] = $p;
     }
@@ -381,5 +347,290 @@ $p->gross         = number_format($amount_reg + $amount_ot, 2);
 
     $this->load->view('monthly_payroll_view', $data);
 }
+
+public function generate_bimonth()
+{
+    $from      = $this->input->post('start'); // YYYY-MM-DD
+    $to        = $this->input->post('end');   // YYYY-MM-DD
+    $projectID = $this->input->post('project_id'); // optional
+
+    if (!$from || !$to || strtotime($from) > strtotime($to)) {
+        $this->session->set_flashdata('msg','Start and End date are required.');
+        redirect('MonthlyPayroll');
+        return;
+    }
+
+    $month   = date('Y-m', strtotime($from));
+    $records = $this->MonthlyPayroll_model->get_monthly_payroll_records($month, $from, $to);
+
+    // Safety: ensure structure exists
+    $personnel = isset($records['personnel']) ? $records['personnel'] : [];
+    $dates     = isset($records['dates']) ? $records['dates'] : [];
+    $attIndex  = isset($records['attendance']) ? $records['attendance'] : [];
+
+    $attendance_data = [];
+    $linesForDB      = [];
+
+    foreach ($personnel as $p) {
+        $pid = $p->personnelID;
+
+        $total_hours = 0.0;
+        $total_ot    = 0.0;
+        $total_days  = 0.0;
+
+        // Build per-day map (for DB snapshot) AND reg_hours_per_day (for view)
+        $per_day = [];
+        $reg_hours_per_day = [];
+
+        foreach ($dates as $d) {
+            $attn = isset($attIndex[$pid][$d]) ? $attIndex[$pid][$d] : ['status'=>'', 'reg'=>0, 'ot'=>0];
+
+            $reg = (float)($attn['reg'] ?? 0);
+            $ot  = (float)($attn['ot']  ?? 0);
+
+            // snapshot shape
+            $per_day[$d] = [
+                'status' => $attn['status'] ?? '',
+                'reg'    => $reg,
+                'ot'     => $ot,
+                'hol'    => 0,
+            ];
+
+            // view shape
+            $reg_hours_per_day[$d] = [
+                'status'         => $attn['status'] ?? '',
+                'hours'          => $reg,
+                'overtime_hours' => $ot,
+                'holiday_hours'  => 0,
+            ];
+
+            $total_hours += $reg;
+            $total_ot    += $ot;
+            if ($reg > 0) $total_days += $reg / 8.0;
+        }
+
+        // rate & amounts
+        $rateAmount = (float)($p->rateAmount ?? 0);
+        $rateType   = strtolower(trim($p->rateType ?? 'day'));
+        $perHour    = ($rateType === 'hour') ? $rateAmount : $rateAmount / 8.0;
+
+        $amount_reg = $total_hours * $perHour;
+        $amount_ot  = $total_ot    * $perHour * 1.25;
+        $gross      = $amount_reg + $amount_ot;
+
+        // deductions for the month of $from
+        $monthKey   = date('Y-m', strtotime($from));
+        $gov        = (array)$this->MonthlyPayroll_model->get_government_deductions($pid, $monthKey);
+        $cash       = (float)$this->MonthlyPayroll_model->get_cash_advance($pid, $monthKey);
+        $loan       = (float)$this->MonthlyPayroll_model->get_loan_deduction($pid, $monthKey);
+
+        $sss        = (float)($gov['sss']        ?? 0);
+        $pag        = (float)($gov['pagibig']    ?? 0);
+        $ph         = (float)($gov['philhealth'] ?? 0);
+
+        $total_ded  = $cash + $sss + $pag + $ph + $loan;
+        $net        = $gross - $total_ded;
+
+        // ==== store line for DB ====
+        $linesForDB[] = [
+            'personnelID' => $pid,
+            'amounts_json'=> [
+                'personnelID' => $pid,
+                'last_name'   => $p->last_name  ?? '',
+                'first_name'  => $p->first_name ?? '',
+                'position'    => $p->position   ?? '',
+                'rateType'    => $p->rateType   ?? '',
+                'rateAmount'  => $rateAmount,
+                'perHour'     => $perHour,
+                'hours_reg'   => $total_hours,
+                'hours_ot'    => $total_ot,
+                'days'        => $total_days,
+                'amount_reg'  => round($amount_reg, 2),
+                'amount_ot'   => round($amount_ot, 2),
+                'gross'       => round($gross, 2),
+                'cash_advance'=> round($cash, 2),
+                'sss'         => round($sss, 2),
+                'pagibig'     => round($pag, 2),
+                'philhealth'  => round($ph, 2),
+                'loan'        => round($loan, 2),
+                'total_deduction'=> round($total_ded, 2),
+                'net'         => round($net, 2),
+                'per_day'     => $per_day,
+            ],
+        ];
+
+        // ==== attach row for view ====
+        $row = (object)(array)$p; // keep original fields
+        $row->personnelID       = $pid;
+        $row->reg_hours_per_day = $reg_hours_per_day;
+        $row->rate_per_hour     = number_format($perHour, 2);
+        $row->amount_reg        = number_format($amount_reg, 2);
+        $row->amount_ot         = number_format($amount_ot, 2);
+        $row->gross             = number_format($gross, 2);
+        $row->total_days        = number_format($total_days, 2);
+        $row->cashadvance       = number_format($cash, 2);
+        $row->sss               = number_format($sss, 2);
+        $row->pagibig           = number_format($pag, 2);
+        $row->philhealth        = number_format($ph, 2);
+        $row->loan              = number_format($loan, 2);
+        $row->total_deduction   = number_format($total_ded, 2);
+        $row->takehome          = number_format($net, 2);
+
+        $attendance_data[] = $row;
+    }
+
+    // ==== totals for batch header ====
+    $sum_gross = 0; $sum_ded = 0; $sum_net = 0;
+    foreach ($linesForDB as $l) {
+        $sum_gross += (float)$l['amounts_json']['gross'];
+        $sum_ded   += (float)$l['amounts_json']['total_deduction'];
+        $sum_net   += (float)$l['amounts_json']['net'];
+    }
+    $totals = [
+        'count_lines' => count($linesForDB),
+        'sum_gross'   => $sum_gross,
+        'sum_ded'     => $sum_ded,
+        'sum_net'     => $sum_net,
+    ];
+
+    // ==== save batch once (outside the loop) ====
+    $this->load->model('BimonthPayroll_model');
+    $settingsID = $this->session->userdata('settingsID');
+    $userID     = $this->session->userdata('user_id');
+
+    $batch_id = $this->BimonthPayroll_model->create_batch(
+        $settingsID, $projectID, $from, $to, $month, $totals, $userID
+    );
+    $this->BimonthPayroll_model->insert_lines($batch_id, $linesForDB);
+
+    // ==== render the same view you already use ====
+    $data = [
+        'start'            => $from,
+        'end'              => $to,
+        'dates'            => $dates,   // the view uses this for day columns
+        'project'          => null,     // no project model in your app
+        'signatories'      => $this->SettingsModel->get_signatories($settingsID),
+        'show_signatories' => true,
+        'is_summary'       => false,
+        'attendance_data'  => $attendance_data,
+        'saved_batch_id'   => $batch_id,
+    ];
+
+    $this->session->set_flashdata('msg', '✅ Bi-Month payroll saved.');
+    $this->load->view('monthly_payroll_view', $data);
+}
+
+
+public function list_bimonth_batches()
+{
+    $this->load->model('BimonthPayroll_model');
+    $settingsID = $this->session->userdata('settingsID');
+
+    $projectID = $this->input->get('project_id'); // optional filter
+    $data['batches'] = $this->BimonthPayroll_model->list_batches($settingsID, $projectID);
+
+    // hide the recompute button; set to true if you want it back
+    $data['show_recompute'] = false;
+
+    $this->load->view('bimonth_batches_list', $data);
+}
+
+public function open_bimonth_batch($batch_id)
+{
+    $this->load->model('BimonthPayroll_model');
+
+    [$batch, $lines] = $this->BimonthPayroll_model->get_batch($batch_id);
+    if (!$batch) { show_error('Batch not found', 404); return; }
+
+    // build dates array for the view (YYYY-MM-DD list)
+    $dates = [];
+    $cur = strtotime($batch->start_date);
+    $end = strtotime($batch->end_date);
+    while ($cur <= $end) {
+        $dates[] = date('Y-m-d', $cur);
+        $cur = strtotime('+1 day', $cur);
+    }
+
+    $attendance_data = [];
+    foreach ($lines as $l) {
+        $row = json_decode($l->amounts_json, true) ?: [];
+
+        // safe defaults
+        $pid        = (int)($row['personnelID'] ?? 0);
+        $last_name  = (string)($row['last_name']  ?? ($row['name'] ?? ''));
+        $first_name = (string)($row['first_name'] ?? '');
+        $position   = (string)($row['position']   ?? '');
+        $rateType   = (string)($row['rateType']   ?? '');
+        $rateAmount = (float) ($row['rateAmount'] ?? 0);
+        $perHour    = (float) ($row['perHour']    ?? 0);
+
+        $amount_reg = (float)($row['amount_reg'] ?? 0);
+        $amount_ot  = (float)($row['amount_ot']  ?? 0);
+        $gross      = (float)($row['gross']      ?? ($amount_reg+$amount_ot));
+        $days       = (float)($row['days']       ?? 0);
+
+        $cash       = (float)($row['cash_advance'] ?? 0);
+        $sss        = (float)($row['sss']          ?? 0);
+        $pagibig    = (float)($row['pagibig']      ?? 0);
+        $philhealth = (float)($row['philhealth']   ?? 0);
+        $loan       = (float)($row['loan']         ?? 0);
+        $total_ded  = (float)($row['total_deduction'] ?? ($cash+$sss+$pagibig+$philhealth+$loan));
+        $net        = (float)($row['net'] ?? ($gross - $total_ded));
+
+        // rebuild reg_hours_per_day the view expects
+        $reg_hours_per_day = [];
+        $per_day = isset($row['per_day']) && is_array($row['per_day']) ? $row['per_day'] : [];
+        foreach ($dates as $d) {
+            $cell = $per_day[$d] ?? ['status'=>'', 'reg'=>0, 'ot'=>0, 'hol'=>0];
+            $reg_hours_per_day[$d] = [
+                'status'         => $cell['status'] ?? '',
+                'hours'          => (float)($cell['reg'] ?? 0),
+                'overtime_hours' => (float)($cell['ot']  ?? 0),
+                'holiday_hours'  => (float)($cell['hol'] ?? 0),
+            ];
+        }
+
+        // build the same shape your view uses for each personnel row
+        $p = new stdClass();
+        $p->personnelID      = $pid;
+        $p->last_name        = $last_name;
+        $p->first_name       = $first_name;
+        $p->position         = $position;
+        $p->rateType         = $rateType;
+        $p->rateAmount       = $rateAmount;
+
+        $p->reg_hours_per_day = $reg_hours_per_day;
+        $p->rate_per_hour     = number_format($perHour, 2);
+        $p->amount_reg        = number_format($amount_reg, 2);
+        $p->amount_ot         = number_format($amount_ot, 2);
+        $p->gross             = number_format($gross, 2);
+        $p->total_days        = number_format($days, 2);
+
+        $p->cashadvance       = number_format($cash, 2);
+        $p->sss               = number_format($sss, 2);
+        $p->pagibig           = number_format($pagibig, 2);
+        $p->philhealth        = number_format($philhealth, 2);
+        $p->loan              = number_format($loan, 2);
+        $p->total_deduction   = number_format($total_ded, 2);
+        $p->takehome          = number_format($net, 2);
+
+        $attendance_data[] = $p;
+    }
+
+    $data = [
+        'start'            => $batch->start_date,
+        'end'              => $batch->end_date,
+        'dates'            => $dates,              // 👈 needed by the view for day columns
+        'project'          => null,                // or load it if you saved project_id in batch
+        'signatories'      => [],
+        'show_signatories' => true,
+        'is_summary'       => false,
+        'attendance_data'  => $attendance_data,
+    ];
+
+    $this->load->view('monthly_payroll_view', $data);
+}
+
+
 
 }
