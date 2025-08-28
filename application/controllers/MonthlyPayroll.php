@@ -327,37 +327,31 @@ public function view_formatted()
         $actual_hours = $total_hours;
         $actual_ot = $total_ot;
 
-        // Compute based on working days selected (e.g., 15 for bi-month, 30 for full)
-        $working_days = count($data['dates']); // Days shown in table
-        $total_working_hours = $working_days * 8;
-        if ($total_working_hours == 0) $total_working_hours = 1; // avoid division by zero
+       // (You can keep working_days/total_working_hours if you use them elsewhere,
+// but they are NOT needed for Month/Bi-Month per-day logic.)
 
-        if ($rateType === 'month') {
-            $hourlyRate = $rateAmount / $total_working_hours;
+// Normalize rate type once
+$rateTypeNorm = strtolower(trim($p->rateType ?? ''));
 
-            $amount_reg = $actual_hours * $hourlyRate;
-            $amount_ot = $actual_ot * $hourlyRate * 1.25; // 25% OT bonus
+// Per-hour logic:
+// - Hour: per-hour is the rateAmount
+// - Day, Bi-Month, Month: treat rateAmount as PER-DAY -> per-hour = per-day / 8
+if ($rateTypeNorm === 'hour') {
+    $perHour = (float)$rateAmount;
+} else {
+    // day / bi-month / month are all per-day in your requirement
+    $perHour = ((float)$rateAmount) / 8.0;
+}
 
-            $p->rate_per_hour = number_format($hourlyRate, 2);
-            $p->amount_reg = number_format($amount_reg, 2);
-            $p->amount_ot = number_format($amount_ot, 2);
-            $p->gross = number_format($amount_reg + $amount_ot, 2);
+$amount_reg = $actual_hours * $perHour;        // = perDay * daysWorked
+$amount_ot  = $actual_ot    * $perHour * 1.25; // OT at 25%
 
-        } elseif ($rateType === 'bi-month') {
-            $monthlyAmount = $rateAmount * 2;
-            $hourlyRate = $monthlyAmount / $total_working_hours;
+$p->rate_per_hour = number_format($perHour, 2);
+$p->amount_reg    = number_format($amount_reg, 2);
+$p->amount_ot     = number_format($amount_ot, 2);
+$p->gross         = number_format($amount_reg + $amount_ot, 2);
 
-            $amount_reg = $actual_hours * $hourlyRate;
-            $amount_ot = $actual_ot * $hourlyRate * 1.25;
 
-            $p->rate_per_hour = number_format($hourlyRate, 2);
-            $p->amount_reg = number_format($amount_reg, 2);
-            $p->amount_ot = number_format($amount_ot, 2);
-            $p->gross = number_format($amount_reg + $amount_ot, 2);
-
-        } else {
-            continue;
-        }
 
         // ✅ Add total days to the personnel object
         $p->total_days = number_format($total_days, 2);

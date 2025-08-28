@@ -64,17 +64,13 @@ function computePayroll($row, $start, $end) {
         $otHours = floatval($raw['overtime_hours'] ?? 0);
         $holidayHours = floatval($raw['holiday_hours'] ?? 0);
 
-        if ($row->rateType === 'Hour') {
-            $base = $row->rateAmount;
-        } elseif ($row->rateType === 'Day') {
-            $base = $row->rateAmount / 8;
-        } elseif ($row->rateType === 'Month') {
-            $base = ($row->rateAmount / 30) / 8;
-        } elseif ($row->rateType === 'Bi-Month') {
-            $base = ($row->rateAmount / 15) / 8;
-        } else {
-            $base = 0;
-        }
+   if (strcasecmp($row->rateType, 'Hour') === 0) {
+    $base = (float)$row->rateAmount;          // per-hour as is
+} else {
+    // Treat Day, Month, Bi-Month as PER-DAY -> convert to per-hour
+    $base = ((float)$row->rateAmount) / 8.0;  // per-hour
+}
+
 
         if (preg_match('/holiday|regularho|legal|special/i', $status) || $holidayHours > 0) {
             if (strpos($status, 'regularho') !== false || strpos($status, 'legal') !== false) {
@@ -935,6 +931,9 @@ $amountSpecialHoliday = 0;
 
 $startDate = strtotime($start);
 $endDate = strtotime($end);
+$perHour = (strcasecmp($row->rateType, 'Hour') === 0)
+    ? (float)$row->rateAmount
+    : ((float)$row->rateAmount) / 8.0;
 ?>
     <td><?= $ln++ ?></td>
    <td><?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></td>
@@ -972,17 +971,7 @@ while ($loopDate <= $endDate):
         $regHours = floatval($raw['hours'] ?? 0);
         $otHours = floatval($raw['overtime_hours'] ?? 0);
         $holidayHours = floatval($raw['holiday_hours'] ?? 0);
-
-        // Rate per hour
-        if ($row->rateType === 'Hour') {
-            $base = $row->rateAmount;
-        } elseif ($row->rateType === 'Day') {
-            $base = $row->rateAmount / 8;
-        } elseif ($row->rateType === 'Month') {
-            $base = ($row->rateAmount / 30) / 8;
-        }elseif ($row->rateType === 'Bi-Month') {
-            $base = ($row->rateAmount / 15) / 8;
-        }
+$base = $perHour; // use the unified per-hour computed once
 
         // Check if it's a holiday
         if (preg_match('/holiday|regularho|legal|special/i', $status) || $holidayHours > 0) {
@@ -1084,15 +1073,8 @@ while ($loopDate <= $endDate):
         $regHours = $reg / 60;
         $otHours = $ot / 60;
 
-        if ($row->rateType === 'Hour') {
-            $base = $row->rateAmount;
-        } elseif ($row->rateType === 'Day') {
-            $base = $row->rateAmount / 8;
-        } elseif ($row->rateType === 'Month') {
-            $base = ($row->rateAmount / 30) / 8;
-        } elseif ($row->rateType === 'Bi-Month') {
-            $base = ($row->rateAmount / 15) / 8;
-        }
+     $base = $perHour; // use the unified per-hour computed once
+
 
         $regAmount += $regHours * $base;
         $otAmount  += $otHours * $base;
@@ -1361,19 +1343,17 @@ if (bccomp($netPay, '0', 2) > 0) {
         $dailyRate  = 0.0;
         $hourlyRate = 0.0;
 
-        if ($rateTypeLower === 'month') {
-          $dailyRate  = ($workingDaysInMonth > 0) ? $rateAmountNum / $workingDaysInMonth : 0;
-          $hourlyRate = ($dailyRate > 0) ? $dailyRate / 8 : 0;
-        } elseif (in_array($rateTypeLower, ['bi-month','bi-monthly','bimonth','bi-month '], true)) {
-          $dailyRate  = 15 > 0 ? $rateAmountNum / 15 : 0;
-          $hourlyRate = ($dailyRate > 0) ? $dailyRate / 8 : 0;
-        } elseif ($rateTypeLower === 'day') {
-          $dailyRate  = $rateAmountNum;
-          $hourlyRate = ($rateAmountNum > 0) ? $rateAmountNum / 8 : 0;
-        } else {
-          $hourlyRate = $rateAmountNum;
-          $dailyRate  = $hourlyRate * 8;
-        }
+      if (in_array($rateTypeLower, ['month','bi-month','bi-monthly','bimonth','bi-month '], true)) {
+  $dailyRate  = (float)$rateAmountNum;       // treat as per-day
+  $hourlyRate = $dailyRate / 8.0;
+} elseif ($rateTypeLower === 'day') {
+  $dailyRate  = (float)$rateAmountNum;       // per-day
+  $hourlyRate = $dailyRate / 8.0;
+} else { // 'hour'
+  $hourlyRate = (float)$rateAmountNum;       // per-hour
+  $dailyRate  = $hourlyRate * 8.0;
+}
+
 
         $otRate = $hourlyRate * 1.0;
 
@@ -1679,19 +1659,17 @@ $other_deduction = pick_other_amount(($pay['other_deduction'] ?? 0), $odetail_pr
     $dailyRate  = 0.0;
     $hourlyRate = 0.0;
 
-    if ($rateTypeLower === 'month') {
-      $dailyRate  = ($workingDaysInMonth > 0) ? $rateAmount / $workingDaysInMonth : 0;
-      $hourlyRate = ($dailyRate > 0) ? $dailyRate / 8 : 0;
-    } elseif (in_array($rateTypeLower, ['bi-month','bi-monthly','bimonth','bi-month '], true)) {
-      $dailyRate  = $rateAmount / 15;
-      $hourlyRate = $dailyRate / 8;
-    } elseif ($rateTypeLower === 'day') {
-      $dailyRate  = $rateAmount;
-      $hourlyRate = $rateAmount / 8;
-    } else {
-      $hourlyRate = $rateAmount;
-      $dailyRate  = $hourlyRate * 8;
-    }
+   if (in_array($rateTypeLower, ['month','bi-month','bi-monthly','bimonth','bi-month '], true)) {
+  $dailyRate  = (float)$rateAmount;      // per-day
+  $hourlyRate = $dailyRate / 8.0;
+} elseif ($rateTypeLower === 'day') {
+  $dailyRate  = (float)$rateAmount;      // per-day
+  $hourlyRate = $dailyRate / 8.0;
+} else { // hour
+  $hourlyRate = (float)$rateAmount;      // per-hour
+  $dailyRate  = $hourlyRate * 8.0;
+}
+
     $otRate = $hourlyRate * 1.0;
 
     $regAmount = $regHoursRaw * $hourlyRate;
