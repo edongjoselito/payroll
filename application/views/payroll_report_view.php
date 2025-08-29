@@ -716,6 +716,47 @@ th { background-color: #d9d9d9; font-weight: bold; }
     display: none !important; 
   }
 }
+/* @media print {
+  #mainUnsliced { display: block !important; visibility: visible !important; }
+  #mainUnsliced * { visibility: visible !important; }
+  #print-sliced-perday { display: block !important; }
+}
+
+@media print {
+  #print-sliced-perday { page-break-before: always; }
+} */
+/* === FINAL PRINT RULES (single sheet) === */
+@media print {
+  @page { size: A4 landscape; margin: 6mm; }
+
+  /* show ONLY the sliced version in print */
+  #mainUnsliced { display: none !important; }
+  #print-sliced { display: none !important; }        /* if it still exists */
+  #print-sliced-perday { display: block !important; page-break-before: auto !important; }
+
+  /* make it compact enough to stay on one sheet */
+  #print-sliced-perday .payroll-table { table-layout: fixed !important; font-size: 9.6px !important; }
+  #print-sliced-perday .payroll-table th,
+  #print-sliced-perday .payroll-table td {
+    padding: 2px 3px !important;
+    line-height: 1.15 !important;
+    vertical-align: middle !important;
+  }
+
+  /* clamp the NAME column so long names don’t ruin the right edge */
+  #print-sliced-perday .payroll-table th:nth-child(2),
+  #print-sliced-perday .payroll-table td:nth-child(2) {
+    max-width: 140px !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+    hyphens: auto !important;
+    text-align: left !important;
+  }
+
+  /* small global scale if your printer has larger margins */
+  html { zoom: 0.92; }  /* try 0.90–0.95 if needed */
+}
 
 </style>
 
@@ -1778,125 +1819,214 @@ if (bccomp($netPay, '0', 2) > 0) {
 </tbody>
 </table>
   </div>
-  <!-- === PRINT-ONLY SLICED PAYROLL (EARNINGS PER SLICE) === -->
-<div id="print-sliced">
+  <!-- === PRINT-ONLY: PER-DAY SLICED TABLES === -->
+<div id="print-sliced-perday" style="display:none;">
 <?php
   $slices = getPrintSlices($start, $end);
-  $showCA = $showSSS = $showPHIC = $showPAGIBIG = $showLoan = $showOther = false;
 
-  // We’ll reuse your existing detection so the final summary knows which columns to show
+  // detect whether any Regular/Special holiday exists (same as you did)
+  $hasRegularHoliday = false;
+  $hasSpecialHoliday = false;
   foreach ($attendance_data as $row) {
-      if (!empty($row->ca_cashadvance)) $showCA = true;
-      if (!empty($row->gov_sss)) $showSSS = true;
-      if (!empty($row->gov_philhealth)) $showPHIC = true;
-      if (!empty($row->gov_pagibig)) $showPAGIBIG = true;
-      if (!empty($row->loan)) $showLoan = true;
-      if (!empty($row->other_deduction)) $showOther = true;
-  }
-  if (!$showSSS || !$showPHIC || !$showPAGIBIG || !$showLoan || !$showOther) {
-      $settingsID = isset($project->settingsID) ? $project->settingsID : null;
-      foreach ($attendance_data as $r0) {
-          if (!$showSSS || !$showPHIC || !$showPAGIBIG) {
-              $g0 = fetch_gov_deduction_lines($r0->personnelID, $start, $end, $settingsID);
-              if (!$showSSS && !empty($g0['by']['SSS']))           $showSSS = true;
-              if (!$showPHIC && !empty($g0['by']['PhilHealth']))   $showPHIC = true;
-              if (!$showPAGIBIG && !empty($g0['by']['Pag-IBIG']))  $showPAGIBIG = true;
-          }
-          if (!$showLoan) {
-              $ld0 = fetch_loan_lines($r0->personnelID, $start, $end, $settingsID);
-              if (!empty($ld0['rows'])) $showLoan = true;
-          }
-          if (!$showOther) {
-              $od0 = fetch_other_deduction_lines($r0->personnelID, $start, $end, $settingsID);
-              if (!empty($od0['rows'])) $showOther = true;
-          }
+    $d = strtotime($start);
+    $E = strtotime($end);
+    while ($d <= $E) {
+      $cur = date('Y-m-d', $d);
+      $raw = $row->reg_hours_per_day[$cur] ?? null;
+      if (is_array($raw)) {
+        $status = strtolower(preg_replace('/\s+/', '', trim($raw['status'] ?? '')));
+        $holidayHours = (float)($raw['holiday_hours'] ?? 0);
+        if (strpos($status,'regularho') !== false || strpos($status,'legal') !== false) $hasRegularHoliday = true;
+        if (strpos($status,'special')   !== false || $holidayHours > 0)                 $hasSpecialHoliday = true;
+        if ($hasRegularHoliday && $hasSpecialHoliday) break 2;
       }
+      $d = strtotime('+1 day', $d);
+    }
   }
-  $showTotalDeduction = $showCA || $showSSS || $showPHIC || $showPAGIBIG || $showLoan || $showOther;
 ?>
 
-<?php foreach ($slices as $idx => $sl): ?>
-  <?php
-    // --- decide which columns to show for THIS slice ---
-    $showOTHrs = false;
-    $showOTAmt = false;
-    $showRegHol = false;
-    $showSpecHol = false;
+<?php foreach ($slices as $sl): ?>
+  <div style="page-break-inside: avoid; margin-bottom: 16px;">
+    <h4 style="margin:6px 0 8px;">
+      <?= htmlspecialchars($project->projectTitle ?? 'Payroll') ?> — <?= $sl['label'] ?>
+    </h4>
 
-    foreach ($attendance_data as $row) {
-      if ($row->rateType === 'Month' || $row->rateType === 'Bi-Month') continue;
-      $p = computePayroll($row, $sl['start'], $sl['end']);
-      if (($p['otTotalMinutes'] ?? 0) > 0) $showOTHrs = true;
-      if ((float)($p['otAmount'] ?? 0) > 0) $showOTAmt = true;
-      if ((float)($p['amountRegularHoliday'] ?? 0) > 0) $showRegHol = true;
-      if ((float)($p['amountSpecialHoliday'] ?? 0) > 0) $showSpecHol = true;
-      if ($showOTHrs && $showOTAmt && $showRegHol && $showSpecHol) break;
-    }
-  ?>
-  <div style="page-break-inside: avoid; margin-bottom: 18px;">
-    <h4 style="margin:6px 0 8px;"><?= htmlspecialchars($project->projectTitle ?? 'Payroll') ?> — <?= $sl['label'] ?></h4>
-    <table class="payroll-table slice-table" style="font-size:11px;">
+    <table class="payroll-table" style="font-size:11px; table-layout:fixed;">
+      <colgroup>
+  <col style="width:30px"><!-- L/N -->
+  <col style="width:140px"><!-- NAME -->
+  <col style="width:110px"><!-- POSITION -->
+  <col style="width:70px"><!-- RATE -->
+  <col style="width:56px"><!-- Rate/Hour -->
+  <?php $d=strtotime($sl['start']); $E=strtotime($sl['end']); while($d<=$E){ echo '<col style="width:28px"><col style="width:28px">'; $d=strtotime('+1 day',$d);} ?>
+  <col style="width:44px"><col style="width:44px"><col style="width:44px"><!-- totals time -->
+  <col style="width:68px"><col style="width:68px"><?php if($hasRegularHoliday):?><col style="width:78px"><?php endif; ?><?php if($hasSpecialHoliday):?><col style="width:78px"><?php endif; ?>
+  <col style="width:78px"><!-- Gross -->
+  <col style="width:84px"><!-- Net -->
+  <col style="width:100px"><!-- Signature -->
+</colgroup>
+
+
       <thead>
         <tr>
-          <th style="width:35px;">L/N</th>
-          <th style="width:200px;">NAME</th>
-          <th style="width:140px;">POSITION</th>
-          <th style="width:75px;">Reg. Hrs</th>
-          <?php if ($showOTHrs): ?><th style="width:75px;">OT Hrs</th><?php endif; ?>
-          <th style="width:65px;">Days</th>
-          <th style="width:90px;">Reg. Amt</th>
-          <?php if ($showOTAmt): ?><th style="width:90px;">OT Amt</th><?php endif; ?>
-          <?php if ($showRegHol): ?><th style="width:110px;">Regular Holiday</th><?php endif; ?>
-          <?php if ($showSpecHol): ?><th style="width:110px;">Special Holiday</th><?php endif; ?>
+          <th rowspan="3">L/N</th>
+          <th rowspan="3">NAME</th>
+          <th rowspan="3">POSITION</th>
+          <th rowspan="3">RATE</th>
+          <th rowspan="3">Rate / Hour</th>
+          <?php for($d=strtotime($sl['start']); $d<=strtotime($sl['end']); $d=strtotime('+1 day',$d)): ?>
+            <th colspan="2"><?= date('M d', $d) ?></th>
+          <?php endfor; ?>
+          <th colspan="3">TOTAL TIME</th>
+          <th colspan="<?= 2 + ($hasRegularHoliday?1:0) + ($hasSpecialHoliday?1:0) ?>">AMOUNT</th>
+          <th rowspan="3">Gross</th>
+          <th rowspan="3">Net</th>
+          <th rowspan="3">Signature</th>
+        </tr>
+        <tr>
+          <?php for($d=strtotime($sl['start']); $d<=strtotime($sl['end']); $d=strtotime('+1 day',$d)): ?>
+            <th colspan="2" class="center"><?= date('D', $d) ?></th>
+          <?php endfor; ?>
+          <th rowspan="2">Reg.</th>
+          <th rowspan="2">O.T</th>
+          <th rowspan="2">Days</th>
+          <th rowspan="2">Reg.</th>
+          <th rowspan="2">O.T</th>
+          <?php if ($hasRegularHoliday): ?><th>Regular Holiday</th><?php endif; ?>
+          <?php if ($hasSpecialHoliday): ?><th>Special Holiday</th><?php endif; ?>
+        </tr>
+        <tr>
+          <?php for($d=strtotime($sl['start']); $d<=strtotime($sl['end']); $d=strtotime('+1 day',$d)): ?>
+            <th>Reg.</th><th>O.T</th>
+          <?php endfor; ?>
         </tr>
       </thead>
+
       <tbody>
+      <?php $ln=1; foreach ($attendance_data as $row): ?>
+        <?php if ($row->rateType === 'Month' || $row->rateType === 'Bi-Month') continue; ?>
+
         <?php
-          $ln = 1;
-          foreach ($attendance_data as $row):
-            // mirror your main table’s skip
-            if ($row->rateType === 'Month' || $row->rateType === 'Bi-Month') continue;
+          // accumulators per slice row (same as your main table)
+          $regAmount=0; $otAmount=0; $regMin=0; $otMin=0; $days=0;
+          $amtRegHol=0; $amtSpecHol=0;
 
-            $p = computePayroll($row, $sl['start'], $sl['end']);
-
-            // hide personnel with no slice data at all
-            $hasAny = (
-              ($p['regTotalMinutes'] + $p['otTotalMinutes']) > 0 ||
-              (float)$p['regAmount'] > 0 ||
-              (float)$p['otAmount'] > 0 ||
-              (float)$p['amountRegularHoliday'] > 0 ||
-              (float)$p['amountSpecialHoliday'] > 0
-            );
-            if (!$hasAny) continue;
+          // helper to get hourly base from rateType
+          $hrBase = function($row) {
+            if ($row->rateType === 'Hour')  return (float)$row->rateAmount;
+            if ($row->rateType === 'Day')   return ((float)$row->rateAmount) / 8;
+            if ($row->rateType === 'Month') return ((float)$row->rateAmount) / 30 / 8;
+            if ($row->rateType === 'Bi-Month') return ((float)$row->rateAmount) / 15 / 8;
+            return 0;
+          };
+          $base = $hrBase($row);
         ?>
-          <tr>
-            <td><?= $ln++ ?></td>
-            <td><?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></td>
-            <td><?= htmlspecialchars($row->position) ?></td>
-            <td class="num"><?= number_format($p['regTotalMinutes']/60, 2) ?></td>
-            <?php if ($showOTHrs): ?>
-              <td class="num"><?= number_format($p['otTotalMinutes']/60, 2) ?></td>
+
+        <tr>
+          <td><?= $ln++ ?></td>
+          <td><?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></td>
+          <td><?= htmlspecialchars($row->position) ?></td>
+          <td colspan="2">
+            <?php if ($row->rateType === 'Day'): ?>
+              ₱<?= number_format($row->rateAmount, 2) ?> / day
+            <?php elseif ($row->rateType === 'Hour'): ?>
+              ₱<?= number_format($row->rateAmount, 2) ?> / hour
+            <?php elseif ($row->rateType === 'Month'): ?>
+              ₱<?= number_format($row->rateAmount, 2) ?> / month
+            <?php else: ?>
+              ₱<?= number_format($row->rateAmount, 2) ?> / bi-month
             <?php endif; ?>
-            <td class="num"><?= number_format($p['totalDays'], 2) ?></td>
-            <td class="num"><?= displayAmount($p['regAmount']) ?></td>
-            <?php if ($showOTAmt): ?>
-              <td class="num"><?= displayAmount($p['otAmount']) ?></td>
-            <?php endif; ?>
-            <?php if ($showRegHol): ?>
-              <td class="num"><?= displayAmount($p['amountRegularHoliday']) ?></td>
-            <?php endif; ?>
-            <?php if ($showSpecHol): ?>
-              <td class="num"><?= displayAmount($p['amountSpecialHoliday']) ?></td>
-            <?php endif; ?>
-          </tr>
-        <?php endforeach; ?>
+          </td>
+
+          <?php
+          // === per-day cells for this slice (mirrors your main daily loop) ===
+          for ($d=strtotime($sl['start']); $d<=strtotime($sl['end']); $d=strtotime('+1 day',$d)) {
+            $cur = date('Y-m-d', $d);
+            $raw = $row->reg_hours_per_day[$cur] ?? '-';
+
+            $regH = 0; $otH = 0; $holH = 0; $status = ''; $isHoliday=false; $isRegHol=false; $isSpecHol=false;
+
+            if (is_array($raw)) {
+              $status = strtolower(preg_replace('/\s+/', '', trim($raw['status'] ?? '')));
+              $regH   = (float)($raw['hours'] ?? 0);
+              $otH    = (float)($raw['overtime_hours'] ?? 0);
+              $holH   = (float)($raw['holiday_hours'] ?? 0);
+
+              if (preg_match('/holiday|regularho|legal|special/i', $status) || $holH > 0) {
+                $isHoliday = true;
+                if ($holH <= 0 && $regH > 0) { $holH = $regH; $regH = 0; }
+                $isRegHol  = (strpos($status,'regularho') !== false || strpos($status,'legal') !== false);
+                $isSpecHol = (!$isRegHol);
+              }
+
+              if ($isHoliday) {
+                // print one merged holiday cell for reg/ot of that day
+                echo "<td colspan='2' class='holiday-cell'>";
+                echo ($isRegHol ? 'R.Holiday' : 'S.Holiday');
+                $parts = [];
+                if ($holH > 0) $parts[] = number_format($holH,2) . 'h';
+                if ($otH  > 0) $parts[] = number_format($otH,2)  . 'h OT';
+                echo "<br>(" . implode(' + ', $parts) . ")</td>";
+
+                if ($isRegHol) { $amtRegHol += 8 * $base; }
+                else           { $amtSpecHol += $holH > 0 ? $holH * $base * 0.30 : (8 * $base * 0.30); }
+
+                if ($holH > 0) { $regAmount += $holH * $base; $regMin += $holH * 60; $days += $holH/8; }
+                if ($otH  > 0) { $otAmount  += $otH  * $base; $otMin  += $otH  * 60; }
+              } else {
+                // normal day
+                echo '<td class="num">'.displayAmount($regH).'</td>';
+                echo '<td class="num">'.displayAmount($otH).'</td>';
+
+                $regAmount += $regH * $base;
+                $otAmount  += $otH * $base;
+                $regMin    += $regH * 60;
+                $otMin     += $otH  * 60;
+                if ($regH > 0) $days += $regH/8;
+              }
+            } elseif (strtolower(trim($raw)) === 'day off') {
+              echo "<td colspan='2' class='text-info text-center'>Day Off</td>";
+            } elseif (is_numeric($raw)) {
+              // numeric shorthand hours
+              $dec = (float)$raw;
+              $regm = min($dec*60, 480);
+              $otm  = max(0, $dec*60 - 480);
+              $rH = $regm/60; $oH = $otm/60;
+              echo '<td class="num">'.displayAmount($rH).'</td>';
+              echo '<td class="num">'.displayAmount($oH).'</td>';
+
+              $regAmount += $rH * $base; $otAmount += $oH * $base;
+              $regMin += $regm; $otMin += $otm; if ($rH>0) $days += $rH/8;
+            } else {
+              echo "<td colspan='2' class='absent text-center'>Absent</td>";
+            }
+          }
+
+          $gross = bcadd(bcadd($regAmount, $otAmount, 2), bcadd($amtRegHol, $amtSpecHol, 2), 2);
+          $net   = $gross; // per-slice we don’t re-apply deductions (those are for full period summary)
+          $regHrs = $regMin/60; $otHrs = $otMin/60;
+          ?>
+          <td class="num"><?= number_format($regHrs, 2) ?></td>
+          <td class="num"><?= number_format($otHrs, 2) ?></td>
+          <td class="num"><?= number_format($days, 2) ?></td>
+
+          <td class="num"><?= displayAmount($regAmount) ?></td>
+          <td class="num"><?= displayAmount($otAmount) ?></td>
+          <?php if ($hasRegularHoliday): ?><td class="num"><?= displayAmount($amtRegHol) ?></td><?php endif; ?>
+          <?php if ($hasSpecialHoliday): ?><td class="num"><?= displayAmount($amtSpecHol) ?></td><?php endif; ?>
+          <td class="num"><?= number_format($gross, 2) ?></td>
+          <td class="num"><?= number_format($net, 2) ?></td>
+          <td></td>
+        </tr>
+      <?php endforeach; ?>
       </tbody>
     </table>
   </div>
 <?php endforeach; ?>
 
+
 <!-- === One final "Deductions & Net Pay" summary for the whole period === -->
-<div style="page-break-inside: avoid; margin-top: 6px;">
+<div style="page-break-inside: avoid; margin-top: 8px;">
   <h4 style="margin:10px 0 8px;">Deductions & Net Pay — <?= date('M d', strtotime($start)) ?> – <?= date('M d, Y', strtotime($end)) ?></h4>
   <table class="payroll-table summary-table" style="font-size:11px;">
     <thead>
