@@ -167,7 +167,6 @@ function getPrintSlices($start, $end) {
             $rsTs = strtotime($rs);
             $reTs = strtotime($re);
 
-            // clip to overall period
             $s = max($rsTs, $startTs);
             $e = min($reTs, $endTs);
 
@@ -367,399 +366,8 @@ function fetch_loan_lines($personnelID, $start, $end, $settingsID = null) {
     <title>PMS - Payroll Report</title>
     <?php include('includes/head.php'); ?>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-<style>
-body, html {
-  font-family: 'Segoe UI', 'Calibri', 'Arial', sans-serif;
-  font-size: 14px;
-  margin: 0;
-  padding: 0;
-  color: #000;
-  background: #fff;
-  height: 100%;
-}
-.num { text-align:right !important; font-variant-numeric:tabular-nums; white-space:nowrap; }
-.center { text-align:center !important; }
-
-.print-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  justify-content: space-between;
-}
-
-.header { text-align: center; margin-bottom: 20px; }
-.header h2 { font-size: 18px; margin: 0; }
-.header p { margin: 3px 0; font-size: 14px; }
-
-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-th, td {
-  border: 1px solid #000;
-  padding: 8px 10px;
-  text-align: center;
-  vertical-align: middle;
-}
-
-thead th {
-  padding: 4px 6px !important;
-  font-size: 15px !important;
-  line-height: 1.2;
-  vertical-align: middle !important;
-  text-align: center;
-  font-weight: 600;
-}
-
-.badge-warning {
-  background-color: #ffc107;
-  color: #000;
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 3px;
-}
-
-tbody td {
-  padding: 4px 6px;
-  font-size: 13px;
-  line-height: 1.2;
-  vertical-align: middle;
-  text-align: center;
-}
-tbody td:nth-child(2) { text-align: left; }
-
-td.unused-holiday { background-color: #f9f9f9; color: #aaa; font-style: italic; }
-.holiday-cell { background-color: #ffe5e5 !important; color: red !important; font-weight: bold !important; text-align: center !important; }
-
-tbody td:nth-last-child(-n+10) { font-size: 10.5px; }
-
-.signature {
-  margin-top: 60px;
-  padding-top: 30px;
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  page-break-inside: avoid;
-  break-inside: avoid;
-}
-.signature div { width: 32%; text-align: center; }
-.signature p { margin: 3px 0; }
-.signature .name-line {
-  display: inline-block;
-  border-bottom: 1px solid #000;
-  min-width: 250px;
-  font-size: 15px;
-  font-weight: 400;
-  padding-bottom: 2px;
-}
-.signature em { font-size: 14px; color: #333; }
-
-th { background-color: #d9d9d9; font-weight: bold; }
-.absent { background-color: #f4cccc; color: #000; }
-
-.scrollable-wrapper {
-  width: 100%;
-  flex-grow: 1;
-  overflow-x: hidden;
-  overflow-y: visible;
-  -webkit-overflow-scrolling: touch;
-}
-
-#bottomScroller {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0; 
-  height: 16px;  
-  overflow-x: auto;
-  overflow-y: hidden;
-  z-index: 9999; 
-}
-
-#bottomScroller .sizer { height: 1px; }
-
-@media screen {
-  .print-container { padding-bottom: 18px; }
-}
-
-@media print {
-  #bottomScroller { display: none !important; }
-}
-
-.header-box {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  border-radius: 10px;
-  background-color: #fefefe;
-  padding: 12px 20px;
-  margin: 10px 0 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-.header-box .box-content { flex: 1 1 auto; min-width: 300px; }
-.header-box .info-row { display: flex; align-items: center; margin: 3px 0; font-size: 15px; }
-.header-box .info-row i { font-size: 13px; color: #666; width: 18px; margin-right: 8px; text-align: center; }
-.header-box strong { display: inline-block; min-width: 125px; font-weight: 600; }
-.header-box span { flex: 1; text-align: left; }
-
-.print-button { margin-top: 4px; }
-.print-button button { transition: all 0.2s ease-in-out; }
-.print-button button:hover {
-  background-color: #0056b3 !important;
-  color: #fff !important;
-  transform: scale(1.03);
-  box-shadow: 0 0 6px rgba(0,0,0,0.15);
-}
-
-/* ===== Payslip Modal ===== */
-.modal-content {
-  background: #fff;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-  color: #000;
-  font-family: Arial, sans-serif;
-}
-.modal-header { background: #fff !important; color: #000 !important; border-bottom: 1px solid #ddd; }
-.modal-body h6 { font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 10px; }
-
-/* compact deduction cells but KEEP descriptions */
-.od-cell{
-  min-width:120px;              /* was 160px */
-  white-space:normal;
-  word-break:break-word;
-}
-
-.od-lines{
-  font-size:10px;               /* was 12px */
-  line-height:1.25;             /* was 2.50 */
-  color:#000;
-  overflow-wrap:anywhere;
-  hyphens:auto;
-  margin:0;                     /* tighter */
-}
-
-.od-lines > div{
-  position:relative;
-  padding-left:10px;            /* slightly smaller bullet indent */
-  margin:1px 0;                 /* tiny vertical gap per line */
-}
-.od-lines > div::before{
-  content:"—";                  /* keep the em dash bullet you use */
-  position:absolute;
-  left:0;
-}
-
-
-
-
-@media screen {
-  .od-lines { max-height: none; overflow: visible; }
-  .deduction-sublist{ max-height: 200px; overflow: auto; }
-}
-
-/* ===== PRINT ===== */
-@media print {
-  html, body {
-    height: 100%;
-    margin: 0 !important;
-    padding: 0 !important;
-    font-size: 10px !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    overflow: visible !important;
-  }
-
-  .od-lines { max-height: none; overflow: visible; }
-  .deduction-sublist{ max-height: none; overflow: visible; }
-
-  #print-all-payslips-container{
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    justify-content: center;
-    padding: 20px;
-  }
-
-  .print-card{
-    width: 390px; 
-    height: 550px;
-    padding: 18px 20px;
-    font-size: 13.5px;
-    line-height: 1.4;
-    background-color: #f8f9fa;
-    border: 1.5px solid #444;
-    border-radius: 6px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-  .print-card p { margin: 4px 0; font-size: 12.5px; }
-
-  @page { size: A4 landscape; margin: 1cm; }
-
-  .print-container {
-    display: flex !important;
-    flex-direction: column !important;
-    min-height: 100vh !important;
-    justify-content: space-between !important;
-  }
-
-  .scrollable-wrapper { overflow: visible !important; flex-grow: 1 !important; }
-
-  .btn, .modal, .no-print, .modal-backdrop { display: none !important; }
-
-  .payroll-table {
-    width: 100% !important;
-    table-layout: fixed !important;
-    font-size: 10px !important;
-    word-wrap: break-word !important;
-  }
-    .payroll-table th, .payroll-table td{
-    padding: 3px 4px !important;  /* slightly tighter */
-    font-size: 10px !important;
-    line-height: 1.2 !important;  /* make rows shorter */
-    vertical-align: middle !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid;
-    word-break: break-word;
-  }
-
-  .payroll-table th:first-child, .payroll-table td:first-child{ min-width: 25px; max-width: 30px; }
-
-  thead { display: table-header-group; font-size: 14px !important; }
-  table, thead, tbody, tr, td, th { page-break-inside: avoid !important; }
-
-  .signature { margin-top: auto !important; padding-top: 40px; break-inside: avoid !important; page-break-inside: avoid !important; }
-  .signature div { width: 30%; text-align: center; }
-
-  .modal-content, .modal-content * { visibility: visible !important; }
-  .modal-content{
-    position: static;
-    top: auto; left: auto;
-    width: 100%;
-    height: auto;
-    overflow: visible;
-    padding: 20px;
-    box-sizing: border-box;
-  }
-
-
-}
-@media print {
-  html body, html body * { visibility: visible !important; }
-
-  .no-print, .btn, .modal, .modal-backdrop {
-    visibility: hidden !important;
-    display: none !important;
-  }
-}
-.print-letterhead { display:none; text-align:center; margin-bottom:10px; }
-.print-letterhead img { height: 42px; }
-@media print { .print-letterhead { display:block !important; } }
-
-</style>
-<style>
-  .neg { color:#b00020 !important; font-weight:700 !important; } /* red text */
-  @media print { .neg { color:#b00020 !important; } } /* ensure it prints red */
-  @media screen {
-  #print-sliced { display: none; }
-  #mainUnsliced { display: block; }
-}
-@media print {
-  #print-sliced { display: block !important; }
-  #mainUnsliced { display: none !important; }
-}
-/* === Center numbers in PRINT-SLICED tables only === */
-@media print {
-  /* default: center everything in slice & summary tables */
-  #print-sliced .slice-table th,
-  #print-sliced .slice-table td,
-  #print-sliced .summary-table th,
-  #print-sliced .summary-table td {
-    text-align: center !important;
-    vertical-align: middle !important;
-  }
-
-  /* keep NAME (and POSITION in slice tables) left-aligned */
-  #print-sliced .slice-table th:nth-child(2),
-  #print-sliced .slice-table td:nth-child(2),  /* NAME */
-  #print-sliced .slice-table th:nth-child(3),
-  #print-sliced .slice-table td:nth-child(3),  /* POSITION */
-  #print-sliced .summary-table th:nth-child(2),
-  #print-sliced .summary-table td:nth-child(2) /* NAME */
-  {
-    text-align: left !important;
-  }
-
-  /* override your global .num (right-aligned) inside print-sliced only */
-  #print-sliced .slice-table .num,
-  #print-sliced .summary-table .num {
-    text-align: center !important;
-  }
-
-  /* optional: nicer signature line height */
-  #print-sliced .summary-table td.signature-cell {
-    height: 24px;
-    border-bottom: 1px solid #000 !important;
-  }
-
-  /* optional: allow long names to wrap instead of cut */
-  #print-sliced .slice-table td:nth-child(2),
-  #print-sliced .summary-table td:nth-child(2) {
-    white-space: normal !important;
-    word-break: break-word;
-  }
-}
-@media print {
-  tr.no-data-print { 
-    display: none !important; 
-  }
-}
-/* @media print {
-  #mainUnsliced { display: block !important; visibility: visible !important; }
-  #mainUnsliced * { visibility: visible !important; }
-  #print-sliced-perday { display: block !important; }
-}
-
-@media print {
-  #print-sliced-perday { page-break-before: always; }
-} */
-/* === FINAL PRINT RULES (single sheet) === */
-@media print {
-  @page { size: A4 landscape; margin: 6mm; }
-
-  /* show ONLY the sliced version in print */
-  #mainUnsliced { display: none !important; }
-  #print-sliced { display: none !important; }        /* if it still exists */
-  #print-sliced-perday { display: block !important; page-break-before: auto !important; }
-
-  /* make it compact enough to stay on one sheet */
-  #print-sliced-perday .payroll-table { table-layout: fixed !important; font-size: 9.6px !important; }
-  #print-sliced-perday .payroll-table th,
-  #print-sliced-perday .payroll-table td {
-    padding: 2px 3px !important;
-    line-height: 1.15 !important;
-    vertical-align: middle !important;
-  }
-
-  /* clamp the NAME column so long names don’t ruin the right edge */
-  #print-sliced-perday .payroll-table th:nth-child(2),
-  #print-sliced-perday .payroll-table td:nth-child(2) {
-    max-width: 140px !important;
-    white-space: normal !important;
-    overflow-wrap: anywhere !important;
-    word-break: break-word !important;
-    hyphens: auto !important;
-    text-align: left !important;
-  }
-
-  /* small global scale if your printer has larger margins */
-  html { zoom: 0.92; }  /* try 0.90–0.95 if needed */
-}
-
-</style>
-
+<link rel="stylesheet"
+      href="<?= base_url('assets/css/payroll.css') ?>">
 
 
 </head>
@@ -815,7 +423,6 @@ th { background-color: #d9d9d9; font-weight: bold; }
 $hasRegularHoliday = false;
 $hasSpecialHoliday = false;
 
-// Scan attendance to detect holiday presence
 foreach ($attendance_data as $row) {
     $startDate = strtotime($start);
     $endDate = strtotime($end);
@@ -878,15 +485,16 @@ $showTotalDeduction = $showCA || $showSSS || $showPHIC || $showPAGIBIG || $showL
 
 <table class="payroll-table">
   <colgroup>
-    <col style="width:28px"><!-- L/N -->
-    <col style="width:180px"><!-- NAME -->
-    <col style="width:120px"><!-- POSITION -->
-    <col style="width:90px"><!-- RATE -->
-    <col style="width:70px"><!-- Rate/Hour -->
+    <col style="width:28px">
+   <col style="width:150px">
+<col style="width:110px">
+
+    <col style="width:90px">
+    <col style="width:70px">
     <?php $d=strtotime($start); while($d<=strtotime($end)){ echo '<col style="width:34px"><col style="width:34px">'; $d=strtotime('+1 day',$d);} ?>
     <col style="width:46px"><col style="width:46px"><col style="width:46px"><!-- totals -->
     <col style="width:70px"><col style="width:70px"><?php if($hasRegularHoliday):?><col style="width:70px"><?php endif; ?><?php if($hasSpecialHoliday):?><col style="width:70px"><?php endif; ?>
-    <col style="width:80px"><!-- Gross -->
+    <col style="width:80px">
     <?php if ($showCA): ?><col style="width:80px"><?php endif; ?>
     <?php if ($showSSS): ?><col style="width:110px"><?php endif; ?>
     <?php if ($showPHIC): ?><col style="width:110px"><?php endif; ?>
@@ -894,7 +502,7 @@ $showTotalDeduction = $showCA || $showSSS || $showPHIC || $showPAGIBIG || $showL
     <?php if ($showLoan): ?><col style="width:110px"><?php endif; ?>
     <?php if ($showOther): ?><col style="width:110px"><?php endif; ?>
     <?php if ($showTotalDeduction): ?><col style="width:90px"><?php endif; ?>
-    <col style="width:90px"><!-- Take Home -->
+    <col style="width:90px">
 <?php if (empty($is_summary)): ?><col style="width:120px"><?php endif; ?>
   </colgroup>
 
@@ -1035,7 +643,7 @@ $totalNet = 0;
 $dateColumnCount = 0;
 $loopDate = strtotime($start);
 while ($loopDate <= strtotime($end)) {
-    $dateColumnCount += 2; // 2 columns per day (Reg. & OT)
+    $dateColumnCount += 2; 
     $loopDate = strtotime('+1 day', $loopDate);
 }
 
@@ -1053,22 +661,18 @@ $totalPrefixCols = $fixedColsBeforeDays + $dateColumnCount + $totalTimeCols + $a
 <?php if ($row->rateType === 'Month' || $row->rateType === 'Bi-Month') continue; ?>
 
 <?php
-  // Pre-check if this personnel has any attendance or deduction data
   $p_pre = computePayroll($row, $start, $end);
   $rowHasAny = (
-      // ⏱ Has work/attendance or earnings
       ($p_pre['regTotalMinutes'] + $p_pre['otTotalMinutes']) > 0 ||
       ((float)$p_pre['regAmount'] + (float)$p_pre['otAmount'] +
        (float)$p_pre['amountRegularHoliday'] + (float)$p_pre['amountSpecialHoliday']) > 0 ||
       (float)$p_pre['salary'] > 0 ||
-      // 💸 Has any deductions
       (float)$p_pre['cash_advance'] > 0 ||
       (float)$p_pre['sss'] > 0 ||
       (float)$p_pre['pagibig'] > 0 ||
       (float)$p_pre['philhealth'] > 0 ||
       (float)$p_pre['loan'] > 0 ||
       (float)$p_pre['other_deduction'] > 0 ||
-      // ✅ Has net pay
       (float)$p_pre['netPay'] > 0
   );
 ?>
@@ -1126,7 +730,6 @@ while ($loopDate <= $endDate):
         $otHours = floatval($raw['overtime_hours'] ?? 0);
         $holidayHours = floatval($raw['holiday_hours'] ?? 0);
 
-        // Rate per hour
         if ($row->rateType === 'Hour') {
             $base = $row->rateAmount;
         } elseif ($row->rateType === 'Day') {
@@ -1137,7 +740,6 @@ while ($loopDate <= $endDate):
             $base = ($row->rateAmount / 15) / 8;
         }
 
-        // Check if it's a holiday
         if (preg_match('/holiday|regularho|legal|special/i', $status) || $holidayHours > 0) {
             $showHoliday = true;
 
@@ -1151,7 +753,6 @@ while ($loopDate <= $endDate):
 
         if ($showHoliday) {
             if (strpos($status, 'regularho') !== false || strpos($status, 'legal') !== false) {
-                // ✅ REGULAR HOLIDAY LOGIC
                 $amountRegularHoliday += 8 * $base;
 
                 if ($holidayHours > 0) {
@@ -1171,7 +772,6 @@ while ($loopDate <= $endDate):
                 $holidayLabel = 'R.Holiday';
 
             } else {
-                // ✅ SPECIAL HOLIDAY LOGIC
                if ($holidayHours > 0) {
     $regAmount += $holidayHours * $base;
     $amountSpecialHoliday += $holidayHours * $base * 0.30;
@@ -1192,7 +792,6 @@ while ($loopDate <= $endDate):
                 $holidayLabel = 'S.Holiday';
             }
 
-            // ✅ Output holiday cell
             echo "<td colspan='2' style='background-color: #ffe5e5; color: red; font-weight: bold; text-align: center;'>";
             echo "{$holidayLabel}<br>(";
             $parts = [];
@@ -1203,7 +802,6 @@ while ($loopDate <= $endDate):
             echo ")</td>";
 
         } else {
-            // ✅ Normal workday logic
             if ($regHours <= 0 && $otHours > 0 && in_array($status, ['absent', 'absentee'])) {
                 echo "<td class='text-danger text-center font-weight-bold'>A</td>";
                 echo "<td>" . number_format($otHours, 2) . "</td>";
@@ -1222,7 +820,7 @@ echo '<td class="num">' . displayAmount($otHours) . '</td>';
             $otTotalMinutes += $otHours * 60;
             $totalMinutes += ($regHours + $otHours) * 60;
      if ($regHours > 0) {
-    $totalDays += $regHours / 8; // prorated days from regular hours only
+    $totalDays += $regHours / 8;
 }
 
 
@@ -1272,7 +870,6 @@ endwhile;
 
 
 
-// Totals
 $salary = bcadd(bcadd($regAmount, $otAmount, 2), bcadd($amountRegularHoliday, $amountSpecialHoliday, 2), 2);
 
 $cash_advance = (string) ($row->ca_cashadvance ?? 0);
@@ -1289,7 +886,6 @@ $loan    = (string) ($loan !== '' ? $loan : $ldetail['total']);
 $g_by_type = $gdetail['by'];
 $g_totals  = $gdetail['totals'];
 
-// Use the computed government totals when the legacy per-row fields are blank OR zero
 $sss        = (string)((trim($sss)        !== '' && (float)$sss        > 0) ? $sss        : $g_totals['SSS']);
 $pagibig    = (string)((trim($pagibig)    !== '' && (float)$pagibig    > 0) ? $pagibig    : $g_totals['Pag-IBIG']);
 $philhealth = (string)((trim($philhealth) !== '' && (float)$philhealth > 0) ? $philhealth : $g_totals['PhilHealth']);
@@ -1346,7 +942,6 @@ $totalPHIC = bcadd($totalPHIC, $philhealth, 2);
 $totalLoan = bcadd($totalLoan, $loan, 2);
 $totalOther = bcadd($totalOther, $other_deduction, 2);
 $totalDeduction = bcadd($totalDeduction, $total_deduction, 2);
-// $totalNet = bcadd($totalNet, $netPay, 2);
 if (bccomp($netPay, '0', 2) > 0) {
     $totalNet = bcadd($totalNet, $netPay, 2);
 }
@@ -1479,7 +1074,6 @@ if (bccomp($netPay, '0', 2) > 0) {
   <td colspan="3"></td>
 <?php endif; ?>
 </tr>
-<!-- Payslip Modal -->
 <div class="modal fade" id="payslipModal<?= $ln ?>" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-md">
     <div class="modal-content" id="printablePayslip<?= $ln ?>">
@@ -1502,7 +1096,6 @@ if (bccomp($netPay, '0', 2) > 0) {
           color:#333 !important; opacity:1 !important; text-shadow:none; font-size:26px; line-height:1;
         }
 
-        /* Info rows */
         #payslipModal<?= $ln ?> .info-row{
           display:flex; justify-content:space-between; align-items:flex-start; gap:10px;
           margin:3px 0;
@@ -1510,7 +1103,6 @@ if (bccomp($netPay, '0', 2) > 0) {
         #payslipModal<?= $ln ?> .info-row .label{ font-weight:600; min-width:110px; }
         #payslipModal<?= $ln ?> .info-row .value{ flex:1; text-align:right; }
 
-        /* Section headers & lists */
         #payslipModal<?= $ln ?> .section-title{
           font-weight:700; border-bottom:1px solid #e5e7eb; padding-bottom:6px; margin:12px 0 8px;
           font-size:.95rem;
@@ -1529,12 +1121,10 @@ if (bccomp($netPay, '0', 2) > 0) {
         #payslipModal<?= $ln ?> .total-line{ border-top:1px solid #e5e7eb; margin-top:6px; padding-top:6px; }
         #payslipModal<?= $ln ?> .netpay-box{ border-top:2px solid #e5e7eb; margin-top:12px; padding-top:10px; }
 
-        /* Keep the modal compact on small screens */
         @media (max-width: 575.98px){
           #payslipModal<?= $ln ?> .modal-dialog{ margin: .5rem; }
           #payslipModal<?= $ln ?> .payslip-card{ max-width: 100%; }
         }
-        /* IMPORTANT: no @media print here. Printing uses printPayslip() in a clean window. */
       </style>
 
       <div class="modal-header">
@@ -1543,7 +1133,6 @@ if (bccomp($netPay, '0', 2) > 0) {
       </div>
 
       <?php
-        // ===== Recompute rates and line items (same logic you already had) =====
         $rateTypeRaw   = (string)($row->rateType ?? '');
         $rateTypeLower = strtolower($rateTypeRaw);
         $rateAmountNum = (float)($row->rateAmount ?? 0);
@@ -1568,7 +1157,7 @@ if (bccomp($netPay, '0', 2) > 0) {
 
         $otRate = $hourlyRate * 1.0;
 
-        $regHours = (float)$regFormatted;   // from your row computations above
+        $regHours = (float)$regFormatted;  
         $otHours  = (float)$otFormatted;
 
         $regAmount = $regHours * $hourlyRate;
@@ -1611,7 +1200,6 @@ if (bccomp($netPay, '0', 2) > 0) {
       <div class="modal-body pt-2 pb-3 px-3"<?= $hasAnyData ? '' : ' style="display:none;"' ?>>
         <div class="payslip-card">
 
-          <!-- Top info -->
         
           <div class="info-row">
             <div class="label">Position</div>
@@ -1623,7 +1211,6 @@ if (bccomp($netPay, '0', 2) > 0) {
           </div>
         
 
-          <!-- Rate block -->
           <div class="section-title">Rates</div>
           <ul>
             <li class="line">
@@ -1641,7 +1228,6 @@ if (bccomp($netPay, '0', 2) > 0) {
             <?php endif; ?>
           </ul>
 
-          <!-- Earnings & Deductions -->
           <div class="row mt-2">
             <?php if ($hasEarningsLines): ?>
             <div class="col-12 col-md-6">
@@ -1819,12 +1405,10 @@ if (bccomp($netPay, '0', 2) > 0) {
 </tbody>
 </table>
   </div>
-  <!-- === PRINT-ONLY: PER-DAY SLICED TABLES === -->
 <div id="print-sliced-perday" style="display:none;">
 <?php
   $slices = getPrintSlices($start, $end);
 
-  // detect whether any Regular/Special holiday exists (same as you did)
   $hasRegularHoliday = false;
   $hasSpecialHoliday = false;
   foreach ($attendance_data as $row) {
@@ -1852,66 +1436,56 @@ if (bccomp($netPay, '0', 2) > 0) {
     </h4>
 
     <table class="payroll-table" style="font-size:11px; table-layout:fixed;">
-      <colgroup>
-  <col style="width:30px"><!-- L/N -->
-  <col style="width:140px"><!-- NAME -->
-  <col style="width:110px"><!-- POSITION -->
-  <col style="width:70px"><!-- RATE -->
-  <col style="width:56px"><!-- Rate/Hour -->
-  <?php $d=strtotime($sl['start']); $E=strtotime($sl['end']); while($d<=$E){ echo '<col style="width:28px"><col style="width:28px">'; $d=strtotime('+1 day',$d);} ?>
-  <col style="width:44px"><col style="width:44px"><col style="width:44px"><!-- totals time -->
-  <col style="width:68px"><col style="width:68px"><?php if($hasRegularHoliday):?><col style="width:78px"><?php endif; ?><?php if($hasSpecialHoliday):?><col style="width:78px"><?php endif; ?>
-  <col style="width:78px"><!-- Gross -->
-  <col style="width:84px"><!-- Net -->
-  <col style="width:100px"><!-- Signature -->
+<colgroup>
+  <col style="width:28px">
+  <col style="width:110px">
+  <col style="width:90px">
+  <col style="width:60px">
+  <col style="width:50px">
+  <?php $d=strtotime($sl['start']); $E=strtotime($sl['end']);
+    while($d<=$E){ echo '<col style="width:34px"><col style="width:34px">'; $d=strtotime('+1 day',$d); } ?>
+  <col style="width:50px"><col style="width:50px"><col style="width:50px">
 </colgroup>
 
 
-      <thead>
-        <tr>
-          <th rowspan="3">L/N</th>
-          <th rowspan="3">NAME</th>
-          <th rowspan="3">POSITION</th>
-          <th rowspan="3">RATE</th>
-          <th rowspan="3">Rate / Hour</th>
-          <?php for($d=strtotime($sl['start']); $d<=strtotime($sl['end']); $d=strtotime('+1 day',$d)): ?>
-            <th colspan="2"><?= date('M d', $d) ?></th>
-          <?php endfor; ?>
-          <th colspan="3">TOTAL TIME</th>
-          <th colspan="<?= 2 + ($hasRegularHoliday?1:0) + ($hasSpecialHoliday?1:0) ?>">AMOUNT</th>
-          <th rowspan="3">Gross</th>
-          <th rowspan="3">Net</th>
-          <th rowspan="3">Signature</th>
-        </tr>
-        <tr>
-          <?php for($d=strtotime($sl['start']); $d<=strtotime($sl['end']); $d=strtotime('+1 day',$d)): ?>
-            <th colspan="2" class="center"><?= date('D', $d) ?></th>
-          <?php endfor; ?>
-          <th rowspan="2">Reg.</th>
-          <th rowspan="2">O.T</th>
-          <th rowspan="2">Days</th>
-          <th rowspan="2">Reg.</th>
-          <th rowspan="2">O.T</th>
-          <?php if ($hasRegularHoliday): ?><th>Regular Holiday</th><?php endif; ?>
-          <?php if ($hasSpecialHoliday): ?><th>Special Holiday</th><?php endif; ?>
-        </tr>
-        <tr>
-          <?php for($d=strtotime($sl['start']); $d<=strtotime($sl['end']); $d=strtotime('+1 day',$d)): ?>
-            <th>Reg.</th><th>O.T</th>
-          <?php endfor; ?>
-        </tr>
-      </thead>
+
+<thead>
+  <tr>
+    <th rowspan="3">L/N</th>
+    <th rowspan="3">NAME</th>
+    <th rowspan="3">POSITION</th>
+    <th rowspan="3">RATE</th>
+    <th rowspan="3">Rate / Hour</th>
+    <?php for($d=strtotime($sl['start']); $d<=strtotime($sl['end']); $d=strtotime('+1 day',$d)): ?>
+      <th colspan="2"><?= date('M d', $d) ?></th>
+    <?php endfor; ?>
+    <th colspan="3">TOTAL TIME</th>
+  </tr>
+  <tr>
+    <?php for($d=strtotime($sl['start']); $d<=strtotime($sl['end']); $d=strtotime('+1 day',$d)): ?>
+      <th colspan="2" class="center"><?= date('D', $d) ?></th>
+    <?php endfor; ?>
+    <th rowspan="2">Reg.</th>
+    <th rowspan="2">O.T</th>
+    <th rowspan="2">Days</th>
+  </tr>
+  <tr>
+    <?php for($d=strtotime($sl['start']); $d<=strtotime($sl['end']); $d=strtotime('+1 day',$d)): ?>
+      <th>Reg.</th><th>O.T</th>
+    <?php endfor; ?>
+  </tr>
+</thead>
+
+
 
       <tbody>
       <?php $ln=1; foreach ($attendance_data as $row): ?>
         <?php if ($row->rateType === 'Month' || $row->rateType === 'Bi-Month') continue; ?>
 
         <?php
-          // accumulators per slice row (same as your main table)
           $regAmount=0; $otAmount=0; $regMin=0; $otMin=0; $days=0;
           $amtRegHol=0; $amtSpecHol=0;
 
-          // helper to get hourly base from rateType
           $hrBase = function($row) {
             if ($row->rateType === 'Hour')  return (float)$row->rateAmount;
             if ($row->rateType === 'Day')   return ((float)$row->rateAmount) / 8;
@@ -1939,7 +1513,6 @@ if (bccomp($netPay, '0', 2) > 0) {
           </td>
 
           <?php
-          // === per-day cells for this slice (mirrors your main daily loop) ===
           for ($d=strtotime($sl['start']); $d<=strtotime($sl['end']); $d=strtotime('+1 day',$d)) {
             $cur = date('Y-m-d', $d);
             $raw = $row->reg_hours_per_day[$cur] ?? '-';
@@ -1960,7 +1533,6 @@ if (bccomp($netPay, '0', 2) > 0) {
               }
 
               if ($isHoliday) {
-                // print one merged holiday cell for reg/ot of that day
                 echo "<td colspan='2' class='holiday-cell'>";
                 echo ($isRegHol ? 'R.Holiday' : 'S.Holiday');
                 $parts = [];
@@ -1974,7 +1546,6 @@ if (bccomp($netPay, '0', 2) > 0) {
                 if ($holH > 0) { $regAmount += $holH * $base; $regMin += $holH * 60; $days += $holH/8; }
                 if ($otH  > 0) { $otAmount  += $otH  * $base; $otMin  += $otH  * 60; }
               } else {
-                // normal day
                 echo '<td class="num">'.displayAmount($regH).'</td>';
                 echo '<td class="num">'.displayAmount($otH).'</td>';
 
@@ -1987,7 +1558,6 @@ if (bccomp($netPay, '0', 2) > 0) {
             } elseif (strtolower(trim($raw)) === 'day off') {
               echo "<td colspan='2' class='text-info text-center'>Day Off</td>";
             } elseif (is_numeric($raw)) {
-              // numeric shorthand hours
               $dec = (float)$raw;
               $regm = min($dec*60, 480);
               $otm  = max(0, $dec*60 - 480);
@@ -2002,22 +1572,15 @@ if (bccomp($netPay, '0', 2) > 0) {
             }
           }
 
-          $gross = bcadd(bcadd($regAmount, $otAmount, 2), bcadd($amtRegHol, $amtSpecHol, 2), 2);
-          $net   = $gross; // per-slice we don’t re-apply deductions (those are for full period summary)
+        
           $regHrs = $regMin/60; $otHrs = $otMin/60;
           ?>
-          <td class="num"><?= number_format($regHrs, 2) ?></td>
-          <td class="num"><?= number_format($otHrs, 2) ?></td>
-          <td class="num"><?= number_format($days, 2) ?></td>
+        <td class="num"><?= number_format($regHrs, 2) ?></td>
+<td class="num"><?= number_format($otHrs, 2) ?></td>
+<td class="num"><?= number_format($days, 2) ?></td>
 
-          <td class="num"><?= displayAmount($regAmount) ?></td>
-          <td class="num"><?= displayAmount($otAmount) ?></td>
-          <?php if ($hasRegularHoliday): ?><td class="num"><?= displayAmount($amtRegHol) ?></td><?php endif; ?>
-          <?php if ($hasSpecialHoliday): ?><td class="num"><?= displayAmount($amtSpecHol) ?></td><?php endif; ?>
-          <td class="num"><?= number_format($gross, 2) ?></td>
-          <td class="num"><?= number_format($net, 2) ?></td>
-          <td></td>
-        </tr>
+</tr>
+
       <?php endforeach; ?>
       </tbody>
     </table>
@@ -2025,7 +1588,6 @@ if (bccomp($netPay, '0', 2) > 0) {
 <?php endforeach; ?>
 
 
-<!-- === One final "Deductions & Net Pay" summary for the whole period === -->
 <div style="page-break-inside: avoid; margin-top: 8px;">
   <h4 style="margin:10px 0 8px;">Deductions & Net Pay — <?= date('M d', strtotime($start)) ?> – <?= date('M d, Y', strtotime($end)) ?></h4>
   <table class="payroll-table summary-table" style="font-size:11px;">
@@ -2076,7 +1638,6 @@ if (bccomp($netPay, '0', 2) > 0) {
                   2);
           $net  = (float)bcsub($salary, $tded, 2);
 
-          // hide people with no totals/deductions/net in the final summary
           $hasAnyPrint = (
               ($p['regTotalMinutes'] + $p['otTotalMinutes']) > 0 ||
               (float)$p['regAmount'] > 0 || (float)$p['otAmount'] > 0 ||
@@ -2133,7 +1694,6 @@ if (bccomp($netPay, '0', 2) > 0) {
 </div>
 </div>
 
-<!-- === PRINTABLE ALL PAYSLIPS SECTION (hidden by default) === -->
 <div id="allPayslips" class="no-print-payroll d-none">
   
   <div id="print-all-payslips-container">
@@ -2516,9 +2076,7 @@ function printAllPayslips() {
   let syncing = false;
 
   function setWidths() {
-    // Match proxy width to real content width
     sizer.style.width = real.scrollWidth + 'px';
-    // Show/hide proxy if not needed
     const needs = real.scrollWidth > real.clientWidth + 1;
     fake.style.display = needs ? 'block' : 'none';
     if (needs) fake.scrollLeft = real.scrollLeft;
@@ -2538,14 +2096,11 @@ function printAllPayslips() {
     syncing = false;
   }
 
-  // Wire up events
   real.addEventListener('scroll', syncFromReal, { passive: true });
   fake.addEventListener('scroll', syncFromFake, { passive: true });
   window.addEventListener('resize', setWidths);
 
-  // Initial pass (after layout)
   window.addEventListener('load', setWidths);
-  // In case fonts/layout shift shortly after load
   setTimeout(setWidths, 50);
 })();
 </script>
