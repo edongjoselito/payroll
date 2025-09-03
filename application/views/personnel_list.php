@@ -104,28 +104,36 @@ $showAdmins = ($CI->input->get('type') === 'admin');
             <div class="container-fluid">
 
                 <div class="page-title-box d-flex justify-content-between align-items-center">
-         <div class="mb-3">
-    <a href="<?= base_url('personnel/create') ?>" class="btn btn-primary btn-md mr-2" title="Add Now" data-bs-toggle="tooltip">
-        <i class="fas fa-user-plus me-1"></i> Add New
-    </a>
-    <a href="<?= base_url('personnel/service_years') ?>" class="btn btn-secondary btn-md" title="View Year of Service" data-bs-toggle="tooltip">
-        <i class="fas fa-calendar-alt me-1"></i> Years of Service
-    </a>
-    <a href="<?= base_url('personnel/manage?type=admin') ?>" class="btn btn-warning btn-md mr-2 no-print" title="Show Monthly / Bi-Monthly">
-  <i class="fas fa-user-tie me-1"></i> Monthly / Bi-Monthly
-</a>
-<?php if ($showAdmins): ?>
-
-  <a href="<?= base_url('personnel/manage') ?>" class="btn btn-outline-secondary btn-md mr-2 no-print" title="Show Workers Only">
-    <i class="fas fa-people-carry me-1"></i> Workers Only
+ <?php
+  $role = $this->session->userdata('position') ?: $this->session->userdata('level');
+  $isAdmin = ($role === 'Admin');
+  $showAdmins = ($this->input->get('type') === 'admin');
+?>
+<div class="mb-3">
+  <a href="<?= base_url('personnel/create') ?>" class="btn btn-primary btn-md mr-2" title="Add Now" data-bs-toggle="tooltip">
+    <i class="fas fa-user-plus me-1"></i> Add New
   </a>
-<?php endif; ?>
 
-      <button type="button" class="btn btn-info btn-md no-print" onclick="printAllPersonnel()">
-  <i class="fas fa-print me-1"></i> Print
-</button>
+  <a href="<?= base_url('personnel/service_years') ?>" class="btn btn-secondary btn-md" title="View Year of Service" data-bs-toggle="tooltip">
+    <i class="fas fa-calendar-alt me-1"></i> Years of Service
+  </a>
 
+  <?php if ($isAdmin): ?>
+    <a href="<?= base_url('personnel/manage?type=admin') ?>" class="btn btn-warning btn-md mr-2 no-print" title="Show Monthly / Bi-Monthly">
+      <i class="fas fa-user-tie me-1"></i> Monthly / Bi-Monthly
+    </a>
+    <?php if ($showAdmins): ?>
+      <a href="<?= base_url('personnel/manage') ?>" class="btn btn-outline-secondary btn-md mr-2 no-print" title="Show Workers Only">
+        <i class="fas fa-people-carry me-1"></i> Workers Only
+      </a>
+    <?php endif; ?>
+  <?php endif; ?>
+
+  <button type="button" class="btn btn-info btn-md no-print" onclick="printAllPersonnel()">
+    <i class="fas fa-print me-1"></i> Print
+  </button>
 </div>
+
 
 
 

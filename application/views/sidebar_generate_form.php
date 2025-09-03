@@ -55,20 +55,22 @@
     <h4 class="page-title mb-3">Payroll Generation</h4>
 
     <div class="d-flex flex-wrap">
-      <?php if ($role !== 'Payroll User'): ?>
-      <button type="button" class="btn btn-primary btn-sm-custom mr-2 mt-2" data-toggle="modal" data-target="#generatePayrollModal">
-        <i class="mdi mdi-calculator-variant"></i> Generate Payroll
-      </button>
-      <?php endif; ?>
-
-      <button type="button" class="btn btn-dark btn-sm-custom mr-2 mt-2" data-toggle="modal" data-target="#monthlyPayrollModal">
-        <i class="mdi mdi-calendar-clock"></i> Bi-Month Payroll
-      </button>
-<button type="button"
-        class="btn btn-outline-secondary btn-sm-custom mr-2 mt-2"
-        onclick="location.href='<?= base_url('MonthlyPayroll/list_bimonth_batches') ?>'">
-  <i class="mdi mdi-archive"></i> Saved Bi-Month Payroll
+    <!-- ✅ Payroll User + Admin: Workers payroll (per day/hour) -->
+<button type="button" class="btn btn-primary btn-sm-custom mr-2 mt-2" data-toggle="modal" data-target="#generatePayrollModal">
+  <i class="mdi mdi-calculator-variant"></i> Generate Payroll
 </button>
+
+<!-- ❌ Hide all Bi-Month for Payroll User -->
+<?php if ($role !== 'Payroll User'): ?>
+  <button type="button" class="btn btn-dark btn-sm-custom mr-2 mt-2" data-toggle="modal" data-target="#monthlyPayrollModal">
+    <i class="mdi mdi-calendar-clock"></i> Bi-Month Payroll
+  </button>
+  <button type="button" class="btn btn-outline-secondary btn-sm-custom mr-2 mt-2"
+          onclick="location.href='<?= base_url('MonthlyPayroll/list_bimonth_batches') ?>'">
+    <i class="mdi mdi-archive"></i> Saved Bi-Month Payroll
+  </button>
+<?php endif; ?>
+
       <button type="button" class="btn btn-info btn-sm-custom mr-2 mt-2" data-toggle="modal" data-target="#viewSavedPayrollModal">
         <i class="mdi mdi-eye"></i> View Saved Payroll
       </button>
@@ -114,8 +116,6 @@
   </div>
 </div>
 
-
-<?php if ($role !== 'Payroll User'): ?>
 <!-- Generate Payroll Modal (hidden from Payroll User) -->
 <div class="modal fade" id="generatePayrollModal" tabindex="-1" role="dialog" aria-labelledby="generatePayrollLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-md" role="document">
@@ -169,7 +169,6 @@
     </form>
   </div>
 </div>
-<?php endif; ?>
 <!-- End Modal Section -->
 
 <!-- View Saved Payroll Modal -->

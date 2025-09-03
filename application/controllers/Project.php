@@ -6,13 +6,28 @@ class Project extends CI_Controller
          $this->load->model('PayrollModel');
         $this->load->model('Project_model');
     }
+private function currentRole()
+{
+    return $this->session->userdata('position') ?: $this->session->userdata('level');
+}
+
+private function requireAdmin()
+{
+    if ($this->currentRole() !== 'Admin') {
+        $this->session->set_flashdata('error', 'Unauthorized action.');
+        redirect('project/project_view');
+        exit;
+    }
+}
 
 public function project_view()
 {
     $settingsID = $this->session->userdata('settingsID');
 
     $data['projects'] = $this->Project_model->getAll($settingsID);
-    $data['attendance_periods'] = $this->Project_model->get_attendance_batches($settingsID); 
+    $data['attendance_periods'] = $this->Project_model->get_attendance_batches($settingsID);
+
+    $data['canEditProjects'] = ($this->currentRole() === 'Admin');
 
     $this->load->view('project_view', $data);
 }
@@ -21,6 +36,7 @@ public function project_view()
 
 public function store()
 {
+    $this->requireAdmin();           
     $data = $this->input->post();
     $data['settingsID'] = $this->session->userdata('settingsID');
 
@@ -29,12 +45,12 @@ public function store()
     } else {
         $this->session->set_flashdata('error', 'Failed to add project.');
     }
-
     redirect('project/project_view');
 }
 
 public function update()
 {
+    $this->requireAdmin();           
     $data = $this->input->post();
     $data['settingsID'] = $this->session->userdata('settingsID');
 
@@ -43,18 +59,17 @@ public function update()
     } else {
         $this->session->set_flashdata('error', 'Failed to update project.');
     }
-
     redirect('project/project_view');
 }
 
 public function delete($id)
 {
+    $this->requireAdmin();         
     if ($this->Project_model->delete($id)) {
         $this->session->set_flashdata('success', 'Project successfully deleted.');
     } else {
         $this->session->set_flashdata('error', 'Failed to delete project.');
     }
-
     redirect('project/project_view');
 }
 
@@ -69,7 +84,6 @@ public function attendance_list($settingsID)
    $data['project'] = $this->Project_model->getProjectDetails($projectID);
 
 
-    // $data['project'] = $this->Project_model->getProjectBySettingsID($settingsID);
     $data['attendance_logs'] = $this->Project_model->getAttendanceLogs($settingsID, $projectID);
 
     $this->load->view('attendance_list_view', $data);
@@ -79,7 +93,7 @@ public function attendance_list($settingsID)
 
 public function attendance($settingsID)
 {
-        date_default_timezone_set('Asia/Manila'); // Add this line
+        date_default_timezone_set('Asia/Manila'); 
 
     $projectID = $this->input->get('pid');
 

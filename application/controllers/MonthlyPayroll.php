@@ -19,7 +19,6 @@ class MonthlyPayroll extends CI_Controller
     }
     }
 
-    // Landing page: shows the Generate Payroll button/modal only
    public function index()
 {
     $this->load->model('MonthlyPayroll_model');
@@ -27,14 +26,12 @@ class MonthlyPayroll extends CI_Controller
     $this->load->view('monthly_payroll_input', $data);
 }
 
-    // After selecting month
 public function generate()
 {
     if ($this->input->get('saved') === 'true') {
-        $this->session->keep_flashdata('msg'); // keep the success message alive
+        $this->session->keep_flashdata('msg'); 
     }
 
-    // NEW: Accept date range input
     $from = $this->input->post('from_date');
     $to   = $this->input->post('to_date');
 
@@ -44,7 +41,6 @@ public function generate()
         return;
     }
 
-    // Use month from the 'from' date for backward compatibility
     $month = date('Y-m', strtotime($from));
 
     $settingsID = $this->session->userdata('settingsID');
@@ -57,16 +53,14 @@ public function generate()
         return;
     }
 
-    // ✅ Build date range to check overlap
     $dates = [];
     $current = strtotime($from);
     $end = strtotime($to);
     while ($current <= $end) {
-        $dates[] = date('d', $current); // only days (01 to 31)
+        $dates[] = date('d', $current);
         $current = strtotime('+1 day', $current);
     }
 
-    // 🔍 Check if this date range already exists per personnel
     $existingRows = $this->db->where('payroll_month', $month)
                              ->where('settingsID', $settingsID)
                              ->where_in('personnelID', $personnelIDs)
@@ -81,7 +75,7 @@ public function generate()
         foreach ($dates as $day) {
             if (array_key_exists(ltrim($day, '0'), $existingDetails) || array_key_exists($day, $existingDetails)) {
                 $overlapCount++;
-                break; // only count once per personnel
+                break;
             }
         }
     }
@@ -93,7 +87,6 @@ public function generate()
         return;
     }
 
-    // ✅ Proceed to generation
     $fullDates = [];
     $current = strtotime($from);
     while ($current <= strtotime($to)) {
@@ -119,7 +112,6 @@ public function generate()
 
 
 
-    // Save attendance/payroll data
 public function save()
 {
     $month = $this->input->post('payroll_month');
@@ -134,10 +126,9 @@ public function save()
     foreach ($personnelIDs as $personnelID) {
         $details = [];
 
-        // Loop through days (all days posted for this personnel)
         if (isset($attendance_status[$personnelID])) {
             foreach ($attendance_status[$personnelID] as $date => $status) {
-                $day = date('d', strtotime($date)); // '01'...'31'
+                $day = date('d', strtotime($date)); 
                $details[$date] = [
     'status' => $status,
     'reg'    => isset($regular_hours[$personnelID][$date]) ? (float)$regular_hours[$personnelID][$date] : 0,
@@ -146,20 +137,17 @@ public function save()
             }
         }
 
-        // ✅ Save the selected range inside the JSON (as _range key)
         $details['_range'] = [
             'from' => $from,
             'to' => $to,
         ];
 
-        // Save (insert or update)
         $this->MonthlyPayroll_model->save_payroll_monthly($personnelID, $month, $details);
     }
 
     $this->session->set_flashdata('msg', '✅ Monthly payroll saved successfully!');
     $this->session->set_userdata('payroll_month', $month);
 
-    // Append ?saved=true to the referer so we can detect success later
     $redirect_url = $_SERVER['HTTP_REFERER'];
     $redirect_url .= (strpos($redirect_url, '?') === false) ? '?saved=true' : '&saved=true';
 
@@ -178,7 +166,6 @@ if (!$month) {
     $this->session->set_userdata('payroll_month', $month);
 }
 
-// ✅ Use fallback if not posted
 if (!$from) {
     $from = $this->session->userdata('payroll_from');
 }
@@ -192,7 +179,6 @@ if (!$from || !$to) {
 }
 
 
-    // Save range to session (optional)
     $this->session->set_userdata('payroll_from', $from);
     $this->session->set_userdata('payroll_to', $to);
 
@@ -211,25 +197,22 @@ if (!$from || !$to) {
 public function update_attendance()
 {
     $personnelID   = $this->input->post('personnelID');
-    $payroll_month = $this->input->post('payroll_month'); // YYYY-MM
-    $dayParam      = $this->input->post('day');  // '01'..'31' (legacy)
-    $dateParam     = $this->input->post('date'); // 'YYYY-MM-DD' (new)
+    $payroll_month = $this->input->post('payroll_month'); 
+    $dayParam      = $this->input->post('day');  
+    $dateParam     = $this->input->post('date'); 
     $status        = $this->input->post('status');
     $reg           = (float)$this->input->post('reg');
     $ot            = (float)$this->input->post('ot');
 
-    // Resolve a full date key (prefer 'date', else derive from month+day)
     if ($dateParam && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateParam)) {
         $fullDate = $dateParam;
-        $dayKey   = date('d', strtotime($fullDate)); // '01'..'31'
+        $dayKey   = date('d', strtotime($fullDate)); 
     } else {
-        // fallback: build from month + day (legacy)
         $ym = $payroll_month ?: date('Y-m');
         $dayKey = str_pad($dayParam ?: '01', 2, '0', STR_PAD_LEFT);
-        $fullDate = $ym . '-' . $dayKey; // YYYY-MM-DD
+        $fullDate = $ym . '-' . $dayKey; 
     }
 
-    // Fetch existing details
     $row = $this->MonthlyPayroll_model->get_payroll_record($personnelID, $payroll_month);
     if ($row) {
         $details = json_decode($row->details_json, true);
@@ -238,14 +221,12 @@ public function update_attendance()
         $details = [];
     }
 
-    // Write both keys: full-date (new) and day-only (legacy) to avoid breaking anything
     $payload = ['status' => $status, 'reg' => $reg, 'ot' => $ot];
 
-    $details[$fullDate] = $payload; // new canonical key
-    $details[ltrim($dayKey, '0')] = $payload; // '1'..'31' legacy loose
-    $details[$dayKey] = $payload;             // '01'..'31' legacy strict
+    $details[$fullDate] = $payload; 
+    $details[ltrim($dayKey, '0')] = $payload; 
+    $details[$dayKey] = $payload;     
 
-    // Save back
     $this->MonthlyPayroll_model->update_payroll_details($personnelID, $payroll_month, $details);
     $this->session->set_flashdata('msg', 'Attendance updated!');
 
@@ -269,11 +250,9 @@ public function view_formatted()
     $data['start'] = $from;
     $data['end']   = $to;
 
-    // You said there's no project model—treat project as optional
     $projectID = $this->input->get('project_id');
-    $data['project'] = null; // keep view happy; your view already checks isset/null
+    $data['project'] = null; 
 
-    // signatories (keep if you have SettingsModel)
     $settingsID = $this->session->userdata('settingsID');
     $data['signatories']      = $this->SettingsModel->get_signatories($settingsID);
     $data['show_signatories'] = true;
@@ -286,7 +265,6 @@ public function view_formatted()
         return;
     }
 
-    // Build attendance_data (same logic you had)
     $attendance_data = [];
     foreach ($data['personnel'] as $p) {
         $pid = $p->personnelID;
@@ -316,7 +294,6 @@ public function view_formatted()
         $amount_reg = $total_hours * $perHour;
         $amount_ot  = $total_ot    * $perHour * 1.25;
 
-        // deductions (month derived from $from)
         $monthKey = date('Y-m', strtotime($from));
         $cashadvance    = (float)$this->MonthlyPayroll_model->get_cash_advance($pid, $monthKey);
         $gov            = (array)$this->MonthlyPayroll_model->get_government_deductions($pid, $monthKey);
@@ -363,7 +340,6 @@ public function generate_bimonth()
     $month   = date('Y-m', strtotime($from));
     $records = $this->MonthlyPayroll_model->get_monthly_payroll_records($month, $from, $to);
 
-    // Safety: ensure structure exists
     $personnel = isset($records['personnel']) ? $records['personnel'] : [];
     $dates     = isset($records['dates']) ? $records['dates'] : [];
     $attIndex  = isset($records['attendance']) ? $records['attendance'] : [];
@@ -378,7 +354,6 @@ public function generate_bimonth()
         $total_ot    = 0.0;
         $total_days  = 0.0;
 
-        // Build per-day map (for DB snapshot) AND reg_hours_per_day (for view)
         $per_day = [];
         $reg_hours_per_day = [];
 
@@ -388,7 +363,6 @@ public function generate_bimonth()
             $reg = (float)($attn['reg'] ?? 0);
             $ot  = (float)($attn['ot']  ?? 0);
 
-            // snapshot shape
             $per_day[$d] = [
                 'status' => $attn['status'] ?? '',
                 'reg'    => $reg,
@@ -396,7 +370,6 @@ public function generate_bimonth()
                 'hol'    => 0,
             ];
 
-            // view shape
             $reg_hours_per_day[$d] = [
                 'status'         => $attn['status'] ?? '',
                 'hours'          => $reg,
@@ -409,7 +382,6 @@ public function generate_bimonth()
             if ($reg > 0) $total_days += $reg / 8.0;
         }
 
-        // rate & amounts
         $rateAmount = (float)($p->rateAmount ?? 0);
         $rateType   = strtolower(trim($p->rateType ?? 'day'));
         $perHour    = ($rateType === 'hour') ? $rateAmount : $rateAmount / 8.0;
@@ -418,7 +390,6 @@ public function generate_bimonth()
         $amount_ot  = $total_ot    * $perHour * 1.25;
         $gross      = $amount_reg + $amount_ot;
 
-        // deductions for the month of $from
         $monthKey   = date('Y-m', strtotime($from));
         $gov        = (array)$this->MonthlyPayroll_model->get_government_deductions($pid, $monthKey);
         $cash       = (float)$this->MonthlyPayroll_model->get_cash_advance($pid, $monthKey);
@@ -431,7 +402,6 @@ public function generate_bimonth()
         $total_ded  = $cash + $sss + $pag + $ph + $loan;
         $net        = $gross - $total_ded;
 
-        // ==== store line for DB ====
         $linesForDB[] = [
             'personnelID' => $pid,
             'amounts_json'=> [
@@ -459,8 +429,7 @@ public function generate_bimonth()
             ],
         ];
 
-        // ==== attach row for view ====
-        $row = (object)(array)$p; // keep original fields
+        $row = (object)(array)$p; 
         $row->personnelID       = $pid;
         $row->reg_hours_per_day = $reg_hours_per_day;
         $row->rate_per_hour     = number_format($perHour, 2);
@@ -479,7 +448,6 @@ public function generate_bimonth()
         $attendance_data[] = $row;
     }
 
-    // ==== totals for batch header ====
     $sum_gross = 0; $sum_ded = 0; $sum_net = 0;
     foreach ($linesForDB as $l) {
         $sum_gross += (float)$l['amounts_json']['gross'];
@@ -493,7 +461,6 @@ public function generate_bimonth()
         'sum_net'     => $sum_net,
     ];
 
-    // ==== save batch once (outside the loop) ====
     $this->load->model('BimonthPayroll_model');
     $settingsID = $this->session->userdata('settingsID');
     $userID     = $this->session->userdata('user_id');
@@ -503,12 +470,11 @@ public function generate_bimonth()
     );
     $this->BimonthPayroll_model->insert_lines($batch_id, $linesForDB);
 
-    // ==== render the same view you already use ====
     $data = [
         'start'            => $from,
         'end'              => $to,
-        'dates'            => $dates,   // the view uses this for day columns
-        'project'          => null,     // no project model in your app
+        'dates'            => $dates,  
+        'project'          => null,  
         'signatories'      => $this->SettingsModel->get_signatories($settingsID),
         'show_signatories' => true,
         'is_summary'       => false,
@@ -526,10 +492,9 @@ public function list_bimonth_batches()
     $this->load->model('BimonthPayroll_model');
     $settingsID = $this->session->userdata('settingsID');
 
-    $projectID = $this->input->get('project_id'); // optional filter
+    $projectID = $this->input->get('project_id'); 
     $data['batches'] = $this->BimonthPayroll_model->list_batches($settingsID, $projectID);
 
-    // hide the recompute button; set to true if you want it back
     $data['show_recompute'] = false;
 
     $this->load->view('bimonth_batches_list', $data);
@@ -542,7 +507,6 @@ public function open_bimonth_batch($batch_id)
     [$batch, $lines] = $this->BimonthPayroll_model->get_batch($batch_id);
     if (!$batch) { show_error('Batch not found', 404); return; }
 
-    // build dates array for the view (YYYY-MM-DD list)
     $dates = [];
     $cur = strtotime($batch->start_date);
     $end = strtotime($batch->end_date);
@@ -555,7 +519,6 @@ public function open_bimonth_batch($batch_id)
     foreach ($lines as $l) {
         $row = json_decode($l->amounts_json, true) ?: [];
 
-        // safe defaults
         $pid        = (int)($row['personnelID'] ?? 0);
         $last_name  = (string)($row['last_name']  ?? ($row['name'] ?? ''));
         $first_name = (string)($row['first_name'] ?? '');
@@ -577,7 +540,6 @@ public function open_bimonth_batch($batch_id)
         $total_ded  = (float)($row['total_deduction'] ?? ($cash+$sss+$pagibig+$philhealth+$loan));
         $net        = (float)($row['net'] ?? ($gross - $total_ded));
 
-        // rebuild reg_hours_per_day the view expects
         $reg_hours_per_day = [];
         $per_day = isset($row['per_day']) && is_array($row['per_day']) ? $row['per_day'] : [];
         foreach ($dates as $d) {
@@ -590,7 +552,6 @@ public function open_bimonth_batch($batch_id)
             ];
         }
 
-        // build the same shape your view uses for each personnel row
         $p = new stdClass();
         $p->personnelID      = $pid;
         $p->last_name        = $last_name;
@@ -620,8 +581,8 @@ public function open_bimonth_batch($batch_id)
     $data = [
         'start'            => $batch->start_date,
         'end'              => $batch->end_date,
-        'dates'            => $dates,              // 👈 needed by the view for day columns
-        'project'          => null,                // or load it if you saved project_id in batch
+        'dates'            => $dates,          
+        'project'          => null,   
         'signatories'      => [],
         'show_signatories' => true,
         'is_summary'       => false,

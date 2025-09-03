@@ -19,7 +19,7 @@ public function get_all_personnel($settingsID = null, $allowedTypes = ['Bi-Month
     }
     if (!empty($allowedTypes)) {
       if (!empty($allowedTypes)) {
-    $this->db->where_in('rateType', $allowedTypes);  // Correct field name
+    $this->db->where_in('rateType', $allowedTypes);  
 }
 
     }

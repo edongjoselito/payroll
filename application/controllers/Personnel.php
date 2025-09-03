@@ -4,11 +4,32 @@ class Personnel extends CI_Controller {
         parent::__construct();
         $this->load->model('Personnel_model');
     }
-public function manage() {
+public function manage()
+{
     $settingsID = $this->session->userdata('settingsID');
-    $data['personnel'] = $this->Personnel_model->getAll($settingsID);
+    $role       = $this->session->userdata('position') ?: $this->session->userdata('level');
+
+    $type = $this->input->get('type'); 
+
+    if ($role === 'Payroll User') {
+        $type = null; 
+        if ($this->input->get('type') === 'admin') {
+            redirect('personnel/manage'); 
+            return;
+        }
+    }
+
+    $showAdmins = ($type === 'admin');
+
+    $allPersonnel = $this->Personnel_model->getAll($settingsID);
+
+    $data['personnel']   = $allPersonnel;
+    $data['showAdmins']  = $showAdmins;
+    $data['role']        = $role;
+
     $this->load->view('personnel_list', $data);
 }
+
 
 
 public function store() {

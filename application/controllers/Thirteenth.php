@@ -28,10 +28,8 @@ class Thirteenth extends CI_Controller {
 $showAdmins = ($this->input->get('type') === 'admin');
 
 if ($showAdmins) {
-    // Monthly / Bi-Monthly employees → pull from payroll_attendance_monthly JSON
     $data['payroll_data'] = $this->Thirteenth_model->get_13th_for_admins_from_pm($start, $end, $employment);
 } else {
-    // Hour / Day workers → pull from attendance table
     $data['payroll_data'] = $this->Thirteenth_model->get_13th_from_attendance_reg_only($start, $end, $employment);
 }
 

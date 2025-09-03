@@ -125,36 +125,88 @@
         </ul>
       </div>
 
-    <?php elseif ($role === 'Payroll User'): ?>
-      <div id="sidebar-menu">
-        <ul class="metismenu" id="side-menu">
+ <?php elseif ($role === 'Payroll User'): ?>
+<div id="sidebar-menu">
+  <ul class="metismenu" id="side-menu">
 
-          <li class="menu-title">MENU</li>
+    <li class="menu-title">Payroll User</li>
 
-          <li>
-            <a href="<?= base_url(); ?>WeeklyAttendance" class="waves-effect">
-              <i class="fas fa-calendar-check"></i>
-              <span> Attendance </span>
-            </a>
-          </li>
+     <li>
+  <a href="<?= base_url(); ?>Project/project_view" class="waves-effect">
+    <i class="ion ion-md-cloud-upload"></i>
+    <span> Projects </span>
+  </a>
+</li>
 
-          <li>
-            <a href="<?= base_url(); ?>WeeklyAttendance/records" class="waves-effect">
-              <i class="mdi mdi-eye-outline"></i>
-              <span> View Attendance </span>
-            </a>
-          </li>
+    <li>
+      <a href="<?= base_url(); ?>WeeklyAttendance" class="waves-effect">
+        <i class="fas fa-calendar-check"></i>
+        <span> Attendance</span>
+      </a>
+    </li>
+    <li>
+      <a href="<?= base_url(); ?>WeeklyAttendance/records" class="waves-effect">
+        <i class="mdi mdi-eye-outline"></i>
+        <span> View Attendance </span>
+      </a>
+    </li>
+    <li>
+      <a href="<?= base_url('Generatepayroll/form'); ?>" class="waves-effect">
+        <i class="mdi mdi-cash-multiple"></i>
+        <span> Generate Payroll</span>
+      </a>
+    </li>
 
-          <li>
-            <a href="<?= base_url('Generatepayroll/form'); ?>" class="waves-effect">
-              <i class="mdi mdi-cash-multiple"></i>
-              <span> Generate Payroll </span>
-            </a>
-          </li>
+    <li>
+      <a href="javascript:void(0);" class="waves-effect">
+        <i class="fas fa-users"></i>
+        <span> Personnel – Workers </span>
+        <span class="menu-arrow"></span>
+      </a>
+      <ul class="nav-second-level nav" aria-expanded="false">
+        <li><a href="<?= base_url(); ?>Personnel/manage">Personnel List</a></li>
+      </ul>
+    </li>
 
-        </ul>
-      </div>
-    <?php endif; ?>
+    <li>
+      <a href="javascript:void(0);" class="waves-effect">
+        <i class="fas fa-hand-holding-usd"></i>
+        <span> Manage Deductions </span>
+        <span class="menu-arrow"></span>
+      </a>
+      <ul class="nav-second-level nav" aria-expanded="false">
+        <li><a href="<?= base_url(); ?>Loan/personnel_loan">Personnel Loans</a></li>
+        <li><a href="<?= base_url(); ?>Borrow/cash_advance">Cash Advance</a></li>
+        <li><a href="<?= base_url(); ?>Borrow/govt_deductions">Gov't Deductions</a></li>
+        <li><a href="<?= base_url(); ?>Borrow/materials_loan">Other Deductions</a></li>
+      </ul>
+    </li>
+
+    <li>
+      <a href="javascript:void(0);" class="waves-effect">
+        <i class="fas fa-file-alt"></i>
+        <span> View Summaries </span>
+        <span class="menu-arrow"></span>
+      </a>
+      <ul class="nav-second-level nav" aria-expanded="false">
+        <li><a href="<?= base_url('OtherDeduction/attendance_summary') ?>">Attendance Summary</a></li>
+        <li><a href="<?= base_url('OtherDeduction/summary') ?>">Deduction Summary</a></li>
+        <li><a href="<?= base_url('OtherDeduction/loan_summary') ?>">Loan Summary</a></li>
+      </ul>
+    </li>
+
+    <li>
+      <a href="<?= base_url('thirteenth') ?>" class="waves-effect">
+        <i class="fas fa-gift"></i>
+        <span> 13th Month – Workers </span>
+      </a>
+    </li>
+
+  </ul>
+</div>
+<?php endif; ?>
+
+
 
     <div class="clearfix"></div>
   </div>

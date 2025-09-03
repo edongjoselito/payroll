@@ -70,18 +70,22 @@ h4.page-title, h4.text-dark.font-weight-bold {
               <h4 class="page-title">Attendance Records</h4>
 
               <!-- 🔘 Top Buttons -->
-              <div class="mb-3">
-                <?php if ($role !== 'Payroll User'): ?>
-                <button class="btn btn-info btn-sm mt-2 mr-2 shadow-sm" data-toggle="modal" data-target="#filterModal">
-                  <i class="mdi mdi-filter-variant"></i> View Attendance
-                </button>
-                <?php endif; ?>
-                <button class="btn btn-primary btn-sm mt-2 shadow-sm" data-toggle="modal" data-target="#viewPayrollModal">
-                  <i class="mdi mdi-eye"></i> View Monthly
-                </button>
-              </div>
+            <div class="mb-3">
+  <!-- ✅ Payroll User + Admin -->
+  <button class="btn btn-info btn-sm mt-2 mr-2 shadow-sm" data-toggle="modal" data-target="#filterModal">
+    <i class="mdi mdi-filter-variant"></i> View Attendance
+  </button>
+  <!-- ❌ Hide Monthly view for Payroll User -->
+  <?php if ($role !== 'Payroll User'): ?>
+  <button class="btn btn-primary btn-sm mt-2 shadow-sm" data-toggle="modal" data-target="#viewPayrollModal">
+    <i class="mdi mdi-eye"></i> View Monthly
+  </button>
+  <?php endif; ?>
+</div>
+
 
               <!-- View Monthly Modal (always available) -->
+               <?php if ($role !== 'Payroll User'): ?>
               <div class="modal fade" id="viewPayrollModal" tabindex="-1" role="dialog" aria-labelledby="viewPayrollModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
                   <form method="post" action="<?= base_url('MonthlyPayroll/view_record') ?>">
@@ -123,9 +127,9 @@ h4.page-title, h4.text-dark.font-weight-bold {
                   </form>
                 </div>
               </div>
+<?php endif; ?>
 
               <!-- View Attendance Records Modal (❌ hidden for Payroll User) -->
-              <?php if ($role !== 'Payroll User'): ?>
               <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-md" role="document">
                   <form method="get" action="<?= base_url('WeeklyAttendance/records') ?>">
@@ -168,7 +172,6 @@ h4.page-title, h4.text-dark.font-weight-bold {
                   </form>
                 </div>
               </div>
-              <?php endif; ?>
 
 <?php
 $selectedProjectID = $this->input->get('projectID');

@@ -107,7 +107,7 @@ tfoot th, tfoot td { font-weight: 700; background: #f8f9fa; }
 <h4 class="page-title">
   13th Month Pay Report
   <span class="badge badge-info ml-2">
-    <?= $showAdmins ? 'Admins (Monthly / Bi-Monthly)' : 'Workers (Non-Monthly)' ?>
+    <?= $showAdmins ? 'Admins' : 'Workers' ?>
   </span>
 </h4>
     </div>
@@ -125,15 +125,18 @@ tfoot th, tfoot td { font-weight: 700; background: #f8f9fa; }
     <?php endif; ?>
 
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3 d-print-none">
-    <a href="<?= base_url('Thirteenth') . '?' . http_build_query(array_merge($_GET, ['type' => null])) ?>"
-       class="btn btn-<?= $showAdmins ? 'outline-' : '' ?>primary btn-sm glow-hover me-2">
-       <i class="fas fa-people-carry"></i> Workers
-    </a>
+  <a href="<?= base_url('Thirteenth') . '?' . http_build_query(array_merge($_GET, ['type' => null])) ?>"
+   class="btn btn-<?= $showAdmins ? 'outline-' : '' ?>primary btn-sm glow-hover me-2">
+   <i class="fas fa-people-carry"></i> Workers
+</a>
 
-    <a href="<?= base_url('Thirteenth') . '?' . http_build_query(array_merge($_GET, ['type' => 'admin'])) ?>"
-       class="btn btn-<?= $showAdmins ? '' : 'outline-' ?>warning btn-sm glow-hover me-2">
-       <i class="fas fa-user-tie"></i> Admin (Monthly / Bi-Monthly)
-    </a>
+<?php if ($this->session->userdata('position') === 'Admin'): ?>
+<a href="<?= base_url('Thirteenth') . '?' . http_build_query(array_merge($_GET, ['type' => 'admin'])) ?>"
+   class="btn btn-<?= $showAdmins ? '' : 'outline-' ?>warning btn-sm glow-hover me-2">
+   <i class="fas fa-user-tie"></i> Admin
+</a>
+<?php endif; ?>
+
 
     <button id="btn-print-all" class="btn btn-outline-secondary btn-sm glow-hover me-2" type="button">
         <i class="fas fa-print"></i> Print Report

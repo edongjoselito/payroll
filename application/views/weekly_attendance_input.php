@@ -191,24 +191,28 @@ input.is-invalid {
                 </button>
               </div>
             <?php endif; ?>
+<!-- ✅ Payroll User + Admin can generate WEEKLY (workers) -->
+<button type="button"
+        class="btn btn-info btn-sm mt-2 mr-2 shadow-sm"
+        data-toggle="modal"
+        data-target="#generateModal">
+  <i class="mdi mdi-calendar-search"></i> Generate Attendance
+</button>
 
-            <!-- ❌ Hide for Payroll User -->
-            <?php if ($role !== 'Payroll User'): ?>
-            <button class="btn btn-info btn-sm mt-2 mr-2 shadow-sm" data-toggle="modal" data-target="#generateModal">
-              <i class="mdi mdi-calendar-search"></i> Generate Attendance
-            </button>
-            <?php endif; ?>
 
-            <!-- ✅ Always visible -->
-            <button class="btn btn-primary btn-sm mt-2 shadow-sm" data-toggle="modal" data-target="#monthlyPayrollModal">
-              <i class="mdi mdi-calendar-month"></i> Generate Monthly
-            </button>
+<!-- ❌ Hide Monthly for Payroll User -->
+<?php if ($role !== 'Payroll User'): ?>
+<button class="btn btn-primary btn-sm mt-2 shadow-sm" data-toggle="modal" data-target="#monthlyPayrollModal">
+  <i class="mdi mdi-calendar-month"></i> Generate Monthly
+</button>
+<?php endif; ?>
+
           </div>
         </div>
 
         <div class="card">
           <div class="card-body">
-
+<?php if ($role !== 'Payroll User'): ?>
             <!-- Modal: Select Month for Monthly Payroll (always) -->
             <div class="modal fade" id="monthlyPayrollModal" tabindex="-1" role="dialog" aria-labelledby="monthlyPayrollModalLabel" aria-hidden="true">
               <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
@@ -240,60 +244,12 @@ input.is-invalid {
                 </form>
               </div>
             </div>
+<?php endif; ?>
 
-            <!-- ❌ Generate Attendance modal: hide for Payroll User -->
-            <?php if ($role !== 'Payroll User'): ?>
-            <div class="modal fade" id="generateModal" tabindex="-1" role="dialog" aria-labelledby="generateModalLabel" aria-hidden="true">
-              <div class="modal-dialog modal-dialog-centered modal-md" role="document">
-                <form method="post" action="<?= base_url('WeeklyAttendance/generate') ?>">
-                  <div class="modal-content bg-white border-0 shadow-sm">
-                    <div class="modal-header">
-                      <h5 class="modal-title font-weight-bold" id="generateModalLabel">
-                        <i class="mdi mdi-calendar-month"></i> Generate Attendance
-                      </h5>
-                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span>&times;</span>
-                      </button>
-                    </div>
-
-                    <div class="modal-body">
-                      <div class="form-group">
-                        <label for="project" class="font-weight-bold">Project</label>
-                        <select name="project" id="project" class="form-control" required>
-                          <option value="" disabled selected>Select Project</option>
-                          <?php foreach ($projects as $proj): ?>
-                            <option value="<?= $proj->projectID ?>"><?= $proj->projectTitle ?></option>
-                          <?php endforeach; ?>
-                        </select>
-                      </div>
-
-                      <div class="form-row">
-                        <div class="form-group col-md-6">
-                          <label for="from" class="font-weight-bold">From</label>
-                          <input type="date" name="from" id="from" class="form-control" required>
-                        </div>
-
-                        <div class="form-group col-md-6">
-                          <label for="to" class="font-weight-bold">To</label>
-                          <input type="date" name="to" id="to" class="form-control" required>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="modal-footer">
-                      <button type="submit" class="btn btn-primary">
-                        <i class="mdi mdi-check"></i> Generate
-                      </button>
-                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div>
-            <?php endif; ?>
+         
 
             <!-- Attendance Table / Save form -->
-            <?php if (isset($employees) && $role !== 'Payroll User'): ?>
+<?php if (isset($employees)): ?>
 
               <?php if (isset($project)): ?>
                 <?php
@@ -392,6 +348,53 @@ input.is-invalid {
 
       </div>
     </div>
+   <!-- ✅ Generate Attendance modal: available for Admin & Payroll User -->
+<div class="modal fade" id="generateModal" tabindex="-1" role="dialog" aria-labelledby="generateModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+    <form method="post" action="<?= base_url('WeeklyAttendance/generate') ?>">
+      <div class="modal-content bg-white border-0 shadow-sm">
+        <div class="modal-header">
+          <h5 class="modal-title font-weight-bold" id="generateModalLabel">
+            <i class="mdi mdi-calendar-month"></i> Generate Attendance
+          </h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span>&times;</span>
+          </button>
+        </div>
+
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="project" class="font-weight-bold">Project</label>
+            <select name="project" id="project" class="form-control" required>
+              <option value="" disabled selected>Select Project</option>
+              <?php foreach ($projects as $proj): ?>
+                <option value="<?= $proj->projectID ?>"><?= $proj->projectTitle ?></option>
+              <?php endforeach; ?>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              <label for="from" class="font-weight-bold">From</label>
+              <input type="date" name="from" id="from" class="form-control" required>
+            </div>
+            <div class="form-group col-md-6">
+              <label for="to" class="font-weight-bold">To</label>
+              <input type="date" name="to" id="to" class="form-control" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">
+            <i class="mdi mdi-check"></i> Generate
+          </button>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
 
     <?php if ($flash): ?>
     <script>
@@ -469,7 +472,15 @@ input.is-invalid {
 <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.bootstrap4.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/datatables/dataTables.responsive.min.js"></script>
 <script src="<?= base_url(); ?>assets/libs/datatables/responsive.bootstrap4.min.js"></script>
-<script src="<?= base_url(); ?>assets/js/pages/datatables.init.js"></script>
+<script src="<?= base_url(); ?>assets/libs/datatables/dataTables.buttons.min.js"></script>
+<script src="<?= base_url(); ?>assets/libs/datatables/buttons.bootstrap4.min.js"></script>
+<script src="<?= base_url(); ?>assets/libs/jszip/jszip.min.js"></script>
+<script src="<?= base_url(); ?>assets/libs/pdfmake/pdfmake.min.js"></script>
+<script src="<?= base_url(); ?>assets/libs/pdfmake/vfs_fonts.js"></script>
+<script src="<?= base_url(); ?>assets/libs/datatables/buttons.html5.min.js"></script>
+<script src="<?= base_url(); ?>assets/libs/datatables/buttons.print.min.js"></script>
+<script src="<?= base_url(); ?>assets/libs/datatables/buttons.colVis.min.js"></script>
+<!-- <script src="<?= base_url(); ?>assets/js/pages/datatables.init.js"></script> -->
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
 <link href="<?= base_url(); ?>assets/libs/select2/select2.min.css" rel="stylesheet" />
 <script src="<?= base_url(); ?>assets/libs/select2/select2.min.js"></script>
@@ -605,6 +616,15 @@ function showNotesSweetAlert() {
         customClass: { popup: 'shadow-sm rounded' }
     });
 }
+</script>
+<script>
+  $(function () {
+    if (!$.fn.DataTable) return;
+    $('#attendanceTable').DataTable({
+      responsive: true,   // keep what you need
+      dom: 'frtip'        // no Buttons here
+    });
+  });
 </script>
 
 </body>

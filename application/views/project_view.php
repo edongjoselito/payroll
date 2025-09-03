@@ -2,6 +2,9 @@
 <html lang="en">
 <title>PMS - Project List</title>
 <?php include('includes/head.php'); ?>
+
+<?php $canEditProjects = isset($canEditProjects) ? (bool)$canEditProjects : false; ?>
+
 <style>
 .btn {
   padding: 6px 12px !important;
@@ -111,13 +114,12 @@ td .btn:last-child {
                     <div class="col-12">
                         <div class="page-title-box d-flex justify-content-between align-items-center">
                             <!-- <h4 class="page-title">Project Management</h4> -->
-        <button type="button"
-    class="btn btn-success icon-expand-btn"
-    data-toggle="modal"
-    data-target="#addModal">
-    <i class="mdi mdi-plus"></i>
-    <span>Add New Project</span>
+     <?php if ($canEditProjects): ?>
+<button type="button" class="btn btn-success icon-expand-btn" data-toggle="modal" data-target="#addModal">
+  <i class="mdi mdi-plus"></i>
+  <span>Add New Project</span>
 </button>
+<?php endif; ?>
 
 
 
@@ -154,55 +156,31 @@ td .btn:last-child {
                                                     <!-- <td><?= htmlspecialchars($proj->projectLocation) ?></td> -->
                                                  <td>
 
-<a href="<?= base_url('project/assign_personnel/' . $proj->settingsID . '/' . $proj->projectID) ?>"
-   class="btn btn-success btn-sm"
-   data-toggle="tooltip"
-   title="Assign Personnel">
+<td>
+  <!-- Everyone (Admin + Payroll User) -->
+  <a href="<?= base_url('project/assign_personnel/' . $proj->settingsID . '/' . $proj->projectID) ?>"
+     class="btn btn-success btn-sm" data-toggle="tooltip" title="Assign Personnel">
     <i class="fas fa-user-plus"></i>
-</a>
-<!-- 
-<a href="<?= base_url('project/attendance/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>"
-   class="btn btn-info btn-sm"
-   data-toggle="tooltip"
-   title="View Attendance">
-    <i class="fas fa-calendar-check"></i>
-</a> -->
+  </a>
 
-<a href="<?= base_url('project/attendance_list/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>"
-   class="btn btn-primary btn-sm"
-   data-toggle="tooltip"
-   title="Attendance List">
+  <a href="<?= base_url('project/attendance_list/' . $proj->settingsID . '?pid=' . $proj->projectID) ?>"
+     class="btn btn-primary btn-sm" data-toggle="tooltip" title="Attendance List">
     <i class="fas fa-list"></i>
-</a>
+  </a>
 
-<!-- <button class="btn btn-dark btn-sm"
-        data-toggle="modal"
-        data-target="#payrollModal<?= $proj->projectID ?>"
-        data-toggle="tooltip"
-        title="Payroll">
-    <i class="fas fa-money-check-alt"></i>
-</button> -->
+  <!-- Admin only -->
+  <?php if ($canEditProjects): ?>
+    <button class="btn btn-warning btn-sm" data-toggle="modal"
+            data-target="#editModal<?= $proj->projectID ?>" title="Edit Project">
+      <i class="fas fa-edit"></i>
+    </button>
 
-<button class="btn btn-warning btn-sm"
-        data-toggle="modal"
-        data-target="#editModal<?= $proj->projectID ?>"
-        data-toggle="tooltip"
-        title="Edit Project">
-    <i class="fas fa-edit"></i>
-</button>
-
-
-<a href="<?= base_url('Project/delete/' . $proj->projectID) ?>"
-   class="btn btn-danger btn-sm"
-   onclick="return confirm('Delete this project?')"
-   data-toggle="tooltip"
-   title="Delete Project">
-    <i class="fas fa-trash-alt"></i>
-</a>
-
-</a>
-
-
+    <a href="<?= base_url('Project/delete/' . $proj->projectID) ?>"
+       class="btn btn-danger btn-sm" onclick="return confirm('Delete this project?')"
+       title="Delete Project">
+      <i class="fas fa-trash-alt"></i>
+    </a>
+  <?php endif; ?>
 </td>
 
                                                 </tr>
@@ -249,6 +227,8 @@ td .btn:last-child {
                                                 </div>
 
                                                 <!-- Edit Modal -->
+                                                 <?php if ($canEditProjects): ?>
+
                                                 <div class="modal fade" id="editModal<?= $proj->projectID ?>" tabindex="-1">
                                                     <div class="modal-dialog" style="margin-top: 60px;">
                                                         <div class="modal-content">
@@ -272,6 +252,7 @@ td .btn:last-child {
                                                         </div>
                                                     </div>
                                                 </div>
+<?php endif; ?>
 
                                             <?php endforeach; ?>
                                         <?php endif; ?>
@@ -287,6 +268,8 @@ td .btn:last-child {
     </div>
 
     <!-- Add Modal -->
+     <?php if ($canEditProjects): ?>
+
     <div class="modal fade" id="addModal" tabindex="-1">
         <div class="modal-dialog" style="margin-top: 60px;">
             <div class="modal-content">
@@ -309,6 +292,7 @@ td .btn:last-child {
             </div>
         </div>
     </div>
+<?php endif; ?>
 
     <!-- Scripts -->
 <script src="<?= base_url(); ?>assets/js/vendor.min.js"></script>
