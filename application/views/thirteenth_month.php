@@ -3,6 +3,51 @@
 <title>PMS - 13th Month Pay</title>
 
 <?php include('includes/head.php'); ?>
+<?php
+$CI =& get_instance();
+$showAdmins = ($CI->input->get('type') === 'admin');
+
+/**
+ * Normalize and detect Monthly/Bi-Monthly.
+ */
+function is_admin_rate($rateType) {
+  $raw  = strtolower((string)$rateType);
+  $norm = preg_replace('/[^a-z]/', '', $raw); // e.g., "Bi-Month" -> "bimonth"
+  return in_array($norm, ['month','permonth','bimonth','bimonthly'], true);
+}
+
+/**
+ * Try to get rateType from the row; if absent, fetch from personnel table (cached).
+ * Adjust key names below to match your data if needed.
+ */
+function get_rate_type_for_emp(array $emp) {
+  static $cache = [];        // personnelID => rateType
+  $CI = get_instance();
+
+  // 1) Direct keys commonly used in arrays:
+  foreach (['rateType','rate_type','pay_rate_type','rate'] as $k) {
+    if (!empty($emp[$k])) return $emp[$k];
+  }
+
+  // 2) If we have an ID, try cached DB lookup:
+  $id = $emp['personnelID'] ?? $emp['personnel_id'] ?? null;
+  if ($id) {
+    if (array_key_exists($id, $cache)) return $cache[$id];
+
+    // Query personnel table once per unique id
+    $row = $CI->db->select('rateType')
+                  ->from('personnel')
+                  ->where('personnelID', $id)
+                  ->get()->row_array();
+    $cache[$id] = $row['rateType'] ?? '';
+    return $cache[$id];
+  }
+
+  // 3) Nothing found
+  return '';
+}
+?>
+
 <style>
 thead th {
     background-color: #f8f9fa;
@@ -59,7 +104,12 @@ tfoot th, tfoot td { font-weight: 700; background: #f8f9fa; }
 <div class="container-fluid">
 
     <div class="page-title-box d-flex justify-content-between align-items-center">
-        <h4 class="page-title">13th Month Pay Report</h4>
+<h4 class="page-title">
+  13th Month Pay Report
+  <span class="badge badge-info ml-2">
+    <?= $showAdmins ? 'Admins (Monthly / Bi-Monthly)' : 'Workers (Non-Monthly)' ?>
+  </span>
+</h4>
     </div>
 
     <?php if ($this->session->flashdata('success')): ?>
@@ -75,7 +125,16 @@ tfoot th, tfoot td { font-weight: 700; background: #f8f9fa; }
     <?php endif; ?>
 
 <div class="d-flex flex-wrap align-items-center gap-2 mb-3 d-print-none">
-    <!-- UPDATED: give the button an id and let JS handle printing ALL rows -->
+    <a href="<?= base_url('Thirteenth') . '?' . http_build_query(array_merge($_GET, ['type' => null])) ?>"
+       class="btn btn-<?= $showAdmins ? 'outline-' : '' ?>primary btn-sm glow-hover me-2">
+       <i class="fas fa-people-carry"></i> Workers
+    </a>
+
+    <a href="<?= base_url('Thirteenth') . '?' . http_build_query(array_merge($_GET, ['type' => 'admin'])) ?>"
+       class="btn btn-<?= $showAdmins ? '' : 'outline-' ?>warning btn-sm glow-hover me-2">
+       <i class="fas fa-user-tie"></i> Admin (Monthly / Bi-Monthly)
+    </a>
+
     <button id="btn-print-all" class="btn btn-outline-secondary btn-sm glow-hover me-2" type="button">
         <i class="fas fa-print"></i> Print Report
     </button>
@@ -87,6 +146,7 @@ tfoot th, tfoot td { font-weight: 700; background: #f8f9fa; }
         Hide / View Table
     </button>
 </div>
+
 
     <div class="card">
         <div class="card-header bg-light d-flex justify-content-between align-items-center">
@@ -126,31 +186,42 @@ tfoot th, tfoot td { font-weight: 700; background: #f8f9fa; }
                       </thead>
 
                       <tbody>
-                        <?php
-                          $i = 1;
-                          $total_basic = 0.0;
-                          $total_13th  = 0.0;
-                          $total_net   = 0.0;
+                       <?php
+  $i = 1;
+  $total_basic = 0.0;
+  $total_13th  = 0.0;
+  $total_net   = 0.0;
 
-                          foreach ($payroll_data as $emp):
-                            $basic      = (float)($emp['basic_total'] ?? 0.0);
-                            $thirteenth = $basic / 12;
-                            $netpay     = $thirteenth;
+  foreach ($payroll_data as $emp):
 
-                            $total_basic += $basic;
-                            $total_13th  += $thirteenth;
-                            $total_net   += $netpay;
-                        ?>
-                        <tr class="text-center">
-                          <td><?= $i++ ?></td>
-                          <td class="text-left"><?= htmlspecialchars(($emp['last_name'] ?? '').', '.($emp['first_name'] ?? '')) ?></td>
-                          <td><?= htmlspecialchars($emp['position'] ?? '') ?></td>
-                          <td>₱<?= number_format($basic, 2) ?></td>
-                          <td><strong>₱<?= number_format($thirteenth, 2) ?></strong></td>
-                          <td>₱<?= number_format($netpay, 2) ?></td>
-                          <td>____________________</td>
-                        </tr>
-                        <?php endforeach; ?>
+    // Get the rate type (from row if present, otherwise from personnel table)
+    $rateType = get_rate_type_for_emp($emp);
+    $isAdmin  = is_admin_rate($rateType);
+
+    // Toggle: default shows WORKERS; ?type=admin shows ADMINS
+    if (!$showAdmins && $isAdmin)  { continue; }
+    if ($showAdmins  && !$isAdmin) { continue; }
+
+    // Only compute for rows we keep
+    $basic      = (float)($emp['basic_total'] ?? 0.0);
+    $thirteenth = $basic / 12;
+    $netpay     = $thirteenth;
+
+    $total_basic += $basic;
+    $total_13th  += $thirteenth;
+    $total_net   += $netpay;
+?>
+<tr class="text-center" data-ratetype="<?= htmlspecialchars($rateType) ?>">
+  <td><?= $i++ ?></td>
+  <td class="text-left"><?= htmlspecialchars(($emp['last_name'] ?? '').', '.($emp['first_name'] ?? '')) ?></td>
+  <td><?= htmlspecialchars($emp['position'] ?? '') ?></td>
+  <td>₱<?= number_format($basic, 2) ?></td>
+  <td><strong>₱<?= number_format($thirteenth, 2) ?></strong></td>
+  <td>₱<?= number_format($netpay, 2) ?></td>
+  <td>____________________</td>
+</tr>
+<?php endforeach; ?>
+
                       </tbody>
 
                       <tfoot>
@@ -178,6 +249,10 @@ tfoot th, tfoot td { font-weight: 700; background: #f8f9fa; }
 <div class="modal fade" id="filterModal" tabindex="-1" role="dialog" aria-labelledby="filterModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <form action="<?= base_url('Thirteenth') ?>" method="get">
+      <?php if ($showAdmins): ?>
+  <input type="hidden" name="type" value="admin">
+<?php endif; ?>
+
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Filter 13th Month Pay</h5>

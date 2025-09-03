@@ -64,17 +64,12 @@ class Thirteenth_model extends CI_Model {
         $rateType   = strtolower((string)$r['rateType']);
         $rateAmount = (float)$r['rateAmount'];
 
-        if ($rateType === 'hour') {
-            $base = $rateAmount;
-        } elseif ($rateType === 'day') {
-            $base = $rateAmount / 8.0;
-        } elseif ($rateType === 'month') {
-            $base = ($rateAmount / 30.0) / 8.0;
-        } elseif ($rateType === 'bi-month' || $rateType === 'bi-monthly' || $rateType === 'bimonth' || $rateType === 'bi-month ') {
-            $base = ($rateAmount / 15.0) / 8.0;
-        } else {
-            $base = 0.0;
-        }
+if ($rateType === 'hour') {
+    $base = $rateAmount;
+} else {
+    $base = $rateAmount / 8.0;
+}
+
 
         $status       = strtolower(trim(preg_replace('/\s+/', '', (string)($r['status'] ?? ''))));
         $regHours     = max(0.0, (float)$r['reg_hours']);
@@ -225,4 +220,107 @@ class Thirteenth_model extends CI_Model {
         uasort($merged, function ($a, $b) { return strcmp($a['name'], $b['name']); });
         return $merged;
     }
+    public function get_13th_for_admins_from_pm($start, $end, $employment = 'active')
+{
+    $settingsID = $this->session->userdata('settingsID');
+
+    // build month keys like 2025-01 .. 2025-12 from the date range
+    $startMonth = date('Y-m', strtotime($start));
+    $endMonth   = date('Y-m', strtotime($end));
+
+    // Only monthly / bi-monthly rate types
+    $adminTypes = ['month','per month','bi-month','bi month','bi-monthly','bimonth'];
+
+    $this->db->select('
+        p.personnelID,
+        p.first_name,
+        p.last_name,
+        p.position,
+        p.rateType,
+        CAST(p.rateAmount AS DECIMAL(10,2)) as rateAmount,
+        pm.payroll_month,
+        pm.details_json
+    ');
+    $this->db->from('personnel p');
+    $this->db->join('payroll_attendance_monthly pm',
+        "pm.personnelID = p.personnelID
+         AND pm.payroll_month >= ".$this->db->escape($startMonth)."
+         AND pm.payroll_month <= ".$this->db->escape($endMonth),
+        'left'
+    );
+    $this->db->where('p.settingsID', $settingsID);
+
+    // Employment filter
+    $this->db->group_start()
+        ->where("(CASE 
+                    WHEN ".$this->db->escape($employment)." = 'active' THEN 
+                        (p.date_terminated IS NULL OR p.date_terminated='0000-00-00' OR p.date_terminated > ".$this->db->escape($end).")
+                    WHEN ".$this->db->escape($employment)." = 'inactive' THEN 
+                        (p.date_terminated IS NOT NULL AND p.date_terminated <> '0000-00-00' AND p.date_terminated <= ".$this->db->escape($end).")
+                    ELSE 1=1
+                  END)", null, false)
+    ->group_end();
+
+    // Only monthly/bi-monthly
+    $this->db->group_start();
+    foreach ($adminTypes as $t) {
+        $this->db->or_where('LOWER(p.rateType) =', strtolower($t));
+    }
+    $this->db->group_end();
+
+    $this->db->order_by('p.last_name', 'ASC');
+    $this->db->order_by('p.first_name', 'ASC');
+
+    $rows = $this->db->get()->result_array();
+
+    // Aggregate per-person
+    $agg = [];
+    foreach ($rows as $r) {
+        $pid = $r['personnelID'];
+        if (!isset($agg[$pid])) {
+            $agg[$pid] = [
+                'personnelID' => $pid,
+                'first_name'  => $r['first_name'] ?? '',
+                'last_name'   => $r['last_name'] ?? '',
+                'position'    => $r['position'] ?? '',
+                'rateType'    => $r['rateType'] ?? '',
+                'rateAmount'  => (float)($r['rateAmount'] ?? 0),
+                'basic_total' => 0.0,
+            ];
+        }
+
+        // Sum regular hours from details_json (the same structure you use in monthly payroll)
+        $regHours = 0.0;
+        if (!empty($r['details_json'])) {
+            $details = json_decode($r['details_json'], true);
+            if (is_array($details)) {
+                foreach ($details as $day => $entry) {
+                    if (is_array($entry) && isset($entry['reg'])) {
+                        $regHours += (float)$entry['reg'];
+                    }
+                }
+            }
+        }
+
+        // Convert monthly/bi-monthly rate to hourly base
+        $rt  = strtolower(trim($r['rateType'] ?? ''));
+        $amt = (float)$r['rateAmount'];
+if ($rt === 'hour') {
+    $basePerHour = $amt;
+} else {
+    $basePerHour = $amt / 8.0;
+}
+
+
+        $agg[$pid]['basic_total'] += round($regHours * $basePerHour, 2);
+    }
+
+    // Return list sorted by name
+    $out = array_values($agg);
+    usort($out, function ($a, $b) {
+        return strcmp($a['last_name'].$a['first_name'], $b['last_name'].$b['first_name']);
+    });
+    return $out;
+}
+
 }

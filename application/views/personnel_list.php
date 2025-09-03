@@ -3,6 +3,11 @@
     <title>PMS - Personnel List</title>
 
 <?php include('includes/head.php'); ?>
+<?php
+$CI =& get_instance();
+$showAdmins = ($CI->input->get('type') === 'admin');
+?>
+
 <style>
 .btn {
     transition: all 0.25s ease-in-out;
@@ -106,6 +111,16 @@
     <a href="<?= base_url('personnel/service_years') ?>" class="btn btn-secondary btn-md" title="View Year of Service" data-bs-toggle="tooltip">
         <i class="fas fa-calendar-alt me-1"></i> Years of Service
     </a>
+    <a href="<?= base_url('personnel/manage?type=admin') ?>" class="btn btn-warning btn-md mr-2 no-print" title="Show Monthly / Bi-Monthly">
+  <i class="fas fa-user-tie me-1"></i> Monthly / Bi-Monthly
+</a>
+<?php if ($showAdmins): ?>
+
+  <a href="<?= base_url('personnel/manage') ?>" class="btn btn-outline-secondary btn-md mr-2 no-print" title="Show Workers Only">
+    <i class="fas fa-people-carry me-1"></i> Workers Only
+  </a>
+<?php endif; ?>
+
       <button type="button" class="btn btn-info btn-md no-print" onclick="printAllPersonnel()">
   <i class="fas fa-print me-1"></i> Print
 </button>
@@ -138,7 +153,12 @@
 <!-- to be modified into aria live -->
                 <div class="card">
                     <div class="card-body">
-                      <h5 class="page-title">Personnel List</h5>
+<h5 class="page-title">
+  Personnel List
+  <span class="badge badge-info ml-2">
+    <?= $showAdmins ? 'Monthly / Bi-Monthly (Admins)' : 'Workers (Non-Monthly)' ?>
+  </span>
+</h5>
 <div class="table-responsive">
     <?php
 $hasTerminated = false;
@@ -156,6 +176,7 @@ foreach ($personnel as $p) {
     if (!empty($p->pagibig_number)) $hasPagibig = true;
     if (!empty($p->tin_number)) $hasTIN = true;
 }
+$showAdmins = $this->input->get('type') === 'admin';
 
 ?>
 <div class="d-flex align-items-center mb-3">
@@ -216,10 +237,18 @@ if ($hasTerminated) $colCount++;
         } else {
             $duration = '—';
         }
+$status = $hasEnd ? 'Inactive' : 'Active';
 
-        $status = $hasEnd ? 'Inactive' : 'Active';
-    ?>
-  <tr data-status="<?= $status ?>"> 
+$rateTypeRaw  = strtolower((string)($p->rateType ?? ''));
+$rateTypeNorm = preg_replace('/[^a-z]/', '', $rateTypeRaw); 
+$isAdminRate  = in_array($rateTypeNorm, ['month','permonth','bimonth','bimonthly'], true);
+
+if (!$showAdmins && $isAdminRate)  { continue; }
+if ($showAdmins  && !$isAdminRate) { continue; }
+?>
+  <tr data-status="<?= $status ?>" data-ratetype="<?= htmlspecialchars($rateTypeNorm, ENT_QUOTES, 'UTF-8') ?>">
+
+
   <td><?= "{$p->last_name}, {$p->first_name} {$p->middle_name} {$p->name_ext}" ?></td>
   <td><?= htmlspecialchars($p->position ?? '—') ?></td>
   <td><?= $p->address ?></td>
