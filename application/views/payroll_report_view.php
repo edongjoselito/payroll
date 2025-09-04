@@ -1217,9 +1217,7 @@ if (bccomp($netPay, '0', 2) > 0) {
               <span>Base Rate (<?= htmlspecialchars(ucfirst($rateTypeLower === 'bi-month' ? 'bi-month' : $rateTypeLower)) ?>)</span>
               <span class="amt">₱<?= number_format($rateAmountNum, 2) ?></span>
             </li>
-            <?php if ($dailyRate > 0): ?>
-              <li class="line"><span>Daily Rate</span><span class="amt">₱<?= number_format($dailyRate, 2) ?></span></li>
-            <?php endif; ?>
+            
             <?php if ($hourlyRate > 0): ?>
               <li class="line"><span>Hourly Rate</span><span class="amt">₱<?= number_format($hourlyRate, 2) ?></span></li>
             <?php endif; ?>
@@ -1804,9 +1802,7 @@ if (bccomp($netPay, '0', 2) > 0) {
         <p><strong>Rate:</strong> ₱<?= number_format($rateAmount, 2) ?> / <?= htmlspecialchars($rateType) ?></p>
         <?php if ($hourlyRate > 0): ?><p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p><?php endif; ?>
         <?php if ($otRate > 0): ?><p><strong>Overtime Rate:</strong> ₱<?= number_format($otRate, 2) ?></p><?php endif; ?>
-        <?php if ($rateTypeLower !== 'hour' && $dailyRate > 0): ?>
-          <p><strong>Daily Rate:</strong> ₱<?= number_format($dailyRate, 2) ?></p>
-        <?php endif; ?>
+       
       </div>
       <div style="text-align: right;">
         <p><strong>Period:</strong><br><?= date('F d', strtotime($start)) ?> - <?= date('F d, Y', strtotime($end)) ?></p>
