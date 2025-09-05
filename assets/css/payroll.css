@@ -298,31 +298,42 @@ th {
 
   #print-all-payslips-container {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    justify-content: center;
-    padding: 20px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10mm 8mm;
+    justify-content: start;
+    align-content: start;
+    padding: 0 !important;
   }
 
   .print-card {
-    width: 390px;
-    height: 550px;
-    padding: 18px 20px;
-    font-size: 13.5px;
-    line-height: 1.4;
-    background-color: #f8f9fa;
-    border: 1.5px solid #444;
-    border-radius: 6px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    page-break-inside: avoid;
-    break-inside: avoid;
+    margin: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 115mm; /* balanced height per card on A4 landscape */
+    padding: 10mm !important;
+    background: #fff !important;
+    border: 1px solid #222 !important;
+    border-radius: 8px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 6mm !important;
+    justify-content: space-between !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
+
+  .print-card h4 {
+    margin: 0 0 3mm 0 !important;
+    padding-bottom: 2mm !important;
+    border-bottom: 1px solid #ccc !important;
+    font-size: 14px !important;
+  }
+
   .print-card p {
-    margin: 4px 0;
-    font-size: 12.5px;
+    margin: 2mm 0 !important;
+    font-size: 12px !important;
+    line-height: 1.35 !important;
   }
 
   @page {
@@ -568,3 +579,291 @@ th {
   }
 }
 /* </style> */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 6mm;
+  }
+
+  html {
+    zoom: 1 !important;
+  }
+
+  #print-all-payslips-container {
+    --card: 52mm;
+    --pad: 2.2mm;
+    --gap: 3.5mm;
+    --mid-max: 26mm;
+  }
+
+  #print-all-payslips-container {
+    display: grid !important;
+    grid-template-columns: repeat(5, var(--card)) !important;
+    grid-auto-rows: var(--card) !important;
+    gap: var(--gap) !important;
+    padding: 0 !important;
+    align-content: start !important;
+    justify-content: flex-start !important;
+  }
+
+  .print-card {
+    width: var(--card) !important;
+    height: var(--card) !important;
+    padding: var(--pad) !important;
+    margin: 0 !important;
+    border: 1px solid #222 !important;
+    border-radius: 3mm !important;
+    background: #fff !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    overflow: hidden !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .print-card-inner {
+    display: grid !important;
+    grid-template-rows: auto auto auto auto !important;
+    row-gap: 1.6mm !important;
+    height: 100% !important;
+    contain: layout paint !important;
+  }
+
+  .print-card-inner>h4 {
+    grid-row: 1;
+    font-size: 9px !important;
+    margin: 0 !important;
+    padding: 0 0 1mm 0 !important;
+    border-bottom: 1px solid #ccc !important;
+  }
+
+  .print-card-inner>div:nth-of-type(1) {
+    grid-row: 2;
+  }
+
+  .print-card-inner>div:nth-of-type(2) {
+    grid-row: 3;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    column-gap: 2mm !important;
+    align-items: start !important;
+    max-height: var(--mid-max) !important;
+    overflow: hidden !important;
+  }
+
+  .print-card-inner>div:nth-of-type(2)>div {
+    width: auto !important;
+  }
+
+  .print-card-inner>div:nth-of-type(3) {
+    grid-row: 4;
+    margin-top: 0 !important;
+  }
+
+  .print-card p,
+  .print-card li {
+    font-size: 7.2px !important;
+    line-height: 1.2 !important;
+    margin: 0.6mm 0 !important;
+  }
+
+  .print-card-inner,
+  .print-card-inner * {
+    white-space: normal !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    hyphens: auto !important;
+  }
+}
+@media print {
+  :root{
+    --card: 48mm;   
+    --gap: 3mm;  
+    --mid-max: 18mm;
+    --fs-h: 8px; 
+    --fs-p: 6.8px; 
+  }
+
+  @page { size: A4 landscape; margin: 6mm; }
+  html { zoom: 1 !important; }
+
+  #print-all-payslips-container{
+    display: grid !important;
+    grid-template-columns: repeat(5, var(--card)) !important;
+    grid-auto-rows: var(--card) !important;
+    gap: var(--gap) !important;
+    padding: 0 !important;
+    justify-content: flex-start !important;
+    align-content: flex-start !important;
+  }
+
+  .print-card{
+    width: var(--card) !important;
+    height: var(--card) !important;
+    padding: 2mm !important;
+    border: 1px solid #222 !important;
+    border-radius: 2.5mm !important;
+    box-sizing: border-box !important;
+    background: #fff !important;
+    overflow: hidden !important;
+    page-break-inside: avoid !important;
+  }
+
+  .print-card-inner{
+    height: 100% !important;
+    display: grid !important;
+    grid-template-rows: min-content min-content minmax(0, var(--mid-max)) min-content !important;
+    align-content: start !important;
+    row-gap: .8mm !important;
+  }
+
+  .print-card-inner > div:first-of-type{
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    column-gap: 1.2mm !important;
+  }
+
+  .print-card-inner > div:nth-of-type(2){
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    column-gap: 1.2mm !important;
+    overflow: hidden !important; 
+  }
+
+  .print-card h4{
+    font-size: var(--fs-h) !important;
+    margin: 0 0 1mm !important;
+    padding-bottom: .8mm !important;
+    border-bottom: 1px solid #ccc !important;
+  }
+  .print-card p,
+  .print-card li{
+    font-size: var(--fs-p) !important;
+    line-height: 1.15 !important;
+    margin: .3mm 0 !important;
+    overflow-wrap: anywhere !important;
+    word-break: break-word !important;
+  }
+
+  .print-card-inner > div:last-child{
+    margin-top: auto !important;
+    padding-top: .8mm !important;
+    border-top: 1px solid #ddd !important;
+  }
+  .print-card-inner > div:last-child h4{
+    border: 0 !important;
+    margin: 0 !important;
+    font-size: calc(var(--fs-h) + .5px) !important;
+  }
+}
+@media print {
+  :root {
+    --card-w: 48mm;
+    --card-min-h: 22mm;
+    --gap: 2mm;
+    --fs-h: 6px;
+    --fs-p: 5px;
+    --col-gap: .5mm;
+    --pad: 1mm;
+    --rule: .25mm;
+  }
+
+  @page {
+    size: A4 landscape;
+    margin: 5mm;
+  }
+
+  html {
+    zoom: 1 !important;
+  }
+
+  #print-all-payslips-container {
+    display: grid !important;
+    grid-template-columns: repeat(5, var(--card-w)) !important;
+    grid-auto-rows: auto !important;
+    gap: var(--gap) !important;
+    padding: 0 !important;
+    justify-content: flex-start !important;
+    align-content: flex-start !important;
+  }
+
+  .print-card {
+    width: var(--card-w) !important;
+    min-height: var(--card-min-h) !important;
+    height: auto !important;
+    padding: var(--pad) !important;
+    border: 1px solid #222 !important;
+    border-radius: 1mm !important;
+    background: #fff !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    page-break-inside: avoid !important;
+  }
+
+  .print-card-inner {
+    display: grid !important;
+    grid-template-rows: min-content min-content auto min-content !important;
+    row-gap: var(--rule) !important;
+  }
+
+  .print-card h4 {
+    font-size: var(--fs-h) !important;
+    margin: 0 0 var(--rule) !important;
+    padding-bottom: var(--rule) !important;
+    border-bottom: 1px solid #ccc !important;
+  }
+
+  .print-card-inner>div:first-of-type {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    column-gap: var(--col-gap) !important;
+  }
+
+  .print-card p,
+  .print-card li,
+  .print-card div {
+    font-size: var(--fs-p) !important;
+    line-height: 1.0 !important;
+    margin: .1mm 0 !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .print-card-inner>div:nth-of-type(2) {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    column-gap: var(--col-gap) !important;
+    min-height: 0 !important;
+  }
+
+  .print-card-inner>div:nth-of-type(2)>div {
+    columns: 2;
+    column-gap: var(--col-gap);
+    column-fill: auto;
+    min-height: 0;
+  }
+
+  .print-card-inner>div:nth-of-type(2)>div h5 {
+    column-span: all;
+    margin: 0 0 calc(var(--rule) * .8) !important;
+  }
+
+  .print-card-inner>div:nth-of-type(2)>div>* {
+    break-inside: avoid;
+  }
+
+  .print-card-inner>div:last-child {
+    margin-top: 0 !important;
+    padding-top: var(--rule) !important;
+    border-top: 0 !important;
+    position: relative !important;
+  }
+
+  .print-card-inner>div:last-child::before {
+    content: "";
+    display: block;
+    width: 55%;
+    margin: 0 auto var(--rule);
+    border-top: 1px solid #ddd;
+  }
+}
