@@ -220,16 +220,13 @@ if ($rateType === 'hour') {
         uasort($merged, function ($a, $b) { return strcmp($a['name'], $b['name']); });
         return $merged;
     }
-    public function get_13th_for_admins_from_pm($start, $end, $employment = 'active')
+ public function get_13th_for_admins_from_pm($start, $end, $employment = 'active')
 {
     $settingsID = $this->session->userdata('settingsID');
 
-    // build month keys like 2025-01 .. 2025-12 from the date range
+    // Build month keys like 2025-01 .. 2025-12 from the date range
     $startMonth = date('Y-m', strtotime($start));
     $endMonth   = date('Y-m', strtotime($end));
-
-    // Only monthly / bi-monthly rate types
-    $adminTypes = ['month','per month','bi-month','bi month','bi-monthly','bimonth'];
 
     $this->db->select('
         p.personnelID,
@@ -237,20 +234,22 @@ if ($rateType === 'hour') {
         p.last_name,
         p.position,
         p.rateType,
-        CAST(p.rateAmount AS DECIMAL(10,2)) as rateAmount,
+        CAST(p.rateAmount AS DECIMAL(10,2)) AS rateAmount,
         pm.payroll_month,
         pm.details_json
-    ');
+    ', false);
     $this->db->from('personnel p');
-    $this->db->join('payroll_attendance_monthly pm',
+    // INNER JOIN so only personnel who actually have monthly rows appear in Admin tab
+    $this->db->join(
+        'payroll_attendance_monthly pm',
         "pm.personnelID = p.personnelID
          AND pm.payroll_month >= ".$this->db->escape($startMonth)."
          AND pm.payroll_month <= ".$this->db->escape($endMonth),
-        'left'
+        'inner'
     );
     $this->db->where('p.settingsID', $settingsID);
 
-    // Employment filter
+    // Employment filter (same logic you already use)
     $this->db->group_start()
         ->where("(CASE 
                     WHEN ".$this->db->escape($employment)." = 'active' THEN 
@@ -261,65 +260,56 @@ if ($rateType === 'hour') {
                   END)", null, false)
     ->group_end();
 
-    // Only monthly/bi-monthly
-    $this->db->group_start();
-    foreach ($adminTypes as $t) {
-        $this->db->or_where('LOWER(p.rateType) =', strtolower($t));
-    }
-    $this->db->group_end();
-
     $this->db->order_by('p.last_name', 'ASC');
     $this->db->order_by('p.first_name', 'ASC');
 
     $rows = $this->db->get()->result_array();
 
-    // Aggregate per-person
+    // ---- Aggregate: sum reg hours × correct hourly base (day-based Admin) ----
     $agg = [];
     foreach ($rows as $r) {
-        $pid = $r['personnelID'];
+        $pid = (int)$r['personnelID'];
         if (!isset($agg[$pid])) {
             $agg[$pid] = [
                 'personnelID' => $pid,
                 'first_name'  => $r['first_name'] ?? '',
-                'last_name'   => $r['last_name'] ?? '',
-                'position'    => $r['position'] ?? '',
-                'rateType'    => $r['rateType'] ?? '',
+                'last_name'   => $r['last_name']  ?? '',
+                'position'    => $r['position']   ?? '',
+                'rateType'    => $r['rateType']   ?? '',
                 'rateAmount'  => (float)($r['rateAmount'] ?? 0),
                 'basic_total' => 0.0,
             ];
         }
 
-        // Sum regular hours from details_json (the same structure you use in monthly payroll)
+        // Sum only regular hours from JSON (ignore _range and OT)
         $regHours = 0.0;
         if (!empty($r['details_json'])) {
             $details = json_decode($r['details_json'], true);
             if (is_array($details)) {
-                foreach ($details as $day => $entry) {
-                    if (is_array($entry) && isset($entry['reg'])) {
+                foreach ($details as $dayKey => $entry) {
+                    if ($dayKey === '_range') continue;
+                    if (is_array($entry) && isset($entry['reg']) && is_numeric($entry['reg'])) {
                         $regHours += (float)$entry['reg'];
                     }
                 }
             }
         }
 
-        // Convert monthly/bi-monthly rate to hourly base
-        $rt  = strtolower(trim($r['rateType'] ?? ''));
-        $amt = (float)$r['rateAmount'];
-if ($rt === 'hour') {
-    $basePerHour = $amt;
-} else {
-    $basePerHour = $amt / 8.0;
-}
-
+        // Hourly base: hourly rate → use as-is; otherwise (Day/Month/Bi-Month stored as day) → divide by 8
+        $rtNorm = strtolower(preg_replace('/[^a-z]/', '', (string)($r['rateType'] ?? '')));
+        $amt    = (float)$r['rateAmount'];
+        $isHourly = in_array($rtNorm, ['hour','perhour','hr','hrs'], true);
+        $basePerHour = $isHourly ? $amt : ($amt / 8.0);
 
         $agg[$pid]['basic_total'] += round($regHours * $basePerHour, 2);
     }
 
+    foreach ($agg as &$x) { $x['basic_total'] = round($x['basic_total'], 2); }
+    unset($x);
+
     // Return list sorted by name
     $out = array_values($agg);
-    usort($out, function ($a, $b) {
-        return strcmp($a['last_name'].$a['first_name'], $b['last_name'].$b['first_name']);
-    });
+    usort($out, function($a,$b){ return strcmp($a['last_name'].$a['first_name'], $b['last_name'].$b['first_name']); });
     return $out;
 }
 
