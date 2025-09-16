@@ -758,19 +758,19 @@ th {
 }
 @media print {
   :root {
-    --card-w: 48mm;
-    --card-min-h: 22mm;
-    --gap: 2mm;
-    --fs-h: 6px;
-    --fs-p: 5px;
-    --col-gap: .5mm;
-    --pad: 1mm;
-    --rule: .25mm;
+    --card-w: 100mm;
+    --card-min-h: 40mm;
+    --gap: 10mm;
+    --fs-h: 10px;
+    --fs-p: 8.5px;
+    --col-gap: 1.2mm;
+    --pad: 9mm;
+    --rule: 1.55mm;
   }
 
   @page {
     size: A4 landscape;
-    margin: 5mm;
+    margin: 6mm;
   }
 
   html {
@@ -779,7 +779,8 @@ th {
 
   #print-all-payslips-container {
     display: grid !important;
-    grid-template-columns: repeat(5, var(--card-w)) !important;
+    grid-template-columns: repeat(3, var(--card-w)) !important;
+    /* 3 per row */
     grid-auto-rows: auto !important;
     gap: var(--gap) !important;
     padding: 0 !important;
@@ -793,7 +794,7 @@ th {
     height: auto !important;
     padding: var(--pad) !important;
     border: 1px solid #222 !important;
-    border-radius: 1mm !important;
+    border-radius: 2mm !important;
     background: #fff !important;
     box-sizing: border-box !important;
     overflow: hidden !important;
@@ -865,5 +866,68 @@ th {
     width: 55%;
     margin: 0 auto var(--rule);
     border-top: 1px solid #ddd;
+  }
+}
+/* === CLEAN 8-UP (4x2) WITHOUT EXTRA WHITESPACE === */
+@page {
+  size: A4 landscape;
+  margin: 8mm;
+}
+
+@media print {
+  :root {
+    --cols: 4;
+    --gap: 4mm;
+    --pad: 2mm;
+    --fs-h: 10px;
+    --fs-p: 8.5px;
+  }
+
+  html,
+  body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #print-all-payslips-container {
+    display: grid !important;
+    grid-template-columns: repeat(var(--cols), 1fr) !important;
+    grid-auto-rows: auto !important;
+    gap: var(--gap) !important;
+    width: 100% !important;
+  }
+
+  .print-card {
+    width: auto !important;
+    min-height: auto !important;
+    padding: var(--pad) !important;
+    border-radius: 1.5mm !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .print-card h4 {
+    font-size: var(--fs-h) !important;
+    margin: 0 0 1mm !important;
+  }
+
+  .print-card p,
+  .print-card li,
+  .print-card div {
+    font-size: var(--fs-p) !important;
+    line-height: 1.2 !important;
+    margin: 0.5mm 0 !important;
+  }
+
+  .print-card .netpay {
+    margin-top: auto !important;
+    text-align: right !important;
+  }
+
+  #print-all-payslips-container .print-card:nth-of-type(8n) {
+    break-after: page !important;
+    page-break-after: always !important;
   }
 }

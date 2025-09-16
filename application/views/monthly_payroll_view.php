@@ -335,6 +335,43 @@ function pick_other_amount($legacy, array $odetail, array $gdetail): float {
     }
     return $legacy;
 }
+function getPrintSlices($start, $end) {
+    $startTs = strtotime($start);
+    $endTs   = strtotime($end);
+    if ($startTs === false || $endTs === false || $startTs > $endTs) return [];
+
+    // cursor at first of the start month
+    $monthCur = strtotime(date('Y-m-01', $startTs));
+    $lastMon  = strtotime(date('Y-m-01', $endTs));
+
+    $out = [];
+    while ($monthCur <= $lastMon) {
+        $y = (int)date('Y', $monthCur);
+        $m = (int)date('m', $monthCur);
+        $eom = cal_days_in_month(CAL_GREGORIAN, $m, $y);
+
+        $ranges = [
+            ["$y-$m-01", "$y-$m-10"],
+            ["$y-$m-11", "$y-$m-20"],
+            ["$y-$m-21", "$y-$m-$eom"],
+        ];
+
+        foreach ($ranges as [$rs, $re]) {
+            $s = max(strtotime($rs), $startTs);
+            $e = min(strtotime($re), $endTs);
+            if ($s <= $e) {
+                $out[] = [
+                    'label' => date('M d', $s) . ' – ' . date('M d, Y', $e),
+                    'start' => date('Y-m-d', $s),
+                    'end'   => date('Y-m-d', $e),
+                ];
+            }
+        }
+        $monthCur = strtotime('+1 month', $monthCur);
+    }
+    return $out;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -344,282 +381,58 @@ function pick_other_amount($legacy, array $odetail, array $gdetail): float {
     <title>PMS - Payroll Report</title>
     <?php include('includes/head.php'); ?>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet"
+      href="<?= base_url('assets/css/payroll.css') ?>">
+
 <style>
-body, html {
-  font-family: 'Segoe UI', 'Calibri', 'Arial', sans-serif;
-  font-size: 14px;
-  margin: 0;
-  padding: 0;
-  color: #000;
-  background: #fff;
-  height: 100%;
-}
+  /* Show/hide by media */
+  @media screen { .print-only { display: none !important; } }
+  @media print  { .screen-only { display: none !important; } .print-only { display: block !important; } }
 
-.print-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 100vh;
-  justify-content: space-between;
-}
+  @media print {
+    /* One-page fit (A4 landscape is safest) */
+    @page { size: A4 landscape; margin: 8mm; }
 
-.header { text-align: center; margin-bottom: 20px; }
-.header h2 { font-size: 18px; margin: 0; }
-.header p { margin: 3px 0; font-size: 14px; }
+    /* Tight, fixed layout so widths don't jump */
+    .payroll-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      font-size: 10.5px;            /* ↑ a little so “upper were too small” */
+    }
+    .payroll-table th,
+    .payroll-table td {
+      padding: 1px 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-th, td {
-  border: 1px solid #000;
-  padding: 8px 10px;
-  text-align: center;
-  vertical-align: middle;
-}
+    /* Column widths (used via <colgroup>) */
+    .col-ln     { width: 24px; }
+    .col-name   { width: 150px; }  /* <— tighten here if needed (e.g. 135px) */
+    .col-pos    { width: 90px; }
+    .col-rate   { width: 80px; }
+    .col-ratehr { width: 64px; }
+    .col-day    { width: 36px; }   /* applies to each Reg/OT day cell */
+    .col-time   { width: 60px; }   /* Reg/OT/Days (totals) */
 
-thead th {
-  padding: 4px 6px !important;
-  font-size: 15px !important;
-  line-height: 1.2;
-  vertical-align: middle !important;
-  text-align: center;
-  font-weight: 600;
-}
+    /* Slice title compact */
+    .slice-title { margin: 4px 0 3px; font-weight: 700; font-size: 12px; }
 
-.badge-warning {
-  background-color: #ffc107;
-  color: #000;
-  font-size: 11px;
-  padding: 2px 6px;
-  border-radius: 3px;
-}
+    /* Slight zoom to help one-page fit; tweak 0.88 ↔ 0.92 if needed */
+    #printSliced { zoom: 0.90; }
 
-tbody td {
-  padding: 4px 6px;
-  font-size: 13px;
-  line-height: 1.2;
-  vertical-align: middle;
-  text-align: center;
-}
-tbody td:nth-child(2) { text-align: left; }
-
-td.unused-holiday { background-color: #f9f9f9; color: #aaa; font-style: italic; }
-.holiday-cell { background-color: #ffe5e5 !important; color: red !important; font-weight: bold !important; text-align: center !important; }
-
-tbody td:nth-last-child(-n+10) { font-size: 10.5px; }
-
-.signature {
-  margin-top: 60px;
-  padding-top: 30px;
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  page-break-inside: avoid;
-  break-inside: avoid;
-}
-.signature div { width: 32%; text-align: center; }
-.signature p { margin: 3px 0; }
-.signature .name-line {
-  display: inline-block;
-  border-bottom: 1px solid #000;
-  min-width: 250px;
-  font-size: 15px;
-  font-weight: 400;
-  padding-bottom: 2px;
-}
-.signature em { font-size: 14px; color: #333; }
-
-th { background-color: #d9d9d9; font-weight: bold; }
-.absent { background-color: #f4cccc; color: #000; }
-
-.scrollable-wrapper {
-  width: 100%;
-  flex-grow: 1;
-  overflow-x: hidden;
-  overflow-y: visible;
-  -webkit-overflow-scrolling: touch;
-}
-
-#bottomScroller {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0; 
-  height: 16px;  
-  overflow-x: auto;
-  overflow-y: hidden;
-  z-index: 9999; 
-}
-
-#bottomScroller .sizer { height: 1px; }
-
-@media screen {
-  .print-container { padding-bottom: 18px; }
-}
-
-@media print {
-  #bottomScroller { display: none !important; }
-}
-
-.header-box {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  border-radius: 10px;
-  background-color: #fefefe;
-  padding: 12px 20px;
-  margin: 10px 0 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-}
-.header-box .box-content { flex: 1 1 auto; min-width: 300px; }
-.header-box .info-row { display: flex; align-items: center; margin: 3px 0; font-size: 15px; }
-.header-box .info-row i { font-size: 13px; color: #666; width: 18px; margin-right: 8px; text-align: center; }
-.header-box strong { display: inline-block; min-width: 125px; font-weight: 600; }
-.header-box span { flex: 1; text-align: left; }
-
-.print-button { margin-top: 4px; }
-.print-button button { transition: all 0.2s ease-in-out; }
-.print-button button:hover {
-  background-color: #0056b3 !important;
-  color: #fff !important;
-  transform: scale(1.03);
-  box-shadow: 0 0 6px rgba(0,0,0,0.15);
-}
-
-/* ===== Payslip Modal ===== */
-.modal-content {
-  background: #fff;
-  border-radius: 6px;
-  border: 1px solid #ddd;
-  color: #000;
-  font-family: Arial, sans-serif;
-}
-.modal-header { background: #fff !important; color: #000 !important; border-bottom: 1px solid #ddd; }
-.modal-body h6 { font-weight: bold; border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 10px; }
-
-.od-cell{
- 
-  min-width:160px;  
-  white-space:normal; 
-}
-
-.od-lines{
-  font-size:12px;
-  line-height:2.50;
-  color: #000;;
-
-  word-break:normal; 
-  overflow-wrap:anywhere;
-  hyphens:auto;
-}
-
-.od-lines > div{ position:relative; padding-left:12px; }
-.od-lines > div::before{ position:absolute; left:0; }
-
-
-
-
-@media screen {
-  .od-lines { max-height: none; overflow: visible; }
-  .deduction-sublist{ max-height: 200px; overflow: auto; }
-}
-
-/* ===== PRINT ===== */
-@media print {
-  html, body {
-    height: 100%;
-    margin: 0 !important;
-    padding: 0 !important;
-    font-size: 10px !important;
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-    overflow: visible !important;
+    /* Firefox fallback for zoom */
+    @supports (-moz-appearance: none) {
+      #printSliced {
+        transform: scale(0.90);
+        transform-origin: top left;
+        width: 111%;
+      }
+    }
   }
-
-  .od-lines { max-height: none; overflow: visible; }
-  .deduction-sublist{ max-height: none; overflow: visible; }
-
-  #print-all-payslips-container{
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
-    justify-content: center;
-    padding: 20px;
-  }
-
-  .print-card{
-    width: 390px; 
-    height: 550px;
-    padding: 18px 20px;
-    font-size: 13.5px;
-    line-height: 1.4;
-    background-color: #f8f9fa;
-    border: 1.5px solid #444;
-    border-radius: 6px;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-  .print-card p { margin: 4px 0; font-size: 12.5px; }
-
-  @page { size: A4 landscape; margin: 1cm; }
-
-  .print-container {
-    display: flex !important;
-    flex-direction: column !important;
-    min-height: 100vh !important;
-    justify-content: space-between !important;
-  }
-
-  .scrollable-wrapper { overflow: visible !important; flex-grow: 1 !important; }
-
-  .btn, .modal, .no-print, .modal-backdrop { display: none !important; }
-
-  .payroll-table {
-    width: 100% !important;
-    table-layout: fixed !important;
-    font-size: 10px !important;
-    word-wrap: break-word !important;
-  }
-  .payroll-table th, .payroll-table td{
-    padding: 4px !important;
-    font-size: 10px !important;
-    page-break-inside: avoid !important;
-    break-inside: avoid;
-    word-break: break-word;
-  }
-  .payroll-table th:first-child, .payroll-table td:first-child{ min-width: 25px; max-width: 30px; }
-
-  thead { display: table-header-group; font-size: 14px !important; }
-  table, thead, tbody, tr, td, th { page-break-inside: avoid !important; }
-
-  .signature { margin-top: auto !important; padding-top: 40px; break-inside: avoid !important; page-break-inside: avoid !important; }
-  .signature div { width: 30%; text-align: center; }
-
-  .modal-content, .modal-content * { visibility: visible !important; }
-  .modal-content{
-    position: static;
-    top: auto; left: auto;
-    width: 100%;
-    height: auto;
-    overflow: visible;
-    padding: 20px;
-    box-sizing: border-box;
-  }
-
-
-}
-@media print {
-  html body, html body * { visibility: visible !important; }
-
-  .no-print, .btn, .modal, .modal-backdrop {
-    visibility: hidden !important;
-    display: none !important;
-  }
-}
 </style>
-
 
 
 </head>
@@ -761,8 +574,25 @@ if (!$showTotalDeduction) {
 
 
 
+<div class="screen-only" id="unslicedPayroll">
 <table class="payroll-table">
-<thead>
+<colgroup>
+  <col class="col-ln">
+  <col class="col-name">
+  <col class="col-pos">
+  <col class="col-rate">
+  <col class="col-ratehr">
+  <?php
+    $__d = strtotime($start); $__e = strtotime($end);
+    while ($__d !== false && $__e !== false && $__d <= $__e):
+  ?>
+    <col class="col-day"><col class="col-day">
+  <?php $__d = strtotime('+1 day', $__d); endwhile; ?>
+  <col class="col-time"><col class="col-time"><col class="col-time">
+</colgroup>
+
+  <thead>
+
 <tr>
     <th rowspan="3">L/N</th>
     <th rowspan="3">NAME</th>
@@ -936,21 +766,23 @@ $perHour = (strcasecmp($row->rateType, 'Hour') === 0)
     : ((float)$row->rateAmount) / 8.0;
 ?>
     <td><?= $ln++ ?></td>
-   <td><?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></td>
+<?php $fullName = $row->last_name . ', ' . $row->first_name; ?>
+<td><span title="<?= htmlspecialchars($fullName) ?>"><?= htmlspecialchars($fullName) ?></span></td>
 
     <td><?= htmlspecialchars($row->position) ?></td>
-    
-    <td colspan="2">
-    <?php if ($row->rateType === 'Day'): ?>
-        ₱<?= number_format($row->rateAmount, 2) ?> / day
-    <?php elseif ($row->rateType === 'Hour'): ?>
-        ₱<?= number_format($row->rateAmount, 2) ?> / hour
-    <?php elseif ($row->rateType === 'Month'): ?>
-        ₱<?= number_format($row->rateAmount, 2) ?> / month
-        <?php elseif ($row->rateType === 'Bi-Month'): ?>
-        ₱<?= number_format($row->rateAmount, 2) ?> / bi-month
-    <?php endif; ?>
-    </td>
+<td>
+  <?php if ($row->rateType === 'Day'): ?>
+    ₱<?= number_format($row->rateAmount, 2) ?> / day
+  <?php elseif ($row->rateType === 'Hour'): ?>
+    ₱<?= number_format($row->rateAmount, 2) ?> / hour
+  <?php elseif ($row->rateType === 'Month'): ?>
+    ₱<?= number_format($row->rateAmount, 2) ?> / month
+  <?php elseif ($row->rateType === 'Bi-Month'): ?>
+    ₱<?= number_format($row->rateAmount, 2) ?> / bi-month
+  <?php endif; ?>
+</td>
+<td><?= number_format($perHour, 2) ?></td>
+
 
 <?php
 $loopDate = strtotime($start);
@@ -1600,6 +1432,230 @@ $otHours  = (float)($row->ot ?? 0);
 
 </tbody>
 </table>
+</div><!-- /#unslicedPayroll -->
+<!-- ===== PRINT-ONLY SLICED VIEW (template-style) ===== -->
+<div class="print-only" id="printSliced">
+<?php
+$__origStart = $start;
+$__origEnd   = $end;
+
+$slices = getPrintSlices($start, $end);
+/* fallback: if no slices returned, use the full range */
+if (empty($slices)) { $slices = [['start' => $start, 'end' => $end]]; }
+
+$__sliceIndex = 0;
+foreach ($slices as $__slice) {
+    $__sliceIndex++;
+
+    // ✅ define per-slice range with safe fallbacks
+    $ps = $__slice['start'] ?? $start;
+    $pe = $__slice['end']   ?? $end;
+
+    // (optional ultra-guard: skip if still bad)
+    if (empty($ps) || empty($pe) || strtotime($ps) === false || strtotime($pe) === false) {
+        continue;
+    }
+
+    $projName = $project->projectTitle ?? '';
+    ?>
+    <h5 class="slice-title">
+      <?= htmlspecialchars($projName) ?> — <?= date('M d', strtotime($ps)) ?> – <?= date('M d, Y', strtotime($pe)) ?>
+    </h5>
+
+    <table class="payroll-table">
+      <colgroup>
+        <col class="col-ln">
+        <col class="col-name">
+        <col class="col-pos">
+        <col class="col-rate">
+        <col class="col-ratehr">
+        <?php
+        $__d = strtotime($ps); $__e = strtotime($pe);
+        while ($__d !== false && $__e !== false && $__d <= $__e): ?>
+          <col class="col-day"><col class="col-day">
+        <?php $__d = strtotime('+1 day', $__d); endwhile; ?>
+        <col class="col-time"><col class="col-time"><col class="col-time">
+      </colgroup>
+
+
+  <thead>
+    <tr>
+      <th rowspan="3">L/N</th>
+      <th rowspan="3">NAME</th>
+      <th rowspan="3">POSITION</th>
+      <th rowspan="3">RATE</th>
+      <th rowspan="3">Rate / Hour</th>
+      <?php
+      $d = strtotime($ps); $e = strtotime($pe);
+      while ($d !== false && $e !== false && $d <= $e): ?>
+        <th colspan="2"><?= date('M d', $d) ?></th>
+      <?php $d = strtotime('+1 day', $d); endwhile; ?>
+      <th colspan="3">TOTAL TIME</th>
+    </tr>
+    <tr>
+      <?php
+      $d = strtotime($ps); $e = strtotime($pe);
+      while ($d !== false && $e !== false && $d <= $e): ?>
+        <th colspan="2" class="center"><?= date('D', $d) ?></th>
+      <?php $d = strtotime('+1 day', $d); endwhile; ?>
+      <th rowspan="2">Reg.</th>
+      <th rowspan="2">O.T</th>
+      <th rowspan="2">Days</th>
+    </tr>
+    <tr>
+      <?php
+      $d = strtotime($ps); $e = strtotime($pe);
+      while ($d !== false && $e !== false && $d <= $e): ?>
+        <th>Reg.</th><th>O.T</th>
+      <?php $d = strtotime('+1 day', $d); endwhile; ?>
+    </tr>
+  </thead>
+
+  <tbody>
+  <?php
+  $ln = 1;
+  foreach ($attendance_data as $row):
+      // per-hour rate (display only)
+      $perHour = (strcasecmp($row->rateType, 'Hour') === 0)
+        ? (float)$row->rateAmount
+        : ((float)$row->rateAmount) / 8.0;
+
+      // slice totals per employee
+      $regTotalMin = 0;
+      $otTotalMin  = 0;
+      $daysTotal   = 0;
+  ?>
+    <tr>
+      <td><?= $ln++ ?></td>
+      <?php $fullName = $row->last_name . ', ' . $row->first_name; ?>
+      <td><span title="<?= htmlspecialchars($fullName) ?>"><?= htmlspecialchars($fullName) ?></span></td>
+      <td><?= htmlspecialchars($row->position) ?></td>
+      <td>
+        <?php if ($row->rateType === 'Day'): ?>
+          ₱<?= number_format($row->rateAmount, 2) ?> / day
+        <?php elseif ($row->rateType === 'Hour'): ?>
+          ₱<?= number_format($row->rateAmount, 2) ?> / hour
+        <?php elseif ($row->rateType === 'Month'): ?>
+          ₱<?= number_format($row->rateAmount, 2) ?> / month
+        <?php elseif ($row->rateType === 'Bi-Month'): ?>
+          ₱<?= number_format($row->rateAmount, 2) ?> / bi-month
+        <?php endif; ?>
+      </td>
+      <td><?= number_format($perHour, 2) ?></td>
+
+      <?php
+      $d = strtotime($ps); $e = strtotime($pe);
+      while ($d !== false && $e !== false && $d <= $e):
+          $curDate = date('Y-m-d', $d);
+          $raw = $row->reg_hours_per_day[$curDate] ?? '-';
+
+          $regH = 0.0; $otH = 0.0;
+
+          if (is_array($raw)) {
+              $status = strtolower(trim((string)($raw['status'] ?? '')));
+              $regH   = (float)($raw['hours'] ?? 0);
+              $otH    = (float)($raw['overtime_hours'] ?? 0);
+
+              if ($status === 'day off' || $status === 'dayoff') {
+                  echo "<td colspan='2' class='text-info font-bold text-center'>Day Off</td>";
+              } elseif (in_array($status, ['absent', 'absentee'])) {
+                  if ($regH <= 0 && $otH <= 0) {
+                      echo "<td colspan='2' class='absent text-center' style='background:#f8d7da;color:red;'>Absent</td>";
+                  } else {
+                      echo "<td class='text-danger text-center font-weight-bold'>A</td>";
+                      echo "<td>" . number_format($otH, 2) . "</td>";
+                  }
+              } else {
+                  echo '<td class="num">' . (($regH == 0.0) ? '––' : number_format($regH, 2)) . '</td>';
+                  echo '<td class="num">' . (($otH  == 0.0) ? '––' : number_format($otH,  2)) . '</td>';
+              }
+          } elseif (is_numeric($raw)) {
+              $dec    = (float)$raw;
+              $regMin = min($dec * 60, 480);
+              $otMin  = max(0, ($dec * 60) - 480);
+              $regH   = $regMin / 60;
+              $otH    = $otMin  / 60;
+              echo '<td class="num">' . (($regH == 0.0) ? '––' : number_format($regH, 2)) . '</td>';
+              echo '<td class="num">' . (($otH  == 0.0) ? '––' : number_format($otH,  2)) . '</td>';
+          } else {
+              echo "<td colspan='2' class='absent text-center' style='background:#f8d7da;color:red;'>Absent</td>";
+          }
+
+          // accumulate totals
+          $regTotalMin += $regH * 60;
+          $otTotalMin  += $otH  * 60;
+          if ($regH > 0) $daysTotal += $regH / 8.0;
+
+          $d = strtotime('+1 day', $d);
+      endwhile;
+      ?>
+
+      <td><?= number_format($regTotalMin / 60, 2) ?></td>
+      <td><?= number_format($otTotalMin  / 60, 2) ?></td>
+      <td><?= number_format($daysTotal, 2) ?></td>
+    </tr>
+  <?php endforeach; ?>
+  </tbody>
+</table>
+
+
+    <!-- <div class="page-break"></div> -->
+<?php } // end foreach slice ?>
+
+<?php
+// ===== Print summary for FULL original period (Gross/Net only) =====
+$start = $__origStart; $end = $__origEnd;
+?>
+<h5 class="slice-title">Deductions &amp; Net Pay — <?= date('M d', strtotime($start)) ?> – <?= date('M d, Y', strtotime($end)) ?></h5>
+
+<table class="payroll-table">
+  <colgroup>
+    <col class="col-ln">
+    <col class="col-name">
+    <col style="width: 95px">
+    <col style="width: 95px">
+    <?php if (empty($is_summary)): ?><col style="width: 130px"><?php endif; ?>
+  </colgroup>
+  <thead>
+
+    <tr>
+      <th style="width:28px">L/N</th>
+      <th>NAME</th>
+      <th style="width:120px">Gross</th>
+      <th style="width:120px">Net Pay</th>
+      <?php if (empty($is_summary)): ?><th style="width:180px">Signature</th><?php endif; ?>
+    </tr>
+  </thead>
+  <tbody>
+    <?php
+    $ln = 1; $totalGross = '0'; $totalNet = '0';
+    foreach ($attendance_data as $row):
+        $p = computePayroll($row, $start, $end);
+        $gross = (string)($p['salary'] ?? '0');
+        $net   = (string)($p['netPay'] ?? '0');
+        $totalGross = bcadd($totalGross, $gross, 2);
+        $totalNet   = bcadd($totalNet,   $net,   2);
+    ?>
+      <tr>
+        <td><?= $ln++ ?></td>
+<?php $fullName = $row->last_name . ', ' . $row->first_name; ?>
+<td><span title="<?= htmlspecialchars($fullName) ?>"><?= htmlspecialchars($fullName) ?></span></td>
+        <td><?= number_format((float)$gross, 2) ?></td>
+        <td><?= number_format((float)$net,   2) ?></td>
+        <?php if (empty($is_summary)): ?><td></td><?php endif; ?>
+      </tr>
+    <?php endforeach; ?>
+    <tr style="background:#f3f3f3; font-weight:600;">
+      <td colspan="2" class="text-right">TOTAL</td>
+      <td><?= number_format((float)$totalGross, 2) ?></td>
+      <td><?= number_format((float)$totalNet,   2) ?></td>
+      <?php if (empty($is_summary)): ?><td></td><?php endif; ?>
+    </tr>
+  </tbody>
+</table>
+
+</div>
+<!-- ===== END PRINT-ONLY SLICED VIEW ===== -->
 
 <!-- === PRINTABLE ALL PAYSLIPS SECTION (hidden by default) === -->
 <div id="allPayslips" class="no-print-payroll d-none">
