@@ -206,19 +206,23 @@ tfoot th, tfoot td { font-weight: 700; background: #f8f9fa; }
     if ($showAdmins  && !$isAdmin) { continue; }
 
     // Only compute for rows we keep
-    $basic      = (float)($emp['basic_total'] ?? 0.0);
-    $thirteenth = $basic / 12;
-    $netpay     = $thirteenth;
+$pid         = (int)($emp['personnelID'] ?? 0);
 
-    $total_basic += $basic;
-    $total_13th  += $thirteenth;
-    $total_net   += $netpay;
+$basic_ytd   = isset($ytd_basic_map[$pid]) ? (float)$ytd_basic_map[$pid] : 0.0;
+$thirteenth  = $basic_ytd / 12.0;
+$netpay      = $thirteenth;
+
+
+$total_basic += $basic_ytd;
+$total_13th  += $thirteenth;
+$total_net   += $netpay;
+
 ?>
 <tr class="text-center" data-ratetype="<?= htmlspecialchars($rateType) ?>">
   <td><?= $i++ ?></td>
   <td class="text-left"><?= htmlspecialchars(($emp['last_name'] ?? '').', '.($emp['first_name'] ?? '')) ?></td>
   <td><?= htmlspecialchars($emp['position'] ?? '') ?></td>
-  <td>₱<?= number_format($basic, 2) ?></td>
+<td>₱<?= number_format($basic_ytd, 2) ?></td>
   <td><strong>₱<?= number_format($thirteenth, 2) ?></strong></td>
   <td>₱<?= number_format($netpay, 2) ?></td>
   <td>____________________</td>

@@ -2,6 +2,20 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Thirteenth_model extends CI_Model {
+    // —— Helpers: treat Month/Bi-Month as Day (₱/day ÷ 8 = ₱/hr), Hour stays Hour
+    private function canonical_rate_type($rateTypeRaw) {
+        $t = strtolower(trim((string)$rateTypeRaw));
+        $t = preg_replace('/[^a-z]/', '', $t); // "Bi-Month" -> "bimonth"
+        if (in_array($t, ['month','permonth','bimonth','bimonthly'], true)) return 'day';
+        if (in_array($t, ['hour','perhour','hr','hrs'], true))               return 'hour';
+        if (in_array($t, ['day','perday','daily'], true))                    return 'day';
+        return 'day';
+    }
+    private function per_hour_from_rate($rateTypeRaw, $rateAmount, $hoursPerDay = 8.0) {
+        return ($this->canonical_rate_type($rateTypeRaw) === 'hour')
+            ? (float)$rateAmount
+            : ((float)$rateAmount) / (float)$hoursPerDay;
+    }
 
   public function get_13th_from_attendance_reg_only($start, $end, $employment = 'active')
 {
@@ -61,14 +75,9 @@ class Thirteenth_model extends CI_Model {
             ];
         }
 
-        $rateType   = strtolower((string)$r['rateType']);
-        $rateAmount = (float)$r['rateAmount'];
-
-if ($rateType === 'hour') {
-    $base = $rateAmount;
-} else {
-    $base = $rateAmount / 8.0;
-}
+     $rateType   = $r['rateType'] ?? '';
+$rateAmount = (float)$r['rateAmount'];
+$base       = $this->per_hour_from_rate($rateType, $rateAmount, 8.0);
 
 
         $status       = strtolower(trim(preg_replace('/\s+/', '', (string)($r['status'] ?? ''))));
@@ -239,14 +248,15 @@ if ($rateType === 'hour') {
         pm.details_json
     ', false);
     $this->db->from('personnel p');
-    // INNER JOIN so only personnel who actually have monthly rows appear in Admin tab
-    $this->db->join(
-        'payroll_attendance_monthly pm',
-        "pm.personnelID = p.personnelID
-         AND pm.payroll_month >= ".$this->db->escape($startMonth)."
-         AND pm.payroll_month <= ".$this->db->escape($endMonth),
-        'inner'
-    );
+// change 'left' to 'inner'
+$this->db->join(
+  'payroll_attendance_monthly pm',
+  "pm.personnelID = p.personnelID
+   AND pm.payroll_month >= ".$this->db->escape($startMonth)."
+   AND pm.payroll_month <= ".$this->db->escape($endMonth),
+  'inner'
+);
+
     $this->db->where('p.settingsID', $settingsID);
 
     // Employment filter (same logic you already use)
@@ -296,10 +306,8 @@ if ($rateType === 'hour') {
         }
 
         // Hourly base: hourly rate → use as-is; otherwise (Day/Month/Bi-Month stored as day) → divide by 8
-        $rtNorm = strtolower(preg_replace('/[^a-z]/', '', (string)($r['rateType'] ?? '')));
-        $amt    = (float)$r['rateAmount'];
-        $isHourly = in_array($rtNorm, ['hour','perhour','hr','hrs'], true);
-        $basePerHour = $isHourly ? $amt : ($amt / 8.0);
+$basePerHour = $this->per_hour_from_rate($r['rateType'] ?? '', (float)$r['rateAmount'], 8.0);
+
 
         $agg[$pid]['basic_total'] += round($regHours * $basePerHour, 2);
     }
