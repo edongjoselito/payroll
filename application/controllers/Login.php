@@ -7,6 +7,7 @@ class Login extends CI_Controller
         $this->load->model('Login_model');
         $this->load->model('SettingsModel');
         $this->load->model('StudentModel');
+        $this->load->library('AuditLogger');
     }
 
     function index()
@@ -194,12 +195,99 @@ class Login extends CI_Controller
     }
 
 
-   function auth()
+//    function auth()
+// {
+//     $username = $this->input->post('username', TRUE);
+//     $password = $this->input->post('password', TRUE);
+//     $sy = $this->input->post('sy', TRUE);
+//     $semester = $this->input->post('semester', TRUE);
+
+//     // Fetch user data
+//     $user = $this->Login_model->get_user_by_username($username);
+
+//     if ($user) {
+//         $storedHash = $user->password;
+
+//         // Handle old SHA1 passwords
+//         if (strlen($storedHash) === 40 && ctype_xdigit($storedHash)) {
+//             if (sha1($password) === $storedHash) {
+//                 // ✅ Matches old SHA1 — upgrade to secure hash
+//                 $newHash = password_hash($password, PASSWORD_DEFAULT);
+//                 $this->db->where('username', $username)->update('o_users', ['password' => $newHash]);
+//             } else {
+//                 // Invalid SHA1 password
+//                 $this->session->set_flashdata('danger', 'The username or password is incorrect!');
+//                 redirect('login');
+//                 return;
+//             }
+//         } elseif (!password_verify($password, $storedHash)) {
+//             // bcrypt/secure hash failed
+//             $this->session->set_flashdata('danger', 'The username or password is incorrect!');
+//             redirect('login');
+//             return;
+//         }
+
+//         // ✅ Valid password — continue login
+//         $acctStat = $user->acctStat;
+//         if (strtolower($acctStat) === 'active') {
+//           $user_data = array(
+//     'username'   => $user->username,
+//     'fname'      => $user->fName,
+//     'mname'      => $user->mName,
+//     'lname'      => $user->lName,
+//     'avatar'     => $user->avatar,
+//     'email'      => $user->email,
+//     'position'   => $user->position,   // NEW: primary role key
+//     'level'      => $user->position,   // BACKWARD-COMPAT for existing checks
+//     'IDNumber'   => $user->IDNumber,
+//     'sy'         => $sy,
+//     'semester'   => $semester,
+//     'settingsID' => $user->settingsID,
+//     'logged_in'  => TRUE
+// );
+// $this->session->set_userdata($user_data);
+
+
+//             // Role-based redirection
+//             switch ($user->position) {
+//                 case 'Admin': redirect('page/admin'); break;
+//                 case 'School Admin': redirect('page/school_admin'); break;
+//                 case 'Registrar': case 'Head Registrar': redirect('page/registrar'); break;
+//                 case 'Super Admin': redirect('page/superAdmin'); break;
+//                 case 'Property Custodian': redirect('page/p_custodian'); break;
+//                 case 'Academic Officer': redirect('page/a_officer'); break;
+//                 case 'Student': redirect('page/student'); break;
+//                 case 'Stude Applicant': redirect('page/student_registration'); break;
+//                 case 'Accounting': redirect('page/accounting'); break;
+//                 case 'Instructor': redirect('page/Instructor'); break;
+//                 case 'Teacher/Adviser': redirect('page/adviser'); break;
+//                 case 'HR Admin': redirect('page/hr'); break;
+//                 case 'Guidance': redirect('page/guidance'); break;
+//                 case 'School Nurse': redirect('page/medical'); break;
+//                 case 'IT': redirect('page/IT'); break;
+//                 case 'Librarian': redirect('page/library'); break;
+//                 case 'Principal': redirect('page/s_principal'); break;
+//                   case 'Payroll User': redirect('WeeklyAttendance'); break;
+
+//                 default:
+//                     $this->session->set_flashdata('danger', 'Unauthorized access.');
+//                     redirect('login');
+//             }
+//         } else {
+//             $this->session->set_flashdata('danger', 'Your account is not active. Please contact support.');
+//             redirect('login');
+//         }
+//     } else {
+//         $this->session->set_flashdata('danger', 'The username or password is incorrect!');
+//         redirect('login');
+//     }
+// }
+function auth()
 {
-    $username = $this->input->post('username', TRUE);
-    $password = $this->input->post('password', TRUE);
-    $sy = $this->input->post('sy', TRUE);
-    $semester = $this->input->post('semester', TRUE);
+    $username  = $this->input->post('username', TRUE);
+    $password  = $this->input->post('password', TRUE);
+    $sy        = $this->input->post('sy', TRUE);
+    $semester  = $this->input->post('semester', TRUE);
 
     // Fetch user data
     $user = $this->Login_model->get_user_by_username($username);
@@ -213,14 +301,34 @@ class Login extends CI_Controller
                 // ✅ Matches old SHA1 — upgrade to secure hash
                 $newHash = password_hash($password, PASSWORD_DEFAULT);
                 $this->db->where('username', $username)->update('o_users', ['password' => $newHash]);
+
+                // AUDIT: note hash upgrade
+                $this->auditlogger->log(
+                    'other', 'o_users', 'username', $username,
+                    null, null,
+                    'Login success; upgraded hash from SHA1 → bcrypt'
+                );
+
             } else {
-                // Invalid SHA1 password
+                // AUDIT: bad password (SHA1 branch)
+                $this->auditlogger->log(
+                    'other', 'o_users', 'username', $username,
+                    null, null,
+                    'Login failed: bad password (legacy SHA1)'
+                );
+
                 $this->session->set_flashdata('danger', 'The username or password is incorrect!');
                 redirect('login');
                 return;
             }
         } elseif (!password_verify($password, $storedHash)) {
-            // bcrypt/secure hash failed
+            // AUDIT: bad password (modern bcrypt/argon)
+            $this->auditlogger->log(
+                'other', 'o_users', 'username', $username,
+                null, null,
+                'Login failed: bad password'
+            );
+
             $this->session->set_flashdata('danger', 'The username or password is incorrect!');
             redirect('login');
             return;
@@ -229,23 +337,29 @@ class Login extends CI_Controller
         // ✅ Valid password — continue login
         $acctStat = $user->acctStat;
         if (strtolower($acctStat) === 'active') {
-          $user_data = array(
-    'username'   => $user->username,
-    'fname'      => $user->fName,
-    'mname'      => $user->mName,
-    'lname'      => $user->lName,
-    'avatar'     => $user->avatar,
-    'email'      => $user->email,
-    'position'   => $user->position,   // NEW: primary role key
-    'level'      => $user->position,   // BACKWARD-COMPAT for existing checks
-    'IDNumber'   => $user->IDNumber,
-    'sy'         => $sy,
-    'semester'   => $semester,
-    'settingsID' => $user->settingsID,
-    'logged_in'  => TRUE
-);
-$this->session->set_userdata($user_data);
+            $user_data = array(
+                'username'   => $user->username,
+                'fname'      => $user->fName,
+                'mname'      => $user->mName,
+                'lname'      => $user->lName,
+                'avatar'     => $user->avatar,
+                'email'      => $user->email,
+                'position'   => $user->position,
+                'level'      => $user->position,
+                'IDNumber'   => $user->IDNumber,
+                'sy'         => $sy,
+                'semester'   => $semester,
+                'settingsID' => $user->settingsID,
+                'logged_in'  => TRUE
+            );
+            $this->session->set_userdata($user_data);
 
+            // AUDIT: login success (include SY/Sem in note)
+            $this->auditlogger->log(
+                'login', 'o_users', 'username', $username,
+                null, null,
+                'Login success | role='.$user->position.' | SY='.$sy.' | Sem='.$semester
+            );
 
             // Role-based redirection
             switch ($user->position) {
@@ -266,28 +380,55 @@ $this->session->set_userdata($user_data);
                 case 'IT': redirect('page/IT'); break;
                 case 'Librarian': redirect('page/library'); break;
                 case 'Principal': redirect('page/s_principal'); break;
-                  case 'Payroll User': redirect('WeeklyAttendance'); break;
-
+                case 'Payroll User': redirect('WeeklyAttendance'); break;
                 default:
+                    // AUDIT: blocked by unknown role
+                    $this->auditlogger->log(
+                        'other', 'o_users', 'username', $username,
+                        null, null,
+                        'Login blocked: unknown/unauthorized role'
+                    );
                     $this->session->set_flashdata('danger', 'Unauthorized access.');
                     redirect('login');
             }
         } else {
+            // AUDIT: inactive account
+            $this->auditlogger->log(
+                'other', 'o_users', 'username', $username,
+                null, null,
+                'Login blocked: account not active'
+            );
+
             $this->session->set_flashdata('danger', 'Your account is not active. Please contact support.');
             redirect('login');
         }
     } else {
+        // AUDIT: unknown user
+        $this->auditlogger->log(
+            'other', 'o_users', 'username', $username,
+            null, null,
+            'Login failed: username not found'
+        );
+
         $this->session->set_flashdata('danger', 'The username or password is incorrect!');
         redirect('login');
     }
 }
 
+function logout()
+{
+    // AUDIT: log before session is destroyed
+    $this->auditlogger->log(
+        'logout', 'o_users', 'username',
+        $this->session->userdata('username'),
+        null, null,
+        'User logged out'
+    );
 
-    function logout()
-    {
-        $this->session->sess_destroy();
-        redirect('login');
-    }
+    $this->session->sess_destroy();
+    redirect('login');
+}
+
     public function forgot_pass()
     {
         $email = $this->input->post('email');

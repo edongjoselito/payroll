@@ -108,6 +108,14 @@
               <span> Company Information </span>
             </a>
           </li>
+<!-- ===== DEV: Audit Tools (comment this block to hide) ===== -->
+<!-- <li>
+  <a href="<?= site_url('audit'); ?>" class="waves-effect">
+    <i class="mdi mdi-file-document-box-search-outline"></i>
+    <span> Audit Log (DEV) </span>
+  </a>
+</li> -->
+<!-- ===== /DEV ===== -->
 
         </ul>
       </div>
@@ -122,6 +130,15 @@
               <span> Dashboard </span>
             </a>
           </li>
+          <!-- ===== DEV: Audit Tools (comment this block to hide) ===== -->
+<li>
+  <a href="<?= site_url('audit'); ?>" class="waves-effect">
+    <i class="mdi mdi-file-document-box-search-outline"></i>
+    <span> Audit Log (DEV) </span>
+  </a>
+</li>
+<!-- ===== /DEV ===== -->
+
         </ul>
       </div>
 
@@ -201,6 +218,14 @@
         <span> 13th Month – Workers </span>
       </a>
     </li>
+<!-- ===== DEV: Audit Tools (comment this block to hide for Payroll Users) ===== -->
+<!-- <li>
+  <a href="<?= site_url('audit'); ?>" class="waves-effect">
+    <i class="mdi mdi-file-document-box-search-outline"></i>
+    <span> Audit Log (DEV) </span>
+  </a>
+</li> -->
+<!-- ===== /DEV ===== -->
 
   </ul>
 </div>

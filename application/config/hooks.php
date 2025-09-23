@@ -20,3 +20,10 @@ $hook['pre_controller'] = array(
     'filename' => 'MaintenanceMode.php',
     'filepath' => 'hooks',
 );
+
+$hook['post_controller_constructor'][] = [
+  'class'    => 'AuditHook',
+  'function' => 'bindAuditContext',
+  'filename' => 'AuditHook.php',
+  'filepath' => 'hooks'
+];

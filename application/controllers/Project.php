@@ -5,6 +5,7 @@ class Project extends CI_Controller
         parent::__construct();
          $this->load->model('PayrollModel');
         $this->load->model('Project_model');
+        $this->load->library('AuditLogger');
     }
 private function currentRole()
 {
@@ -782,12 +783,26 @@ public function export_attendance_csv($settingsID)
     $logs = $this->Project_model->getAttendanceLogs($settingsID, $projectID);
 
     if (empty($logs)) {
+        // AUDIT: attempted export with no data
+        $this->auditlogger->log(
+            'export', 'attendance', null, null,
+            null, null,
+            'Export attempted: attendance CSV has no rows | settingsID='.$settingsID.' | projectID='.$projectID
+        );
+
         $this->session->set_flashdata('error', 'No attendance logs found.');
         redirect('project/attendance_list/' . $settingsID . '?pid=' . $projectID);
         return;
     }
 
     $filename = 'AttendanceLogs_' . date('YmdHis') . '.csv';
+
+    // AUDIT: successful export (record row count + filters)
+    $this->auditlogger->log(
+        'export', 'attendance', null, null,
+        null, null,
+        'Exported attendance CSV | rows='.count($logs).' | settingsID='.$settingsID.' | projectID='.$projectID
+    );
 
     header('Content-Type: text/csv');
     header("Content-Disposition: attachment; filename=\"$filename\"");

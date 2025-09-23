@@ -7,6 +7,7 @@ class Generatepayroll extends CI_Controller {
         parent::__construct();
         $this->load->model('Generatepayroll_model');
         $this->load->model('Project_model');
+        $this->load->library('AuditLogger'); 
          if (!in_array($this->session->userdata('level'), ['Admin','Payroll User'], true)) {
         $this->session->set_flashdata('error', 'Unauthorized access.');
         redirect('login');

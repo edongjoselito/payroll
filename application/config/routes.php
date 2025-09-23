@@ -15,3 +15,5 @@ $route['Material/update'] = 'Material/update';
 $route['MonthlyPayroll/generate_bimonth']     = 'MonthlyPayroll/generate_bimonth';
 $route['MonthlyPayroll/list_bimonth_batches'] = 'MonthlyPayroll/list_bimonth_batches';
 $route['MonthlyPayroll/open_bimonth_batch/(:num)'] = 'MonthlyPayroll/open_bimonth_batch/$1';
+$route['audit']         = 'Audit/index';
+$route['audit/export']  = 'Audit/export';
