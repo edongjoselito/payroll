@@ -10,7 +10,8 @@ class MonthlyPayroll extends CI_Controller
         $this->load->model('SettingsModel');
 
         $this->load->helper(['form', 'url']);
-        
+        $this->load->library('AuditLogger');
+
         $this->load->library('session');
           if (!in_array($this->session->userdata('level'), ['Admin','Payroll User'], true)) {
         $this->session->set_flashdata('error', 'Unauthorized access.');
@@ -152,6 +153,17 @@ public function save()
     $redirect_url .= (strpos($redirect_url, '?') === false) ? '?saved=true' : '&saved=true';
 
     redirect($redirect_url);
+    // AUDIT: summarize monthly save
+$this->auditlogger->log(
+    'other',
+    'payroll_attendance_monthly',
+    null,
+    null,
+    null,
+    null,
+    'Saved monthly payroll | month='.$month.' | period='.$from.'..'.$to.' | employees='.count((array)$personnelIDs)
+);
+
 }
 
 public function view_record()
@@ -469,6 +481,20 @@ public function generate_bimonth()
         $settingsID, $projectID, $from, $to, $month, $totals, $userID
     );
     $this->BimonthPayroll_model->insert_lines($batch_id, $linesForDB);
+// AUDIT: summarize bi-month generation
+$this->auditlogger->log(
+    'other',
+    'payroll_bimonth_batches',
+    'id',
+    $batch_id,
+    null,
+    null,
+    'Generated bi-month payroll | projectID='.($projectID?:'ALL').
+    ' | period='.$from.'..'.$to.
+    ' | lines='.count((array)$linesForDB).
+    ' | gross='.number_format((float)$sum_gross, 2).
+    ' | net='.number_format((float)$sum_net, 2)
+);
 
     $data = [
         'start'            => $from,

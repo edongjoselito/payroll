@@ -520,8 +520,27 @@ if (!$exists) {
 }
 
     }
+$__ins_count = is_array($batch) ? count($batch) : 0;
+if ($__ins_count === 0) {
+    // AUDIT: attempt produced no new rows (duplicates or no data)
+    $this->auditlogger->log(
+        'other', 'payroll_summary', null, null, null, null,
+        'Generate payroll summary produced 0 new rows | projectID='.$projectID.' | period='.$start.'..'.$end
+    );
+}
 
     if (!empty($batch)) {
+// AUDIT: summarize rows inserted to payroll_summary
+$this->auditlogger->log(
+    'other',
+    'payroll_summary',
+    null,
+    null,
+    null,
+    null,
+    'Generated payroll summary | projectID='.$projectID.' | period='.$start.'..'.$end.' | rows='.$__ins_count
+);
+
         $this->db->insert_batch('payroll_summary', $batch);
     }
 
