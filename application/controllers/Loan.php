@@ -3,25 +3,39 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Loan extends CI_Controller {
 
-    public function __construct() {
+  public function __construct() {
         parent::__construct();
         $this->load->library('session');
         $this->load->model('Loan_model');
+        $this->load->model('SettingsModel'); // <-- add this so we can fetch defaults
+
+        // 1) Require login
+        if ($this->session->userdata('logged_in') !== TRUE) {
+            redirect('login'); // use the actual route / lowercase to avoid case issues on Linux
+            return;
+        }
+
+        // 2) Ensure settingsID exists; if not, try to load an active/default settings row
+        if (!$this->session->userdata('settingsID')) {
+            $active = $this->SettingsModel->getSchoolInfo(); // or your own "active settings" getter
+            if (!empty($active) && !empty($active[0]->settingsID)) {
+                $this->session->set_userdata('settingsID', $active[0]->settingsID);
+            } else {
+                // If you really can’t determine a default, then show a friendly page or redirect to a “choose school/company” page
+                $this->session->set_flashdata('error', 'No active company/settings found. Please select one.');
+                redirect('login');
+                return;
+            }
+        }
     }
 
 public function personnel_loan()
 {
     $settingsID = $this->session->userdata('settingsID');
 
-    if (!$settingsID) {
-        $this->session->set_flashdata('error', 'Session expired. Please log in again.');
-        redirect('Login'); 
-        return;
-    }
-
     $data['assigned_loans'] = $this->Loan_model->get_assigned_loans($settingsID);
-    $data['personnel'] = $this->Loan_model->get_personnel_by_settings($settingsID);
-    $data['loans'] = $this->Loan_model->get_all_loans();
+    $data['personnel']      = $this->Loan_model->get_personnel_by_settings($settingsID);
+    $data['loans']          = $this->Loan_model->get_all_loans($settingsID); // pass settingsID if your model supports scoping
 
     $this->load->view('personnel_loan', $data);
 }
