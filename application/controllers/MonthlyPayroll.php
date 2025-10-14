@@ -204,6 +204,128 @@ if (!$from || !$to) {
 
     $this->load->view('monthly_payroll_records', $data);
 }
+public function delete_range()
+{
+    $month = $this->input->post('payroll_month');   // YYYY-MM
+    $from  = $this->input->post('from_date');       // YYYY-MM-DD
+    $to    = $this->input->post('to_date');         // YYYY-MM-DD
+
+    if (!$month || !$from || !$to || strtotime($from) > strtotime($to)) {
+        $this->session->set_flashdata('msg', 'Invalid month or date range.');
+        redirect('MonthlyPayroll');
+        return;
+    }
+
+    $settingsID = $this->session->userdata('settingsID');
+    if (!$settingsID) {
+        $this->session->set_flashdata('msg', 'Session expired.');
+        redirect('login');
+        return;
+    }
+
+    // Build list of date keys to remove
+    $datesToDelete = [];
+    for ($cur = strtotime($from), $end = strtotime($to); $cur <= $end; $cur = strtotime('+1 day', $cur)) {
+        $datesToDelete[] = date('Y-m-d', $cur);         // full date
+        $datesToDelete[] = date('d', $cur);             // 01..31
+        $datesToDelete[] = ltrim(date('d', $cur), '0'); // 1..31
+    }
+
+    // Fetch month rows
+    $rows = $this->db->where('payroll_month', $month)
+                     ->where('settingsID', $settingsID)
+                     ->get('payroll_attendance_monthly')
+                     ->result();
+
+    $affected = 0;
+    foreach ($rows as $row) {
+        $details = json_decode($row->details_json, true);
+        if (!is_array($details)) $details = [];
+
+        foreach ($datesToDelete as $k) {
+            if (array_key_exists($k, $details)) unset($details[$k]);
+        }
+
+        // If only _range (or empty), delete row; else update json
+        $tmp = $details; unset($tmp['_range']);
+        if (empty($tmp)) {
+            $this->db->where('id', $row->id)->delete('payroll_attendance_monthly');
+        } else {
+            $this->MonthlyPayroll_model->update_payroll_details($row->personnelID, $month, $details);
+        }
+        $affected++;
+    }
+
+    // 🔁 ALSO: delete overlapping saved bi-month batches
+    $this->load->model('BimonthPayroll_model');
+    $deleted_batches = $this->BimonthPayroll_model->delete_batches_overlapping($settingsID, $from, $to);
+
+    // AUDIT
+    if (property_exists($this, 'auditlogger')) {
+        $this->auditlogger->log(
+            'delete',
+            'payroll_attendance_monthly',
+            null, null, null, null,
+            'Deleted monthly (range) | month='.$month.' | period='.$from.'..'.$to.' | rows_touched='.$affected.' | deleted_bimonth_batches='.$deleted_batches
+        );
+    }
+
+    $msg = '🗑️ Monthly attendance deleted for the selected range.';
+    if ($deleted_batches > 0) $msg .= ' Also removed '.$deleted_batches.' saved bi-month batch(es).';
+    $this->session->set_flashdata('msg', $msg);
+
+    redirect('MonthlyPayroll');
+}
+
+public function delete_month_all()
+{
+    $month = $this->input->post('payroll_month');
+    if (!$month) {
+        $this->session->set_flashdata('msg', 'Select a month to delete.');
+        redirect('MonthlyPayroll');
+        return;
+    }
+
+    $settingsID = $this->session->userdata('settingsID');
+    if (!$settingsID) {
+        $this->session->set_flashdata('msg', 'Session expired.');
+        redirect('login');
+        return;
+    }
+
+    // Delete all monthly rows for this month
+    $this->db->where('payroll_month', $month)
+             ->where('settingsID', $settingsID)
+             ->delete('payroll_attendance_monthly');
+
+    // 🔁 ALSO: delete saved bi-month batches fully/partly in this month
+    $this->load->model('BimonthPayroll_model');
+
+    // Prefer using month column if your batches table has it; else compute range
+    if (method_exists($this->BimonthPayroll_model, 'delete_batches_by_month')) {
+        $deleted_batches = $this->BimonthPayroll_model->delete_batches_by_month($settingsID, $month);
+    } else {
+        // Fallback: delete batches overlapping the whole calendar month
+        $start = date('Y-m-01', strtotime($month.'-01'));
+        $end   = date('Y-m-t',  strtotime($month.'-01'));
+        $deleted_batches = $this->BimonthPayroll_model->delete_batches_overlapping($settingsID, $start, $end);
+    }
+
+    if (property_exists($this, 'auditlogger')) {
+        $this->auditlogger->log(
+            'delete',
+            'payroll_attendance_monthly',
+            null, null, null, null,
+            'Deleted ALL monthly | month='.$month.' | deleted_bimonth_batches='.$deleted_batches
+        );
+    }
+
+    $msg = '🗑️ Entire monthly attendance removed.';
+    if ($deleted_batches > 0) $msg .= ' Also removed '.$deleted_batches.' saved bi-month batch(es).';
+    $this->session->set_flashdata('msg', $msg);
+
+    redirect('MonthlyPayroll');
+}
 
 
 public function update_attendance()

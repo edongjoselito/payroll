@@ -95,4 +95,43 @@ public function list_batches($settingsID, $projectID = null)
         $lines = $this->db->get_where('payroll_bimonth_lines', ['batch_id'=>$batch_id])->result();
         return [$batch, $lines];
     }
+      public function delete_batches_overlapping($settingsID, $from, $to)
+    {
+        // Find overlapping batches: (start <= to) AND (end >= from)
+        $batches = $this->db->where('settingsID', $settingsID)
+                            ->where('start_date <=', $to)
+                            ->where('end_date >=', $from)
+                            ->get('payroll_bimonth_batches')
+                            ->result();
+
+        $deleted = 0;
+        foreach ($batches as $b) {
+            // delete lines first (if not cascading FK)
+            $this->db->where('batch_id', $b->id)->delete('payroll_bimonth_lines');
+            // delete batch
+            $this->db->where('id', $b->id)->delete('payroll_bimonth_batches');
+            $deleted++;
+        }
+        return $deleted;
+    }
+
+    /**
+     * If your batches table stores a 'month' column, you can delete by month directly.
+     * Returns number of batches deleted.
+     */
+    public function delete_batches_by_month($settingsID, $month) // $month = 'YYYY-MM'
+    {
+        $batches = $this->db->where('settingsID', $settingsID)
+                            ->where('month', $month)
+                            ->get('payroll_bimonth_batches')
+                            ->result();
+
+        $deleted = 0;
+        foreach ($batches as $b) {
+            $this->db->where('batch_id', $b->id)->delete('payroll_bimonth_lines');
+            $this->db->where('id', $b->id)->delete('payroll_bimonth_batches');
+            $deleted++;
+        }
+        return $deleted;
+    }
 }

@@ -10,6 +10,7 @@ function formatHoursAndMinutes($decimal) {
 
 <title>PMS - Monthly Payroll Records</title>
 <?php include('includes/head.php'); ?>
+
 <style>
 thead th, thead td {
     position: sticky;
@@ -30,10 +31,7 @@ td, th {
     padding: 7px 6px;
     font-size: 14px;
 }
-td {
-    min-height: 36px;
-    height: 36px;
-}
+td { min-height: 36px; height: 36px; }
 th:first-child, td:first-child {
     position: sticky;
     left: 0;
@@ -44,22 +42,20 @@ th:first-child, td:first-child {
     min-width: 120px;
     text-align: left !important;
 }
-tbody tr td {
-    border-bottom: 1px solid #f0f0f0;
-}
+tbody tr td { border-bottom: 1px solid #f0f0f0; }
 
 .cell-label { font-size: 13px; font-weight: 500; }
-.text-blue    { color: #007bff; }      /* Present */
-.text-red     { color: #e74c3c; }      /* Absent */
-.text-dayoff  { color: #55aee6; }      /* Day Off */
-.text-gray    { color: #7b7d7d; }      /* Holidays */
-.cell-hours   { font-size: 12px; color: #2d9c5a; font-weight: 400; }
-.cell-ot      { color: #c0392b; font-size:12px;}
-.totals-cell      { font-size: 15px; font-weight: bold; color: #1abc9c; white-space: nowrap; }
-.totals-cell-ot   { color: #e67e22; }
-.edit-pen {
-    color: #aaa; font-size: 14px; margin-left: 4px; vertical-align: middle; cursor: pointer;
-}
+.text-blue   { color: #007bff; }   /* Present */
+.text-red    { color: #e74c3c; }   /* Absent */
+.text-dayoff { color: #55aee6; }   /* Day Off */
+.text-gray   { color: #7b7d7d; }   /* Holidays */
+.cell-hours  { font-size: 12px; color: #2d9c5a; font-weight: 400; }
+.cell-ot     { color: #c0392b; font-size:12px; }
+
+.totals-cell    { font-size: 15px; font-weight: bold; color: #1abc9c; white-space: nowrap; }
+.totals-cell-ot { color: #e67e22; }
+
+.edit-pen { color: #aaa; font-size: 14px; margin-left: 4px; vertical-align: middle; cursor: pointer; }
 .edit-pen:hover { color: #007bff; }
 
 @media print {
@@ -78,162 +74,202 @@ tbody tr td {
 <?php include('includes/sidebar.php'); ?>
 
 <div class="content-page">
-<div class="content">
-<div class="container-fluid">
+  <div class="content">
+    <div class="container-fluid">
 
-<div class="card">
-<div class="card-body">
-    
-    <h4 class="text-dark font-weight-bold mb-4">
-        <i class="mdi mdi-calendar-month mr-1"></i>
-        Monthly Payroll Records for <?= date('F Y', strtotime($month . '-01')) ?>
-        <div>
-             <a href="<?= base_url('WeeklyAttendance/records') ?>" class="btn btn-secondary mt-3">Back</a>
-        <button class="btn btn-outline-primary mt-3" onclick="window.print()">
-        <i class="mdi mdi-printer"></i> Print
-    </button></div>
-    
-    </h4>
+      <div class="card">
+        <div class="card-body">
 
-    <div class="table-responsive">
-        <table class="table table-bordered table-striped table-hover">
-            
-            <thead class="thead-light">
-                
+          <!-- Header: title + actions (Back / Print / Delete) -->
+          <div class="d-flex justify-content-between align-items-start flex-wrap mb-3">
+            <h4 class="text-dark font-weight-bold mb-3 page-title">
+              <i class="mdi mdi-calendar-month mr-1"></i>
+              Monthly Payroll Records — <?= date('F Y', strtotime($month . '-01')) ?>
+              <small class="text-muted d-block" style="font-size:13px;">
+                <?= date('M j, Y', strtotime($from)) ?> – <?= date('M j, Y', strtotime($to)) ?>
+              </small>
+            </h4>
+
+            <div class="d-flex align-items-center">
+              <a href="<?= base_url('WeeklyAttendance/records') ?>" class="btn btn-secondary mr-2 mt-2">
+                <i class="mdi mdi-arrow-left"></i> Back
+              </a>
+              <button class="btn btn-outline-primary mr-2 mt-2" onclick="window.print()">
+                <i class="mdi mdi-printer"></i> Print
+              </button>
+
+              <!-- Delete Monthly (Range) -->
+              <form method="post"
+                    action="<?= base_url('MonthlyPayroll/delete_range') ?>"
+                    onsubmit="return confirm('Delete monthly attendance for <?= date('F Y', strtotime($month.'-01')) ?> within this viewed date range (<?= date('M j', strtotime($from)) ?> – <?= date('M j, Y', strtotime($to)) ?>)? This cannot be undone.');"
+                    class="mt-2">
+                <?php if (isset($this->security)) : ?>
+                  <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>"
+                         value="<?= $this->security->get_csrf_hash(); ?>">
+                <?php endif; ?>
+                <input type="hidden" name="payroll_month" value="<?= $month ?>">
+                <input type="hidden" name="from_date"     value="<?= $from ?>">
+                <input type="hidden" name="to_date"       value="<?= $to ?>">
+                <button type="submit" class="btn btn-danger">
+                  <i class="mdi mdi-delete"></i> Delete Monthly (Range)
+                </button>
+              </form>
+
+              <!-- Optional: Delete ENTIRE month (uncomment if you want it visible)
+              <form method="post"
+                    action="<?= base_url('MonthlyPayroll/delete_month_all') ?>"
+                    onsubmit="return confirm('Delete ALL monthly attendance for <?= date('F Y', strtotime($month.'-01')) ?>? This cannot be undone.');"
+                    class="mt-2 ml-2">
+                <?php if (isset($this->security)) : ?>
+                  <input type="hidden" name="<?= $this->security->get_csrf_token_name(); ?>"
+                         value="<?= $this->security->get_csrf_hash(); ?>">
+                <?php endif; ?>
+                <input type="hidden" name="payroll_month" value="<?= $month ?>">
+                <button type="submit" class="btn btn-outline-danger">
+                  <i class="mdi mdi-delete-alert"></i> Delete ENTIRE Month
+                </button>
+              </form>
+              -->
+            </div>
+          </div>
+
+          <!-- Flash message (optional) -->
+          <?php if ($this->session->flashdata('msg')): ?>
+            <div class="alert alert-info"><?= $this->session->flashdata('msg'); ?></div>
+          <?php endif; ?>
+
+          <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover">
+              <thead class="thead-light">
                 <tr>
-                    <th>Personnel</th>
-                    <?php foreach ($records['dates'] as $d): ?>
-                        <th><?= date('M d', strtotime($d)) ?></th>
-                    <?php endforeach; ?>
-                    <th>Total Reg</th>
-                    <th>Total OT</th>
+                  <th>Personnel</th>
+                  <?php foreach ($records['dates'] as $d): ?>
+                    <th><?= date('M d', strtotime($d)) ?></th>
+                  <?php endforeach; ?>
+                  <th>Total Reg</th>
+                  <th>Total OT</th>
                 </tr>
-            </thead>
-          <tbody>
-<?php foreach ($records['personnel'] as $person): ?>
-    <tr>
-        <td class="text-left font-weight-bold">
-            <?= $person->last_name . ', ' . $person->first_name ?>
-            <?= $person->name_ext ? ' ' . $person->name_ext : '' ?>
-        </td>
-        <?php
-            $total_reg = 0;
-            $total_ot = 0;
-            foreach ($records['dates'] as $d):
-             $fullKey = $d; 
-$dayKey  = date('d', strtotime($d));
+              </thead>
+              <tbody>
+              <?php foreach ($records['personnel'] as $person): ?>
+                <tr>
+                  <td class="text-left font-weight-bold">
+                    <?= $person->last_name . ', ' . $person->first_name ?>
+                    <?= $person->name_ext ? ' ' . $person->name_ext : '' ?>
+                  </td>
+                  <?php
+                    $total_reg = 0;
+                    $total_ot  = 0;
+                    foreach ($records['dates'] as $d):
+                      $fullKey = $d;
+                      $dayKey  = date('d', strtotime($d));
 
-$rec = $records['attendance'][$person->personnelID][$fullKey]
-    ?? $records['attendance'][$person->personnelID][$dayKey]
-    ?? null;
+                      $rec = $records['attendance'][$person->personnelID][$fullKey]
+                          ?? $records['attendance'][$person->personnelID][$dayKey]
+                          ?? null;
 
-                $status = $rec ? $rec['status'] : 'Absent';
-                $reg = $rec ? (float)$rec['reg'] : 0;
-                $ot  = $rec ? (float)$rec['ot'] : 0;
-                $total_reg += $reg;
-                $total_ot  += $ot;
+                      $status = $rec ? $rec['status'] : 'Absent';
+                      $reg    = $rec ? (float)$rec['reg'] : 0;
+                      $ot     = $rec ? (float)$rec['ot']  : 0;
 
-                // Color logic for label
-                $labelClass = 'cell-label ';
-                if ($status === 'Present') $labelClass .= 'text-blue';
-                elseif ($status === 'Absent') $labelClass .= 'text-red';
-                elseif ($status === 'Day Off') $labelClass .= 'text-dayoff';
-                elseif ($status === 'Regular Holiday' || $status === 'Special Non-Working Holiday') $labelClass .= 'text-gray';
+                      $total_reg += $reg;
+                      $total_ot  += $ot;
 
-                $label = $status;
-                if ($label === 'Regular Holiday') $label = 'R. Holiday';
-                elseif ($label === 'Special Non-Working Holiday') $label = 'S. Holiday';
-        ?>
-        <td>
-            <span class="<?= $labelClass ?>"><?= $label ?></span>
-            <?php if ($reg > 0): ?>
-                <br><span class="cell-hours"><?= number_format($reg,2) ?> hrs</span>
-            <?php endif; ?>
-            <?php if ($ot > 0): ?>
-                <br><span class="cell-ot"><?= number_format($ot,2) ?> OT</span>
-            <?php endif; ?>
-            <!-- Edit icon/button -->
-           <a href="#" 
-   class="edit-pen" 
-   title="Edit"
-   data-toggle="modal"
-   data-target="#editAttendanceModal"
-   data-personnel="<?= $person->personnelID ?>"
-  data-date="<?= $d ?>"
-data-day="<?= date('d', strtotime($d)) ?>"
+                      $labelClass = 'cell-label ';
+                      if ($status === 'Present') $labelClass .= 'text-blue';
+                      elseif ($status === 'Absent') $labelClass .= 'text-red';
+                      elseif ($status === 'Day Off') $labelClass .= 'text-dayoff';
+                      elseif ($status === 'Regular Holiday' || $status === 'Special Non-Working Holiday') $labelClass .= 'text-gray';
 
-   data-status="<?= $status ?>"
-   data-reg="<?= $reg ?>"
-   data-ot="<?= $ot ?>"
-   onclick="event.preventDefault();"
->
-<i class="mdi mdi-pencil"></i></a>
+                      $label = $status;
+                      if ($label === 'Regular Holiday') $label = 'R. Holiday';
+                      elseif ($label === 'Special Non-Working Holiday') $label = 'S. Holiday';
+                  ?>
+                  <td>
+                    <span class="<?= $labelClass ?>"><?= $label ?></span>
+                    <?php if ($reg > 0): ?><br><span class="cell-hours"><?= number_format($reg,2) ?> hrs</span><?php endif; ?>
+                    <?php if ($ot  > 0): ?><br><span class="cell-ot"><?= number_format($ot,2) ?> OT</span><?php endif; ?>
 
-        </td>
-        <?php endforeach; ?>
-        <td class="totals-cell">
-            <?= $total_reg > 0 ? formatHoursAndMinutes($total_reg) : '-' ?>
-        </td>
-        <td class="totals-cell-ot">
-            <?= $total_ot > 0 ? formatHoursAndMinutes($total_ot) : '-' ?>
-        </td>
-    </tr>
-<?php endforeach; ?>
-</tbody>
-        </table>
-    </div>
-    
-   
-</div>
-</div>
-
-<!-- Edit Modal -->
-<div class="modal fade" id="editAttendanceModal" tabindex="-1" role="dialog" aria-labelledby="editAttendanceModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <form method="post" action="<?= base_url('MonthlyPayroll/update_attendance') ?>">
-      <!-- HIDDEN FIELDS: these must always be present for correct context! -->
-      <input type="hidden" name="payroll_month" id="editPayrollMonth" value="<?= $month ?>">
-      <input type="hidden" name="personnelID" id="editPersonnelID">
-      <input type="hidden" name="day" id="editDay">
-      <input type="hidden" name="date" id="editDate"> 
-      <div class="modal-content">
-        <div class="modal-header bg-primary text-white">
-          <h5 class="modal-title" id="editAttendanceModalLabel">Edit Attendance</h5>
-          <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label>Status</label>
-            <select name="status" id="editStatus" class="form-control" required>
-              <option value="Present">Present</option>
-              <option value="Absent">Absent</option>
-              <option value="Day Off">Day Off</option>
-              <option value="Regular Holiday">Regular Holiday</option>
-              <option value="Special Non-Working Holiday">Special Non-Working Holiday</option>
-            </select>
+                    <!-- Edit icon triggers modal -->
+                    <a href="#"
+                       class="edit-pen"
+                       title="Edit"
+                       data-toggle="modal"
+                       data-target="#editAttendanceModal"
+                       data-personnel="<?= $person->personnelID ?>"
+                       data-date="<?= $d ?>"
+                       data-day="<?= date('d', strtotime($d)) ?>"
+                       data-status="<?= $status ?>"
+                       data-reg="<?= $reg ?>"
+                       data-ot="<?= $ot ?>"
+                       onclick="event.preventDefault();">
+                      <i class="mdi mdi-pencil"></i>
+                    </a>
+                  </td>
+                  <?php endforeach; ?>
+                  <td class="totals-cell">
+                    <?= $total_reg > 0 ? formatHoursAndMinutes($total_reg) : '-' ?>
+                  </td>
+                  <td class="totals-cell-ot">
+                    <?= $total_ot > 0 ? formatHoursAndMinutes($total_ot) : '-' ?>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+              </tbody>
+            </table>
           </div>
-          <div class="form-group">
-            <label>Regular Hours</label>
-            <input type="number" step="0.01" max="8" min="0" name="reg" id="editReg" class="form-control">
-          </div>
-          <div class="form-group">
-            <label>Overtime Hours</label>
-            <input type="number" step="0.01" max="8" min="0" name="ot" id="editOT" class="form-control">
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-primary">Save changes</button>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+
         </div>
       </div>
-    </form>
-  </div>
-</div>
-<!-- End Edit Modal -->
 
-</div>
-</div>
-<?php include('includes/footer.php'); ?>
+      <!-- Edit Modal -->
+      <div class="modal fade" id="editAttendanceModal" tabindex="-1" role="dialog" aria-labelledby="editAttendanceModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <form method="post" action="<?= base_url('MonthlyPayroll/update_attendance') ?>">
+            <!-- Context -->
+            <input type="hidden" name="payroll_month" id="editPayrollMonth" value="<?= $month ?>">
+            <input type="hidden" name="personnelID"   id="editPersonnelID">
+            <input type="hidden" name="day"           id="editDay">
+            <input type="hidden" name="date"          id="editDate"> <!-- preferred full date key -->
+
+            <div class="modal-content">
+              <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="editAttendanceModalLabel">Edit Attendance</h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+              </div>
+              <div class="modal-body">
+                <div class="form-group">
+                  <label>Status</label>
+                  <select name="status" id="editStatus" class="form-control" required>
+                    <option value="Present">Present</option>
+                    <option value="Absent">Absent</option>
+                    <option value="Day Off">Day Off</option>
+                    <option value="Regular Holiday">Regular Holiday</option>
+                    <option value="Special Non-Working Holiday">Special Non-Working Holiday</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Regular Hours</label>
+                  <input type="number" step="0.01" max="8" min="0" name="reg" id="editReg" class="form-control">
+                </div>
+                <div class="form-group">
+                  <label>Overtime Hours</label>
+                  <input type="number" step="0.01" max="8" min="0" name="ot" id="editOT" class="form-control">
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- /Edit Modal -->
+
+    </div>
+  </div>
+  <?php include('includes/footer.php'); ?>
 </div>
 </div>
 
@@ -241,27 +277,27 @@ data-day="<?= date('d', strtotime($d)) ?>"
 <script src="<?= base_url(); ?>assets/js/app.min.js"></script>
 <script>
 $(document).ready(function() {
-    function toggleRegField(status) {
-        const disableReg = (status === 'Absent' || status === 'Day Off');
-        
-        $('#editReg').val(disableReg ? 0 : $('#editReg').val()).prop('readonly', disableReg);
-    }
-$('#editReg').on('input', function () {
+  function toggleRegField(status) {
+    const disableReg = (status === 'Absent' || status === 'Day Off');
+    $('#editReg').val(disableReg ? 0 : $('#editReg').val()).prop('readonly', disableReg);
+  }
+
+  $('#editReg').on('input', function () {
     let val = parseFloat($(this).val());
     if (val > 8) {
-        alert("Regular hours cannot exceed 8 per day.");
-        $(this).val(8);
+      alert("Regular hours cannot exceed 8 per day.");
+      $(this).val(8);
     }
-});
-   $('.edit-pen').click(function() {
+  });
+
+  $('.edit-pen').click(function() {
     const personnel = $(this).data('personnel');
-    const fullDate  = $(this).data('date');  // e.g. 2025-07-26
-    const day       = $(this).data('day');   // legacy support
+    const fullDate  = $(this).data('date');
+    const day       = $(this).data('day');
     const status    = $(this).data('status');
     const reg       = parseFloat($(this).data('reg')) || 0;
     const ot        = parseFloat($(this).data('ot'))  || 0;
 
-    // ✅ populate hidden fields & inputs
     $('#editPersonnelID').val(personnel);
     $('#editDate').val(fullDate);
     $('#editDay').val(day);
@@ -269,14 +305,12 @@ $('#editReg').on('input', function () {
     $('#editReg').val(reg);
     $('#editOT').val(ot);
 
-    // keep the regular-hours enable/disable behavior
     toggleRegField(status);
-});
+  });
 
-
-    $('#editStatus').on('change', function() {
-        toggleRegField($(this).val());
-    });
+  $('#editStatus').on('change', function() {
+    toggleRegField($(this).val());
+  });
 });
 </script>
 
