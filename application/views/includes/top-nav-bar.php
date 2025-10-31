@@ -4,6 +4,32 @@
         window.history.forward(); 
     } 
 </script> -->
+<?php
+$CI =& get_instance();
+if (!isset($CI->SettingsModel)) {
+    $CI->load->model('SettingsModel');
+}
+$currentSettingsId = $CI->session->userdata('settingsID');
+if (empty($currentSettingsId)) {
+    $currentSettingsId = $CI->SettingsModel->get_active_settings_id();
+    if (!empty($currentSettingsId)) {
+        $CI->session->set_userdata('settingsID', $currentSettingsId);
+    }
+}
+$companyInfo = null;
+$companyLogoSrc = base_url('assets/images/pms-logo.png');
+$companyLogoSmallSrc = base_url('assets/images/pms-logo1.png');
+if (!empty($currentSettingsId)) {
+    $companyInfo = $CI->SettingsModel->get_company_info($currentSettingsId);
+    if ($companyInfo && !empty($companyInfo->schoolLogo)) {
+        $logoInfo = @getimagesizefromstring($companyInfo->schoolLogo);
+        $logoMime = ($logoInfo && !empty($logoInfo['mime'])) ? $logoInfo['mime'] : 'image/png';
+        $base64Logo = base64_encode($companyInfo->schoolLogo);
+        $companyLogoSrc = 'data:' . $logoMime . ';base64,' . $base64Logo;
+        $companyLogoSmallSrc = $companyLogoSrc;
+    }
+}
+?>
 <div class="navbar-custom">
     <ul class="list-unstyled topnav-menu float-right mb-0">
         <?php if($this->session->userdata('level') === 'Student'): ?>
@@ -102,19 +128,19 @@
     <div class="logo-box">
         <a href="#" class="logo text-center logo-dark">
             <span class="logo-lg">
-                <img src="<?= base_url(); ?>assets/images/pms-logo.png" alt="" height="18">
+                <img src="<?= $companyLogoSrc; ?>" alt="Company logo" class="img-fluid" style="max-height: 55px;">
             </span>
             <span class="logo-sm">
-                <img src="<?= base_url(); ?>assets/images/pms-logo1.png" alt="" height="22">
+                <img src="<?= $companyLogoSmallSrc; ?>" alt="Company logo small" class="img-fluid" style="max-height: 45px;">
             </span>
         </a>
 
         <a href="#" class="logo text-center logo-light">
             <span class="logo-lg">
-                <img src="<?= base_url(); ?>assets/images/pms-logo.png" alt="" height="85">
+                <img src="<?= $companyLogoSrc; ?>" alt="Company logo" class="img-fluid" style="max-height: 85px;">
             </span>
             <span class="logo-sm">
-                <img src="<?= base_url(); ?>assets/images/pms-logo1.png" alt="" height="40">
+                <img src="<?= $companyLogoSmallSrc; ?>" alt="Company logo small" class="img-fluid" style="max-height: 45px;">
             </span>
         </a>
     </div>

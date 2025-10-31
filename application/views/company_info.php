@@ -3,6 +3,23 @@
     <title>PMS - Company Info</title>
 
 <?php include('includes/head.php'); ?>
+<?php
+$logoMime = '';
+$logoData = '';
+if (!empty($info->schoolLogo)) {
+    $logoImageInfo = @getimagesizefromstring($info->schoolLogo);
+    $logoMime = $logoImageInfo && !empty($logoImageInfo['mime']) ? $logoImageInfo['mime'] : 'image/png';
+    $logoData = base64_encode($info->schoolLogo);
+}
+
+$letterHeadMime = '';
+$letterHeadData = '';
+if (!empty($info->letterHead)) {
+    $letterHeadImageInfo = @getimagesizefromstring($info->letterHead);
+    $letterHeadMime = $letterHeadImageInfo && !empty($letterHeadImageInfo['mime']) ? $letterHeadImageInfo['mime'] : 'image/png';
+    $letterHeadData = base64_encode($info->letterHead);
+}
+?>
 <style>
     .btn-info, .btn-success, .btn-light {
         transition: all 0.3s ease;
@@ -66,18 +83,21 @@
 
               <div class="col-md-6">
                 <h5 class="text-info mb-3">General Information</h5>
-                <p><strong>Company Name:</strong><br><?= $info->SchoolName ?></p>
-                <p><strong>Company Address:</strong><br><?= $info->SchoolAddress ?></p>
-                <p><strong>Company Head:</strong><br><?= $info->SchoolHead ?></p>
-                <p><strong>Head Position:</strong><br><?= $info->sHeadPosition ?></p>
+                <p><strong>Company Name:</strong><br><?= html_escape($info->SchoolName); ?></p>
+                <p><strong>Company Address:</strong><br><?= html_escape($info->SchoolAddress); ?></p>
+                <p><strong>Contact Number/s:</strong><br><?= !empty($info->contactNos) ? html_escape($info->contactNos) : '<span class="text-muted">N/A</span>'; ?></p>
+                <p><strong>Telephone Number:</strong><br><?= !empty($info->telNo) ? html_escape($info->telNo) : '<span class="text-muted">N/A</span>'; ?></p>
+                <p><strong>TIN:</strong><br><?= !empty($info->tinNo) ? html_escape($info->tinNo) : '<span class="text-muted">N/A</span>'; ?></p>
+                <p><strong>Company Head:</strong><br><?= html_escape($info->SchoolHead); ?></p>
+                <p><strong>Head Position:</strong><br><?= html_escape($info->sHeadPosition); ?></p>
               </div>
 
-              <!-- <div class="col-md-6">
+              <div class="col-md-6">
                 <h5 class="text-info mb-3">Visual Assets</h5>
                 <div class="mb-3">
                   <strong>Company Logo:</strong><br>
-                  <?php if (!empty($info->schoolLogo)): ?>
-                    <img src="data:image/png;base64,<?= base64_encode($info->schoolLogo) ?>" alt="Company Logo" class="img-thumbnail" style="max-height: 100px;">
+                  <?php if (!empty($logoData)): ?>
+                    <img src="data:<?= $logoMime; ?>;base64,<?= $logoData; ?>" alt="Company Logo" class="img-thumbnail" style="max-height: 120px;">
                   <?php else: ?>
                     <p class="text-muted">No logo uploaded.</p>
                   <?php endif; ?>
@@ -85,13 +105,13 @@
 
                 <div class="mb-3">
                   <strong>Letter Head:</strong><br>
-                  <?php if (!empty($info->letterHead)): ?>
-                    <img src="data:image/png;base64,<?= base64_encode($info->letterHead) ?>" alt="Letter Head" class="img-thumbnail" style="max-height: 100px;">
+                  <?php if (!empty($letterHeadData)): ?>
+                    <img src="data:<?= $letterHeadMime; ?>;base64,<?= $letterHeadData; ?>" alt="Letter Head" class="img-thumbnail" style="max-height: 120px;">
                   <?php else: ?>
                     <p class="text-muted">No letterhead uploaded.</p>
                   <?php endif; ?>
                 </div>
-              </div> -->
+              </div>
 
             </div>
           </div>
@@ -108,20 +128,20 @@
       <div class="row">
         <div class="col-md-4">
           <p><strong>Prepared By:</strong><br>
-            <?= $info->prepared_by_name ?? 'N/A' ?><br>
-            <small><?= $info->prepared_by_position ?? '' ?></small>
+            <?= !empty($info->prepared_by_name) ? html_escape($info->prepared_by_name) : 'N/A'; ?><br>
+            <small><?= !empty($info->prepared_by_position) ? html_escape($info->prepared_by_position) : ''; ?></small>
           </p>
         </div>
         <div class="col-md-4">
           <p><strong>Checked By:</strong><br>
-            <?= $info->checked_by_name ?? 'N/A' ?><br>
-            <small><?= $info->checked_by_position ?? '' ?></small>
+            <?= !empty($info->checked_by_name) ? html_escape($info->checked_by_name) : 'N/A'; ?><br>
+            <small><?= !empty($info->checked_by_position) ? html_escape($info->checked_by_position) : ''; ?></small>
           </p>
         </div>
         <div class="col-md-4">
-          <p><br>
-            <?= $info->additional_name ?? 'N/A' ?><br>
-            <small><?= $info->additional_position ?? '' ?></small>
+          <p><strong>Additional Signatory:</strong><br>
+            <?= !empty($info->additional_name) ? html_escape($info->additional_name) : 'N/A'; ?><br>
+            <small><?= !empty($info->additional_position) ? html_escape($info->additional_position) : ''; ?></small>
           </p>
         </div>
       </div>
@@ -150,37 +170,55 @@
             <div class="col-md-6">
               <div class="form-group">
                 <label>Company Name</label>
-                <input type="text" name="SchoolName" class="form-control" value="<?= $info->SchoolName ?>" required>
+                <input type="text" name="SchoolName" class="form-control" value="<?= html_escape($info->SchoolName); ?>" required>
               </div>
               <div class="form-group">
                 <label>Company Head</label>
-                <input type="text" name="SchoolHead" class="form-control" value="<?= $info->SchoolHead ?>" required>
+                <input type="text" name="SchoolHead" class="form-control" value="<?= html_escape($info->SchoolHead); ?>" required>
               </div>
-              <!-- <div class="form-group">
+              <div class="form-group">
+                <label>Contact Number/s</label>
+                <input type="text" name="contactNos" class="form-control" value="<?= html_escape($info->contactNos ?? ''); ?>">
+              </div>
+              <div class="form-group">
                 <label>Company Logo</label>
-                <?php if (!empty($info->schoolLogo)): ?>
-                  <img src="data:image/png;base64,<?= base64_encode($info->schoolLogo) ?>" class="img-thumbnail mb-2" style="max-height: 80px;">
+                <?php if (!empty($logoData)): ?>
+                  <div class="mb-2">
+                    <img src="data:<?= $logoMime; ?>;base64,<?= $logoData; ?>" class="img-thumbnail" style="max-height: 90px;" alt="Current company logo">
+                  </div>
                 <?php endif; ?>
-                <input type="file" name="schoolLogo" class="form-control">
-              </div> -->
+                <input type="file" name="schoolLogo" class="form-control-file" accept="image/png, image/jpeg">
+                <small class="form-text text-muted">Allowed: PNG or JPG, up to 2MB. Leave blank to keep the current logo.</small>
+              </div>
             </div>
 
             <div class="col-md-6">
               <div class="form-group">
                 <label>Company Address</label>
-                <input type="text" name="SchoolAddress" class="form-control" value="<?= $info->SchoolAddress ?>" required>
+                <input type="text" name="SchoolAddress" class="form-control" value="<?= html_escape($info->SchoolAddress); ?>" required>
               </div>
               <div class="form-group">
                 <label>Head Position</label>
-                <input type="text" name="sHeadPosition" class="form-control" value="<?= $info->sHeadPosition ?>" required>
+                <input type="text" name="sHeadPosition" class="form-control" value="<?= html_escape($info->sHeadPosition); ?>" required>
               </div>
-              <!-- <div class="form-group">
+              <div class="form-group">
+                <label>Telephone Number</label>
+                <input type="text" name="telNo" class="form-control" value="<?= html_escape($info->telNo ?? ''); ?>">
+              </div>
+              <div class="form-group">
+                <label>TIN</label>
+                <input type="text" name="tinNo" class="form-control" value="<?= html_escape($info->tinNo ?? ''); ?>">
+              </div>
+              <div class="form-group">
                 <label>Letter Head</label>
-                <?php if (!empty($info->letterHead)): ?>
-                  <img src="data:image/png;base64,<?= base64_encode($info->letterHead) ?>" class="img-thumbnail mb-2" style="max-height: 80px;">
+                <?php if (!empty($letterHeadData)): ?>
+                  <div class="mb-2">
+                    <img src="data:<?= $letterHeadMime; ?>;base64,<?= $letterHeadData; ?>" class="img-thumbnail" style="max-height: 90px;" alt="Current letter head">
+                  </div>
                 <?php endif; ?>
-                <input type="file" name="letterHead" class="form-control">
-              </div> -->
+                <input type="file" name="letterHead" class="form-control-file" accept="image/png, image/jpeg">
+                <small class="form-text text-muted">Allowed: PNG or JPG, up to 2MB. Leave blank to keep the current image.</small>
+              </div>
             </div>
           </div>
 
@@ -190,31 +228,31 @@
             <div class="col-md-4">
               <div class="form-group">
                 <label>Prepared By (Name)</label>
-                <input type="text" name="prepared_by_name" class="form-control" value="<?= $info->prepared_by_name ?? '' ?>">
+                <input type="text" name="prepared_by_name" class="form-control" value="<?= html_escape($info->prepared_by_name ?? ''); ?>">
               </div>
               <div class="form-group">
                 <label>Prepared By (Position)</label>
-                <input type="text" name="prepared_by_position" class="form-control" value="<?= $info->prepared_by_position ?? '' ?>">
+                <input type="text" name="prepared_by_position" class="form-control" value="<?= html_escape($info->prepared_by_position ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-4">
               <div class="form-group">
                 <label>Checked By (Name)</label>
-                <input type="text" name="checked_by_name" class="form-control" value="<?= $info->checked_by_name ?? '' ?>">
+                <input type="text" name="checked_by_name" class="form-control" value="<?= html_escape($info->checked_by_name ?? ''); ?>">
               </div>
               <div class="form-group">
                 <label>Checked By (Position)</label>
-                <input type="text" name="checked_by_position" class="form-control" value="<?= $info->checked_by_position ?? '' ?>">
+                <input type="text" name="checked_by_position" class="form-control" value="<?= html_escape($info->checked_by_position ?? ''); ?>">
               </div>
             </div>
             <div class="col-md-4">
               <div class="form-group">
                 <label>Additional Signatory (Name)</label>
-                <input type="text" name="additional_name" class="form-control" value="<?= $info->additional_name ?? '' ?>">
+                <input type="text" name="additional_name" class="form-control" value="<?= html_escape($info->additional_name ?? ''); ?>">
               </div>
               <div class="form-group">
                 <label>Additional Signatory (Position)</label>
-                <input type="text" name="additional_position" class="form-control" value="<?= $info->additional_position ?? '' ?>">
+                <input type="text" name="additional_position" class="form-control" value="<?= html_escape($info->additional_position ?? ''); ?>">
               </div>
             </div>
           </div>
