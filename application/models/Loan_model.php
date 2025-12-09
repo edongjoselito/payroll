@@ -1,27 +1,28 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Loan_model extends CI_Model {
+class Loan_model extends CI_Model
+{
 
     // =================== Personnel and Loan Entry ======================
 
     public function get_personnel_by_settings($settingsID)
     {
         return $this->db->where('settingsID', $settingsID)
-                        ->get('personnel')
-                        ->result();
+            ->get('personnel')
+            ->result();
     }
 
-  public function insert_loan($data)
-{
-    return $this->db->insert('loans', $data);
-}
+    public function insert_loan($data)
+    {
+        return $this->db->insert('loans', $data);
+    }
 
-public function update_loan($loan_id, $data)
-{
-    $this->db->where('loan_id', $loan_id);
-    return $this->db->update('loans', $data);
-}
+    public function update_loan($loan_id, $data)
+    {
+        $this->db->where('loan_id', $loan_id);
+        return $this->db->update('loans', $data);
+    }
 
 
     public function delete_loan($loan_id)
@@ -30,37 +31,37 @@ public function update_loan($loan_id, $data)
         return $this->db->delete('loans');
     }
 
-public function get_loans_by_rate($rateType, $settingsID)
-{
-    $this->db->where('rateType', $rateType);
-    $this->db->where('settingsID', $settingsID);
-    $query = $this->db->get('loans_view');
-    return $query->result();
-}
+    public function get_loans_by_rate($rateType, $settingsID)
+    {
+        $this->db->where('rateType', $rateType);
+        $this->db->where('settingsID', $settingsID);
+        $query = $this->db->get('loans_view');
+        return $query->result();
+    }
 
 
-public function get_loans_by_ratetype($rateType)
-{
-    $this->db->where('rateType', $rateType);  
-    return $this->db->get('loans')->result(); 
-}
+    public function get_loans_by_ratetype($rateType)
+    {
+        $this->db->where('rateType', $rateType);
+        return $this->db->get('loans')->result();
+    }
 
 
-public function get_all_loans()
-{
-    return $this->db->get('loans')->result();  
-}
+    public function get_all_loans()
+    {
+        return $this->db->get('loans')->result();
+    }
 
-public function get_loan_description($loan_id)
-{
-    $loan = $this->db->get_where('loans', ['loan_id' => $loan_id])->row();
-    return $loan ? $loan->loan_description : '';
-}
-
-
+    public function get_loan_description($loan_id)
+    {
+        $loan = $this->db->get_where('loans', ['loan_id' => $loan_id])->row();
+        return $loan ? $loan->loan_description : '';
+    }
 
 
-  
+
+
+
 
 
     public function get_loan_by_id($loan_id)
@@ -70,51 +71,51 @@ public function get_loan_description($loan_id)
 
     // =================== Personnel Loan Assignment ======================
 
-public function insert_personnel_loan($data)
-{
-    return $this->db->insert('personnelloans', $data);
-}
+    public function insert_personnel_loan($data)
+    {
+        return $this->db->insert('personnelloans', $data);
+    }
 
 
 
     public function check_existing_personnel_loan($personnelID, $loan_id)
     {
         return $this->db->where('personnelID', $personnelID)
-                        ->where('loan_id', $loan_id)
-                        ->where('status', 1)
-                        ->get('personnelloans')
-                        ->num_rows() > 0;
+            ->where('loan_id', $loan_id)
+            ->where('status', 1)
+            ->get('personnelloans')
+            ->num_rows() > 0;
     }
 
-public function get_assigned_loans($settingsID)
-{
-    $this->db->select('pl.loan_id, pl.personnelID, pl.loan_description, pl.amount, pl.monthly_deduction, pl.date_assigned, pl.status, 
+    public function get_assigned_loans($settingsID)
+    {
+        $this->db->select('pl.loan_id, pl.personnelID, pl.loan_description, pl.amount, pl.monthly_deduction, pl.date_assigned, pl.status, 
                       p.first_name, p.middle_name, p.last_name, p.name_ext, p.position');
-    $this->db->from('personnelloans pl');
-    $this->db->join('personnel p', 'p.personnelID = pl.personnelID');
-    $this->db->where('pl.settingsID', $settingsID);
-    $query = $this->db->get();
-    return $query->result();
-}
+        $this->db->from('personnelloans pl');
+        $this->db->join('personnel p', 'p.personnelID = pl.personnelID');
+        $this->db->where('pl.settingsID', $settingsID);
+        $query = $this->db->get();
+        return $query->result();
+    }
 
 
 
 
 
-public function assign_personnel_loan($data)
-{
-    return $this->db->insert('personnelloans', $data);
-}
+    public function assign_personnel_loan($data)
+    {
+        return $this->db->insert('personnelloans', $data);
+    }
 
 
 
-public function update_personnel_loan($settingsID, $personnelID, $loan_id, $data)
-{
-    $this->db->where('settingsID', $settingsID);
-    $this->db->where('personnelID', $personnelID);
-    $this->db->where('loan_id', $loan_id);
-    return $this->db->update('personnelloans', $data);
-}
+    public function update_personnel_loan($settingsID, $personnelID, $loan_id, $data)
+    {
+        $this->db->where('settingsID', $settingsID);
+        $this->db->where('personnelID', $personnelID);
+        $this->db->where('loan_id', $loan_id);
+        return $this->db->update('personnelloans', $data);
+    }
 
 
     public function delete_personnel_loan($id)
@@ -123,7 +124,7 @@ public function update_personnel_loan($settingsID, $personnelID, $loan_id, $data
     }
     // =================== Cash Advance ======================
 
-     public function insert_cash_advance($data)
+    public function insert_cash_advance($data)
     {
         return $this->db->insert('cashadvance', $data);
     }
@@ -138,23 +139,41 @@ public function update_personnel_loan($settingsID, $personnelID, $loan_id, $data
         return $this->db->delete('cashadvance', ['id' => $id]);
     }
 
- public function get_cash_advance_data($settingsID)
-{
-    return $this->db
-        ->select("ca.*, 
+    public function get_cash_advance_data($settingsID)
+    {
+        return $this->db
+            ->select("ca.*, 
             CONCAT(
                 p.last_name, ', ', 
                 p.first_name, 
                 IF(p.middle_name != '', CONCAT(' ', LEFT(p.middle_name, 1), '.'), ''), 
                 IF(p.name_ext != '', CONCAT(' ', p.name_ext), '')
             ) AS fullname")
-        ->from('cashadvance ca')
-        ->join('personnel p', 'ca.personnelID = p.personnelID')
-        ->where('ca.settingsID', $settingsID)
-        ->order_by('p.last_name ASC')
-        ->get()
-        ->result();
-}
+            ->from('cashadvance ca')
+            ->join('personnel p', 'ca.personnelID = p.personnelID')
+            ->where('ca.settingsID', $settingsID)
+            ->order_by('p.last_name ASC')
+            ->get()
+            ->result();
+    }
 
+    public function get_personnel_loan($personnelID, $settingsID)
+    {
+        // Get total active monthly deduction for this personnel in this settingsID
+        $row = $this->db
+            ->select('SUM(monthly_deduction) AS monthly_deduction')
+            ->from('personnelloans')
+            ->where('personnelID', $personnelID)
+            ->where('settingsID', $settingsID)
+            ->where('status', 1)  // only active loans
+            ->get()
+            ->row();
 
+        if ($row && $row->monthly_deduction !== null) {
+            return $row;
+        }
+
+        // Default: no active loan
+        return (object) ['monthly_deduction' => 0];
+    }
 }

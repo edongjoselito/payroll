@@ -17,3 +17,5 @@ $route['MonthlyPayroll/list_bimonth_batches'] = 'MonthlyPayroll/list_bimonth_bat
 $route['MonthlyPayroll/open_bimonth_batch/(:num)'] = 'MonthlyPayroll/open_bimonth_batch/$1';
 $route['audit']         = 'Audit/index';
 $route['audit/export']  = 'Audit/export';
+$route['api/payroll/ping']['get']     = 'api/Payroll_api/ping';
+$route['api/payroll/generate']['post'] = 'api/Payroll_api/generate';
