@@ -9,9 +9,9 @@ $db['default'] = array(
 
 	'hostname' => '127.0.0.1',
 	'username' => 'root',
-	'password' => '', 
-	'database' => 'payroll',
-// moth34board
+	'password' => '',
+	'database' => 'softtechpms_db',
+	// moth34board
 	'dbdriver' => 'mysqli',
 	'dbprefix' => '',
 	'pconnect' => FALSE,
