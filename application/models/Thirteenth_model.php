@@ -17,6 +17,22 @@ class Thirteenth_model extends CI_Model {
             : ((float)$rateAmount) / (float)$hoursPerDay;
     }
 
+    private function base_rate_amount_for_13th(array $row) {
+        $basicPay = isset($row['basic_pay']) ? (float)$row['basic_pay'] : 0.0;
+        if ($basicPay > 0) {
+            return $basicPay;
+        }
+
+        $rateAmount = isset($row['rateAmount']) ? (float)$row['rateAmount'] : 0.0;
+        $cola = isset($row['cola']) ? (float)$row['cola'] : 0.0;
+
+        if ($cola > 0) {
+            return max(0.0, $rateAmount - $cola);
+        }
+
+        return $rateAmount;
+    }
+
   public function get_13th_from_attendance_reg_only($start, $end, $employment = 'active')
 {
     $settingsID = $this->session->userdata('settingsID');
@@ -29,6 +45,8 @@ class Thirteenth_model extends CI_Model {
             p.position,
             p.rateType,
             p.rateAmount,
+            COALESCE(p.basic_pay, 0) AS basic_pay,
+            COALESCE(p.cola, 0) AS cola,
             a.date,
             a.status,
             COALESCE(a.work_duration, 0)  AS reg_hours,      -- regular hours logged
@@ -76,7 +94,7 @@ class Thirteenth_model extends CI_Model {
         }
 
      $rateType   = $r['rateType'] ?? '';
-$rateAmount = (float)$r['rateAmount'];
+$rateAmount = $this->base_rate_amount_for_13th($r);
 $base       = $this->per_hour_from_rate($rateType, $rateAmount, 8.0);
 
 
@@ -110,8 +128,11 @@ $base       = $this->per_hour_from_rate($rateType, $rateAmount, 8.0);
     $this->db->select("
         pr.personnelID,
         pr.first_name, pr.last_name, pr.position,
-        pr.rateType, CAST(pr.rateAmount AS DECIMAL(10,2)) AS rateAmount,
-        COALESCE(SUM(ps.reg_pay),0) AS basic_total
+        pr.rateType,
+        CAST(pr.rateAmount AS DECIMAL(10,2)) AS rateAmount,
+        CAST(COALESCE(pr.basic_pay, 0) AS DECIMAL(10,2)) AS basic_pay,
+        CAST(COALESCE(pr.cola, 0) AS DECIMAL(10,2)) AS cola,
+        COALESCE(SUM(ps.reg_hours),0) AS reg_hours_total
     ");
     $this->db->from('personnel pr');
     $this->db->join(
@@ -137,7 +158,16 @@ $base       = $this->per_hour_from_rate($rateType, $rateAmount, 8.0);
     $this->db->group_by('pr.personnelID');
     $this->db->order_by('pr.last_name, pr.first_name');
 
-    return $this->db->get()->result_array();
+    $rows = $this->db->get()->result_array();
+    foreach ($rows as &$row) {
+        $baseRate = $this->base_rate_amount_for_13th($row);
+        $basePerHour = $this->per_hour_from_rate($row['rateType'] ?? '', $baseRate, 8.0);
+        $regHours = (float)($row['reg_hours_total'] ?? 0);
+        $row['basic_total'] = round($regHours * $basePerHour, 2);
+    }
+    unset($row);
+
+    return $rows;
 }
 
     public function get_13th_month_data($period = null)
@@ -162,6 +192,8 @@ $base       = $this->per_hour_from_rate($rateType, $rateAmount, 8.0);
             p.last_name,
             p.position,
             p.rateType,
+            CAST(COALESCE(p.basic_pay, 0) AS DECIMAL(10,2)) as basic_pay,
+            CAST(COALESCE(p.cola, 0) AS DECIMAL(10,2)) as cola,
             CAST(p.rateAmount AS DECIMAL(10,2)) as rateAmount,
             pm.details_json
         ');
@@ -179,6 +211,8 @@ $base       = $this->per_hour_from_rate($rateType, $rateAmount, 8.0);
             p.last_name,
             p.position,
             p.rateType,
+            CAST(COALESCE(p.basic_pay, 0) AS DECIMAL(10,2)) as basic_pay,
+            CAST(COALESCE(p.cola, 0) AS DECIMAL(10,2)) as cola,
             CAST(p.rateAmount AS DECIMAL(10,2)) as rateAmount,
             IFNULL(SUM(a.work_duration), 0) AS total_attendance_hours,
             IFNULL(SUM(w.total_hours), 0) AS total_work_hours
@@ -243,6 +277,8 @@ $base       = $this->per_hour_from_rate($rateType, $rateAmount, 8.0);
         p.last_name,
         p.position,
         p.rateType,
+        CAST(COALESCE(p.basic_pay, 0) AS DECIMAL(10,2)) AS basic_pay,
+        CAST(COALESCE(p.cola, 0) AS DECIMAL(10,2)) AS cola,
         CAST(p.rateAmount AS DECIMAL(10,2)) AS rateAmount,
         pm.payroll_month,
         pm.details_json
@@ -287,6 +323,8 @@ $this->db->join(
                 'position'    => $r['position']   ?? '',
                 'rateType'    => $r['rateType']   ?? '',
                 'rateAmount'  => (float)($r['rateAmount'] ?? 0),
+                'basic_pay'   => (float)($r['basic_pay'] ?? 0),
+                'cola'        => (float)($r['cola'] ?? 0),
                 'basic_total' => 0.0,
             ];
         }
@@ -306,7 +344,7 @@ $this->db->join(
         }
 
         // Hourly base: hourly rate → use as-is; otherwise (Day/Month/Bi-Month stored as day) → divide by 8
-$basePerHour = $this->per_hour_from_rate($r['rateType'] ?? '', (float)$r['rateAmount'], 8.0);
+        $basePerHour = $this->per_hour_from_rate($r['rateType'] ?? '', $this->base_rate_amount_for_13th($r), 8.0);
 
 
         $agg[$pid]['basic_total'] += round($regHours * $basePerHour, 2);
