@@ -16,6 +16,10 @@ function displayAmount($value) {
     return ($value == 0 || $value === 0.00) ? '––' : number_format($value, 2);
 }
 
+function roundPayrollHours($value) {
+    return is_numeric($value) ? max(0.0, (float) round((float) $value, 0, PHP_ROUND_HALF_UP)) : 0.0;
+}
+
 function hourlyRateFromPersonnel($row) {
     $rateType = strtolower(trim((string)($row->rateType ?? '')));
     $rateAmount = (float)($row->rateAmount ?? 0);
@@ -153,7 +157,7 @@ function computePayroll($row, $start, $end) {
 
         $status = strtolower(preg_replace('/\s+/', '', trim($raw['status'] ?? '')));
         $regHours = floatval($raw['hours'] ?? 0);
-        $otHours = floatval($raw['overtime_hours'] ?? 0);
+        $otHours = roundPayrollHours($raw['overtime_hours'] ?? 0);
         $holidayHours = floatval($raw['holiday_hours'] ?? 0);
 
         if ($row->rateType === 'Hour') {
@@ -815,7 +819,7 @@ while ($loopDate <= $endDate):
     if (is_array($raw)) {
         $status = strtolower(preg_replace('/\s+/', '', trim($raw['status'] ?? '')));
         $regHours = floatval($raw['hours'] ?? 0);
-        $otHours = floatval($raw['overtime_hours'] ?? 0);
+        $otHours = roundPayrollHours($raw['overtime_hours'] ?? 0);
         $holidayHours = floatval($raw['holiday_hours'] ?? 0);
 
         if ($row->rateType === 'Hour') {
@@ -922,7 +926,8 @@ echo '<td class="num">' . displayAmount($otHours) . '</td>';
         $reg = min($decimalHours * 60, 480);
         $ot = max(0, ($decimalHours * 60) - 480);
         $regHours = $reg / 60;
-        $otHours = $ot / 60;
+        $otHours = roundPayrollHours($ot / 60);
+        $ot = $otHours * 60;
 
         if ($row->rateType === 'Hour') {
             $base = $row->rateAmount;
@@ -1244,8 +1249,8 @@ if (bccomp($netPay, '0', 2) > 0) {
 
         $otRate = $hourlyRate * 1.0;
 
-        $regHours = (float)$regFormatted;  
-        $otHours  = (float)$otFormatted;
+        $regHours = (float)$regTotalMinutes / 60;
+        $otHours  = (float)$otTotalMinutes / 60;
 
         $regAmount = $regHours * $hourlyRate;
         $otAmount  = $otHours  * $otRate;
@@ -1610,7 +1615,7 @@ if (bccomp($netPay, '0', 2) > 0) {
             if (is_array($raw)) {
               $status = strtolower(preg_replace('/\s+/', '', trim($raw['status'] ?? '')));
               $regH   = (float)($raw['hours'] ?? 0);
-              $otH    = (float)($raw['overtime_hours'] ?? 0);
+              $otH    = roundPayrollHours($raw['overtime_hours'] ?? 0);
               $holH   = (float)($raw['holiday_hours'] ?? 0);
 
               if (preg_match('/holiday|regularho|legal|special/i', $status) || $holH > 0) {
@@ -1649,7 +1654,8 @@ if (bccomp($netPay, '0', 2) > 0) {
               $dec = (float)$raw;
               $regm = min($dec*60, 480);
               $otm  = max(0, $dec*60 - 480);
-              $rH = $regm/60; $oH = $otm/60;
+              $rH = $regm/60; $oH = roundPayrollHours($otm / 60);
+              $otm = $oH * 60;
               echo '<td class="num">'.displayAmount($rH).'</td>';
               echo '<td class="num">'.displayAmount($oH).'</td>';
 

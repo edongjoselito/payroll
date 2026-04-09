@@ -7,6 +7,12 @@ class Project extends CI_Controller
         $this->load->model('Project_model');
         $this->load->library('AuditLogger');
     }
+
+private function roundPayrollHours($value)
+{
+    return is_numeric($value) ? max(0.0, (float) round((float) $value, 0, PHP_ROUND_HALF_UP)) : 0.0;
+}
+
 private function currentRole()
 {
     return $this->session->userdata('position') ?: $this->session->userdata('level');
@@ -368,7 +374,7 @@ $this->db->select('personnelID, date, status, work_duration, overtime_hours');
     $logs[$pid][$date] = [
         'status' => $log->status,
         'hours' => floatval($log->work_duration ?? 0),
-        'overtime_hours' => floatval($log->overtime_hours ?? 0)
+        'overtime_hours' => $this->roundPayrollHours($log->overtime_hours ?? 0)
 
     ];
     
@@ -404,7 +410,7 @@ $row->gov_philhealth = $govDeduction['PHILHEALTH'] ?? 0;
             
 if ($status === 'present' || $status === 'regular ho') {
     $reg = floatval($day_log['hours']);
-    $ot  = floatval($day_log['overtime_hours'] ?? 0);
+    $ot  = $this->roundPayrollHours($day_log['overtime_hours'] ?? 0);
 
    $row->reg_hours_per_day[$date] = [
     'hours' => $reg,
@@ -423,7 +429,7 @@ if ($status === 'present' || $status === 'regular ho') {
 } else {
     // ✅ Always capture hours and overtime even for Absent
     $reg = floatval($day_log['hours'] ?? 0); // Usually 0
-    $ot  = floatval($day_log['overtime_hours'] ?? 0); // Might be > 0
+    $ot  = $this->roundPayrollHours($day_log['overtime_hours'] ?? 0); // Might be > 0
 
     $row->reg_hours_per_day[$date] = [
         'hours' => $reg,
@@ -606,7 +612,7 @@ public function view_payroll_batch()
         $logs[$pid][$date] = [
             'status'          => (string)($log->status ?? ''),
             'hours'           => (float)($log->work_duration ?? 0),
-            'overtime_hours'  => (float)($log->overtime_hours ?? 0),
+            'overtime_hours'  => $this->roundPayrollHours($log->overtime_hours ?? 0),
         ];
         $dateList[$date] = true;
     }
@@ -662,21 +668,21 @@ public function view_payroll_batch()
             if (in_array($status, $valid, true)) {
                 $row->reg_hours_per_day[$d] = [
                     'hours'          => (float)$day['hours'],
-                    'overtime_hours' => (float)$day['overtime_hours'],
+                    'overtime_hours' => $this->roundPayrollHours($day['overtime_hours'] ?? 0),
                     'status'         => $statusRaw
                 ];
                 if ($status === 'present' || $status === 'regularho') {
                     $row->total_reg_hours += (float)$day['hours'];
-                    $row->total_ot_hours  += (float)$day['overtime_hours'];
+                    $row->total_ot_hours  += $this->roundPayrollHours($day['overtime_hours'] ?? 0);
                     $row->present_days++;
                 } else {
-                    $row->total_ot_hours += (float)$day['overtime_hours'];
+                    $row->total_ot_hours += $this->roundPayrollHours($day['overtime_hours'] ?? 0);
                 }
             } elseif ($status === 'dayoff') {
                 $row->reg_hours_per_day[$d] = 'Day Off';
             } else {
                 $hours = (float)($day['hours'] ?? 0);
-                $ot    = (float)($day['overtime_hours'] ?? 0);
+                $ot    = $this->roundPayrollHours($day['overtime_hours'] ?? 0);
                 if ($hours > 0 || $ot > 0) {
                     $row->reg_hours_per_day[$d] = [
                         'hours'          => $hours,

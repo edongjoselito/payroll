@@ -3,6 +3,78 @@ class Project_model extends CI_Model
 {
     private $table = 'project';
 
+    private function roundPayrollHours($value)
+    {
+        return is_numeric($value) ? max(0.0, (float) round((float) $value, 0, PHP_ROUND_HALF_UP)) : 0.0;
+    }
+
+    private function getProjectCashAdvanceMap($settingsID, $projectID, $start, $end, array $personnelIds = [])
+    {
+        if (empty($personnelIds)) {
+            return [];
+        }
+
+        $this->db->select('personnelID, SUM(amount) as total_ca');
+        $this->db->from('cashadvance');
+        $this->db->where('settingsID', $settingsID);
+        $this->db->where('date >=', $start);
+        $this->db->where('date <=', $end);
+        $this->db->where_in('personnelID', $personnelIds);
+        $this->db->group_start();
+        $this->db->like('description', 'Cash Advance', 'both');
+        $this->db->or_where_in('type', ['cash', 'Cash', 'Cash Advance']);
+        $this->db->group_end();
+        $this->db->group_by('personnelID');
+        $cashRows = $this->db->get()->result();
+
+        if (empty($cashRows)) {
+            return [];
+        }
+
+        $cashTotals = [];
+        foreach ($cashRows as $row) {
+            $cashTotals[(string) $row->personnelID] = (float) $row->total_ca;
+        }
+
+        $this->db->select('personnelID, projectID, SUM(COALESCE(work_duration, 0) + COALESCE(holiday_hours, 0) + ROUND(COALESCE(overtime_hours, 0), 0)) AS payable_hours', false);
+        $this->db->from('attendance');
+        $this->db->where('settingsID', $settingsID);
+        $this->db->where('date >=', $start);
+        $this->db->where('date <=', $end);
+        $this->db->where_in('personnelID', $personnelIds);
+        $this->db->group_by(['personnelID', 'projectID']);
+        $hourRows = $this->db->get()->result();
+
+        $totalHoursByPersonnel = [];
+        $projectHoursByPersonnel = [];
+
+        foreach ($hourRows as $row) {
+            $pid = (string) $row->personnelID;
+            $hours = max(0.0, (float) $row->payable_hours);
+
+            $totalHoursByPersonnel[$pid] = ($totalHoursByPersonnel[$pid] ?? 0.0) + $hours;
+
+            if ((int) $row->projectID === (int) $projectID) {
+                $projectHoursByPersonnel[$pid] = $hours;
+            }
+        }
+
+        $shareMap = [];
+        foreach ($cashTotals as $pid => $totalCashAdvance) {
+            $totalHours = (float) ($totalHoursByPersonnel[$pid] ?? 0.0);
+            $projectHours = (float) ($projectHoursByPersonnel[$pid] ?? 0.0);
+
+            if ($totalHours > 0 && $projectHours > 0) {
+                $shareMap[$pid] = round($totalCashAdvance * ($projectHours / $totalHours), 2);
+                continue;
+            }
+
+            $shareMap[$pid] = $totalHours > 0 ? 0.0 : round($totalCashAdvance, 2);
+        }
+
+        return $shareMap;
+    }
+
 public function getAll($settingsID) {
     $this->db->where('settingsID', $settingsID);
     return $this->db->get($this->table)->result();
@@ -362,6 +434,9 @@ public function getPayrollData($settingsID, $projectID, $start, $end, $rateType 
     $this->db->where('a.projectID', $projectID);
     $this->db->order_by('p.last_name', 'ASC');
     $assignedPersonnel = $this->db->get()->result();
+    $assignedPersonnelIds = array_map(static function ($row) {
+        return (int) $row->personnelID;
+    }, $assignedPersonnel);
 
     // Step 2: Get attendance logs with work hours
     $this->db->select('a.personnelID, a.date AS attendance_date, a.status AS attendance_status, 
@@ -383,20 +458,8 @@ public function getPayrollData($settingsID, $projectID, $start, $end, $rateType 
         $logMap[$log->personnelID][$log->attendance_date] = $log;
     }
 
-    // Step 3-A: Cash Advances (description contains 'Cash Advance')
-    $this->db->select('personnelID, SUM(amount) as total_ca');
-    $this->db->from('cashadvance');
-    $this->db->where('settingsID', $settingsID);
-    $this->db->where('date >=', $start);
-    $this->db->where('date <=', $end);
-    $this->db->like('description', 'Cash Advance', 'both');
-    $this->db->group_by('personnelID');
-    $cashAdvances = $this->db->get()->result();
-
-    $caMap = [];
-    foreach ($cashAdvances as $ca) {
-        $caMap[trim($ca->personnelID)] = $ca->total_ca;
-    }
+    // Step 3-A: Cash Advances are prorated by worked hours across all projects in the cutoff.
+    $caMap = $this->getProjectCashAdvanceMap($settingsID, $projectID, $start, $end, $assignedPersonnelIds);
 
     // Step 3-B: Other Deductions (excluding 'Cash Advance')
     $this->db->select('personnelID, SUM(amount) as total_other');
@@ -782,7 +845,7 @@ public function compute_batch_gross_live($settingsID, $projectID, $start_date, $
         $status    = strtolower(trim(preg_replace('/\s+/', '', (string)$statusRaw)));
 
         $regHours     = max(0.0, (float)($r['work_duration']  ?? 0));
-        $otHours      = max(0.0, (float)($r['overtime_hours'] ?? 0));
+        $otHours      = $this->roundPayrollHours($r['overtime_hours'] ?? 0);
         $holidayHours = max(0.0, (float)($r['holiday_hours']  ?? 0));
 
         $regAmount = 0.0;

@@ -8,6 +8,11 @@ class MonthlyPayroll extends CI_Controller
         return is_numeric($value) ? round((float) $value, 2) : 0.0;
     }
 
+    private function roundPayrollHours($value)
+    {
+        return is_numeric($value) ? max(0.0, (float) round((float) $value, 0, PHP_ROUND_HALF_UP)) : 0.0;
+    }
+
     public function __construct()
     {
         parent::__construct();
@@ -412,7 +417,7 @@ public function view_formatted()
 
         foreach ($data['dates'] as $d) {
             $attn = $data['attendance'][$pid][$d] ?? ['status' => '', 'reg' => 0, 'ot' => 0];
-            $status = $attn['status']; $reg = $attn['reg']; $ot = $attn['ot'];
+            $status = $attn['status']; $reg = $attn['reg']; $ot = $this->roundPayrollHours($attn['ot'] ?? 0);
 
             $p->reg_hours_per_day[$d] = [
                 'status' => $status,
@@ -500,7 +505,7 @@ public function generate_bimonth()
             $attn = isset($attIndex[$pid][$d]) ? $attIndex[$pid][$d] : ['status'=>'', 'reg'=>0, 'ot'=>0];
 
             $reg = (float)($attn['reg'] ?? 0);
-            $ot  = (float)($attn['ot']  ?? 0);
+            $ot  = $this->roundPayrollHours($attn['ot'] ?? 0);
 
             $per_day[$d] = [
                 'status' => $attn['status'] ?? '',
@@ -700,7 +705,7 @@ public function open_bimonth_batch($batch_id)
             $reg_hours_per_day[$d] = [
                 'status'         => $cell['status'] ?? '',
                 'hours'          => (float)($cell['reg'] ?? 0),
-                'overtime_hours' => (float)($cell['ot']  ?? 0),
+                'overtime_hours' => $this->roundPayrollHours($cell['ot'] ?? 0),
                 'holiday_hours'  => (float)($cell['hol'] ?? 0),
             ];
         }

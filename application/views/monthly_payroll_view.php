@@ -16,6 +16,10 @@ function displayAmount($value) {
     return ($value == 0 || $value === 0.00) ? '––' : number_format($value, 2);
 }
 
+function roundPayrollHours($value) {
+    return is_numeric($value) ? max(0.0, (float) round((float) $value, 0, PHP_ROUND_HALF_UP)) : 0.0;
+}
+
 $hasRegularHoliday = false;
 $hasSpecialHoliday = false;
 
@@ -61,7 +65,7 @@ function computePayroll($row, $start, $end) {
 
         $status = strtolower(preg_replace('/\s+/', '', trim($raw['status'] ?? '')));
         $regHours = floatval($raw['hours'] ?? 0);
-        $otHours = floatval($raw['overtime_hours'] ?? 0);
+        $otHours = roundPayrollHours($raw['overtime_hours'] ?? 0);
         $holidayHours = floatval($raw['holiday_hours'] ?? 0);
 
    if (strcasecmp($row->rateType, 'Hour') === 0) {
@@ -801,7 +805,7 @@ while ($loopDate <= $endDate):
     if (is_array($raw)) {
         $status = strtolower(preg_replace('/\s+/', '', trim($raw['status'] ?? '')));
         $regHours = floatval($raw['hours'] ?? 0);
-        $otHours = floatval($raw['overtime_hours'] ?? 0);
+        $otHours = roundPayrollHours($raw['overtime_hours'] ?? 0);
         $holidayHours = floatval($raw['holiday_hours'] ?? 0);
 $base = $perHour; // use the unified per-hour computed once
 
@@ -903,7 +907,8 @@ $base = $perHour; // use the unified per-hour computed once
         $reg = min($decimalHours * 60, 480);
         $ot = max(0, ($decimalHours * 60) - 480);
         $regHours = $reg / 60;
-        $otHours = $ot / 60;
+        $otHours = roundPayrollHours($ot / 60);
+        $ot = $otHours * 60;
 
      $base = $perHour; // use the unified per-hour computed once
 
@@ -1189,8 +1194,8 @@ if (bccomp($netPay, '0', 2) > 0) {
 
         $otRate = $hourlyRate * 1.0;
 
-       $regHours = (float)($row->reg ?? 0);
-$otHours  = (float)($row->ot ?? 0);
+       $regHours = (float)$regTotalMinutes / 60;
+$otHours  = (float)$otTotalMinutes / 60;
 
 
         $regAmount = $regHours * $hourlyRate;
@@ -1554,7 +1559,7 @@ foreach ($slices as $__slice) {
           if (is_array($raw)) {
               $status = strtolower(trim((string)($raw['status'] ?? '')));
               $regH   = (float)($raw['hours'] ?? 0);
-              $otH    = (float)($raw['overtime_hours'] ?? 0);
+              $otH    = roundPayrollHours($raw['overtime_hours'] ?? 0);
 
               if ($status === 'day off' || $status === 'dayoff') {
                   echo "<td colspan='2' class='text-info font-bold text-center'>Day Off</td>";
@@ -1574,7 +1579,8 @@ foreach ($slices as $__slice) {
               $regMin = min($dec * 60, 480);
               $otMin  = max(0, ($dec * 60) - 480);
               $regH   = $regMin / 60;
-              $otH    = $otMin  / 60;
+              $otH    = roundPayrollHours($otMin / 60);
+              $otMin  = $otH * 60;
               echo '<td class="num">' . (($regH == 0.0) ? '––' : number_format($regH, 2)) . '</td>';
               echo '<td class="num">' . (($otH  == 0.0) ? '––' : number_format($otH,  2)) . '</td>';
           } else {
