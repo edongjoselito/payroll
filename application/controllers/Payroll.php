@@ -14,10 +14,6 @@ class Payroll extends CI_Controller
         $this->load->library('session');
     }
 
-    /**
-     * Landing page for "Payroll SOA"
-     * URL:  http://localhost/payroll/index.php/Payroll
-     */
     public function index()
     {
         // Simple form to choose cutoff & date range

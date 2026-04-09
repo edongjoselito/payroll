@@ -102,12 +102,7 @@
             </a>
           </li>
 
-          <li>
-            <a href="<?= base_url('Payroll'); ?>" class="waves-effect">
-              <i class="mdi mdi-file-document-outline"></i>
-              <span> Payroll SOA </span>
-            </a>
-          </li>
+
 
           <li>
             <a href="<?= base_url('Company') ?>" class="waves-effect">
