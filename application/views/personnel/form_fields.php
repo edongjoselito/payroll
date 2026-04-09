@@ -96,7 +96,7 @@
             </div>
             <div class="form-group col-md-4">
                 <label>Salary Type</label>
-                <select name="rateType" class="form-control" required>
+                <select name="rateType" id="rateTypeInput" class="form-control" required>
                     <option value="">Select Salary Type</option>
                     <option value="Hour" <?= ($personnel->rateType ?? '') === 'Hour' ? 'selected' : '' ?>>Per Hour</option>
                     <option value="Day" <?= ($personnel->rateType ?? '') === 'Day' ? 'selected' : '' ?>>Per Day</option>
@@ -104,12 +104,26 @@
                     <option value="Bi-Month" <?= ($personnel->rateType ?? '') === 'Bi-Month' ? 'selected' : '' ?>>Bi-Month</option>
                 </select>
             </div>
+        </div>
+        <div class="form-row">
             <div class="form-group col-md-4">
-                <label>Salary Amount</label>
-                <input type="text" class="form-control" name="rateAmount"
-                       pattern="^\d+(\.\d{1,2})?$"
-                       title="Enter a valid amount"
-                       placeholder="" value="<?= $personnel->rateAmount ?? '' ?>" required>
+                <label>Basic Rate / Day</label>
+                <input type="number" class="form-control" name="basic_pay" id="basicPayInput"
+                       step="0.01" min="0"
+                       value="<?= isset($personnel->basic_pay) ? htmlspecialchars($personnel->basic_pay, ENT_QUOTES, 'UTF-8') : '' ?>">
+            </div>
+            <div class="form-group col-md-4">
+                <label>COLA</label>
+                <input type="number" class="form-control" name="cola" id="colaInput"
+                       step="0.01" min="0"
+                       value="<?= isset($personnel->cola) ? htmlspecialchars($personnel->cola, ENT_QUOTES, 'UTF-8') : '' ?>">
+            </div>
+            <div class="form-group col-md-4">
+                <label id="rateAmountLabel">Total</label>
+                <input type="number" class="form-control" name="rateAmount" id="rateAmountInput"
+                       step="0.01" min="0"
+                       placeholder="" value="<?= isset($personnel->rateAmount) ? htmlspecialchars($personnel->rateAmount, ENT_QUOTES, 'UTF-8') : '' ?>" required>
+                <small id="rateAmountHelp" class="text-muted">Total = Basic Rate / Day + COLA.</small>
             </div>
         </div>
     </div>
@@ -138,3 +152,49 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const rateTypeInput = document.getElementById('rateTypeInput');
+    const basicPayInput = document.getElementById('basicPayInput');
+    const colaInput = document.getElementById('colaInput');
+    const rateAmountInput = document.getElementById('rateAmountInput');
+    const rateAmountLabel = document.getElementById('rateAmountLabel');
+    const rateAmountHelp = document.getElementById('rateAmountHelp');
+
+    if (!rateTypeInput || !basicPayInput || !colaInput || !rateAmountInput) {
+        return;
+    }
+
+    const toNumber = (value) => {
+        const parsed = parseFloat(value);
+        return Number.isFinite(parsed) ? parsed : 0;
+    };
+
+    const syncRateAmount = () => {
+        const isDayRate = rateTypeInput.value === 'Day';
+        const totalDailyRate = toNumber(basicPayInput.value) + toNumber(colaInput.value);
+
+        rateAmountLabel.textContent = isDayRate ? 'Total' : 'Salary Amount';
+        rateAmountHelp.textContent = isDayRate
+            ? 'Total = Basic Rate / Day + COLA.'
+            : 'Enter the amount for the selected salary type.';
+
+        basicPayInput.required = isDayRate;
+        colaInput.required = isDayRate;
+        rateAmountInput.readOnly = isDayRate;
+
+        if (isDayRate) {
+            rateAmountInput.value = totalDailyRate.toFixed(2);
+        } else if (!rateAmountInput.value && totalDailyRate > 0) {
+            rateAmountInput.value = totalDailyRate.toFixed(2);
+        }
+    };
+
+    rateTypeInput.addEventListener('change', syncRateAmount);
+    basicPayInput.addEventListener('input', syncRateAmount);
+    colaInput.addEventListener('input', syncRateAmount);
+
+    syncRateAmount();
+});
+</script>

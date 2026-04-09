@@ -446,8 +446,8 @@
                                     <option value="Special Non-Working Holiday">Special Non-Working Holiday</option>
                                   </select>
 
-                                  <input type="number" name="regular_hours[<?= $emp->personnelID ?>][<?= $date ?>]" class="form-control hours-input" min="0" max="8" step="0.25" placeholder="Reg Hrs">
-                                  <input type="number" name="overtime_hours[<?= $emp->personnelID ?>][<?= $date ?>]" class="form-control hours-input mt-1" min="0" max="8" step="0.25" placeholder="OT Hrs">
+                                  <input type="number" name="regular_hours[<?= $emp->personnelID ?>][<?= $date ?>]" class="form-control hours-input" min="0" max="8" step="0.01" inputmode="decimal" placeholder="Reg Hrs">
+                                  <input type="number" name="overtime_hours[<?= $emp->personnelID ?>][<?= $date ?>]" class="form-control hours-input mt-1" min="0" max="8" step="0.01" inputmode="decimal" placeholder="OT Hrs">
                                 </div>
                               </td>
                             <?php endforeach; ?>

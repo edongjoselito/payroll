@@ -3,6 +3,29 @@ class Personnel_model extends CI_Model
 {
     protected $table = 'personnel';
 
+    private function normalizeMoney($value)
+    {
+        return is_numeric($value) ? round((float) $value, 2) : 0.0;
+    }
+
+    private function preparePersonnelData(array $data): array
+    {
+        $rateType = trim((string)($data['rateType'] ?? ''));
+        $basicPay = $this->normalizeMoney($data['basic_pay'] ?? 0);
+        $cola = $this->normalizeMoney($data['cola'] ?? 0);
+        $rateAmount = $this->normalizeMoney($data['rateAmount'] ?? 0);
+
+        if (strcasecmp($rateType, 'Day') === 0) {
+            $rateAmount = round($basicPay + $cola, 2);
+        }
+
+        $data['basic_pay'] = $basicPay;
+        $data['cola'] = $cola;
+        $data['rateAmount'] = $rateAmount;
+
+        return $data;
+    }
+
     public function getAll($settingsID) {
         $this->db->where('settingsID', $settingsID);
         return $this->db->get($this->table)->result();
@@ -10,11 +33,13 @@ class Personnel_model extends CI_Model
 
     public function insert($data)
     {
+        $data = $this->preparePersonnelData($data);
         return $this->db->insert($this->table, $data);
     }
 
     public function update($data)
     {
+        $data = $this->preparePersonnelData($data);
         $this->db->where('personnelID', $data['personnelID']);
         return $this->db->update($this->table, $data);
     }
@@ -75,4 +100,3 @@ public function getTodayBirthdays() {
         return $this->db->get()->result();
     }
 }
-

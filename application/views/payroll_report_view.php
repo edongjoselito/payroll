@@ -16,6 +16,98 @@ function displayAmount($value) {
     return ($value == 0 || $value === 0.00) ? '––' : number_format($value, 2);
 }
 
+function hourlyRateFromPersonnel($row) {
+    $rateType = strtolower(trim((string)($row->rateType ?? '')));
+    $rateAmount = (float)($row->rateAmount ?? 0);
+
+    if ($rateType === 'hour') {
+        return $rateAmount;
+    }
+    if ($rateType === 'day') {
+        return $rateAmount / 8;
+    }
+    if ($rateType === 'month') {
+        return $rateAmount / 30 / 8;
+    }
+    if (in_array($rateType, ['bi-month', 'bi-monthly', 'bimonth'], true)) {
+        return $rateAmount / 15 / 8;
+    }
+
+    return 0.0;
+}
+
+function dailyRateFromPersonnel($row) {
+    $rateType = strtolower(trim((string)($row->rateType ?? '')));
+    $rateAmount = (float)($row->rateAmount ?? 0);
+
+    if ($rateType === 'hour') {
+        return $rateAmount * 8;
+    }
+    if ($rateType === 'month') {
+        return $rateAmount / 30;
+    }
+    if (in_array($rateType, ['bi-month', 'bi-monthly', 'bimonth'], true)) {
+        return $rateAmount / 15;
+    }
+
+    return $rateAmount;
+}
+
+function basicPayFromPersonnel($row) {
+    $basicPay = (float)($row->basic_pay ?? 0);
+    $cola = (float)($row->cola ?? 0);
+
+    if ($basicPay <= 0) {
+        $basicPay = max(0.0, dailyRateFromPersonnel($row) - $cola);
+    }
+
+    return $basicPay;
+}
+
+function colaFromPersonnel($row) {
+    return max(0.0, (float)($row->cola ?? 0));
+}
+
+function renderRateCell($row) {
+    $rateType = strtolower(trim((string)($row->rateType ?? '')));
+    $rateAmount = (float)($row->rateAmount ?? 0);
+
+    ob_start();
+
+    if ($rateType === 'day') {
+        $basicPay = basicPayFromPersonnel($row);
+        $cola = colaFromPersonnel($row);
+        ?>
+        <small class="text-muted d-block">Basic Rate / Day: ₱<?= number_format($basicPay, 2) ?></small>
+        <small class="text-muted d-block">COLA: ₱<?= number_format($cola, 2) ?></small>
+        <div><strong>Total: ₱<?= number_format(dailyRateFromPersonnel($row), 2) ?> / day</strong></div>
+        <?php
+    } elseif ($rateType === 'hour') {
+        ?>
+        <div>₱<?= number_format($rateAmount, 2) ?> / hour</div>
+        <?php
+    } elseif ($rateType === 'month') {
+        ?>
+        <div>₱<?= number_format($rateAmount, 2) ?> / month</div>
+        <?php
+    } else {
+        ?>
+        <div>₱<?= number_format($rateAmount, 2) ?> / bi-month</div>
+        <?php
+    }
+
+    return trim(ob_get_clean());
+}
+
+function renderHourlyRateCell($row) {
+    $hourlyRate = hourlyRateFromPersonnel($row);
+    return $hourlyRate > 0 ? '₱' . number_format($hourlyRate, 2) : '—';
+}
+
+function renderRateNumber($value) {
+    return number_format((float)$value, 2);
+}
+
 $hasRegularHoliday = false;
 $hasSpecialHoliday = false;
 
@@ -489,7 +581,9 @@ $showTotalDeduction = $showCA || $showSSS || $showPHIC || $showPAGIBIG || $showL
    <col style="width:150px">
 <col style="width:110px">
 
-    <col style="width:90px">
+    <col style="width:85px">
+    <col style="width:70px">
+    <col style="width:85px">
     <col style="width:70px">
     <?php $d=strtotime($start); while($d<=strtotime($end)){ echo '<col style="width:34px"><col style="width:34px">'; $d=strtotime('+1 day',$d);} ?>
     <col style="width:46px"><col style="width:46px"><col style="width:46px"><!-- totals -->
@@ -511,8 +605,10 @@ $showTotalDeduction = $showCA || $showSSS || $showPHIC || $showPAGIBIG || $showL
     <th rowspan="3">L/N</th>
     <th rowspan="3">NAME</th>
     <th rowspan="3">POSITION</th>
-    <th rowspan="3">RATE</th>
-    <th rowspan="3">Rate / Hour</th>
+    <th rowspan="3">BASIC<br>RATE/DAY</th>
+    <th rowspan="3">COLA</th>
+    <th rowspan="3">TOTAL<br>(BASIC<br>RATE/DAY+<br>COLA)</th>
+    <th rowspan="3">RATE/HR.</th>
     <?php
     $startDate = strtotime($start);
     $endDate = strtotime($end);
@@ -647,7 +743,7 @@ while ($loopDate <= strtotime($end)) {
     $loopDate = strtotime('+1 day', $loopDate);
 }
 
-$fixedColsBeforeDays = 5;
+$fixedColsBeforeDays = 7;
 $totalTimeCols = 3; 
 $amountCols = 2; 
 
@@ -697,18 +793,10 @@ $endDate = strtotime($end);
    <td><?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></td>
 
     <td><?= htmlspecialchars($row->position) ?></td>
-    
-    <td colspan="2">
-    <?php if ($row->rateType === 'Day'): ?>
-        ₱<?= number_format($row->rateAmount, 2) ?> / day
-    <?php elseif ($row->rateType === 'Hour'): ?>
-        ₱<?= number_format($row->rateAmount, 2) ?> / hour
-    <?php elseif ($row->rateType === 'Month'): ?>
-        ₱<?= number_format($row->rateAmount, 2) ?> / month
-        <?php elseif ($row->rateType === 'Bi-Month'): ?>
-        ₱<?= number_format($row->rateAmount, 2) ?> / bi-month
-    <?php endif; ?>
-    </td>
+    <td class="num"><?= renderRateNumber(basicPayFromPersonnel($row)) ?></td>
+    <td class="num"><?= renderRateNumber(colaFromPersonnel($row)) ?></td>
+    <td class="num"><?= renderRateNumber(dailyRateFromPersonnel($row)) ?></td>
+    <td class="num"><?= renderRateNumber(hourlyRateFromPersonnel($row)) ?></td>
 
 <?php
 $loopDate = strtotime($start);
@@ -920,7 +1008,6 @@ $customDecimal = $formattedH . '.' . str_pad($formattedM, 2, '0', STR_PAD_LEFT);
 
 $regFormatted = floor($regTotalMinutes / 60) . '.' . str_pad($regTotalMinutes % 60, 2, '0', STR_PAD_LEFT);
 $otFormatted = floor($otTotalMinutes / 60) . '.' . str_pad($otTotalMinutes % 60, 2, '0', STR_PAD_LEFT);
-
 
 $salary = bcadd(bcadd($regAmount, $otAmount, 2), bcadd($amountRegularHoliday, $amountSpecialHoliday, 2), 2);
 
@@ -1213,10 +1300,16 @@ if (bccomp($netPay, '0', 2) > 0) {
 
           <div class="section-title">Rates</div>
           <ul>
-            <li class="line">
-              <span>Base Rate (<?= htmlspecialchars(ucfirst($rateTypeLower === 'bi-month' ? 'bi-month' : $rateTypeLower)) ?>)</span>
-              <span class="amt">₱<?= number_format($rateAmountNum, 2) ?></span>
-            </li>
+            <?php if ($rateTypeLower === 'day'): ?>
+              <li class="line"><span>Basic Rate / Day</span><span class="amt">₱<?= number_format(basicPayFromPersonnel($row), 2) ?></span></li>
+              <li class="line"><span>COLA</span><span class="amt">₱<?= number_format(colaFromPersonnel($row), 2) ?></span></li>
+              <li class="line"><span>Total</span><span class="amt">₱<?= number_format(dailyRateFromPersonnel($row), 2) ?></span></li>
+            <?php else: ?>
+              <li class="line">
+                <span>Base Rate (<?= htmlspecialchars(ucfirst($rateTypeLower === 'bi-month' ? 'bi-month' : $rateTypeLower)) ?>)</span>
+                <span class="amt">₱<?= number_format($rateAmountNum, 2) ?></span>
+              </li>
+            <?php endif; ?>
             
             <?php if ($hourlyRate > 0): ?>
               <li class="line"><span>Hourly Rate</span><span class="amt">₱<?= number_format($hourlyRate, 2) ?></span></li>
@@ -1439,7 +1532,9 @@ if (bccomp($netPay, '0', 2) > 0) {
   <col style="width:110px">
   <col style="width:90px">
   <col style="width:60px">
-  <col style="width:50px">
+  <col style="width:48px">
+  <col style="width:60px">
+  <col style="width:48px">
   <?php $d=strtotime($sl['start']); $E=strtotime($sl['end']);
     while($d<=$E){ echo '<col style="width:34px"><col style="width:34px">'; $d=strtotime('+1 day',$d); } ?>
   <col style="width:50px"><col style="width:50px"><col style="width:50px">
@@ -1452,8 +1547,10 @@ if (bccomp($netPay, '0', 2) > 0) {
     <th rowspan="3">L/N</th>
     <th rowspan="3">NAME</th>
     <th rowspan="3">POSITION</th>
-    <th rowspan="3">RATE</th>
-    <th rowspan="3">Rate / Hour</th>
+    <th rowspan="3">BASIC<br>RATE/DAY</th>
+    <th rowspan="3">COLA</th>
+    <th rowspan="3">TOTAL</th>
+    <th rowspan="3">RATE/HR.</th>
     <?php for($d=strtotime($sl['start']); $d<=strtotime($sl['end']); $d=strtotime('+1 day',$d)): ?>
       <th colspan="2"><?= date('M d', $d) ?></th>
     <?php endfor; ?>
@@ -1498,17 +1595,10 @@ if (bccomp($netPay, '0', 2) > 0) {
           <td><?= $ln++ ?></td>
           <td><?= htmlspecialchars($row->last_name . ', ' . $row->first_name) ?></td>
           <td><?= htmlspecialchars($row->position) ?></td>
-          <td colspan="2">
-            <?php if ($row->rateType === 'Day'): ?>
-              ₱<?= number_format($row->rateAmount, 2) ?> / day
-            <?php elseif ($row->rateType === 'Hour'): ?>
-              ₱<?= number_format($row->rateAmount, 2) ?> / hour
-            <?php elseif ($row->rateType === 'Month'): ?>
-              ₱<?= number_format($row->rateAmount, 2) ?> / month
-            <?php else: ?>
-              ₱<?= number_format($row->rateAmount, 2) ?> / bi-month
-            <?php endif; ?>
-          </td>
+          <td class="num"><?= renderRateNumber(basicPayFromPersonnel($row)) ?></td>
+          <td class="num"><?= renderRateNumber(colaFromPersonnel($row)) ?></td>
+          <td class="num"><?= renderRateNumber(dailyRateFromPersonnel($row)) ?></td>
+          <td class="num"><?= renderRateNumber(hourlyRateFromPersonnel($row)) ?></td>
 
           <?php
           for ($d=strtotime($sl['start']); $d<=strtotime($sl['end']); $d=strtotime('+1 day',$d)) {
@@ -1799,7 +1889,13 @@ if (bccomp($netPay, '0', 2) > 0) {
       <div>
         <p><strong>Employee:</strong> <?= $fullName ?></p>
         <p><strong>Position:</strong> <?= $position ?></p>
-        <p><strong>Rate:</strong> ₱<?= number_format($rateAmount, 2) ?> / <?= htmlspecialchars($rateType) ?></p>
+        <?php if ($rateTypeLower === 'day'): ?>
+          <p><strong>Basic Rate / Day:</strong> ₱<?= number_format(basicPayFromPersonnel($row), 2) ?></p>
+          <p><strong>COLA:</strong> ₱<?= number_format(colaFromPersonnel($row), 2) ?></p>
+          <p><strong>Total:</strong> ₱<?= number_format(dailyRateFromPersonnel($row), 2) ?></p>
+        <?php else: ?>
+          <p><strong>Rate:</strong> ₱<?= number_format($rateAmount, 2) ?> / <?= htmlspecialchars($rateType) ?></p>
+        <?php endif; ?>
         <?php if ($hourlyRate > 0): ?><p><strong>Hourly Rate:</strong> ₱<?= number_format($hourlyRate, 2) ?></p><?php endif; ?>
         <?php if ($otRate > 0): ?><p><strong>Overtime Rate:</strong> ₱<?= number_format($otRate, 2) ?></p><?php endif; ?>
        

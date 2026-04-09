@@ -201,6 +201,10 @@ $showAdmins = $this->input->get('type') === 'admin';
   <tr>
     <th>Name</th>
     <th>Position</th>
+    <th>Salary Type</th>
+    <th>Basic Rate / Day</th>
+    <th>COLA</th>
+    <th>Total</th>
     <th>Address</th>
     <th>Contact</th>
     <?php if ($hasSSS): ?><th>SSS</th><?php endif; ?>
@@ -219,7 +223,7 @@ $showAdmins = $this->input->get('type') === 'admin';
                              <tbody>
 <?php if (empty($personnel)): ?>
  <?php
-$colCount = 10;
+$colCount = 12;
 
 if ($hasSSS) $colCount++;
 if ($hasPhilHealth) $colCount++;
@@ -259,6 +263,16 @@ if ($showAdmins  && !$isAdminRate) { continue; }
 
   <td><?= "{$p->last_name}, {$p->first_name} {$p->middle_name} {$p->name_ext}" ?></td>
   <td><?= htmlspecialchars($p->position ?? '—') ?></td>
+  <td><?= htmlspecialchars($p->rateType ?? '—') ?></td>
+  <td><?= ((float)($p->basic_pay ?? 0) > 0) ? '₱' . number_format((float)$p->basic_pay, 2) : '—' ?></td>
+  <td><?= ((float)($p->cola ?? 0) > 0) ? '₱' . number_format((float)$p->cola, 2) : '—' ?></td>
+  <td>
+    <?php if (is_numeric($p->rateAmount ?? null)): ?>
+      ₱<?= number_format((float)$p->rateAmount, 2) ?> / <?= strtolower((string)($p->rateType ?? 'rate')) ?>
+    <?php else: ?>
+      —
+    <?php endif; ?>
+  </td>
   <td><?= $p->address ?></td>
   <td><?= $p->contact_number ?></td>
   <?php if ($hasSSS): ?><td><?= $p->sss_number ?></td><?php endif; ?>

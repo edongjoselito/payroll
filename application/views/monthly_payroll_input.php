@@ -204,14 +204,14 @@
                            <input type="number"
     name="regular_hours[<?= $emp->personnelID ?>][<?= $date ?>]"
     class="form-control input-hours"
-    min="0" max="8" step="0.25" placeholder="Regular Hrs"
+    min="0" max="8" step="0.01" inputmode="decimal" placeholder="Regular Hrs"
     value="8"
 >
 
                             <input type="number"
                                 name="overtime_hours[<?= $emp->personnelID ?>][<?= $date ?>]"
                                 class="form-control input-hours mt-1"
-                                min="0" max="8" step="0.25" placeholder="Overtime Hrs">
+                                min="0" max="8" step="0.01" inputmode="decimal" placeholder="Overtime Hrs">
                         </div>
                     </td>
                     <?php endforeach; ?>

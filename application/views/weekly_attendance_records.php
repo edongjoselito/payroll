@@ -1,10 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <?php
-function formatHoursAndMinutes($decimal) {
-    $hours = floor($decimal);
-    $minutes = round(($decimal - $hours) * 60);
-    return "{$hours} hr" . ($hours != 1 ? "s" : "") . " and {$minutes} mins";
+function formatHoursAndMinutes($decimal, $compact = false) {
+    $totalMinutes = (int) round(max(0, (float) $decimal) * 60);
+    $hours = intdiv($totalMinutes, 60);
+    $minutes = $totalMinutes % 60;
+
+    if ($compact) {
+        if ($hours > 0 && $minutes > 0) {
+            return "{$hours}h {$minutes}m";
+        }
+        if ($hours > 0) {
+            return "{$hours}h";
+        }
+        return "{$minutes}m";
+    }
+
+    $parts = [];
+    if ($hours > 0) {
+        $parts[] = "{$hours} hr" . ($hours != 1 ? "s" : "");
+    }
+    if ($minutes > 0 || empty($parts)) {
+        $parts[] = "{$minutes} min" . ($minutes != 1 ? "s" : "");
+    }
+
+    return implode(' and ', $parts);
 }
 ?>
 
@@ -269,9 +289,9 @@ $to = $selectedTo ?? '';
                           <?php
                           if ($workHrs > 0 || $holidayHrs > 0 || $overtimeHrs > 0) {
                               echo "<br><small>";
-                              if ($workHrs > 0) echo number_format($workHrs, 2) . ' hr' . ($workHrs != 1 ? 's' : '');
-                              if ($holidayHrs > 0) { if ($workHrs > 0) echo ' + '; echo number_format($holidayHrs, 2) . ' hr' . ($holidayHrs != 1 ? 's' : '') . ' (holiday)'; }
-                              if ($overtimeHrs > 0) { if ($workHrs > 0 || $holidayHrs > 0) echo ' + '; echo number_format($overtimeHrs, 2) . ' hr' . ($overtimeHrs != 1 ? 's' : '') . ' (OT)'; }
+                              if ($workHrs > 0) echo formatHoursAndMinutes($workHrs, true);
+                              if ($holidayHrs > 0) { if ($workHrs > 0) echo ' + '; echo formatHoursAndMinutes($holidayHrs, true) . ' (holiday)'; }
+                              if ($overtimeHrs > 0) { if ($workHrs > 0 || $holidayHrs > 0) echo ' + '; echo formatHoursAndMinutes($overtimeHrs, true) . ' (OT)'; }
                               echo "</small>";
                           }
                           ?>

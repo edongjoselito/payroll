@@ -354,7 +354,7 @@ public function getAttendanceLogsByDate($settingsID, $projectID, $date = null)
 public function getPayrollData($settingsID, $projectID, $start, $end, $rateType = null)
 {
     // Step 1: Get assigned personnel with static deductions
-    $this->db->select('p.personnelID, p.first_name, p.last_name, p.position, p.rateType, p.rateAmount,
+    $this->db->select('p.personnelID, p.first_name, p.last_name, p.position, p.rateType, p.rateAmount, p.basic_pay, p.cola,
                       p.sss_deduct, p.pagibig_deduct, p.philhealth_deduct');
     $this->db->from('project_personnel_assignment a');
     $this->db->join('personnel p', 'p.personnelID = a.personnelID');

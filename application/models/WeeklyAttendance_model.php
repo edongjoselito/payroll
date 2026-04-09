@@ -1,6 +1,11 @@
 <?php
 class WeeklyAttendance_model extends CI_Model {
 
+private function normalizeHours($value)
+{
+    return is_numeric($value) ? round((float) $value, 2) : 0.0;
+}
+
 public function getProjects() {
     $settingsID = $this->session->userdata('settingsID');
 
@@ -47,8 +52,8 @@ public function saveAttendance($data)
     // -------- Save individual attendance entries --------
     foreach ($statuses as $personnelID => $statusDates) {
         foreach ($statusDates as $date => $status) {
-            $reg = $regularHours[$personnelID][$date] ?? 0;
-            $ot = $overtimeHours[$personnelID][$date] ?? 0;
+            $reg = $this->normalizeHours($regularHours[$personnelID][$date] ?? 0);
+            $ot = $this->normalizeHours($overtimeHours[$personnelID][$date] ?? 0);
 
             $log = [
                 'personnelID'     => $personnelID,
@@ -56,8 +61,8 @@ public function saveAttendance($data)
                 'settingsID'      => $settingsID,
                 'date'            => $date,
                 'status'          => $status,
-                'work_duration'   => is_numeric($reg) ? $reg : 0,
-                'overtime_hours'  => is_numeric($ot) ? $ot : 0,
+                'work_duration'   => $reg,
+                'overtime_hours'  => $ot,
                 'holiday_hours'   => 0,
                 'group_number'    => $group_number,
             ];
@@ -84,9 +89,8 @@ public function saveAttendance($data)
 
     foreach ($regularHours as $personnelID => $dayHours) {
         foreach ($dayHours as $date => $reg) {
-            $reg = is_numeric($reg) ? $reg : 0;
-            $ot  = isset($overtimeHours[$personnelID][$date]) ? $overtimeHours[$personnelID][$date] : 0;
-            $ot  = is_numeric($ot) ? $ot : 0;
+            $reg = $this->normalizeHours($reg);
+            $ot  = $this->normalizeHours($overtimeHours[$personnelID][$date] ?? 0);
 
             if (!isset($totals[$personnelID])) {
                 $totals[$personnelID] = 0;
@@ -279,9 +283,9 @@ public function updateAttendanceRecord($personnelID, $date, $status, $hours, $ho
     $this->db->where('date', $date);
     $this->db->update('attendance', [
         'status'         => $status,
-        'work_duration'  => $hours,
+        'work_duration'  => $this->normalizeHours($hours),
         'holiday_hours'  => $holiday,
-        'overtime_hours' => $overtime
+        'overtime_hours' => $this->normalizeHours($overtime)
     ]);
 }
 

@@ -207,16 +207,7 @@ class WeeklyAttendance extends CI_Controller
         $from = $this->input->post('from');
         $to = $this->input->post('to');
 
-        // Update attendance
-        $this->db->where('personnelID', $personnelID);
-        $this->db->where('date', $date);
-        $this->db->update('attendance', [
-            'status' => $status,
-            'work_duration' => $hours,
-            'holiday_hours' => $holiday,
-            'overtime_hours' => $overtime
-
-        ]);
+        $this->WeeklyAttendance_model->updateAttendanceRecord($personnelID, $date, $status, $hours, $holiday, $overtime);
         $this->session->set_flashdata('update_success', 'Attendance updated successfully!');
 
 

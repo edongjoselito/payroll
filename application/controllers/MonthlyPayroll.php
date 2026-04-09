@@ -3,6 +3,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class MonthlyPayroll extends CI_Controller
 {
+    private function normalizeHours($value)
+    {
+        return is_numeric($value) ? round((float) $value, 2) : 0.0;
+    }
+
     public function __construct()
     {
         parent::__construct();
@@ -132,8 +137,8 @@ public function save()
                 $day = date('d', strtotime($date)); 
                $details[$date] = [
     'status' => $status,
-    'reg'    => isset($regular_hours[$personnelID][$date]) ? (float)$regular_hours[$personnelID][$date] : 0,
-    'ot'     => isset($overtime_hours[$personnelID][$date]) ? (float)$overtime_hours[$personnelID][$date] : 0,
+    'reg'    => $this->normalizeHours($regular_hours[$personnelID][$date] ?? 0),
+    'ot'     => $this->normalizeHours($overtime_hours[$personnelID][$date] ?? 0),
 ];
             }
         }
@@ -335,8 +340,8 @@ public function update_attendance()
     $dayParam      = $this->input->post('day');  
     $dateParam     = $this->input->post('date'); 
     $status        = $this->input->post('status');
-    $reg           = (float)$this->input->post('reg');
-    $ot            = (float)$this->input->post('ot');
+    $reg           = $this->normalizeHours($this->input->post('reg'));
+    $ot            = $this->normalizeHours($this->input->post('ot'));
 
     if ($dateParam && preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateParam)) {
         $fullDate = $dateParam;
