@@ -281,7 +281,7 @@ if ($success || $error):
             <div class="form-group col-md-6">
               <label>Amount</label>
               <input type="number" name="amount" class="form-control" 
-                     value="<?= $row->amount ?>" required>
+                     value="<?= $row->amount ?>" step="0.01" required>
             </div>
             <div class="form-group col-md-6">
               <label>Date</label>
@@ -363,7 +363,7 @@ if ($success || $error):
     <div class="form-row">
         <div class="form-group col-md-6">
             <label>Amount</label>
-            <input type="number" name="amount" class="form-control" required>
+            <input type="number" name="amount" class="form-control" step="0.01" required>
         </div>
         <div class="form-group col-md-6">
             <label>Date</label>
